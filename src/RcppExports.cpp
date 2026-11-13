@@ -549,6 +549,33 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// count_ped_individuals
+double count_ped_individuals(std::string filename, int n_threads);
+RcppExport SEXP _tidypopgen_count_ped_individuals(SEXP filenameSEXP, SEXP n_threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
+    Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(count_ped_individuals(filename, n_threads));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ped_to_fbm
+List ped_to_fbm(std::string filename, Environment BM, CharacterVector locus_names, CharacterVector na_strings, int n_threads);
+RcppExport SEXP _tidypopgen_ped_to_fbm(SEXP filenameSEXP, SEXP BMSEXP, SEXP locus_namesSEXP, SEXP na_stringsSEXP, SEXP n_threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type locus_names(locus_namesSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type na_strings(na_stringsSEXP);
+    Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(ped_to_fbm(filename, BM, locus_names, na_strings, n_threads));
+    return rcpp_result_gen;
+END_RCPP
+}
 // pop_stats_dip_pseudo_cpp
 List pop_stats_dip_pseudo_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, size_t ngroups, const NumericVector& ploidy, bool by_locus_ho, bool by_locus_hs, bool by_locus_fis, bool by_locus_global, int block_size, int ncores);
 RcppExport SEXP _tidypopgen_pop_stats_dip_pseudo_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP by_locus_hoSEXP, SEXP by_locus_hsSEXP, SEXP by_locus_fisSEXP, SEXP by_locus_globalSEXP, SEXP block_sizeSEXP, SEXP ncoresSEXP) {
@@ -965,6 +992,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_sidecar_gather", (DL_FUNC) &_tidypopgen_sidecar_gather, 9},
     {"_tidypopgen_pairwise_pop_fst_cpp", (DL_FUNC) &_tidypopgen_pairwise_pop_fst_cpp, 12},
     {"_tidypopgen_windows_pairwise_pop_fst_cpp", (DL_FUNC) &_tidypopgen_windows_pairwise_pop_fst_cpp, 14},
+    {"_tidypopgen_count_ped_individuals", (DL_FUNC) &_tidypopgen_count_ped_individuals, 2},
+    {"_tidypopgen_ped_to_fbm", (DL_FUNC) &_tidypopgen_ped_to_fbm, 5},
     {"_tidypopgen_pop_stats_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_pop_stats_dip_pseudo_cpp, 12},
     {"_tidypopgen_read_packedancestry", (DL_FUNC) &_tidypopgen_read_packedancestry, 3},
     {"_tidypopgen_roh_sliding_cpp", (DL_FUNC) &_tidypopgen_roh_sliding_cpp, 17},

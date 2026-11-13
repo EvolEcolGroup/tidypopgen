@@ -335,6 +335,115 @@ test_that("0 is always a missing genotype in ped files", {
   )
 })
 
+test_that("ped files: allele coding, missing and multi-allelic loci", {
+  # the first allele found in the file is the reference, the next one the
+  # alternate; a genotype with one missing allele counts the other ("A 0" is
+  # "A A"); a third allele makes a locus multi-allelic (all missing)
+  ped_file <- tempfile(fileext = ".ped")
+  writeLines(c(
+    "f1 i1 0 0 1 1 A 0\tC C   0 0 G G A G",
+    "",
+    "f1 i2 0 0 2 2 0 G\tC A   0 0 G G C A",
+    "  ",
+    "f2 i3 1 2 0 -9 A G A C 0 0 G N A C",
+    "f2 i4 0 0 1 1 G 0 A T 0 0 N G G G"
+  ), ped_file)
+  writeLines(
+    paste("1", paste0("snp", 1:5), 0, (1:5) * 100, sep = "\t"),
+    sub("\\.ped$", ".map", ped_file)
+  )
+  expect_warning(
+    ped_gt <- gen_tibble(ped_file,
+      backingfile = tempfile(), missing_alleles = c("0", "N"),
+      quiet = TRUE
+    ),
+    "loci with no genotypes"
+  )
+  expect_equal(ped_gt$id, paste0("i", 1:4))
+  loci <- show_loci(ped_gt)
+  expect_equal(loci$allele_ref, c("A", "C", NA, "G", "A"))
+  expect_equal(loci$allele_alt, c("G", "A", NA, NA, "G"))
+  geno <- show_genotypes(ped_gt)
+  expect_equal(geno[, 1], c(0, 2, 1, 2))
+  # "A T" (after C and A) makes the locus multi-allelic
+  expect_true(all(is.na(geno[, 2])))
+  expect_true(all(is.na(geno[, 3])))
+  expect_equal(geno[, 4], c(0, 0, 0, 0))
+  # "C A" (after A and G) makes the locus multi-allelic
+  expect_true(all(is.na(geno[, 5])))
+  # the same on several cores, and from a gzipped file
+  gz_file <- tempfile(fileext = ".ped")
+  gz_con <- gzfile(gz_file, "w")
+  writeLines(readLines(ped_file), gz_con)
+  close(gz_con)
+  file.copy(sub("\\.ped$", ".map", ped_file), sub("\\.ped$", ".map", gz_file))
+  for (x in c(ped_file, gz_file)) {
+    other_gt <- suppressWarnings(gen_tibble(x,
+      backingfile = tempfile(), missing_alleles = c("0", "N"),
+      n_cores = 2, quiet = TRUE
+    ))
+    expect_identical(show_genotypes(other_gt), geno)
+    expect_identical(show_loci(other_gt), loci)
+  }
+})
+
+test_that("ped files: a third allele in either position is multi-allelic", {
+  # 600 loci (more than one block of loci coded in parallel): a third allele
+  # in the first position ("C A", locus 2), in the second position ("A C",
+  # locus 300), and only in the second position of a later individual (locus
+  # 550, after a heterozygote "A G")
+  n_loci <- 600
+  geno <- matrix("A G", nrow = 3, ncol = n_loci)
+  geno[2, 2] <- "C A"
+  geno[2, 300] <- "A C"
+  geno[3, 550] <- "G C"
+  ped_file <- tempfile(fileext = ".ped")
+  writeLines(
+    paste(paste("f", paste0("i", 1:3), "0 0 1 1"), apply(geno, 1, paste,
+      collapse = " "
+    )),
+    ped_file
+  )
+  writeLines(
+    paste("1", paste0("snp", 1:n_loci), 0, seq_len(n_loci), sep = "\t"),
+    sub("\\.ped$", ".map", ped_file)
+  )
+  multi <- c(2, 300, 550)
+  for (n_cores in 1:2) {
+    messages <- capture_messages(
+      ped_gt <- gen_tibble(ped_file,
+        backingfile = tempfile(), n_cores = n_cores, quiet = FALSE
+      )
+    )
+    expect_true(any(grepl("^3 loci were multi-allelic", messages)))
+    ped_geno <- show_genotypes(ped_gt)
+    expect_true(all(is.na(ped_geno[, multi])))
+    expect_true(all(ped_geno[, -multi] == 1))
+    expect_equal(show_loci(ped_gt)$allele_ref, rep("A", n_loci))
+    expect_equal(show_loci(ped_gt)$allele_alt, rep("G", n_loci))
+  }
+})
+
+test_that("ped files with the wrong number of fields give an error", {
+  ped_file <- tempfile(fileext = ".ped")
+  writeLines(c(
+    "f1 i1 0 0 1 1 A A G G",
+    "f1 i2 0 0 1 1 A A G"
+  ), ped_file)
+  writeLines(
+    paste("1", paste0("snp", 1:2), 0, (1:2) * 100, sep = "\t"),
+    sub("\\.ped$", ".map", ped_file)
+  )
+  bk <- tempfile()
+  expect_error(
+    gen_tibble(ped_file, backingfile = bk, quiet = TRUE),
+    "individual i2 \\(line 2 of the ped file\\) has 9 fields, but 10"
+  )
+  # no backing file is left behind
+  expect_false(file.exists(paste0(bk, ".bk")))
+  expect_false(file.exists(paste0(bk, ".rds")))
+})
+
 test_that("error if genotypes and loci tables differ in length", {
   test_loci_short <- test_loci[1:5, ]
   expect_error(

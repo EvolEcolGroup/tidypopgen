@@ -28,16 +28,19 @@
   phase, `gt_as_vcf()` writes it, and `rbind()` keeps it
 * `pairwise_ibs(missing_correction = "allele_freq")` corrects for missing
   genotypes as PLINK 1.9's `--distance` without `flat-missing`
+* `gen_tibble()` reads *.ped* files straight into the backing file, much
+  faster and in parallel with `n_cores`
 
 ## Bug fixes
 
+* `gen_tibble()` on .ped files: a third allele always flags the locus as
+  multi-allelic
 * `gen_tibble()` with the "cpp" parser: fix malformed VCF files read as wrong
   genotypes (now an error), missing chromosomes (now `NA`), and backing files
   left behind on errors
 * `gt_as_vcf()`: fix loci with missing chromosomes (now written as ".")
 * `gt_pca_autoSVD()`, `loci_ld_clump()` and `gt_pca_partialSVD()` delete
-  their temporary backing files, which could clash with later ones
-  ("File '...bk' already exists")
+  their temporary backing files
 
 # tidypopgen 1.0.0
 

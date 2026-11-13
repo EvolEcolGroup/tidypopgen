@@ -102,8 +102,9 @@
 #' @param n_cores the number of cores used to read a *VCF* file with
 #'   `parser = "cpp"`: the genotypes are parsed in parallel, and a *.vcf.gz*
 #'   file compressed with `bgzip` (as most are) is also decompressed in
-#'   parallel (other gzipped files are decompressed on a single core). It is
-#'   ignored for other formats and for `parser = "vcfR"`.
+#'   parallel (other gzipped files are decompressed on a single core). For
+#'   a PLINK *.ped* file, the lines are split and the genotypes coded in
+#'   parallel. It is ignored for other formats and for `parser = "vcfR"`.
 #' @param valid_alleles a vector of valid allele values; it defaults to 'A','T',
 #'   'C' and 'G'.
 #' @param missing_alleles a vector of values in the BIM file/loci dataframe that
@@ -340,6 +341,7 @@ gen_tibble.character <-
         missing_alleles = missing_alleles,
         backingfile = backingfile,
         allow_duplicates = allow_duplicates,
+        n_cores = n_cores,
         quiet = quiet
       )
     } else if (tolower(file_ext(x)) == "geno") {
