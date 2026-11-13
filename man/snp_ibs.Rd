@@ -36,10 +36,12 @@ writes it to a .mibs file).
 number of alleles that differ between two individuals, scaled up by the
 number of loci over the number of loci genotyped in both individuals, to
 correct for missing genotypes. It equals \code{2 * n_loci * (1 - proportion)}, where \code{n_loci} is the number of loci used, so it is 0 for
-identical individuals and at most \code{2 * n_loci}. Note that, without
-\code{flat-missing}, PLINK corrects for missing genotypes differently, which
-gives slightly different values when genotypes are missing (see
-\code{missing_correction}).
+identical individuals and, with the default \code{missing_correction = "flat"}, at most \code{2 * n_loci}. Note that, without \code{flat-missing}, PLINK
+corrects for missing genotypes differently, which gives slightly
+different values when genotypes are missing (see \code{missing_correction});
+with that correction (\code{missing_correction = "allele_freq"}), it can
+exceed \code{2 * n_loci}, and "proportion" can be negative (see
+\code{\link[=pairwise_ibs]{pairwise_ibs()}}).
 \item "raw_counts": the counts of identical alleles and of non-missing
 alleles, from which the two other quantities are computed.
 }}

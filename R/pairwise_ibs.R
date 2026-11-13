@@ -27,13 +27,20 @@
 #' monomorphic loci). "adjusted_counts" is then `d_ij * W / W_ij`, where `W`
 #' is the sum of the weights of all loci and `W_ij` that of the loci genotyped
 #' in both individuals, and "proportion" is `1 - adjusted_counts / (2 *
-#' n_loci)`. As in PLINK, the weights are scaled to sum to just under `2^32`
-#' and rounded to integers (so values are identical to PLINK's), `W_ij`
-#' excludes each locus missing in either individual or in both (its weight is
-#' removed once), and monomorphic loci have no weight (a missing genotype at a
-#' monomorphic locus does not change the distance, but the locus still counts
-#' in `n_loci`). PLINK 1.9 computes the allele frequencies from the founders
-#' only (unless `--nonfounders` is used), or reads them with `--read-freq`;
+#' n_loci)`. As `W / W_ij` depends on which loci are genotyped in both
+#' individuals, "adjusted_counts" can exceed `2 * n_loci` (and "proportion"
+#' can be negative) for pairs genotyped in both mostly at loci with small
+#' weights (loci with a rare allele), as in PLINK. For example, with two loci
+#' with frequencies 0.1 and 0.5, a pair of opposite homozygotes at the first
+#' locus, missing at the second, has "adjusted_counts" of about 6.58 (more
+#' than `2 * n_loci = 4`). As in PLINK, the weights are scaled to sum to just
+#' under `2^32` and rounded to integers (so values are identical to PLINK's),
+#' `W_ij` excludes each locus missing in either individual or in both (its
+#' weight is removed once), and monomorphic loci have no weight (a missing
+#' genotype at a monomorphic locus does not change the distance, but the
+#' locus still counts in `n_loci`). PLINK 1.9 computes the allele frequencies
+#' from the founders only (unless `--nonfounders` is used), or reads them with
+#' `--read-freq`;
 #' `pairwise_ibs()` computes them from all individuals of `x` (the same as
 #' PLINK when all individuals are founders, as in data without a pedigree),
 #' unless they are given with `allele_freqs` (e.g. from the founders, with
@@ -57,9 +64,10 @@
 #'   number of alleles that differ between two individuals, scaled up by the
 #'   number of loci over the number of loci genotyped in both individuals, to
 #'   correct for missing genotypes. It equals `2 * n_loci * (1 -
-#'   proportion)`, so it is 0 for identical individuals and at most `2 *
-#'   n_loci`. With `missing_correction = "allele_freq"`, as `--distance` in
-#'   PLINK (without `flat-missing`), see Details.
+#'   proportion)`, so it is 0 for identical individuals and, with the
+#'   default `missing_correction = "flat"`, at most `2 * n_loci`. With
+#'   `missing_correction = "allele_freq"`, as `--distance` in PLINK (without
+#'   `flat-missing`), it can exceed `2 * n_loci`, see Details.
 #'   - "raw_counts": the counts of identical alleles and of non-missing
 #'   alleles, from which the two other quantities are computed.
 #' @param block_size maximum number of loci read at once. Genotypes are

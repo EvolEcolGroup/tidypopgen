@@ -24,10 +24,13 @@
 #'   number of loci over the number of loci genotyped in both individuals, to
 #'   correct for missing genotypes. It equals `2 * n_loci * (1 -
 #'   proportion)`, where `n_loci` is the number of loci used, so it is 0 for
-#'   identical individuals and at most `2 * n_loci`. Note that, without
-#'   `flat-missing`, PLINK corrects for missing genotypes differently, which
-#'   gives slightly different values when genotypes are missing (see
-#'   `missing_correction`).
+#'   identical individuals and, with the default `missing_correction =
+#'   "flat"`, at most `2 * n_loci`. Note that, without `flat-missing`, PLINK
+#'   corrects for missing genotypes differently, which gives slightly
+#'   different values when genotypes are missing (see `missing_correction`);
+#'   with that correction (`missing_correction = "allele_freq"`), it can
+#'   exceed `2 * n_loci`, and "proportion" can be negative (see
+#'   [pairwise_ibs()]).
 #'   - "raw_counts": the counts of identical alleles and of non-missing
 #'   alleles, from which the two other quantities are computed.
 #' @param block.size maximum number of columns read at once. Genotypes are
