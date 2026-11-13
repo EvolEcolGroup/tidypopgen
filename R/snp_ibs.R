@@ -105,6 +105,12 @@ snp_ibs <- function(
     }
     return(matrix(numeric(0), 0, 0))
   }
+  # the count FBMs are temporary unless they are returned (raw_counts): make
+  # them in a private directory, deleted on exit, so that their names cannot
+  # clash with other .bk files (see with_private_fbm_dir())
+  if (type != "raw_counts") {
+    local_private_fbm_dir()
+  }
   # FBM matrix to count the IBS counts
   IBS <- bigstatsr::FBM(n, n, init = 0) # nolint
   # FBM matrix to store valid number of comparisons (i.e NOT NA)

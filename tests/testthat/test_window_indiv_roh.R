@@ -1,3 +1,6 @@
+# delete the backing files of this file when it ends (see helper_cleanup.R)
+local_tempdir_cleanup()
+
 # small parameters, for the small examples below
 small_par <- list(
   window_snp = 3, min_snp = 2, min_kb = 0, max_kb_per_snp = 50,

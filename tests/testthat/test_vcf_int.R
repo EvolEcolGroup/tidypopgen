@@ -115,7 +115,10 @@ for (names_as_int in c(TRUE, FALSE)) {
     aug_loci <- augment_loci(anole_pca)
     expect_identical(aug_loci$.rownames, loci_names(anole_gt))
     # autoSVD only keeps a subset of loci
-    anole_auto <- gt_pca_autoSVD(anole_gt,
+    # (on the first 200 loci: its clumping makes a temporary FBM for each
+    # chromosome, and with all the ~1400 scaffolds the chance that two of
+    # their random names clash, about 4e-4 per call, is not negligible)
+    anole_auto <- gt_pca_autoSVD(anole_gt |> select_loci(1:200),
       k = 5, roll_size = 0, verbose = FALSE
     )
     expect_identical(row_names(anole_auto$v), anole_auto$loci$name)

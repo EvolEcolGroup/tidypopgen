@@ -48,6 +48,10 @@ snp_allele_sharing <- function(
   if (n == 0) {
     return(matrix(numeric(0), 0, 0))
   }
+  # both FBMs are temporary (the result is a matrix): make them in a private
+  # directory, deleted on exit, so that their names cannot clash with other
+  # .bk files (see with_private_fbm_dir())
+  local_private_fbm_dir()
   # FBM matrix to store the tcrossproduct of (dos-1)
   dos_tcross <- bigstatsr::FBM(n, n, init = 0)
   # FBM matrix to store tcrossproduct of NA matrix

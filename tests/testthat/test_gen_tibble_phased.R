@@ -1,3 +1,6 @@
+# delete the backing files of this file when it ends (see helper_cleanup.R)
+local_tempdir_cleanup()
+
 # tests of phased gen_tibbles (gen_tibble(phased = TRUE) and the functions
 # that have to keep, or use, the phase of the genotypes)
 
