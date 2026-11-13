@@ -414,6 +414,44 @@ test_that("gt_save lists the sidecars to keep with the files", {
   )
 })
 
+test_that("gt_get_file_names and gt_save list the sidecars in use", {
+  int_gt <- gen_tibble(small_vcf,
+    quiet = TRUE, backingfile = tempfile("small_"),
+    names_as_int = TRUE, chromosomes_as_int = TRUE
+  )
+  files <- gt_get_file_names(int_gt)
+  # the .rds and .bk files keep their positions, the sidecars follow (loci
+  # first), and all of them exist
+  expect_length(files, 4)
+  expect_match(files[1], "\\.rds$")
+  expect_match(files[2], "\\.bk$")
+  expect_identical(
+    files[3:4],
+    c(loci_sidecar_path(int_gt), chromosomes_sidecar_path(int_gt))
+  )
+  expect_true(all(file.exists(files)))
+  # the genotypes column gives the same files
+  expect_identical(gt_get_file_names(int_gt$genotypes), files)
+  # gt_save() returns the .gt file, then the same files
+  expect_identical(gt_save(int_gt, quiet = TRUE)[-1], files)
+
+  # only the sidecar in use is listed
+  name_gt <- gen_tibble(small_vcf,
+    quiet = TRUE, backingfile = tempfile("small_"), names_as_int = TRUE
+  )
+  expect_identical(
+    gt_get_file_names(name_gt)[-(1:2)], loci_sidecar_path(name_gt)
+  )
+  # without integer names or chromosomes, only the two files of the FBM
+  plain_gt <- gen_tibble(small_vcf,
+    quiet = TRUE, backingfile = tempfile("small_")
+  )
+  expect_length(gt_get_file_names(plain_gt), 2)
+  # a sidecar that is missing is not listed
+  unlink(loci_sidecar_path(name_gt))
+  expect_length(gt_get_file_names(name_gt), 2)
+})
+
 test_that("very long names are kept by the sidecar", {
   # a name of 2 MB, longer than the buffer of the sidecar reader (1 MB)
   long_name <- strrep("x", 2^21)

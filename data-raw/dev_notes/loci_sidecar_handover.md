@@ -317,9 +317,9 @@ the first line of every 1024th line.
   `man/gt_lookup_loci.Rd`) do run.
 - Windows: the 64-bit seeks (`_fseeki64`) and the binary-mode files have
   not been built on Windows yet. CI will tell.
-- `gt_get_file_names()` does not list the sidecars. `gt_save()` lists them
-  in its messages, but its return value is unchanged, so as not to break
-  code that indexes it.
+- Done (branch `sidecar_followups`): `gt_get_file_names()`, and so the value
+  of `gt_save()`, list the sidecars that the `gen_tibble` uses and that
+  exist, after the *.rds* and *.bk* files (which keep positions 1 and 2).
 - The ROH output with integer chromosomes is ordered by code, not by name
   (as `order()` on integers would). Its `chromosome_length` attribute also
   has codes.

@@ -371,9 +371,11 @@ gen_tibble.character <-
     # check alleles
     if (has_genotypes_without_alleles(x_gt)) {
       # clean up files if we are stopping (dropping the gen_tibble first,
-      # so that its backing file can be unmapped, see remove_fbm_files())
+      # so that its backing file can be unmapped, see remove_fbm_files());
+      # the sidecars are listed by path, as gt_get_file_names() would list
+      # them too (and twice) only when the loci table uses them
       files <- c(
-        gt_get_file_names(x_gt), loci_sidecar_path(x_gt),
+        fbm_file_names(x_gt), loci_sidecar_path(x_gt),
         chromosomes_sidecar_path(x_gt)
       )
       rm(x_gt)

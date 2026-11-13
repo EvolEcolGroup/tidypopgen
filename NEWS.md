@@ -8,6 +8,8 @@
   chromosomes; the original names of integer loci and chromosomes are kept in
   sidecar files (`gt_lookup_loci()`, `gt_restore_loci()` and
   `gt_lookup_chromosomes()`)
+* `gt_get_file_names()` and `gt_save()` list the sidecar files after the
+  *.rds* and *.bk* files
 * new article on large RAD-seq datasets; the big data article uses
   `gt_merge_vcfs()`
 * faster "cpp" VCF parser: a single pass, in parallel with `n_cores`, and
