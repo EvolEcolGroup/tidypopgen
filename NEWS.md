@@ -25,9 +25,10 @@
 * `gt_impute_simple()` works after removing loci (but not individuals)
 * new article on large RAD-seq datasets; the big data article uses
   `gt_merge_vcfs()`
-* `pairwise_king()`, `pairwise_ibs()` (with methods for `gen_tibble` objects
-  and their `genotypes` column) and `windows_indiv_roh()` (with a method for
-  `gen_tibble` objects) are now S3 generics, and the generic
+* `pairwise_king()`, `pairwise_ibs()`, `pairwise_allele_sharing()` (with
+  methods for `gen_tibble` objects and their `genotypes` column) and
+  `windows_indiv_roh()` (with a method for `gen_tibble` objects) are now S3
+  generics, and the generic
   `indiv_inbreeding()` only has the arguments `.x` and `...` (its method for
   `gen_tibble` objects is a `gen_tbl` method), so that other packages (e.g.
   `tidypopgl`) can provide methods for their own objects, with their own
