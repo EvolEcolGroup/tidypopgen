@@ -25,6 +25,11 @@
 * `gt_impute_simple()` works after removing loci (but not individuals)
 * new article on large RAD-seq datasets; the big data article uses
   `gt_merge_vcfs()`
+* new `pairwise_dist()`: genetic distances between individuals, as ngsDist,
+  with the genotype or nucleotide score, corrected for saturation
+  (`-log(1 - d)` by default, Jukes-Cantor, or none), e.g. to build
+  neighbour-joining trees; an S3 generic, so that other packages (e.g.
+  `tidypopgl`, from genotype likelihoods) can add methods
 * `pairwise_king()`, `pairwise_ibs()`, `pairwise_allele_sharing()` (with
   methods for `gen_tibble` objects and their `genotypes` column) and
   `windows_indiv_roh()` (with a method for `gen_tibble` objects) are now S3

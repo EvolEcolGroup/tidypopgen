@@ -55,6 +55,7 @@ Imports:
 Suggests:
     adegenet,
     admixtools,
+    ape,
     broom,
     hexbin,
     hierfstat,
