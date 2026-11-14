@@ -25,6 +25,10 @@
 * `gt_impute_simple()` works after removing loci (but not individuals)
 * new article on large RAD-seq datasets; the big data article uses
   `gt_merge_vcfs()`
+* new `bootstrap_blocks()`, for developers (not in the reference index): the
+  blocks of loci of the block bootstrap and the blocks drawn by each
+  replicate, so that other packages (e.g. `tidypopgl`) can resample the same
+  blocks as the bootstrap functions of tidypopgen
 * new `pairwise_dist()`: genetic distances between individuals, as ngsDist,
   with the genotype or nucleotide score, corrected for saturation
   (`-log(1 - d)` by default, Jukes-Cantor, or none), e.g. to build
