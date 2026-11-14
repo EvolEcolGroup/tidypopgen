@@ -56,6 +56,36 @@
   works after removing loci (but not individuals)
 - new article on large RAD-seq datasets; the big data article uses
   [`gt_merge_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.md)
+- new
+  [`bootstrap_blocks()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/bootstrap_blocks.md),
+  for developers (not in the reference index): the blocks of loci of the
+  block bootstrap and the blocks drawn by each replicate, so that other
+  packages can resample the same blocks as the bootstrap functions of
+  tidypopgen
+- new
+  [`pairwise_dist()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_dist.md):
+  genetic distances between individuals, as ngsDist, with the genotype
+  or nucleotide score, corrected for saturation (`-log(1 - d)` by
+  default, Jukes-Cantor, or none), e.g. to build neighbour-joining
+  trees; an S3 generic, so that other packages (e.g. for genotype
+  likelihoods) can add methods
+- [`pairwise_king()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_king.md),
+  [`pairwise_ibs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_ibs.md),
+  [`pairwise_allele_sharing()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_allele_sharing.md)
+  (with methods for `gen_tibble` objects and their `genotypes` column)
+  and
+  [`windows_indiv_roh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_indiv_roh.md)
+  (with a method for `gen_tibble` objects) are now S3 generics, and the
+  generic
+  [`indiv_inbreeding()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_inbreeding.md)
+  only has the arguments `.x` and `...` (its method for `gen_tibble`
+  objects is a `gen_tbl` method), so that other packages can provide
+  methods for their own objects, with their own arguments.
+  [`windows_indiv_roh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_indiv_roh.md)
+  now also works on `gen_tibble` objects that lost their class
+  (e.g. with
+  [`as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html)),
+  as the other generics do
 
 ### Bug fixes
 

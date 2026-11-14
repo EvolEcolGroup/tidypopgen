@@ -6,9 +6,9 @@ based on the beta estimate from Weir and Goudet (2017).
 ## Usage
 
 ``` r
-indiv_inbreeding(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
+indiv_inbreeding(.x, ...)
 
-# S3 method for class 'tbl_df'
+# S3 method for class 'gen_tbl'
 indiv_inbreeding(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
 
 # S3 method for class 'vctrs_bigSNP'
@@ -26,6 +26,11 @@ indiv_inbreeding(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
   [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
   object), or a
   [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md).
+  The method for the `genotypes` column needs `allele_sharing_mat`.
+
+- ...:
+
+  other arguments passed to specific methods, currently unused.
 
 - method:
 
@@ -41,13 +46,20 @@ indiv_inbreeding(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
   pre-compute this matrix. It is not possible to use this with grouped
   tibbles.
 
-- ...:
-
-  currently unused.
-
 ## Value
 
-a numeric vector of inbreeding coefficients.
+a numeric vector of inbreeding coefficients. For a grouped
+[`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md),
+a list of such vectors, one per group (the coefficients are computed
+within each group).
+
+## Details
+
+`indiv_inbreeding()` is an S3 generic, with methods for
+[`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
+objects (grouped or not) and for their `genotypes` column. Other
+packages can add methods for their own classes (e.g. tibbles of genotype
+likelihoods).
 
 ## References
 

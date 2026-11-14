@@ -62,7 +62,10 @@ are analysed in a single pass over the genotypes.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">windows_indiv_roh</span><span class="op">(</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">windows_indiv_roh</span><span class="op">(</span><span class="va">.x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'gen_tbl'</span></span>
+<span><span class="fu">windows_indiv_roh</span><span class="op">(</span></span>
 <span>  <span class="va">.x</span>,</span>
 <span>  window_snp <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>  window_het <span class="op">=</span> <span class="fl">1</span>,</span>
@@ -84,7 +87,14 @@ are analysed in a single pass over the genotypes.</p>
 
 
 <dl><dt id="arg--x">.x<a class="anchor" aria-label="anchor" href="#arg--x"></a></dt>
-<dd><p>a <a href="gen_tibble.html">gen_tibble</a></p></dd>
+<dd><p>a <code><a href="gen_tibble.html">gen_tibble</a></code>, grouped or not</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>other arguments passed to specific methods. The method for
+<code><a href="gen_tibble.html">gen_tibble</a></code> objects uses none: the arguments of the version of this
+function based on <code>detectRUNS</code> (e.g. <code>window_size</code>) give an error: use
+<code><a href="gt_roh_window.html">gt_roh_window()</a></code> for that version.</p></dd>
 
 
 <dt id="arg-window-snp">window_snp<a class="anchor" aria-label="anchor" href="#arg-window-snp"></a></dt>
@@ -145,12 +155,6 @@ which gives the lengths of PLINK 1.07)</p></dd>
 <dt id="arg-n-cores">n_cores<a class="anchor" aria-label="anchor" href="#arg-n-cores"></a></dt>
 <dd><p>the number of cores to use (individuals are analysed in
 parallel)</p></dd>
-
-
-<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>not used. The arguments of the version of this function based
-on <code>detectRUNS</code> (e.g. <code>window_size</code>) give an error: use
-<code><a href="gt_roh_window.html">gt_roh_window()</a></code> for that version.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -214,6 +218,9 @@ still find them. The loci must be sorted by chromosome and position (see
 <p>Runs can be plotted with <code><a href="autoplot.indiv_roh.html">autoplot.indiv_roh()</a></code>, which draws the plots
 of <code>detectRUNS</code>. Use <code><a href="as_detectRUNS.html">as_detectRUNS()</a></code> to convert the runs to the format
 of <code>detectRUNS</code>, to use its own functions.</p>
+<p><code>windows_indiv_roh()</code> is an S3 generic, with a method for <code><a href="gen_tibble.html">gen_tibble</a></code>
+objects (grouped or not). Other packages can add methods for their own
+classes (e.g. tibbles of genotype likelihoods).</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

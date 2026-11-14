@@ -119,8 +119,8 @@ otherwise dispatch to the fallback method again.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Packages that build their own tibbles on <code>tidypopgen</code> (e.g. the
-<code>gl_tibble</code> of <code>tidypopgl</code>) add a method to <code>genotypes_tbl_class()</code> for the
+    <p>Packages that build their own tibbles on <code>tidypopgen</code> (e.g. for genotype
+likelihoods) add a method to <code>genotypes_tbl_class()</code> for the
 class of their <code>genotypes</code> column, so that their own methods of the
 <code>tidypopgen</code> generics are used after the class is restored.</p>
     </div>

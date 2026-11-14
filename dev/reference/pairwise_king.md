@@ -6,11 +6,24 @@ reimplementing the KING algorithm of Manichaikul et al. (2010).
 ## Usage
 
 ``` r
+pairwise_king(x, ...)
+
+# S3 method for class 'tbl_df'
 pairwise_king(
   x,
   as_matrix = FALSE,
   block_size = bigstatsr::block_size(nrow(x)),
-  n_cores = bigstatsr::nb_cores()
+  n_cores = bigstatsr::nb_cores(),
+  ...
+)
+
+# S3 method for class 'vctrs_bigSNP'
+pairwise_king(
+  x,
+  as_matrix = FALSE,
+  block_size = bigstatsr::block_size(length(x)),
+  n_cores = bigstatsr::nb_cores(),
+  ...
 )
 ```
 
@@ -18,7 +31,14 @@ pairwise_king(
 
 - x:
 
-  a `gen_tibble` object.
+  a `gen_tibble` object, or a vector of class `vctrs_bigSNP` (the
+  `genotypes` column of a
+  [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md),
+  whose individuals are then labelled with the names of the vector).
+
+- ...:
+
+  other arguments passed to specific methods, currently unused.
 
 - as_matrix:
 
@@ -46,6 +66,13 @@ if `as_matrix` is FALSE.
 Imputed genotypes are used if `x` is set to use them (see
 [`gt_set_imputed()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_set_imputed.md)),
 and treated as missing otherwise.
+
+`pairwise_king()` is an S3 generic. The method for a
+[`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
+computes the matrix with the method for its `genotypes` column (of class
+`vctrs_bigSNP`), and labels it with the `id` of the individuals;
+grouping is ignored. Other packages can add methods for their own
+classes of genotypes (e.g. genotype likelihoods).
 
 ## References
 

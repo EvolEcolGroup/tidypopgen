@@ -8,6 +8,9 @@ individuals are analysed in a single pass over the genotypes.
 ## Usage
 
 ``` r
+windows_indiv_roh(.x, ...)
+
+# S3 method for class 'gen_tbl'
 windows_indiv_roh(
   .x,
   window_snp = 50,
@@ -30,7 +33,17 @@ windows_indiv_roh(
 - .x:
 
   a
-  [gen_tibble](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
+  [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md),
+  grouped or not
+
+- ...:
+
+  other arguments passed to specific methods. The method for
+  [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
+  objects uses none: the arguments of the version of this function based
+  on `detectRUNS` (e.g. `window_size`) give an error: use
+  [`gt_roh_window()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_roh_window.md)
+  for that version.
 
 - window_snp:
 
@@ -90,13 +103,6 @@ windows_indiv_roh(
 - n_cores:
 
   the number of cores to use (individuals are analysed in parallel)
-
-- ...:
-
-  not used. The arguments of the version of this function based on
-  `detectRUNS` (e.g. `window_size`) give an error: use
-  [`gt_roh_window()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_roh_window.md)
-  for that version.
 
 ## Value
 
@@ -189,6 +195,11 @@ which draws the plots of `detectRUNS`. Use
 [`as_detectRUNS()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/as_detectRUNS.md)
 to convert the runs to the format of `detectRUNS`, to use its own
 functions.
+
+`windows_indiv_roh()` is an S3 generic, with a method for
+[`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
+objects (grouped or not). Other packages can add methods for their own
+classes (e.g. tibbles of genotype likelihoods).
 
 ## References
 

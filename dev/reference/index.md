@@ -309,6 +309,12 @@ Functions comparing individuals or populations.
 
   Compute the Pairwise Allele Sharing Matrix for a `gen_tibble` object
 
+- [`pairwise_dist()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_dist.md)
+  :
+
+  Compute the Genetic Distances between individuals of a `gen_tibble`
+  object
+
 - [`pairwise_grm()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_grm.md)
   :
 

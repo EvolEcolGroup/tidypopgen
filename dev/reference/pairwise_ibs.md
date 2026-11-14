@@ -5,6 +5,9 @@ This function computes the IBS matrix.
 ## Usage
 
 ``` r
+pairwise_ibs(x, ...)
+
+# S3 method for class 'tbl_df'
 pairwise_ibs(
   x,
   as_matrix = FALSE,
@@ -12,7 +15,20 @@ pairwise_ibs(
   block_size = bigstatsr::block_size(nrow(x)),
   n_cores = bigstatsr::nb_cores(),
   missing_correction = c("flat", "allele_freq"),
-  allele_freqs = NULL
+  allele_freqs = NULL,
+  ...
+)
+
+# S3 method for class 'vctrs_bigSNP'
+pairwise_ibs(
+  x,
+  as_matrix = FALSE,
+  type = c("proportion", "adjusted_counts", "raw_counts"),
+  block_size = bigstatsr::block_size(length(x)),
+  n_cores = bigstatsr::nb_cores(),
+  missing_correction = c("flat", "allele_freq"),
+  allele_freqs = NULL,
+  ...
 )
 ```
 
@@ -20,7 +36,14 @@ pairwise_ibs(
 
 - x:
 
-  a `gen_tibble` object.
+  a `gen_tibble` object, or a vector of class `vctrs_bigSNP` (the
+  `genotypes` column of a
+  [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md),
+  whose individuals are then labelled with the names of the vector).
+
+- ...:
+
+  other arguments passed to specific methods, currently unused.
 
 - as_matrix:
 
@@ -145,6 +168,13 @@ missing:
 Pairs of individuals without any locus genotyped in both (or, with
 "allele_freq", without any polymorphic locus genotyped in both) have
 `NaN` (or `Inf`) values.
+
+`pairwise_ibs()` is an S3 generic. The method for a
+[`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
+computes the matrix with the method for its `genotypes` column (of class
+`vctrs_bigSNP`), and labels it with the `id` of the individuals;
+grouping is ignored. Other packages can add methods for their own
+classes of genotypes (e.g. genotype likelihoods).
 
 ## Examples
 

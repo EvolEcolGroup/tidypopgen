@@ -11,11 +11,24 @@ heterozygous. Matching is the average of these 0, 1/2 and 1s)
 ## Usage
 
 ``` r
+pairwise_allele_sharing(x, ...)
+
+# S3 method for class 'tbl_df'
 pairwise_allele_sharing(
   x,
   as_matrix = FALSE,
   block_size = bigstatsr::block_size(nrow(x)),
-  n_cores = bigstatsr::nb_cores()
+  n_cores = bigstatsr::nb_cores(),
+  ...
+)
+
+# S3 method for class 'vctrs_bigSNP'
+pairwise_allele_sharing(
+  x,
+  as_matrix = FALSE,
+  block_size = bigstatsr::block_size(length(x)),
+  n_cores = bigstatsr::nb_cores(),
+  ...
 )
 ```
 
@@ -23,7 +36,14 @@ pairwise_allele_sharing(
 
 - x:
 
-  a `gen_tibble` object.
+  a `gen_tibble` object, or a vector of class `vctrs_bigSNP` (the
+  `genotypes` column of a
+  [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md),
+  whose individuals are then labelled with the names of the vector).
+
+- ...:
+
+  other arguments passed to specific methods, currently unused.
 
 - as_matrix:
 
@@ -42,13 +62,22 @@ pairwise_allele_sharing(
 
 ## Value
 
-a matrix of allele sharing between all pairs of individuals
+a matrix of allele sharing between all pairs of individuals (the
+diagonal is the allele sharing of each individual with itself, 1 minus
+half its proportion of heterozygous loci), or a tidy tibble
 
 ## Details
 
 Imputed genotypes are used if `x` is set to use them (see
 [`gt_set_imputed()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_set_imputed.md)),
 and treated as missing otherwise.
+
+`pairwise_allele_sharing()` is an S3 generic. The method for a
+[`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
+computes the matrix with the method for its `genotypes` column (of class
+`vctrs_bigSNP`), and labels it with the `id` of the individuals;
+grouping is ignored. Other packages can add methods for their own
+classes of genotypes (e.g. genotype likelihoods).
 
 ## See also
 
