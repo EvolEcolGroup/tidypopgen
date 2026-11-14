@@ -313,53 +313,6 @@ bootstrap_nwise_pop_sfs.gen_tbl <- function(
   bigstatsr::block_size(length(data$genotypes), 1)
 }
 
-#' Draw the blocks of bootstrap replicates
-#'
-#' @param loci the loci table
-#' @param n_bootstrap the number of replicates
-#' @param block_size,size_unit the size of the blocks (see
-#'   `.jackknife_block_ids()`)
-#' @returns a list with `block_id` (the 1-based block of each locus) and
-#'   `weights` (a matrix with the number of times each block, in columns, is
-#'   drawn in each replicate, in rows: each replicate draws as many blocks as
-#'   there are, with replacement)
-#' @keywords internal
-#' @noRd
-.sfs_bootstrap_blocks <- function(loci, n_bootstrap, block_size, size_unit) {
-  .sfs_check_bootstrap_args(n_bootstrap, block_size)
-  # the blocks of the block jackknife
-  block_id <- .jackknife_block_ids(
-    loci_table = loci,
-    block_size = block_size,
-    size_unit = size_unit
-  )
-  n_blocks <- max(block_id)
-  if (n_blocks < 2) {
-    stop(
-      "the block bootstrap needs at least 2 blocks; use a smaller ",
-      "block_size"
-    )
-  }
-  # the weights are a matrix with one value per replicate and block, which
-  # is copied (as doubles) to project the replicates: with single SNPs as
-  # blocks (block_size = 1) of tens of millions of loci, it would need tens
-  # of GB, so we cap its size (with an option, for testing)
-  max_weights <- getOption("tidypopgen.sfs_max_bootstrap_weights", 1e9)
-  n_weights <- as.numeric(n_blocks) * n_bootstrap
-  if (n_weights > max_weights) {
-    stop(
-      "the bootstrap would need ", format(n_weights), " weights (",
-      n_bootstrap, " replicates of ", n_blocks, " blocks), which would use ",
-      "too much memory; use a larger block_size or fewer replicates"
-    )
-  }
-  weights <- t(stats::rmultinom(n_bootstrap,
-    size = n_blocks,
-    prob = rep(1, n_blocks)
-  ))
-  list(block_id = block_id, weights = weights)
-}
-
 #' Compute bootstrap replicates of a set of spectra
 #'
 #' The configurations of each spectrum are counted in each block, in a single
@@ -377,7 +330,7 @@ bootstrap_nwise_pop_sfs.gen_tbl <- function(
 #' @noRd
 .sfs_bootstrap <- function(data, spectra, n_proj, folded, n_bootstrap,
                            block_size, size_unit, n_cores) {
-  blocks <- .sfs_bootstrap_blocks(data$loci,
+  blocks <- bootstrap_blocks(data$loci,
     n_bootstrap = n_bootstrap,
     block_size = block_size, size_unit = size_unit
   )

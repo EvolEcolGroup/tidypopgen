@@ -2,20 +2,40 @@
 % Please edit documentation in R/pairwise_ibs.R
 \name{pairwise_ibs}
 \alias{pairwise_ibs}
+\alias{pairwise_ibs.tbl_df}
+\alias{pairwise_ibs.vctrs_bigSNP}
 \title{Compute the Identity by State Matrix for a \code{gen_tibble} object}
 \usage{
-pairwise_ibs(
+pairwise_ibs(x, ...)
+
+\method{pairwise_ibs}{tbl_df}(
   x,
   as_matrix = FALSE,
   type = c("proportion", "adjusted_counts", "raw_counts"),
   block_size = bigstatsr::block_size(nrow(x)),
   n_cores = bigstatsr::nb_cores(),
   missing_correction = c("flat", "allele_freq"),
-  allele_freqs = NULL
+  allele_freqs = NULL,
+  ...
+)
+
+\method{pairwise_ibs}{vctrs_bigSNP}(
+  x,
+  as_matrix = FALSE,
+  type = c("proportion", "adjusted_counts", "raw_counts"),
+  block_size = bigstatsr::block_size(length(x)),
+  n_cores = bigstatsr::nb_cores(),
+  missing_correction = c("flat", "allele_freq"),
+  allele_freqs = NULL,
+  ...
 )
 }
 \arguments{
-\item{x}{a \code{gen_tibble} object.}
+\item{x}{a \code{gen_tibble} object, or a vector of class \code{vctrs_bigSNP} (the
+\code{genotypes} column of a \code{\link{gen_tibble}}, whose individuals are then
+labelled with the names of the vector).}
+
+\item{...}{other arguments passed to specific methods, currently unused.}
 
 \item{as_matrix}{boolean, determining whether the results should be a square
 symmetrical matrix (TRUE), or a tidied tibble (FALSE, the default)}
@@ -117,6 +137,12 @@ file) gives \code{1 - proportion} with either correction.
 Pairs of individuals without any locus genotyped in both (or, with
 "allele_freq", without any polymorphic locus genotyped in both) have
 \code{NaN} (or \code{Inf}) values.
+
+\code{pairwise_ibs()} is an S3 generic. The method for a \code{\link{gen_tibble}}
+computes the matrix with the method for its \code{genotypes} column (of class
+\code{vctrs_bigSNP}), and labels it with the \code{id} of the individuals; grouping
+is ignored. Other packages can add methods for their own classes of
+genotypes (e.g. genotype likelihoods).
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

@@ -89,3 +89,42 @@ test_that("indiv_inbreeding and allele sharing work with a single individual", {
   single_grp <- which(group_keys(grouped_gt)$population == "pop_single")
   expect_true(is.nan(inb_grp[[single_grp]]))
 })
+
+test_that("indiv_inbreeding is a generic with methods for gen_tibbles", {
+  inbreed_gt <- indiv_inbreeding(test_gt)
+  ashare <- pairwise_allele_sharing(test_gt, as_matrix = TRUE)
+  # the method for the genotypes column needs the matrix of allele sharing
+  expect_identical(
+    indiv_inbreeding(test_gt$genotypes, allele_sharing_mat = ashare),
+    inbreed_gt
+  )
+  expect_error(indiv_inbreeding(test_gt$genotypes), "applied to a gen_tibble")
+  # arguments are matched by the methods, also by position
+  expect_identical(indiv_inbreeding(test_gt, "WG17", ashare), inbreed_gt)
+  expect_error(indiv_inbreeding(test_gt, foo = 1), "must be empty")
+  # tibbles that lost their class are restored
+  expect_identical(indiv_inbreeding(as_tibble(test_gt)), inbreed_gt)
+  expect_identical(
+    indiv_inbreeding(as_tibble(test_gt) %>% group_by(population)),
+    indiv_inbreeding(test_gt %>% group_by(population))
+  )
+  # other packages can add methods for their own classes of genotypes and
+  # of tibbles (here, a tibble that lost its class is restored as a dummy_tbl)
+  registerS3method(
+    "genotypes_tbl_class", "dummy_genotypes",
+    function(genotypes, ...) "dummy_tbl",
+    envir = asNamespace("tidypopgen")
+  )
+  dummy_genotypes <- structure(1:3, class = "dummy_genotypes")
+  dummy_tbl <- tibble(id = c("a", "b", "c"), genotypes = dummy_genotypes)
+  expect_error(
+    indiv_inbreeding(dummy_tbl),
+    "indiv_inbreeding\\(\\) has no method for objects of class 'dummy_tbl'"
+  )
+  registerS3method(
+    "indiv_inbreeding", "dummy_tbl",
+    function(.x, ...) rep(0.5, nrow(.x)),
+    envir = asNamespace("tidypopgen")
+  )
+  expect_identical(indiv_inbreeding(dummy_tbl), rep(0.5, 3))
+})

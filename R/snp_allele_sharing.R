@@ -48,9 +48,27 @@ snp_allele_sharing <- function(
   if (n == 0) {
     return(matrix(numeric(0), 0, 0))
   }
-  # both FBMs are temporary (the result is a matrix): make them in a private
-  # directory, deleted on exit, so that their names cannot clash with other
-  # .bk files (see with_private_fbm_dir())
+  counts <- .allele_sharing_counts(X, ind.row, ind.col, block.size, n_cores)
+  # The allele sharing matrix is:
+  # Mij <- 1/2 * (1+1/tcrossprod(na) * tcrossprod(dos-1)) #nolint
+  # where dos is a dosage matrix (with missing values replaced by 1) and
+  # na is a matrix with 0 for NAs and 1 for valid values
+  res <- 0.5 * (1 + counts$num / counts$denom)
+  res[counts$denom == 0] <- NA_real_
+  return(res)
+}
+
+# The sums from which the allele sharing of each pair of individuals is
+# computed, over the loci genotyped in both: `num`, the sum of the products of
+# their centred dosages (dosage - 1), and `denom`, the number of loci
+# genotyped in both (square matrices, in the order of `ind.row`, which must
+# not be empty). Allele sharing is `0.5 * (1 + num / denom)`; used by
+# snp_allele_sharing() and pairwise_dist().
+.allele_sharing_counts <- function(X, ind.row, ind.col, block.size, n_cores) { # nolint
+  n <- length(ind.row)
+  # both FBMs are temporary (the result is a list of matrices): make them in a
+  # private directory, deleted on exit, so that their names cannot clash with
+  # other .bk files (see with_private_fbm_dir())
   local_private_fbm_dir()
   # FBM matrix to store the tcrossproduct of (dos-1)
   dos_tcross <- bigstatsr::FBM(n, n, init = 0)
@@ -76,16 +94,9 @@ snp_allele_sharing <- function(
       ncores = n_cores
     )
   }
-  # The allele sharing matrix is:
-  # Mij <- 1/2 * (1+1/tcrossprod(na) * tcrossprod(dos-1)) #nolint
-  # where dos is a dosage matrix (with missing values replaced by 1) and
-  # na is a matrix with 0 for NAs and 1 for valid values
-  # TODO this could be done in chunks to avoid bringing
-  # everything to memory at once
   # (drop = FALSE keeps a 1 x 1 matrix for a single individual)
-  denom <- na_tcross[, , drop = FALSE]
-  num <- dos_tcross[, , drop = FALSE]
-  res <- 0.5 * (1 + num / denom)
-  res[denom == 0] <- NA_real_
-  return(res)
+  list(
+    num = dos_tcross[, , drop = FALSE],
+    denom = na_tcross[, , drop = FALSE]
+  )
 }

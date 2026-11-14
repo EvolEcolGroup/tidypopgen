@@ -355,3 +355,59 @@ test_that("pairwise functions delete their temporary FBMs", {
   expect_true(file.exists(test_ibs$ibs$backingfile))
   expect_true(file.exists(test_ibs$valid_n$backingfile))
 })
+
+test_that("pairwise_ibs is a generic with methods for gen_tibbles", {
+  ibs_mat <- pairwise_ibs(test_gt, as_matrix = TRUE)
+  ibs_tidy <- pairwise_ibs(test_gt, type = "adjusted_counts")
+  # the method for the genotypes column labels the individuals with the names
+  # of the vector, and the method for gen_tibbles with their ids
+  expect_identical(pairwise_ibs(test_gt$genotypes, as_matrix = TRUE), ibs_mat)
+  expect_identical(
+    pairwise_ibs(test_gt$genotypes, type = "adjusted_counts"),
+    ibs_tidy
+  )
+  renamed_gt <- test_gt %>% mutate(id = toupper(id))
+  expect_identical(
+    dimnames(pairwise_ibs(renamed_gt, as_matrix = TRUE)),
+    list(renamed_gt$id, renamed_gt$id)
+  )
+  expect_identical(pairwise_ibs(renamed_gt)$item1, c("A", "A", "B"))
+  ibs_counts <- pairwise_ibs(test_gt$genotypes, type = "raw_counts")
+  expect_identical(attr(ibs_counts$ibs, "indiv_names"), test_gt$id)
+  ibs_counts <- pairwise_ibs(renamed_gt, type = "raw_counts")
+  expect_identical(attr(ibs_counts$ibs, "indiv_names"), renamed_gt$id)
+  expect_identical(attr(ibs_counts$valid_n, "indiv_names"), renamed_gt$id)
+  # arguments are matched by the methods, also by position
+  expect_identical(pairwise_ibs(test_gt, TRUE, "proportion", 2, 1), ibs_mat)
+  expect_error(pairwise_ibs(test_gt, foo = 1), "must be empty")
+  expect_error(pairwise_ibs(test_gt, type = "foo"), "should be one of")
+  # grouping is ignored, and tibbles that lost their class work
+  expect_identical(
+    pairwise_ibs(test_gt %>% group_by(population), type = "adjusted_counts"),
+    ibs_tidy
+  )
+  expect_identical(pairwise_ibs(as_tibble(test_gt), as_matrix = TRUE), ibs_mat)
+  # other packages can add methods for their own classes of genotypes
+  registerS3method(
+    "genotypes_tbl_class", "dummy_genotypes",
+    function(genotypes, ...) "dummy_tbl",
+    envir = asNamespace("tidypopgen")
+  )
+  registerS3method(
+    "pairwise_ibs", "dummy_genotypes",
+    function(x, as_matrix = FALSE, ...) {
+      structure(matrix(1, length(x), length(x)),
+        class = c("pairwise_matrix", "matrix", "array")
+      )
+    },
+    envir = asNamespace("tidypopgen")
+  )
+  dummy_tbl <- tibble(
+    id = c("a", "b", "c"),
+    genotypes = structure(1:3, class = "dummy_genotypes")
+  )
+  dummy_ibs <- pairwise_ibs(dummy_tbl)
+  expect_s3_class(dummy_ibs, "pairwise_tbl")
+  expect_identical(dummy_ibs$item2, c("b", "c", "c"))
+  expect_identical(dummy_ibs$value, c(1, 1, 1))
+})

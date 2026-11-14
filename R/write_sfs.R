@@ -399,7 +399,7 @@ write_sfs.default <- function(x, ...) {
   # draw the blocks of the bootstrap replicates before writing any file, so
   # that we stop early if they cannot be drawn
   if (n_bootstrap > 0) {
-    blocks <- .sfs_bootstrap_blocks(data$loci,
+    blocks <- bootstrap_blocks(data$loci,
       n_bootstrap = n_bootstrap,
       block_size = bootstrap_block_size,
       size_unit = bootstrap_size_unit
