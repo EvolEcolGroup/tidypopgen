@@ -9,8 +9,8 @@
 #' give back the tibble its class, as given by `genotypes_tbl_class()` for
 #' its `genotypes` column, and then dispatch again.
 #'
-#' Packages that build their own tibbles on `tidypopgen` (e.g. the
-#' `gl_tibble` of `tidypopgl`) add a method to `genotypes_tbl_class()` for the
+#' Packages that build their own tibbles on `tidypopgen` (e.g. for genotype
+#' likelihoods) add a method to `genotypes_tbl_class()` for the
 #' class of their `genotypes` column, so that their own methods of the
 #' `tidypopgen` generics are used after the class is restored.
 #'

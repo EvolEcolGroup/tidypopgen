@@ -27,21 +27,20 @@
   `gt_merge_vcfs()`
 * new `bootstrap_blocks()`, for developers (not in the reference index): the
   blocks of loci of the block bootstrap and the blocks drawn by each
-  replicate, so that other packages (e.g. `tidypopgl`) can resample the same
-  blocks as the bootstrap functions of tidypopgen
+  replicate, so that other packages can resample the same blocks as the
+  bootstrap functions of tidypopgen
 * new `pairwise_dist()`: genetic distances between individuals, as ngsDist,
   with the genotype or nucleotide score, corrected for saturation
   (`-log(1 - d)` by default, Jukes-Cantor, or none), e.g. to build
-  neighbour-joining trees; an S3 generic, so that other packages (e.g.
-  `tidypopgl`, from genotype likelihoods) can add methods
+  neighbour-joining trees; an S3 generic, so that other packages (e.g. for
+  genotype likelihoods) can add methods
 * `pairwise_king()`, `pairwise_ibs()`, `pairwise_allele_sharing()` (with
   methods for `gen_tibble` objects and their `genotypes` column) and
   `windows_indiv_roh()` (with a method for `gen_tibble` objects) are now S3
   generics, and the generic
   `indiv_inbreeding()` only has the arguments `.x` and `...` (its method for
-  `gen_tibble` objects is a `gen_tbl` method), so that other packages (e.g.
-  `tidypopgl`) can provide methods for their own objects, with their own
-  arguments. `windows_indiv_roh()` now also works on `gen_tibble` objects
+  `gen_tibble` objects is a `gen_tbl` method), so that other packages can
+  provide methods for their own objects, with their own arguments. `windows_indiv_roh()` now also works on `gen_tibble` objects
   that lost their class (e.g. with `as_tibble()`), as the other generics do
 
 ## Bug fixes

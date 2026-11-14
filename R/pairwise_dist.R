@@ -16,7 +16,7 @@
 #' computes the matrix with the method for its `genotypes` column (of class
 #' `vctrs_bigSNP`), and labels it with the `id` of the individuals; grouping
 #' is ignored. Other packages can add methods for their own classes of
-#' genotypes (e.g. `tidypopgl`, from genotype likelihoods).
+#' genotypes (e.g. genotype likelihoods).
 #'
 #' @section The distance and its corrections:
 #' With the default `score = "genotype"`, the uncorrected distance d of a

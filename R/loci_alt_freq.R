@@ -105,7 +105,7 @@ loci_alt_freq.tbl_df <- function(
   ...
 ) {
   # dispatch on the genotypes column: vctrs_bigSNP for a gen_tibble, or the
-  # genotypes of objects from other packages (e.g. tidypopgl's gl_tibble)
+  # genotypes of objects from other packages (e.g. genotype likelihoods)
   stopifnot_has_genotypes(.x)
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%

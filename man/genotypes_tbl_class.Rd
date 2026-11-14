@@ -47,8 +47,8 @@ give back the tibble its class, as given by \code{genotypes_tbl_class()} for
 its \code{genotypes} column, and then dispatch again.
 }
 \details{
-Packages that build their own tibbles on \code{tidypopgen} (e.g. the
-\code{gl_tibble} of \code{tidypopgl}) add a method to \code{genotypes_tbl_class()} for the
+Packages that build their own tibbles on \code{tidypopgen} (e.g. for genotype
+likelihoods) add a method to \code{genotypes_tbl_class()} for the
 class of their \code{genotypes} column, so that their own methods of the
 \code{tidypopgen} generics are used after the class is restored.
 }

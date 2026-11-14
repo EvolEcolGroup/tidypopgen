@@ -33,9 +33,9 @@ columns, is drawn in each replicate, in rows).
 }
 \description{
 This function is designed for developers of packages that add bootstrap
-methods to the generics of tidypopgen (e.g. \code{tidypopgl}, for genotype
-likelihoods), so that their replicates resample the same blocks as the
-methods of tidypopgen. The loci are divided into non-overlapping blocks
+methods to the generics of tidypopgen (e.g. for genotype likelihoods), so
+that their replicates resample the same blocks as the methods of
+tidypopgen. The loci are divided into non-overlapping blocks
 that never span chromosomes, defined as in \code{\link[=jackknife_stats_generic]{jackknife_stats_generic()}} (a
 number of SNPs, of base pairs, or a size in centiMorgans), and each
 replicate draws as many blocks as there are, with replacement.

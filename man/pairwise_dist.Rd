@@ -75,7 +75,7 @@ Imputed genotypes are used if \code{x} is set to use them (see
 computes the matrix with the method for its \code{genotypes} column (of class
 \code{vctrs_bigSNP}), and labels it with the \code{id} of the individuals; grouping
 is ignored. Other packages can add methods for their own classes of
-genotypes (e.g. \code{tidypopgl}, from genotype likelihoods).
+genotypes (e.g. genotype likelihoods).
 }
 \section{The distance and its corrections}{
 
