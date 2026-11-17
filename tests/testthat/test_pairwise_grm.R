@@ -43,7 +43,7 @@ test_that("pairwise_grm compute correctly", {
 test_that("pairwise_grm(method = 'plink') matches plink --make-rel", {
   # 60 individuals with 0 to 90% missing genotypes and a monomorphic locus,
   # and the output of plink --make-rel square, made by the script
-  # create_plink_pca_fixture.R in data-raw
+  # data-raw/validate/create_plink_pca_test_data.R
   fixture <- test_path("testdata", "plink_pca", "missing")
   missing_gt <- gen_tibble(paste0(fixture, ".bed"),
     backingfile = tempfile("grm_"), quiet = TRUE

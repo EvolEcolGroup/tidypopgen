@@ -7,7 +7,7 @@
 # of individuals have 0, 20, 50, 80 and 90% missing genotypes.
 #
 # Run from the package root, with PLINK 1.9 on the PATH (or in PLINK):
-#   Rscript data-raw/create_plink_pca_fixture.R
+#   Rscript data-raw/validate/create_plink_pca_test_data.R
 devtools::load_all(quiet = TRUE)
 out_dir <- "tests/testthat/testdata/plink_pca"
 plink <- Sys.getenv("PLINK", "plink")

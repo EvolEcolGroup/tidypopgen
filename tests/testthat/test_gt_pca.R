@@ -612,7 +612,7 @@ test_that("n_cores can be set for predict_gt_pca", {
 test_that("gt_pca matches PLINK 1.9 with very high missingness", {
   # 60 individuals with 0 to 90% missing genotypes, and the outputs of
   # plink --make-rel square and plink --pca 5
-  # (made by data-raw/create_plink_pca_fixture.R)
+  # (made by data-raw/validate/create_plink_pca_test_data.R)
   fixture <- test_path("testdata", "plink_pca", "missing")
   missing_gt <- gen_tibble(paste0(fixture, ".bed"),
     backingfile = tempfile("grm_"), quiet = TRUE
@@ -669,7 +669,7 @@ test_that("gt_pca matches PLINK 1.9 with very high missingness", {
 test_that("predict(project_method = 'plink') matches PLINK 1.9", {
   # PLINK's PCA of the 24 individuals with 0 or 20% missing genotypes, and its
   # projection of the other 36 (50 to 90% missing), with --pca-cluster-names
-  # (made by data-raw/create_plink_pca_fixture.R)
+  # (made by data-raw/validate/create_plink_pca_test_data.R)
   fixture <- test_path("testdata", "plink_pca", "missing")
   missing_gt <- gen_tibble(paste0(fixture, ".bed"),
     backingfile = tempfile("proj_"), quiet = TRUE

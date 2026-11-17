@@ -61,6 +61,7 @@ Remember to time installed (-O2) builds, not `load_all()` (see `CLAUDE.md`).
 | File | Compares with |
 |---|---|
 | `create_easysfs_test_data.R` | easySFS: creates the fixtures in `tests/testthat/testdata/easysfs` (site frequency spectra). |
+| `create_plink_pca_test_data.R` | PLINK 1.9 `--make-rel`, `--pca` and a `--pca` projection (`--pca-cluster-names`): runs them on a simulated dataset with up to 90% missing genotypes, and saves the outputs in `tests/testthat/testdata/plink_pca` (`gt_pca()`, `pairwise_grm(method = "plink")`, `predict()`). |
 | `create_plink_roh_test_data.R` | PLINK 1.9 `--homozyg`: runs it on the simulated ROH dataset and on a small random dataset, with several sets of parameters, and saves the outputs in `tests/testthat/testdata/plink_roh` (runs of homozygosity). |
 | `create_pixy_test_data.R` | pixy: creates the fixtures in `tests/testthat/testdata/pixy` (Tajima's D with missing data). |
 | `create_plink_king_outputs.Rmd` | PLINK and KING: IBS and kinship of the families in `inst/extdata/related`. |
