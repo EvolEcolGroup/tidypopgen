@@ -180,7 +180,9 @@ gt_pca <- function(x, k = 10, method = c("partial", "random"),
       gt_set_imputed(x, set = TRUE)
       on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)
     }
-    if (any(loci_missingness(x, n_cores = n_cores) > 0)) {
+    # (on the genotypes column, which gives one value per locus also for a
+    # grouped gen_tibble)
+    if (any(loci_missingness(x$genotypes, n_cores = n_cores) > 0)) {
       stop(
         "method = 'random' needs complete or imputed genotypes: impute them ",
         "(e.g. with gt_impute_simple()), or use method = 'partial'"
@@ -260,7 +262,9 @@ gt_pca <- function(x, k = 10, method = c("partial", "random"),
 # 0, so that they add nothing to the GRM.
 pca_scaling <- function(x, fun_scaling, n_cores) {
   if (is.null(fun_scaling)) {
-    freq <- loci_alt_freq(x, n_cores = n_cores)
+    # on the genotypes column, so that a grouped gen_tibble gives the
+    # frequencies of all individuals (not one column per group)
+    freq <- loci_alt_freq(x$genotypes, n_cores = n_cores)
     center <- 2 * freq
     scale <- sqrt(2 * freq * (1 - freq))
   } else {

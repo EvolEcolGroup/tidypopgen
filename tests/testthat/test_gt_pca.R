@@ -744,3 +744,19 @@ test_that("the old PCA functions are deprecated", {
   expect_warning(gt_pca_partialSVD(sim_gt, k = 2), "deprecated")
   expect_warning(gt_pca_randomSVD(sim_gt, k = 2), "deprecated")
 })
+
+test_that("gt_pca works on a grouped gen_tibble", {
+  set.seed(4)
+  sim_gt <- gt_simulate_bn(n_indiv = c(10, 10), n_loci = 200, fst = 0.1)
+  sim_gt <- select_loci_if(sim_gt, loci_maf(genotypes) > 0)
+  grouped_gt <- sim_gt %>% group_by(population)
+  # the grouping is ignored, with both methods
+  expect_equal(
+    gt_pca(grouped_gt, k = 2, n_cores = 1)$d,
+    gt_pca(sim_gt, k = 2, n_cores = 1)$d
+  )
+  expect_equal(
+    gt_pca(grouped_gt, k = 2, method = "random", n_cores = 1)$d,
+    gt_pca(sim_gt, k = 2, method = "random", n_cores = 1)$d
+  )
+})
