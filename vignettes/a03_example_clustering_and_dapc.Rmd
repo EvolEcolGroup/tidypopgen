@@ -116,20 +116,13 @@ Forest.
 
 That was easy. The loci had already been filtered and cleaned, so we don't need 
 to do any QC. Let us jump straight into analysis and run a PCA:
-```{r, error=TRUE}
-anole_pca <- anole_gt %>% gt_pca_partialSVD(k = 30)
-```
-OK, we jumped too quickly. There are missing data, and we need first 
-to impute them:
-
 ```{r}
-anole_gt <- gt_impute_simple(anole_gt, method = "mode")
+anole_pca <- anole_gt %>% gt_pca(k = 30)
 ```
-
-And now:
-```{r}
-anole_pca <- anole_gt %>% gt_pca_partialSVD(k = 30)
-```
+There are missing data, but we do not need to impute them: the default method
+of `gt_pca()`, as `plink --pca`, compares individuals over the loci genotyped in
+both (other analyses, e.g. `gt_pca(method = "random")`, need complete data, and
+we would first impute the missing genotypes with `gt_impute_simple()`).
 
 Let us look at the object:
 ```{r}

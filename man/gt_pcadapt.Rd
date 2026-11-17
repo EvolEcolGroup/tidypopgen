@@ -9,8 +9,7 @@ gt_pcadapt(x, pca, k, n_cores = 1)
 \arguments{
 \item{x}{A \code{gen_tibble} object.}
 
-\item{pca}{a \code{\link{gt_pca}} object, as returned by \code{\link[=gt_pca_partialSVD]{gt_pca_partialSVD()}} or
-\code{\link[=gt_pca_randomSVD]{gt_pca_randomSVD()}}.}
+\item{pca}{a \code{\link{gt_pca}} object, as returned by \code{\link[=gt_pca]{gt_pca()}}.}
 
 \item{k}{Number of principal components to use in the analysis.}
 
@@ -44,12 +43,12 @@ lobsters <- gen_tibble(bed_file,
   quiet = TRUE
 )
 
-# Remove monomorphic loci and impute
+# Remove monomorphic loci and impute (pcadapt needs complete genotypes)
 lobsters <- lobsters \%>\% select_loci_if(loci_maf(genotypes) > 0)
 lobsters <- gt_impute_simple(lobsters, method = "mode")
 
 # Create PCA object
-pca <- gt_pca_partialSVD(lobsters)
+pca <- gt_pca(lobsters)
 
 # Create a gt_pcadapt object
 gt_pcadapt(lobsters, pca, k = 2)

@@ -77,12 +77,11 @@
 #'   quiet = TRUE
 #' )
 #'
-#' # Remove monomorphic loci and impute
+#' # Remove monomorphic loci
 #' lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
-#' lobsters <- gt_impute_simple(lobsters, method = "mode")
 #'
 #' # Create PCA object
-#' pca <- gt_pca_partialSVD(lobsters)
+#' pca <- gt_pca(lobsters)
 #'
 #' # Run DAPC on the `gt_pca` object, providing `pop` as factor
 #' populations <- as.factor(lobsters$population)

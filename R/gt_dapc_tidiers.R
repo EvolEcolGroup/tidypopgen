@@ -67,12 +67,11 @@
 #'   quiet = TRUE
 #' )
 #'
-#' # Remove monomorphic loci and impute
+#' # Remove monomorphic loci
 #' lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
-#' lobsters <- gt_impute_simple(lobsters, method = "mode")
 #'
 #' # Create PCA and run DAPC
-#' pca <- gt_pca_partialSVD(lobsters)
+#' pca <- gt_pca(lobsters)
 #' populations <- as.factor(lobsters$population)
 #' dapc_res <- gt_dapc(pca, n_pca = 6, n_da = 2, pop = populations)
 #'
@@ -168,12 +167,11 @@ tidy.gt_dapc <- function(x, matrix = "eigenvalues", ...) {
 #'   quiet = TRUE
 #' )
 #'
-#' # Remove monomorphic loci and impute
+#' # Remove monomorphic loci
 #' lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
-#' lobsters <- gt_impute_simple(lobsters, method = "mode")
 #'
 #' # Create PCA and run DAPC
-#' pca <- gt_pca_partialSVD(lobsters)
+#' pca <- gt_pca(lobsters)
 #' populations <- as.factor(lobsters$population)
 #' dapc_res <- gt_dapc(pca, n_pca = 6, n_da = 2, pop = populations)
 #'

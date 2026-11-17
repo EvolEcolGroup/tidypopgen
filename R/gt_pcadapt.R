@@ -11,8 +11,7 @@
 #'   pcadapt: an R package for genome scans for selection based on principal
 #'   component analysis. Molecular Ecology Resources, 17(1), 67–77.
 #' @param x A `gen_tibble` object.
-#' @param pca a [`gt_pca`] object, as returned by [gt_pca_partialSVD()] or
-#'   [gt_pca_randomSVD()].
+#' @param pca a [`gt_pca`] object, as returned by [gt_pca()].
 #' @param k Number of principal components to use in the analysis.
 #' @param n_cores Number of cores to use.
 #' @returns An object of subclass `gt_pcadapt`, a subclass of `mhtest`.
@@ -32,12 +31,12 @@
 #'   quiet = TRUE
 #' )
 #'
-#' # Remove monomorphic loci and impute
+#' # Remove monomorphic loci and impute (pcadapt needs complete genotypes)
 #' lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
 #' lobsters <- gt_impute_simple(lobsters, method = "mode")
 #'
 #' # Create PCA object
-#' pca <- gt_pca_partialSVD(lobsters)
+#' pca <- gt_pca(lobsters)
 #'
 #' # Create a gt_pcadapt object
 #' gt_pcadapt(lobsters, pca, k = 2)

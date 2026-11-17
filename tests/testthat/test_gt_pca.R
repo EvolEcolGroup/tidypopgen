@@ -1,6 +1,8 @@
 options(mc_doScale_quiet = TRUE)
 
 test_that("fit_gt_pca_and_predict", {
+  # the deprecated gt_pca_partialSVD() errors on missing data
+  withr::local_options(lifecycle_verbosity = "quiet")
   bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
   missing_gt <- gen_tibble(
     bed_file,
@@ -12,7 +14,12 @@ test_that("fit_gt_pca_and_predict", {
     "You can't have missing"
   )
   missing_gt <- gt_impute_simple(missing_gt, method = "mode")
-  missing_pca <- missing_gt %>% gt_pca_partialSVD()
+  # the pca of the imputed data, which predict() uses for new_data, in double
+  # precision (the internal engine's single precision products differ from
+  # the projection by about 1e-7)
+  gt_set_imputed(missing_gt, set = TRUE)
+  missing_pca <- missing_gt %>% gt_pca(n_cores = 2, engine = "blas")
+  gt_set_imputed(missing_gt, set = FALSE)
   # check that predicting on the object is the same as predicting from the
   # full dataset without imputation to the center (the data are already imputed)
   expect_true(all.equal(
@@ -35,7 +42,9 @@ test_that("fit_gt_pca_and_predict", {
   )
   # predict when new dataset has extra positions
   missing_gt_sub <- missing_gt %>% select_loci(100:450)
-  missing_sub_pca <- missing_gt_sub %>% gt_pca_partialSVD()
+  gt_set_imputed(missing_gt_sub, set = TRUE)
+  missing_sub_pca <- missing_gt_sub %>% gt_pca(n_cores = 2, engine = "blas")
+  gt_set_imputed(missing_gt_sub, set = FALSE)
   expect_true(all.equal(
     predict(missing_sub_pca),
     predict(missing_sub_pca, new_data = missing_gt, project_method = "none"),
@@ -164,7 +173,7 @@ test_that("fit_gt_pca_and_predict_splitted_data", {
 
   # impute the modern data
   modern_gt <- gt_impute_simple(modern_gt, method = "mode")
-  modern_pca <- modern_gt %>% gt_pca_partialSVD()
+  modern_pca <- modern_gt %>% gt_pca(n_cores = 2)
   # if we just try to predict, we find that the new data have missing data
   new_pred <- predict(
     modern_pca,
@@ -280,8 +289,9 @@ test_that("PCA functions work with loci out of order", {
     quiet = TRUE
   )
   missing_gt <- gt_impute_simple(missing_gt, method = "mode")
-  missing_part_pca1 <- missing_gt %>% gt_pca_partialSVD()
-  missing_rand_pca1 <- missing_gt %>% gt_pca_randomSVD(verbose = FALSE)
+  missing_part_pca1 <- missing_gt %>% gt_pca(n_cores = 2)
+  missing_rand_pca1 <- missing_gt %>%
+    gt_pca(method = "random", n_cores = 1, verbose = FALSE)
 
   # now shuffle the loci
   loci <- missing_gt %>% show_loci()
@@ -289,8 +299,9 @@ test_that("PCA functions work with loci out of order", {
   show_loci(missing_gt) <- loci
 
   # Rerun PCA
-  missing_part_pca2 <- missing_gt %>% gt_pca_partialSVD()
-  missing_rand_pca2 <- missing_gt %>% gt_pca_randomSVD(verbose = FALSE)
+  missing_part_pca2 <- missing_gt %>% gt_pca(n_cores = 2)
+  missing_rand_pca2 <- missing_gt %>%
+    gt_pca(method = "random", n_cores = 1, verbose = FALSE)
 
   expect_equal(missing_part_pca1$loadings, missing_part_pca2$loadings)
   expect_equal(missing_rand_pca1$loadings, missing_rand_pca2$loadings)
@@ -372,12 +383,12 @@ test_that("PCA computes frobenius when needed", {
     quiet = TRUE
   )
   missing_gt <- gt_impute_simple(missing_gt, method = "mode")
-  missing_part_pca1 <- missing_gt %>% gt_pca_partialSVD()
+  missing_part_pca1 <- missing_gt %>% gt_pca(n_cores = 2)
   expect_true("square_frobenius" %in% names(missing_part_pca1))
   tidy_pca_out <- tidy(missing_part_pca1, matrix = "eigenvalues")
   expect_true("cumulative" %in% names(tidy_pca_out))
   # now repeat without estimating variance
-  missing_part_pca2 <- missing_gt %>% gt_pca_partialSVD(total_var = FALSE)
+  missing_part_pca2 <- missing_gt %>% gt_pca(total_var = FALSE, n_cores = 2)
   expect_false("square_frobenius" %in% names(missing_part_pca2))
   tidy_pca_out <- tidy(missing_part_pca2, matrix = "eigenvalues")
   expect_false("cumulative" %in% names(tidy_pca_out))
@@ -408,13 +419,13 @@ test_that("our stdevs are comparable to prcomp", {
   count_loci(families) # 609
 
   #########################
-  # Perform PCA using gt_pca_partialSVD
+  # Perform PCA using gt_pca
   #########################
-  # TODO there seems to be a bug in the gt_pca_partialSVD function where
-  # missing values are detected even when excluded
+  # TODO there seemed to be a bug in the former gt_pca_partialSVD function
+  # where missing values are detected even when excluded
   families <- gt_update_backingfile(families, quiet = TRUE)
   families <- gt_impute_simple(families, method = "mode")
-  gt_pca_result <- families %>% gt_pca_partialSVD()
+  gt_pca_result <- families %>% gt_pca(n_cores = 2)
   tidy_pca <- tidy(gt_pca_result, matrix = "eigenvalues")
 
   # Perform PCA using prcomp
@@ -497,13 +508,13 @@ test_that("n_cores can be set for pca functions", {
   missing_gt <- gt_impute_simple(missing_gt, method = "mode")
 
   ############
-  # Test gt_pca_randomSVD
+  # Test gt_pca with method "random"
   ############
   expect_true(getOption("bigstatsr.check.parallel.blas"))
   one_core <- missing_gt %>%
-    gt_pca_randomSVD(n_cores = 1, verbose = FALSE)
+    gt_pca(method = "random", n_cores = 1, verbose = FALSE)
   two_core <- missing_gt %>%
-    gt_pca_randomSVD(n_cores = 2, verbose = FALSE)
+    gt_pca(method = "random", n_cores = 2, verbose = FALSE)
   # calls will differ, set to NULL
   one_core$call <- NULL
   two_core$call <- NULL
@@ -570,7 +581,7 @@ test_that("n_cores can be set for predict_gt_pca", {
   modern_gt <- gt_update_backingfile(modern_gt, quiet = TRUE)
 
   modern_gt <- gt_impute_simple(modern_gt, method = "mode")
-  modern_pca <- modern_gt %>% gt_pca_partialSVD()
+  modern_pca <- modern_gt %>% gt_pca(n_cores = 2)
   expect_true(getOption("bigstatsr.check.parallel.blas"))
   one_core <- predict(
     modern_pca,

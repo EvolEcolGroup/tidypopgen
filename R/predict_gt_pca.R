@@ -50,7 +50,7 @@
 #' new_lobsters <- lobsters[c(151:176), ]
 #'
 #' # Create PCA object
-#' pca <- gt_pca_partialSVD(original_lobsters)
+#' pca <- gt_pca(original_lobsters)
 #'
 #' # Predict
 #' predict(pca, new_data = new_lobsters, project_method = "simple")

@@ -159,7 +159,8 @@ test_that("retain sf class after imputing and augmenting pca", {
     gt_impute_simple(test_gt_from_sf, method = "mode", n_cores = 1)
   expect_equal(class(test_gt_from_sf), class(test_gt_from_sf_impute))
   # augment the gt and check class
-  test_pca <- test_gt_from_sf_impute %>% gt_pca_randomSVD(k = 3)
+  test_pca <- test_gt_from_sf_impute %>%
+    gt_pca(k = 3, method = "random", n_cores = 1)
   augmented_gt <- augment(x = test_pca, data = test_gt_from_sf_impute)
   expect_equal(class(augmented_gt), class(test_gt_from_sf_impute))
 

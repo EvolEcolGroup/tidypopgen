@@ -467,8 +467,8 @@ test_that("pairwise statistics of individuals are the same with phased data", {
 })
 
 test_that("PCA and LD clumping are the same with phased data", {
-  # PCA needs complete data (without any missing genotype in the backing
-  # file)
+  # LD clumping needs complete data (without any missing genotype in the
+  # backing file)
   complete_haps <- random_haplotypes(n_ind, 100, p_missing = 0)
   phased_complete <- gen_tibble(complete_haps,
     phased = TRUE,
@@ -480,8 +480,8 @@ test_that("PCA and LD clumping are the same with phased data", {
     backingfile = tempfile(), quiet = TRUE
   )
   expect_true(is_phased(phased_complete))
-  pca_phased <- gt_pca_partialSVD(phased_complete, k = 3)
-  pca_unphased <- gt_pca_partialSVD(unphased_complete, k = 3)
+  pca_phased <- gt_pca(phased_complete, k = 3, n_cores = 2)
+  pca_unphased <- gt_pca(unphased_complete, k = 3, n_cores = 2)
   expect_equal(abs(pca_phased$u), abs(pca_unphased$u), tolerance = 1e-6)
   expect_equal(pca_phased$d, pca_unphased$d, tolerance = 1e-6)
   # ld clumping

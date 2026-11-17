@@ -12,7 +12,7 @@ missing_gt <- gen_tibble(
   quiet = TRUE
 )
 missing_gt <- gt_impute_simple(missing_gt, method = "mode")
-missing_pca <- missing_gt %>% gt_pca_partialSVD()
+missing_pca <- missing_gt %>% gt_pca(n_cores = 2)
 
 test_that("gt_pcadapt works on gt_pca object", {
   missing_pcadapt <- gt_pcadapt(missing_gt, missing_pca, k = 3)
@@ -58,7 +58,7 @@ test_that("gt_pcadapt 'U' error with heavily imputed SNPs", {
   # set imputed to TRUE (just to be sure)
   gt_set_imputed(anolis, TRUE)
   # test pca
-  anolis_pca <- gt_pca_randomSVD(anolis)
+  anolis_pca <- gt_pca(anolis, method = "random", n_cores = 1)
   # fails in gt_pcadapt
   expect_error(
     gt_pcadapt(anolis, anolis_pca, k = 2),
@@ -106,7 +106,7 @@ test_that("gt_pcadapt 'U' error with heavily imputed SNPs", {
   # update backingfile
   anolis <- gt_update_backingfile(anolis, quiet = TRUE)
   # test pca
-  anolis_pca <- gt_pca_randomSVD(anolis)
+  anolis_pca <- gt_pca(anolis, method = "random", n_cores = 1)
   # and now it works
   anolis_pcadapt <- gt_pcadapt(anolis, anolis_pca, k = 2)
   expect_true(inherits(anolis_pcadapt, "gt_pcadapt"))

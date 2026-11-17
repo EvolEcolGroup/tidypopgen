@@ -45,12 +45,11 @@
 #'   quiet = TRUE
 #' )
 #'
-#' # Remove monomorphic loci and impute
+#' # Remove monomorphic loci
 #' lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
-#' lobsters <- gt_impute_simple(lobsters, method = "mode")
 #'
 #' # Create PCA object
-#' pca <- gt_pca_partialSVD(lobsters)
+#' pca <- gt_pca(lobsters)
 #'
 #' # Run clustering on the first 10 PCs
 #' gt_cluster_pca(
@@ -214,12 +213,11 @@ compute_wss <- function(x, f) {
 #'   quiet = TRUE
 #' )
 #'
-#' # Remove monomorphic loci and impute
+#' # Remove monomorphic loci
 #' lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
-#' lobsters <- gt_impute_simple(lobsters, method = "mode")
 #'
 #' # Create PCA object
-#' pca <- gt_pca_partialSVD(lobsters)
+#' pca <- gt_pca(lobsters)
 #'
 #' # Run clustering on the first 10 PCs
 #' cluster_pca <- gt_cluster_pca(

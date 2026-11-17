@@ -14,8 +14,8 @@ missing_gt <- gen_tibble(
 test_that("impute and use the imputation", {
   # we get errors because of missing values
   expect_error(
-    missing_gt %>% gt_pca_partialSVD(),
-    "You can't have missing values"
+    missing_gt %>% gt_pca(method = "random", n_cores = 1),
+    "needs complete or imputed genotypes"
   )
   expect_false(gt_has_imputed(missing_gt))
   expect_error(
@@ -29,7 +29,10 @@ test_that("impute and use the imputation", {
   # but don't use it by default
   expect_false(gt_uses_imputed(missing_gt))
   # now we return a pca successfully
-  expect_true(inherits(missing_gt %>% gt_pca_partialSVD(), "gt_pca"))
+  expect_true(inherits(
+    missing_gt %>% gt_pca(method = "random", n_cores = 1),
+    "gt_pca"
+  ))
   # simple error message
   expect_error(
     gt_set_imputed(missing_gt),
@@ -97,7 +100,10 @@ test_that("impute the whole FBM if the gen_tibble has a subset of the loci", {
   expect_false(anyNA(subset_fbm[]))
   expect_identical(unname(subset_fbm[]), unname(all_loci_imputed))
   # functions that need imputed data now work on the subset
-  expect_true(inherits(subset_gt %>% gt_pca_partialSVD(), "gt_pca"))
+  expect_true(inherits(
+    subset_gt %>% gt_pca(method = "random", n_cores = 1),
+    "gt_pca"
+  ))
 })
 
 test_that("impute a gen_tibble with all individuals in a different order", {
@@ -317,7 +323,10 @@ test_that("imputed gt retains status after gt_update_backingfile", {
   gt_set_imputed(missing_gt_imputed, set = FALSE)
   gt_set_imputed(before_update, set = FALSE)
   # test we can use a function that requires imputation
-  expect_true(inherits(missing_gt_imputed %>% gt_pca_partialSVD(), "gt_pca"))
+  expect_true(inherits(
+    missing_gt_imputed %>% gt_pca(method = "random", n_cores = 1),
+    "gt_pca"
+  ))
 
 
   missing_gt_imputed <- gt_impute_simple(missing_gt, method = "mode")
@@ -335,5 +344,8 @@ test_that("imputed gt retains status after gt_update_backingfile", {
   # check if still imputed
   gt_has_imputed(missing_gt_imputed)
   # test we can use a function that requires imputation
-  expect_true(inherits(missing_gt_imputed %>% gt_pca_partialSVD(), "gt_pca"))
+  expect_true(inherits(
+    missing_gt_imputed %>% gt_pca(method = "random", n_cores = 1),
+    "gt_pca"
+  ))
 })

@@ -11,7 +11,7 @@ test_that("gt_dapc_and_tidiers", {
   )
 
   test_gt <- gt_impute_simple(test_gt, method = "mode")
-  test_pca <- test_gt %>% gt_pca_randomSVD(k = 15)
+  test_pca <- test_gt %>% gt_pca(k = 15, n_cores = 2)
   ############################
   # unit tests for gt_cluster_pca
   # test error if not a gt object
@@ -135,7 +135,7 @@ test_that("scores plot error if only 2 populations", {
   test_gt$population <- c(rep("pop1", 100), rep("pop2", 100))
   test_gt <- test_gt %>% group_by(population)
   test_gt <- gt_impute_simple(test_gt, method = "mode")
-  test_pca <- test_gt %>% gt_pca_randomSVD(k = 2)
+  test_pca <- test_gt %>% gt_pca(k = 2, n_cores = 2)
   test_dapc <- test_pca %>% gt_dapc(pop = as.factor(test_gt$population))
   expect_error(
     autoplot(test_dapc, type = "scores"),
@@ -153,7 +153,7 @@ test_that("gt_cluster_pca works with a single k and a single component", {
     quiet = TRUE
   )
   test_gt <- gt_impute_simple(test_gt, method = "mode")
-  test_pca <- test_gt %>% gt_pca_randomSVD(k = 5)
+  test_pca <- test_gt %>% gt_pca(k = 5, n_cores = 2)
   # only one k larger than 1
   test_cluster <- gt_cluster_pca(test_pca,
     n_pca = 5, k_clusters = c(1, 2),
@@ -193,7 +193,7 @@ test_that("best_k is a value of k when k_clusters does not start at 1", {
     quiet = TRUE
   )
   test_gt <- gt_impute_simple(test_gt, method = "mode")
-  test_pca <- test_gt %>% gt_pca_randomSVD(k = 10)
+  test_pca <- test_gt %>% gt_pca(k = 10, n_cores = 2)
   test_cluster <- gt_cluster_pca(test_pca,
     n_pca = 10, k_clusters = c(3, 8),
     quiet = TRUE
@@ -238,7 +238,7 @@ test_that("gt_dapc var is the proportion of variance of the retained PCs", {
     quiet = TRUE
   )
   test_gt <- gt_impute_simple(test_gt, method = "mode")
-  test_pca <- test_gt %>% gt_pca_randomSVD(k = 10)
+  test_pca <- test_gt %>% gt_pca(k = 10, n_cores = 2)
   pops <- as.factor(rep(c("pop1", "pop2", "pop3", "pop4"), each = 50))
   test_dapc <- gt_dapc(test_pca, pop = pops, n_pca = 6)
   # the eigenvalues are the squared singular values
@@ -255,7 +255,7 @@ test_that("gt_dapc uses k-1 PCs by default", {
     quiet = TRUE
   )
   test_gt <- gt_impute_simple(test_gt, method = "mode")
-  test_pca <- test_gt %>% gt_pca_randomSVD(k = 5)
+  test_pca <- test_gt %>% gt_pca(k = 5, n_cores = 2)
   # as many populations as PCs
   pops <- as.factor(rep(paste0("pop", 1:5), each = 40))
   test_dapc <- gt_dapc(test_pca, pop = pops)
@@ -280,7 +280,7 @@ test_that("gt_dapc gives an informative error for an invalid pop", {
     quiet = TRUE
   )
   test_gt <- gt_impute_simple(test_gt, method = "mode")
-  test_pca <- test_gt %>% gt_pca_randomSVD(k = 5)
+  test_pca <- test_gt %>% gt_pca(k = 5, n_cores = 2)
   pops <- c(rep("pop1", 100), rep("pop2", 100))
   # a character vector rather than a factor
   expect_error(
@@ -315,7 +315,7 @@ test_that("augment.gt_dapc works with one discriminant axis and checks ids", {
   test_gt <- gt_impute_simple(test_gt, method = "mode")
   # use integer ids
   test_gt$id <- seq_len(nrow(test_gt))
-  test_pca <- test_gt %>% gt_pca_randomSVD(k = 5)
+  test_pca <- test_gt %>% gt_pca(k = 5, n_cores = 2)
   pops <- as.factor(c(rep("pop1", 100), rep("pop2", 100)))
   test_dapc <- test_pca %>% gt_dapc(pop = pops, n_pca = 3)
   expect_equal(test_dapc$n.da, 1)

@@ -13,7 +13,7 @@ test_that("augment_loci adds to loci_table", {
     quiet = TRUE
   )
   missing_gt <- gt_impute_simple(missing_gt, method = "mode")
-  missing_pca <- missing_gt %>% gt_pca_partialSVD()
+  missing_pca <- missing_gt %>% gt_pca(n_cores = 2)
 
   # Add loadings to loci table
   missing_pca_load <- augment_loci(missing_pca, data = missing_gt)
