@@ -68,9 +68,10 @@ sim_gt <- gt_simulate_bn(
   n_indiv = 20, n_loci = 500, fst = c(0.02, 0.05, 0.1)
 )
 sim_gt
-# with missing genotypes, increasing from 0 to 90\% across individuals
+# three populations with missing genotypes, increasing from 0 to 90\%
+# across the individuals of each population
 sim_missing <- gt_simulate_bn(
-  n_indiv = 20, n_loci = 500, fst = 0.05,
+  n_indiv = c(20, 20, 20), n_loci = 500, fst = 0.05,
   missing = rep(seq(0, 0.9, length.out = 20), 3)
 )
 }
