@@ -3,17 +3,49 @@
 #' Predict the PCA scores for a [`gt_pca`], either for the original data or
 #' projecting new data.
 #'
+#' New individuals are projected on the loadings of the PCA, with their
+#' genotypes centred and scaled as those of the PCA. The methods differ in how
+#' they deal with missing genotypes:
+#'
+#' * `"least_squares"` (the default): for each individual, the least squares
+#'   fit of its standardised genotypes on the loadings of the loci genotyped
+#'   in that individual (as `lsqproject` in smartpca). Individuals with many
+#'   missing genotypes are not shrunk towards the centre of the PCA. With
+#'   complete genotypes, it gives the same scores as `"simple"`. Individuals
+#'   with too few genotyped loci to fit the components get `NA`, with a
+#'   warning. As with `"simple"` and `"OADP"`, imputed genotypes are used only
+#'   if the `gen_tibble` is set to use them (see [gt_set_imputed()]).
+#' * `"simple"`: the product of the standardised genotypes, with missing
+#'   genotypes set to 0 (the mean), by the loadings. An individual with a
+#'   proportion f of missing genotypes is shrunk towards 0 by a factor of
+#'   about 1 - f (e.g. to a fifth of its distance with 80% missing
+#'   genotypes), so it should only be used with complete or imputed data.
+#' * `"OADP"`: the Online Augmentation, Decomposition, and Procrustes
+#'   projection (Zhang et al. 2020), which corrects the shrinkage of
+#'   projections with many more loci than individuals; missing genotypes are
+#'   set to 0, as for `"simple"`, with the same shrinkage.
+#' * `"none"`: the product of the genotypes by the loadings with
+#'   [bigstatsr::big_prodMat()]; it needs complete or imputed genotypes (and
+#'   uses imputed genotypes automatically).
+#'
+#' In a simulation of individuals with 20-80% missing genotypes projected on
+#' complete reference individuals, `"least_squares"` had no shrinkage and the
+#' smallest error, `"simple"` and `"OADP"` shrank individuals by their
+#' proportion of missing genotypes, and imputing the genotypes (by their mode)
+#' before a simple projection only halved the shrinkage.
+#'
 #' @param object the [`gt_pca`] object
 #' @param new_data a gen_tibble if scores are requested for a new dataset
-#' @param project_method a string taking the value of either "simple", "OADP"
-#'   (Online Augmentation, Decomposition, and Procrustes (OADP) projection), or
-#'   "least_squares" (as done by SMARTPCA)
-#' @param lsq_pcs a vector of the indices of the principal
-#' components to use for the least square fitting. Only relevant
-#' if `project_method = 'least_squares'`. It defaults to the first two
-#' components.
+#' @param project_method the projection method: `"least_squares"` (the
+#'   default, as done by smartpca), `"simple"`, `"OADP"` (Online Augmentation,
+#'   Decomposition, and Procrustes projection) or `"none"`; see Details.
+#' @param lsq_pcs a vector of the indices of the principal components to use
+#'   for the least squares fitting (and to return). Only relevant if
+#'   `project_method = "least_squares"`. It defaults to all the components of
+#'   the PCA.
 #' @param block_size number of loci read simultaneously (larger values will
-#' speed up computation, but require more memory)
+#' speed up computation, but require more memory); by default, blocks of about
+#' 128 MB.
 #' @param n_cores number of cores
 #' @param as_matrix logical, whether to return the result as a matrix (default)
 #'   or a tibble.
@@ -23,7 +55,10 @@
 #'   number of components depends on how many were estimated in the [`gt_pca`]
 #'   object.
 #' @references Zhang et al (2020). Fast and robust ancestry prediction using
-#'   principal component analysis  36(11): 3439–3446.
+#'   principal component analysis. Bioinformatics 36(11): 3439–3446.
+#'
+#'   Patterson N., Price A.L. and Reich D. (2006) Population structure and
+#'   eigenanalysis. PLoS Genetics 2: e190.
 #' @rdname predict_gt_pca
 #' @importFrom foreach %do%
 #' @export
@@ -58,11 +93,8 @@
 #' # Predict with OADP
 #' predict(pca, new_data = new_lobsters, project_method = "OADP")
 #'
-#' # Predict with least squares
-#' predict(pca,
-#'   new_data = new_lobsters,
-#'   project_method = "least_squares", lsq_pcs = c(1, 2, 3)
-#' )
+#' # Predict with least squares (the default), on the first three components
+#' predict(pca, new_data = new_lobsters, lsq_pcs = c(1, 2, 3))
 #'
 #' # Return a tibble
 #' predict(pca, new_data = new_lobsters, as_matrix = FALSE)
@@ -75,12 +107,12 @@ predict.gt_pca <- function(
   object,
   new_data = NULL,
   project_method = c(
-    "none",
+    "least_squares",
     "simple",
     "OADP",
-    "least_squares"
+    "none"
   ),
-  lsq_pcs = c(1, 2),
+  lsq_pcs = NULL,
   block_size = NULL,
   n_cores = 1,
   as_matrix = TRUE,
@@ -159,6 +191,8 @@ predict.gt_pca <- function(
       # "simple", "OADP" and "least_squares": one pass over the loci of
       # new_data, in blocks (see pca_project_cpp())
       if (project_method == "least_squares") {
+        # all the components by default
+        if (is.null(lsq_pcs)) lsq_pcs <- seq_len(ncol(object$v))
         if (
           length(lsq_pcs) == 0 ||
             anyNA(lsq_pcs) ||
@@ -205,15 +239,37 @@ predict.gt_pca <- function(
         n_lsq <- length(lsq_pcs)
         vtv <- crossprod(unclass(object$v)[, lsq_pcs, drop = FALSE])
         xv_lsq <- proj$XV[, lsq_pcs, drop = FALSE]
+        # individuals genotyped at fewer loci than there are components have
+        # a singular system (computed as a difference, it can look invertible)
+        n_obs <- nrow(object$v) - proj$n_missing
         lsq_proj <- vapply(
           seq_len(nrow(new_data)),
           function(i) {
-            solve(vtv - matrix(proj$miss[i, ], n_lsq, n_lsq), xv_lsq[i, ])
+            if (n_obs[i] < n_lsq) {
+              return(rep(NA_real_, n_lsq))
+            }
+            # a nearly singular system (e.g. loci genotyped only where the
+            # loadings are 0) is an error, with a tolerance above rounding
+            tryCatch(
+              solve(
+                vtv - matrix(proj$miss[i, ], n_lsq, n_lsq), xv_lsq[i, ],
+                tol = 1e-10
+              ),
+              error = function(e) rep(NA_real_, n_lsq)
+            )
           },
           numeric(n_lsq)
         )
-        # one row per individual
-        XV <- matrix(lsq_proj, nrow = nrow(new_data), byrow = TRUE) # nolint
+        # one row per individual (vapply gives a vector for one component)
+        lsq_proj <- matrix(lsq_proj, nrow = nrow(new_data), byrow = TRUE)
+        n_na <- sum(is.na(lsq_proj[, 1]))
+        if (n_na > 0) {
+          warning(
+            n_na, " individuals have too few genotyped loci to fit ",
+            n_lsq, " components: their scores are NA"
+          )
+        }
+        XV <- lsq_proj # nolint
       }
       pcs <- if (project_method == "least_squares") {
         lsq_pcs

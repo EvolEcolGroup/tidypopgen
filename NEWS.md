@@ -8,6 +8,9 @@
   `method = "random"` is for very large numbers of individuals
 * `gt_pca_partialSVD()` and `gt_pca_randomSVD()` are deprecated in favour of
   `gt_pca()`
+* `predict()` of a `gt_pca` now uses `project_method = "least_squares"` on all
+  the components by default, which does not shrink the scores of individuals
+  with missing genotypes; projections are 2-3 times faster
 * `pairwise_grm(method = "plink")` gives PLINK 1.9's variance-standardised
   relationship matrix
 * new `gt_simulate_bn()` simulates toy datasets of unlinked loci (Balding-Nichols

@@ -22,9 +22,11 @@ test_that("fit_gt_pca_and_predict", {
   gt_set_imputed(missing_gt, set = FALSE)
   # check that predicting on the object is the same as predicting from the
   # full dataset without imputation to the center (the data are already imputed)
+  # ("none" uses the imputed genotypes automatically; the default least
+  # squares only if the gen_tibble is set to use them)
   expect_true(all.equal(
     predict(missing_pca),
-    predict(missing_pca, new_data = missing_gt),
+    predict(missing_pca, new_data = missing_gt, project_method = "none"),
     check.attributes = FALSE
   ))
   # now mismatch the loci table
@@ -203,14 +205,15 @@ test_that("fit_gt_pca_and_predict_splitted_data", {
     project_method = "least_squares",
     as_matrix = TRUE
   )
-  expect_true(all(dim(lsq_pred) == c(20, 2)))
+  # all the components by default
+  expect_true(all(dim(lsq_pred) == c(20, ncol(modern_pca$u))))
   lsq_pred_tbl <- predict(
     modern_pca,
     new_data = ancient_gt,
     project_method = "least_squares",
     as_matrix = FALSE
   )
-  expect_true(all(dim(lsq_pred_tbl) == c(20, 3)))
+  expect_true(all(dim(lsq_pred_tbl) == c(20, ncol(modern_pca$u) + 1)))
   expect_true(inherits(lsq_pred_tbl, "tbl_df"))
 
   # test 3 components
@@ -241,13 +244,13 @@ test_that("fit_gt_pca_and_predict_splitted_data", {
     ), "lsq_pcs should be a vector of valid"
   )
 
-  # Test empty vector
+  # Test empty vector (NULL selects all the components)
   expect_error(
     predict(
       modern_pca,
       new_data = ancient_gt,
       project_method = "least_squares",
-      lsq_pcs = c()
+      lsq_pcs = integer(0)
     ), "lsq_pcs should be a vector of valid"
   )
 
@@ -801,4 +804,17 @@ test_that("projections with missing genotypes match an R reference", {
     block_size = 7
   )
   expect_equal(lsq, lsq_ref, ignore_attr = TRUE)
+  # individuals genotyped at fewer loci than components get NA, with a warning
+  set.seed(2)
+  sparse_gt <- gt_simulate_bn(n_indiv = 6, n_loci = 300, missing = 0.99)
+  # genotyped loci among those of the pca (predict() matches them by name)
+  sparse_geno <- show_genotypes(sparse_gt)
+  sparse_geno <- sparse_geno[, match(pca$loci$name, loci_names(sparse_gt))]
+  n_obs <- rowSums(!is.na(sparse_geno))
+  expect_warning(
+    sparse <- predict(pca, new_data = sparse_gt, as_matrix = TRUE),
+    "too few genotyped loci"
+  )
+  expect_true(any(n_obs < 3) && any(n_obs >= 3))
+  expect_identical(is.na(sparse[, 1]), n_obs < 3, ignore_attr = TRUE)
 })
