@@ -71,24 +71,6 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
-// fbm256_prod_and_rowSumsSq
-List fbm256_prod_and_rowSumsSq(Environment BM, const IntegerVector& ind_row, const IntegerVector& ind_col, const NumericVector& center, const NumericVector& scale, const NumericMatrix& V, const IntegerVector& ind, const IntegerVector& lsq_pcs);
-RcppExport SEXP _tidypopgen_fbm256_prod_and_rowSumsSq(SEXP BMSEXP, SEXP ind_rowSEXP, SEXP ind_colSEXP, SEXP centerSEXP, SEXP scaleSEXP, SEXP VSEXP, SEXP indSEXP, SEXP lsq_pcsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type ind_row(ind_rowSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type ind_col(ind_colSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type center(centerSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type scale(scaleSEXP);
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type V(VSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type ind(indSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type lsq_pcs(lsq_pcsSEXP);
-    rcpp_result_gen = Rcpp::wrap(fbm256_prod_and_rowSumsSq(BM, ind_row, ind_col, center, scale, V, ind, lsq_pcs));
-    return rcpp_result_gen;
-END_RCPP
-}
 // grouped_alt_freq_dip_pseudo_cpp
 NumericMatrix grouped_alt_freq_dip_pseudo_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, int ngroups, const NumericVector& ploidy, int ncores, bool as_counts, int block_size, bool freq_only);
 RcppExport SEXP _tidypopgen_grouped_alt_freq_dip_pseudo_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP ncoresSEXP, SEXP as_countsSEXP, SEXP block_sizeSEXP, SEXP freq_onlySEXP) {
@@ -294,6 +276,26 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const NumericVector& >::type ploidy(ploidySEXP);
     Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
     rcpp_result_gen = Rcpp::wrap(gt_ind_hetero_polyploid(BM, rowInd, colInd, ploidy, ncores));
+    return rcpp_result_gen;
+END_RCPP
+}
+// pca_project_cpp
+List pca_project_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const NumericVector& center, const NumericVector& scale, const NumericMatrix& V, const IntegerVector& lsq_pcs, int block_size, bool use_blas, int ncores);
+RcppExport SEXP _tidypopgen_pca_project_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP centerSEXP, SEXP scaleSEXP, SEXP VSEXP, SEXP lsq_pcsSEXP, SEXP block_sizeSEXP, SEXP use_blasSEXP, SEXP ncoresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type center(centerSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type scale(scaleSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type V(VSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type lsq_pcs(lsq_pcsSEXP);
+    Rcpp::traits::input_parameter< int >::type block_size(block_sizeSEXP);
+    Rcpp::traits::input_parameter< bool >::type use_blas(use_blasSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    rcpp_result_gen = Rcpp::wrap(pca_project_cpp(BM, rowInd, colInd, center, scale, V, lsq_pcs, block_size, use_blas, ncores));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1016,7 +1018,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_alt_freq_polyploid_cpp", (DL_FUNC) &_tidypopgen_alt_freq_polyploid_cpp, 7},
     {"_tidypopgen_check_dosage_matrix_cpp", (DL_FUNC) &_tidypopgen_check_dosage_matrix_cpp, 3},
     {"_tidypopgen_write_dosage_matrix_cpp", (DL_FUNC) &_tidypopgen_write_dosage_matrix_cpp, 3},
-    {"_tidypopgen_fbm256_prod_and_rowSumsSq", (DL_FUNC) &_tidypopgen_fbm256_prod_and_rowSumsSq, 8},
     {"_tidypopgen_grouped_alt_freq_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_grouped_alt_freq_dip_pseudo_cpp, 10},
     {"_tidypopgen_grouped_het_obs_polyploid", (DL_FUNC) &_tidypopgen_grouped_het_obs_polyploid, 8},
     {"_tidypopgen_grouped_missingness_cpp", (DL_FUNC) &_tidypopgen_grouped_missingness_cpp, 8},
@@ -1029,6 +1030,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_gt_grouped_pi_polyploid", (DL_FUNC) &_tidypopgen_gt_grouped_pi_polyploid, 10},
     {"_tidypopgen_gt_ind_hetero", (DL_FUNC) &_tidypopgen_gt_ind_hetero, 4},
     {"_tidypopgen_gt_ind_hetero_polyploid", (DL_FUNC) &_tidypopgen_gt_ind_hetero_polyploid, 5},
+    {"_tidypopgen_pca_project_cpp", (DL_FUNC) &_tidypopgen_pca_project_cpp, 10},
     {"_tidypopgen_gt_pi_diploid", (DL_FUNC) &_tidypopgen_gt_pi_diploid, 5},
     {"_tidypopgen_gt_pi_polyploid", (DL_FUNC) &_tidypopgen_gt_pi_polyploid, 7},
     {"_tidypopgen_gt_write_text_by_locus", (DL_FUNC) &_tidypopgen_gt_write_text_by_locus, 7},

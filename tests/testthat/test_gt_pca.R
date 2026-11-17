@@ -771,3 +771,34 @@ test_that("gt_pca works on a grouped gen_tibble", {
     gt_pca(sim_gt, k = 2, method = "random", n_cores = 1)$d
   )
 })
+
+test_that("projections with missing genotypes match an R reference", {
+  set.seed(5)
+  sim_gt <- gt_simulate_bn(
+    n_indiv = c(15, 15), n_loci = 300, fst = 0.1,
+    missing = rep(c(0, 0.3, 0.6), 10)
+  )
+  sim_gt <- select_loci_if(sim_gt, loci_maf(genotypes) > 0)
+  pca <- gt_pca(sim_gt[1:20, ], k = 3, n_cores = 1)
+  new_gt <- sim_gt[21:30, ]
+  # standardised genotypes of the new individuals, missing as 0 (and loci
+  # monomorphic in the reference, with a scale of 0, also 0)
+  geno <- show_genotypes(new_gt)
+  z <- sweep(sweep(geno, 2, pca$center), 2, pca$scale, "/")
+  z[!is.finite(z)] <- 0
+  v <- unclass(pca$v)
+  simple <- predict(pca,
+    new_data = new_gt, project_method = "simple", block_size = 7
+  )
+  expect_equal(simple, z %*% v, ignore_attr = TRUE)
+  # least squares on the loci genotyped in each individual
+  lsq_ref <- t(sapply(seq_len(nrow(geno)), function(i) {
+    obs <- !is.na(geno[i, ])
+    solve(crossprod(v[obs, , drop = FALSE]), crossprod(v[obs, ], z[i, obs]))
+  }))
+  lsq <- predict(pca,
+    new_data = new_gt, project_method = "least_squares", lsq_pcs = 1:3,
+    block_size = 7
+  )
+  expect_equal(lsq, lsq_ref, ignore_attr = TRUE)
+})

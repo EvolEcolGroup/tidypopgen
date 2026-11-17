@@ -17,10 +17,6 @@ write_dosage_matrix_cpp <- function(x, BM, na_byte) {
     invisible(.Call(`_tidypopgen_write_dosage_matrix_cpp`, x, BM, na_byte))
 }
 
-fbm256_prod_and_rowSumsSq <- function(BM, ind_row, ind_col, center, scale, V, ind, lsq_pcs) {
-    .Call(`_tidypopgen_fbm256_prod_and_rowSumsSq`, BM, ind_row, ind_col, center, scale, V, ind, lsq_pcs)
-}
-
 grouped_alt_freq_dip_pseudo_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores, as_counts, block_size = 100000L, freq_only = FALSE) {
     .Call(`_tidypopgen_grouped_alt_freq_dip_pseudo_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores, as_counts, block_size, freq_only)
 }
@@ -67,6 +63,10 @@ gt_ind_hetero <- function(BM, rowInd, colInd, ncores) {
 
 gt_ind_hetero_polyploid <- function(BM, rowInd, colInd, ploidy, ncores) {
     .Call(`_tidypopgen_gt_ind_hetero_polyploid`, BM, rowInd, colInd, ploidy, ncores)
+}
+
+pca_project_cpp <- function(BM, rowInd, colInd, center, scale, V, lsq_pcs, block_size, use_blas, ncores) {
+    .Call(`_tidypopgen_pca_project_cpp`, BM, rowInd, colInd, center, scale, V, lsq_pcs, block_size, use_blas, ncores)
 }
 
 gt_pi_diploid <- function(BM, rowInd, colInd, ncores, block_size = 100000L) {
