@@ -2,6 +2,11 @@
 
 ## New features and changes
 
+* new `gt_pca_grm()` computes a PCA with missing genotypes as `plink --pca`
+  (PLINK 1.9) does, without imputation; it uses an optimised BLAS when there
+  is one, and Eigen otherwise
+* `pairwise_grm(method = "plink")` gives PLINK 1.9's variance-standardised
+  relationship matrix
 * new `gt_merge_vcfs()` and `gt_concat_vcfs()` read several VCF files into a
   single `gen_tibble`, as `bcftools merge` and `bcftools concat`
 * integer chromosomes (`chromosomes_as_int`) for datasets with many

@@ -12,7 +12,8 @@
 
 // Shared kernel for the pairwise (individual x individual) statistics IBS,
 // KING-robust and allele sharing (see snp_ibs.cpp, snp_king.cpp and
-// snp_as.cpp).
+// snp_as.cpp), and for the counts of loci valid in both individuals of
+// PLINK-style relationship matrices (gt_grm_plink.cpp).
 //
 // All three statistics are sums over loci of simple functions of the two
 // diploid genotypes (0, 1 or 2 alternate alleles, or missing). Rather than
@@ -169,6 +170,21 @@ struct PwAlleleSharing {
     c[0] += pw_popcount((wi[1] & wj[1]) | (wi[2] & wj[2]));
     c[1] += pw_popcount((wi[1] & wj[2]) | (wi[2] & wj[1]));
     c[2] += pw_popcount(wi[0] & wj[0]);
+  }
+};
+
+// Valid loci: one plane (valid) and one count, the number of loci valid in
+// both individuals (the denominator of PLINK 1.9's relationship matrix with
+// missing genotypes, see gt_pca_grm()).
+struct PwValid {
+  static const int N_PLANES = 1;
+  static const int N_COUNTS = 1;
+  static uint8_t planes(int) {
+    return 1;
+  }
+  static PW_ALWAYS_INLINE void add(const uint64_t* wi, const uint64_t* wj,
+                                   uint32_t* c) {
+    c[0] += pw_popcount(wi[0] & wj[0]);
   }
 };
 

@@ -2,6 +2,7 @@
 // Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 #include <RcppArmadillo.h>
+#include <RcppEigen.h>
 #include <Rcpp.h>
 
 using namespace Rcpp;
@@ -175,6 +176,58 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const IntegerVector& >::type copy_lut(copy_lutSEXP);
     gt_copy_fbm(BM_from, BM_to, rowInd, colInd, col_offset, row_offset, swap, swap_lut, copy_lut);
     return R_NilValue;
+END_RCPP
+}
+// grm_rank_update_seconds
+double grm_rank_update_seconds(int n, int nb, bool use_blas, int ncores);
+RcppExport SEXP _tidypopgen_grm_rank_update_seconds(SEXP nSEXP, SEXP nbSEXP, SEXP use_blasSEXP, SEXP ncoresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< int >::type nb(nbSEXP);
+    Rcpp::traits::input_parameter< bool >::type use_blas(use_blasSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    rcpp_result_gen = Rcpp::wrap(grm_rank_update_seconds(n, nb, use_blas, ncores));
+    return rcpp_result_gen;
+END_RCPP
+}
+// grm_plink_cpp
+NumericMatrix grm_plink_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const NumericVector& center, const NumericVector& scale, int block_size, int ncores, bool use_blas);
+RcppExport SEXP _tidypopgen_grm_plink_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP centerSEXP, SEXP scaleSEXP, SEXP block_sizeSEXP, SEXP ncoresSEXP, SEXP use_blasSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type center(centerSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type scale(scaleSEXP);
+    Rcpp::traits::input_parameter< int >::type block_size(block_sizeSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    Rcpp::traits::input_parameter< bool >::type use_blas(use_blasSEXP);
+    rcpp_result_gen = Rcpp::wrap(grm_plink_cpp(BM, rowInd, colInd, center, scale, block_size, ncores, use_blas));
+    return rcpp_result_gen;
+END_RCPP
+}
+// grm_loadings_cpp
+NumericMatrix grm_loadings_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const NumericVector& center, const NumericVector& scale, const NumericMatrix& U, const NumericVector& d, int block_size, int ncores, bool use_blas);
+RcppExport SEXP _tidypopgen_grm_loadings_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP centerSEXP, SEXP scaleSEXP, SEXP USEXP, SEXP dSEXP, SEXP block_sizeSEXP, SEXP ncoresSEXP, SEXP use_blasSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type center(centerSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type scale(scaleSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type U(USEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type d(dSEXP);
+    Rcpp::traits::input_parameter< int >::type block_size(block_sizeSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    Rcpp::traits::input_parameter< bool >::type use_blas(use_blasSEXP);
+    rcpp_result_gen = Rcpp::wrap(grm_loadings_cpp(BM, rowInd, colInd, center, scale, U, d, block_size, ncores, use_blas));
+    return rcpp_result_gen;
 END_RCPP
 }
 // gt_grouped_pi_diploid
@@ -969,6 +1022,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_grouped_missingness_cpp", (DL_FUNC) &_tidypopgen_grouped_missingness_cpp, 8},
     {"_tidypopgen_missingness_cpp", (DL_FUNC) &_tidypopgen_missingness_cpp, 5},
     {"_tidypopgen_gt_copy_fbm", (DL_FUNC) &_tidypopgen_gt_copy_fbm, 9},
+    {"_tidypopgen_grm_rank_update_seconds", (DL_FUNC) &_tidypopgen_grm_rank_update_seconds, 4},
+    {"_tidypopgen_grm_plink_cpp", (DL_FUNC) &_tidypopgen_grm_plink_cpp, 8},
+    {"_tidypopgen_grm_loadings_cpp", (DL_FUNC) &_tidypopgen_grm_loadings_cpp, 10},
     {"_tidypopgen_gt_grouped_pi_diploid", (DL_FUNC) &_tidypopgen_gt_grouped_pi_diploid, 8},
     {"_tidypopgen_gt_grouped_pi_polyploid", (DL_FUNC) &_tidypopgen_gt_grouped_pi_polyploid, 10},
     {"_tidypopgen_gt_ind_hetero", (DL_FUNC) &_tidypopgen_gt_ind_hetero, 4},

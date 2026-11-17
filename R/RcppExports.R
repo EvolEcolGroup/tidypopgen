@@ -41,6 +41,18 @@ gt_copy_fbm <- function(BM_from, BM_to, rowInd, colInd, col_offset, row_offset, 
     invisible(.Call(`_tidypopgen_gt_copy_fbm`, BM_from, BM_to, rowInd, colInd, col_offset, row_offset, swap, swap_lut, copy_lut))
 }
 
+grm_rank_update_seconds <- function(n, nb, use_blas, ncores) {
+    .Call(`_tidypopgen_grm_rank_update_seconds`, n, nb, use_blas, ncores)
+}
+
+grm_plink_cpp <- function(BM, rowInd, colInd, center, scale, block_size, ncores, use_blas) {
+    .Call(`_tidypopgen_grm_plink_cpp`, BM, rowInd, colInd, center, scale, block_size, ncores, use_blas)
+}
+
+grm_loadings_cpp <- function(BM, rowInd, colInd, center, scale, U, d, block_size, ncores, use_blas) {
+    .Call(`_tidypopgen_grm_loadings_cpp`, BM, rowInd, colInd, center, scale, U, d, block_size, ncores, use_blas)
+}
+
 gt_grouped_pi_diploid <- function(BM, rowInd, colInd, groupIds, ngroups, ncores, block_size = 100000L, return_n = FALSE) {
     .Call(`_tidypopgen_gt_grouped_pi_diploid`, BM, rowInd, colInd, groupIds, ngroups, ncores, block_size, return_n)
 }

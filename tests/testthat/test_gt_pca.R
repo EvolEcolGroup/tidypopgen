@@ -594,3 +594,96 @@ test_that("n_cores can be set for predict_gt_pca", {
   )
   expect_true(getOption("bigstatsr.check.parallel.blas"))
 })
+
+test_that("gt_pca_grm matches PLINK 1.9 with very high missingness", {
+  # 60 individuals with 0 to 90% missing genotypes, and the outputs of
+  # plink --make-rel square and plink --pca 5
+  # (made by data-raw/create_plink_pca_fixture.R)
+  fixture <- test_path("testdata", "plink_pca", "missing")
+  missing_gt <- gen_tibble(paste0(fixture, ".bed"),
+    backingfile = tempfile("grm_"), quiet = TRUE
+  )
+  # the relationship matrix, against PLINK and an R reference
+  freq <- loci_alt_freq(missing_gt)
+  geno <- show_genotypes(missing_gt)
+  z <- sweep(sweep(geno, 2, 2 * freq), 2, sqrt(2 * freq * (1 - freq)), "/")
+  z[!is.finite(z)] <- 0 # missing genotypes and the monomorphic locus
+  valid <- (!is.na(geno)) * 1
+  grm_ref <- tcrossprod(z) / tcrossprod(valid)
+  # both engines of the matrix products: the BLAS (double precision), and
+  # Eigen (single precision products of up to 1,024 loci, summed in double)
+  for (use_blas in c(TRUE, FALSE)) {
+    grm <- grm_plink_cpp(
+      BM = .gt_get_fbm(missing_gt), rowInd = .gt_fbm_rows(missing_gt),
+      colInd = show_loci(missing_gt)$big_index, center = 2 * freq,
+      scale = sqrt(2 * freq * (1 - freq)), block_size = 64, ncores = 2,
+      use_blas = use_blas
+    )
+    expect_equal(grm, grm_ref, tolerance = if (use_blas) 1e-12 else 1e-6)
+  }
+  plink_rel <- unname(as.matrix(read.table(paste0(fixture, ".rel"))))
+  # PLINK writes 6 significant digits
+  expect_lt(max(abs(grm - plink_rel)), 1e-5)
+  # the principal components, against PLINK (up to their sign)
+  missing_pca <- gt_pca_grm(missing_gt, k = 5, n_cores = 2)
+  plink_val <- scan(paste0(fixture, ".eigenval"), quiet = TRUE)
+  plink_vec <- as.matrix(read.table(paste0(fixture, ".eigenvec"))[, -(1:2)])
+  expect_equal(missing_pca$d^2 / count_loci(missing_gt), plink_val,
+    tolerance = 1e-5
+  )
+  signs <- sign(colSums(missing_pca$u * plink_vec))
+  expect_lt(max(abs(sweep(missing_pca$u, 2, signs, "*") - plink_vec)), 1e-5)
+  expect_equal(rownames(missing_pca$u), missing_gt$id)
+  # the result works with the gt_pca methods
+  expect_s3_class(missing_pca, "gt_pca")
+  expect_equal(nrow(tidy(missing_pca, "eigenvalues")), 5)
+  expect_equal(dim(predict(missing_pca)), c(nrow(missing_gt), 5))
+  # the same with reordered individuals and loci
+  sub_gt <- missing_gt %>%
+    dplyr::slice(60:1) %>%
+    select_loci(1000:1)
+  sub_pca <- gt_pca_grm(sub_gt,
+    k = 5, n_cores = 1, block_size = 7, engine = "internal"
+  )
+  # (the internal engine's single precision products differ by about 1e-8)
+  expect_equal(sub_pca$d, missing_pca$d, tolerance = 1e-6)
+  expect_equal(abs(sub_pca$u[60:1, ]), abs(missing_pca$u),
+    tolerance = 1e-6, ignore_attr = TRUE
+  )
+})
+
+test_that("gt_pca_grm matches gt_pca_partialSVD on complete data", {
+  bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
+  complete_gt <- gen_tibble(bed_file,
+    backingfile = tempfile("grm_complete_"), quiet = TRUE
+  )
+  complete_gt <- gt_impute_simple(complete_gt, method = "mode")
+  gt_set_imputed(complete_gt, set = TRUE)
+  # drop monomorphic loci, which partialSVD can not scale
+  freq <- loci_alt_freq(complete_gt)
+  complete_gt <- select_loci(complete_gt, which(freq > 0 & freq < 1))
+  grm_pca <- gt_pca_grm(complete_gt, k = 4)
+  svd_pca <- gt_pca_partialSVD(complete_gt, k = 4)
+  expect_equal(grm_pca$d, svd_pca$d, tolerance = 1e-8)
+  expect_equal(abs(grm_pca$u), abs(svd_pca$u), tolerance = 1e-8,
+    ignore_attr = TRUE
+  )
+  expect_equal(abs(grm_pca$v), abs(svd_pca$v), tolerance = 1e-8,
+    ignore_attr = TRUE
+  )
+  gt_set_imputed(complete_gt, set = FALSE)
+})
+
+test_that("gt_pca_grm rejects pairs without shared loci, dosages and bad k", {
+  geno <- rbind(c(0, 1, NA, NA), c(NA, NA, 2, 1), c(1, 2, 0, 1))
+  test_gt <- gen_tibble(geno,
+    indiv_meta = data.frame(id = c("a", "b", "c"), population = "p"),
+    loci = data.frame(
+      name = paste0("rs", 1:4), chromosome = 1, position = 1:4,
+      genetic_dist = 0, allele_ref = "A", allele_alt = "T"
+    ),
+    backingfile = tempfile("grm_small_"), quiet = TRUE
+  )
+  expect_error(gt_pca_grm(test_gt, k = 1), "no locus genotyped in both")
+  expect_error(gt_pca_grm(test_gt, k = 3), "'k' should be between")
+})

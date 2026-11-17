@@ -124,6 +124,7 @@ reference:
     contents:
         - gt_pca
         - gt_pca_autoSVD
+        - gt_pca_grm
         - gt_pca_partialSVD
         - gt_pca_randomSVD
         - predict.gt_pca
