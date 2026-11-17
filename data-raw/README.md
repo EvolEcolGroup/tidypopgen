@@ -89,6 +89,6 @@ Remember to time installed (-O2) builds, not `load_all()` (see `CLAUDE.md`).
 | `speed_accessors_guide.md` | A developer guide to the fast C++ accessors of the genotypes and how to write new kernels. |
 | `article_timings_speed_vs_big_data_article.md` | Timings of the big data article before and after the speed work. |
 | `open_issues_2026-11.md` | What is still open after the review and the speed work, and what was resolved. |
-| `pca_grm.md` | `gt_pca_grm()`: PCA with missing genotypes as PLINK 1.9, its two engines (BLAS and Eigen), the decisions and the timings against PLINK and `gt_pca_partialSVD()`. |
+| `gt_pca.md` | `gt_pca()` and `predict()`: PCA and projection with missing genotypes as PLINK 1.9 and by least squares, the two engines (BLAS and Eigen), the decisions and the timings against PLINK and `gt_pca_partialSVD()`. |
 | `sfs_plan.md` | The plan for the site frequency spectra (implemented in #221). |
 | `cran_checks_2026-11-07.md` | The pre-submission checks for CRAN of version 1.0.0: what was fixed, what needs a decision, and a draft of `cran-comments.md`. |
