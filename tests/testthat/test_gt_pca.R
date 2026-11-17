@@ -712,15 +712,21 @@ test_that("gt_pca matches gt_pca_partialSVD on complete data", {
   # drop monomorphic loci, which partialSVD can not scale
   freq <- loci_alt_freq(complete_gt)
   complete_gt <- select_loci(complete_gt, which(freq > 0 & freq < 1))
-  grm_pca <- gt_pca(complete_gt, k = 4)
   svd_pca <- gt_pca_partialSVD(complete_gt, k = 4)
-  expect_equal(grm_pca$d, svd_pca$d, tolerance = 1e-8)
-  expect_equal(abs(grm_pca$u), abs(svd_pca$u), tolerance = 1e-8,
-    ignore_attr = TRUE
-  )
-  expect_equal(abs(grm_pca$v), abs(svd_pca$v), tolerance = 1e-8,
-    ignore_attr = TRUE
-  )
+  # both engines explicitly: "auto" picks the internal engine with R's
+  # reference BLAS (Windows, macOS) or when it times faster, and its single
+  # precision products differ by about 1e-7
+  for (engine in c("blas", "internal")) {
+    tol <- if (engine == "blas") 1e-8 else 1e-6
+    grm_pca <- gt_pca(complete_gt, k = 4, engine = engine)
+    expect_equal(grm_pca$d, svd_pca$d, tolerance = tol)
+    expect_equal(abs(grm_pca$u), abs(svd_pca$u), tolerance = tol,
+      ignore_attr = TRUE
+    )
+    expect_equal(abs(grm_pca$v), abs(svd_pca$v), tolerance = tol,
+      ignore_attr = TRUE
+    )
+  }
   gt_set_imputed(complete_gt, set = FALSE)
 })
 
