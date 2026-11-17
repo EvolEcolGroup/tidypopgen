@@ -494,11 +494,9 @@ also make sure that the two datasets were aligned to the same reference genome a
 
 # Imputation
 
-Many genetic analysis (e.g. LD clumping, or some PCA methods) do not allow missing data. In many software implementations,
+Some genetic analysis (e.g. LD clumping, or specific PCA methods) do not allow missing data. In many software implementations,
 missing genotypes are imputed on the fly, often in a simplistic manner. In `tidypopgen`, we
-encourage taking this step explicitly, before running any analysis (note that the
-default method of `gt_pca()`, as `plink --pca`, does not need imputation: it
-compares individuals over the loci genotyped in both).
+encourage taking this step explicitly, when it is required. 
 
 Let us start with a dataset that has some missing genotypes:
 ```{r}
@@ -514,13 +512,11 @@ missing_gt %>%
   hist()
 ```
 
-If we attempt to run a PCA with `gt_pca_autoSVD()` on this dataset, we get:
+If we attempt to run LD clumping on this dataset, with `loci_ld_clump()`, we get:
 ```{r, error = TRUE}
-missing_pca <- missing_gt %>% gt_pca_autoSVD()
+missing_ld <- missing_gt %>%
+  select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, size = 10))
 ```
-
-Note that using gt_pca_autoSVD with a small dataset will likely cause an error, 
-see manual page for details.
 
 It is possible to obviate to this problem by filtering loci with missing data,
 but that might lose a lot of loci. The alternative is to impute the missing
@@ -570,12 +566,11 @@ missing_gt %>%
   hist()
 ```
 
-And let functions that need imputation use it automatically (here, a PCA with
-`method = "random"`; the default method of `gt_pca()` uses the imputed genotypes
-only if we set the `gen_tibble` to use them):
+And let functions that need imputation use it automatically (here, `loci_ld_clump()` will use the imputed genotypes):
 ```{r}
-missing_pca <- missing_gt %>% gt_pca(method = "random")
-missing_pca
+missing_ld <- missing_gt %>%
+  select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, size = 10))
+count_loci(missing_ld)
 ```
 
 Note that, when the function is finished, the `gen_tibble` is back to using
@@ -587,8 +582,7 @@ missing_gt %>%
   hist()
 ```
 
-More details about PCA and other analysis is found in the vignette on population
-genetic analysis.
+More details about using imputed data for specific PCA methods can be found in the documentation of `gt_pca()`.
 
 # Saving data and updating backingfiles
 

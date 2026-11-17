@@ -197,7 +197,7 @@ sgdp <- sgdp %>%
 cat("Loci remaining:", count_loci(sgdp))
 ```
 
-With other datasets, we would also remove loci with too many missing genotypes (e.g. with `select_loci_if(loci_missingness(genotypes) < 0.1)`), and then impute the remaining missing genotypes with `gt_impute_simple()`, as LD clumping and PCA do not accept missing values. Our dataset has no missing genotypes, so we can skip both steps. There is no need to rewrite the backing file with `gt_update_backingfile()` after filtering: the following steps only use the loci that are left in the `gen_tibble`.
+With other datasets, we would also remove loci with too many missing genotypes (e.g. with `select_loci_if(loci_missingness(genotypes) < 0.1)`), and then impute the remaining missing genotypes with `gt_impute_simple()`, as LD clumping and some PCA methods do not accept missing values. Our dataset has no missing genotypes, so we can skip both steps. There is no need to rewrite the backing file with `gt_update_backingfile()` after filtering: the following steps only use the loci that are left in the `gen_tibble`.
 
 ## LD clumping
 

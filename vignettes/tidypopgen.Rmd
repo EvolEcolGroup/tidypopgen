@@ -163,17 +163,17 @@ lobsters <- lobsters %>% select_loci_if(loci_missingness(genotypes) < 0.05)
 
 Through our filtering, we have removed a few individuals and loci. Most
 functions, including the PCA below, work directly on the remaining data.
-Imputation (with `gt_impute_simple`), which some other analyses need, depends on
-which individuals are included, so it would first need a backing file with only
-the individuals that are left (written with `gt_update_backingfile`).
-Now that our data are clean, we are ready to create a PCA.
 
 # PCA
 
-We can now run a PCA. There are a number of PCA algorithms, here, we will use
-the default method of the `gt_pca` function, which does not need the remaining
-missing genotypes to be imputed (as `plink --pca`, it compares individuals over
-the loci genotyped in both):
+There are a number of PCA algorithms in tidypopgen. Here, we will use
+the default method of the `gt_pca` function, which does not need the remaining 
+missing genotypes to be imputed. Imputation (with `gt_impute_simple`) is
+required for some speciifc PCA methods and for LD clumpping. See the vignettes
+'The grammar of population genetics' and 'Quality Control' for further details
+on imputing a `gen_tibble`.
+
+We can now run a PCA:
 
 ```{r}
 partial_pca <- gt_pca(lobsters)
