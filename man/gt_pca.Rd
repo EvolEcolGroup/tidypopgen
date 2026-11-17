@@ -190,7 +190,9 @@ sim_gt <- gt_simulate_bn(
 sim_pca <- gt_pca(sim_gt, k = 2, n_cores = 1)
 autoplot(sim_pca, type = "scores")
 
-# the random method needs complete or imputed genotypes
+# the random method needs complete or imputed genotypes, without
+# monomorphic loci
+sim_gt <- select_loci_if(sim_gt, loci_maf(genotypes) > 0)
 sim_gt <- gt_impute_simple(sim_gt, method = "mode")
 gt_pca(sim_gt, k = 2, method = "random")
 }
