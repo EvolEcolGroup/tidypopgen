@@ -11,6 +11,8 @@
 * `predict()` of a `gt_pca` now uses `project_method = "least_squares"` on all
   the components by default, which does not shrink the scores of individuals
   with missing genotypes; projections are 2-3 times faster
+* new `predict(project_method = "plink")` projects as PLINK 1.9
+  (`--pca-cluster-names`)
 * `pairwise_grm(method = "plink")` gives PLINK 1.9's variance-standardised
   relationship matrix
 * new `gt_simulate_bn()` simulates toy datasets of unlinked loci (Balding-Nichols

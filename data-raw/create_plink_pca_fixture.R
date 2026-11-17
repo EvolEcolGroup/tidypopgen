@@ -1,5 +1,6 @@
 # Test fixture for gt_pca(): a small simulated dataset with very high
-# missingness, and the outputs of PLINK 1.9 on it (--make-rel square, --pca).
+# missingness, and the outputs of PLINK 1.9 on it (--make-rel square, --pca,
+# and a --pca projection with --pca-cluster-names, for predict.gt_pca()).
 #
 # Three populations of 20 diploid individuals (Balding-Nichols, Fst about
 # 0.05), 1,000 SNPs, one of them monomorphic; within each population, blocks
@@ -42,8 +43,24 @@ gt_as_plink(gt, file = file.path(out_dir, "missing.bed"), type = "bed")
 bfile <- file.path(out_dir, "missing")
 system2(plink, c("--bfile", bfile, "--make-rel", "square", "--out", bfile))
 system2(plink, c("--bfile", bfile, "--pca", "5", "--out", bfile))
+# a projection: the PCA of the individuals with 0 or 20% missing genotypes
+# (cluster "ref"), on which PLINK projects the others (50 to 90% missing);
+# PLINK refuses monomorphic loci with --pca-cluster-names (--mac 1 drops the
+# monomorphic locus)
+within_file <- tempfile(fileext = ".txt")
+utils::write.table(
+  data.frame(gt$population, gt$id, ifelse(rate <= 0.2, "ref", "proj")),
+  within_file,
+  quote = FALSE, row.names = FALSE, col.names = FALSE
+)
+bfile_proj <- paste0(bfile, "_proj")
+system2(plink, c(
+  "--bfile", bfile, "--within", within_file, "--pca-cluster-names", "ref",
+  "--mac", "1", "--pca", "3", "--out", bfile_proj
+))
 writeLines(system2(plink, "--version", stdout = TRUE),
   file.path(out_dir, "plink_version.txt")
 )
 # keep only the files the tests use
 unlink(paste0(bfile, c(".log", ".nosex", ".rel.id")))
+unlink(paste0(bfile_proj, c(".log", ".nosex")))

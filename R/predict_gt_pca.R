@@ -20,6 +20,16 @@
 #'   proportion f of missing genotypes is shrunk towards 0 by a factor of
 #'   about 1 - f (e.g. to a fifth of its distance with 80% missing
 #'   genotypes), so it should only be used with complete or imputed data.
+#' * `"plink"`: the simple projection divided by the proportion of loci
+#'   genotyped in each individual, which is how PLINK 1.9 projects the
+#'   individuals outside the clusters of `--pca-cluster-names` (or
+#'   `--pca-clusters`). It removes most of the shrinkage of `"simple"`. PLINK
+#'   standardises the genotypes with the allele frequencies of all the
+#'   individuals in its run, reference and projected, whereas `predict()` uses
+#'   those of the PCA (see [gt_pca()] to choose them): the scores are the same
+#'   as PLINK's when the PCA uses the same frequencies, and PLINK's
+#'   `.eigenvec` values are these scores divided by the singular values
+#'   (`object$d`). Individuals with no genotyped locus get `NA`.
 #' * `"OADP"`: the Online Augmentation, Decomposition, and Procrustes
 #'   projection (Zhang et al. 2020), which corrects the shrinkage of
 #'   projections with many more loci than individuals; missing genotypes are
@@ -32,13 +42,16 @@
 #' complete reference individuals, `"least_squares"` had no shrinkage and the
 #' smallest error, `"simple"` and `"OADP"` shrank individuals by their
 #' proportion of missing genotypes, and imputing the genotypes (by their mode)
-#' before a simple projection only halved the shrinkage.
+#' before a simple projection only halved the shrinkage. `"plink"` was close
+#' to `"least_squares"` with the frequencies of the reference individuals, and
+#' had a larger error with those of all the individuals, as PLINK does.
 #'
 #' @param object the [`gt_pca`] object
 #' @param new_data a gen_tibble if scores are requested for a new dataset
 #' @param project_method the projection method: `"least_squares"` (the
-#'   default, as done by smartpca), `"simple"`, `"OADP"` (Online Augmentation,
-#'   Decomposition, and Procrustes projection) or `"none"`; see Details.
+#'   default, as done by smartpca), `"simple"`, `"plink"` (as PLINK 1.9),
+#'   `"OADP"` (Online Augmentation, Decomposition, and Procrustes projection)
+#'   or `"none"`; see Details.
 #' @param lsq_pcs a vector of the indices of the principal components to use
 #'   for the least squares fitting (and to return). Only relevant if
 #'   `project_method = "least_squares"`. It defaults to all the components of
@@ -90,6 +103,9 @@
 #' # Predict
 #' predict(pca, new_data = new_lobsters, project_method = "simple")
 #'
+#' # Predict as PLINK 1.9
+#' predict(pca, new_data = new_lobsters, project_method = "plink")
+#'
 #' # Predict with OADP
 #' predict(pca, new_data = new_lobsters, project_method = "OADP")
 #'
@@ -109,6 +125,7 @@ predict.gt_pca <- function(
   project_method = c(
     "least_squares",
     "simple",
+    "plink",
     "OADP",
     "none"
   ),
@@ -188,7 +205,7 @@ predict.gt_pca <- function(
       output <- output_type(object = XV, as_matrix, id = new_data$id)
       return(output)
     } else {
-      # "simple", "OADP" and "least_squares": one pass over the loci of
+      # "simple", "plink", "OADP" and "least_squares": one pass over the loci of
       # new_data, in blocks (see pca_project_cpp())
       if (project_method == "least_squares") {
         # all the components by default
@@ -221,6 +238,13 @@ predict.gt_pca <- function(
       )
       if (project_method == "simple") {
         XV <- proj$XV # nolint
+      } else if (project_method == "plink") {
+        # PLINK 1.9 divides the simple projection of each individual by its
+        # number of genotyped loci (rather than the number of loci of the
+        # PCA): divide by the proportion of loci genotyped (0 gives NA)
+        obs_frac <- 1 - proj$n_missing / nrow(object$v)
+        obs_frac[obs_frac == 0] <- NA
+        XV <- proj$XV / obs_frac # nolint
       } else if (project_method == "OADP") {
         XV <- utils::getFromNamespace("OADP_proj", "bigsnpr")( # nolint
           proj$XV,

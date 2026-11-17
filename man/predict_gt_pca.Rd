@@ -7,7 +7,7 @@
 \method{predict}{gt_pca}(
   object,
   new_data = NULL,
-  project_method = c("least_squares", "simple", "OADP", "none"),
+  project_method = c("least_squares", "simple", "plink", "OADP", "none"),
   lsq_pcs = NULL,
   block_size = NULL,
   n_cores = 1,
@@ -21,8 +21,9 @@
 \item{new_data}{a gen_tibble if scores are requested for a new dataset}
 
 \item{project_method}{the projection method: \code{"least_squares"} (the
-default, as done by smartpca), \code{"simple"}, \code{"OADP"} (Online Augmentation,
-Decomposition, and Procrustes projection) or \code{"none"}; see Details.}
+default, as done by smartpca), \code{"simple"}, \code{"plink"} (as PLINK 1.9),
+\code{"OADP"} (Online Augmentation, Decomposition, and Procrustes projection)
+or \code{"none"}; see Details.}
 
 \item{lsq_pcs}{a vector of the indices of the principal components to use
 for the least squares fitting (and to return). Only relevant if
@@ -68,6 +69,16 @@ genotypes set to 0 (the mean), by the loadings. An individual with a
 proportion f of missing genotypes is shrunk towards 0 by a factor of
 about 1 - f (e.g. to a fifth of its distance with 80\% missing
 genotypes), so it should only be used with complete or imputed data.
+\item \code{"plink"}: the simple projection divided by the proportion of loci
+genotyped in each individual, which is how PLINK 1.9 projects the
+individuals outside the clusters of \code{--pca-cluster-names} (or
+\code{--pca-clusters}). It removes most of the shrinkage of \code{"simple"}. PLINK
+standardises the genotypes with the allele frequencies of all the
+individuals in its run, reference and projected, whereas \code{predict()} uses
+those of the PCA (see \code{\link[=gt_pca]{gt_pca()}} to choose them): the scores are the same
+as PLINK's when the PCA uses the same frequencies, and PLINK's
+\code{.eigenvec} values are these scores divided by the singular values
+(\code{object$d}). Individuals with no genotyped locus get \code{NA}.
 \item \code{"OADP"}: the Online Augmentation, Decomposition, and Procrustes
 projection (Zhang et al. 2020), which corrects the shrinkage of
 projections with many more loci than individuals; missing genotypes are
@@ -81,7 +92,9 @@ In a simulation of individuals with 20-80\% missing genotypes projected on
 complete reference individuals, \code{"least_squares"} had no shrinkage and the
 smallest error, \code{"simple"} and \code{"OADP"} shrank individuals by their
 proportion of missing genotypes, and imputing the genotypes (by their mode)
-before a simple projection only halved the shrinkage.
+before a simple projection only halved the shrinkage. \code{"plink"} was close
+to \code{"least_squares"} with the frequencies of the reference individuals, and
+had a larger error with those of all the individuals, as PLINK does.
 }
 \examples{
 \dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}
@@ -111,6 +124,9 @@ pca <- gt_pca(original_lobsters)
 
 # Predict
 predict(pca, new_data = new_lobsters, project_method = "simple")
+
+# Predict as PLINK 1.9
+predict(pca, new_data = new_lobsters, project_method = "plink")
 
 # Predict with OADP
 predict(pca, new_data = new_lobsters, project_method = "OADP")

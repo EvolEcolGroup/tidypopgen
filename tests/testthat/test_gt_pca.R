@@ -666,6 +666,40 @@ test_that("gt_pca matches PLINK 1.9 with very high missingness", {
   )
 })
 
+test_that("predict(project_method = 'plink') matches PLINK 1.9", {
+  # PLINK's PCA of the 24 individuals with 0 or 20% missing genotypes, and its
+  # projection of the other 36 (50 to 90% missing), with --pca-cluster-names
+  # (made by data-raw/create_plink_pca_fixture.R)
+  fixture <- test_path("testdata", "plink_pca", "missing")
+  missing_gt <- gen_tibble(paste0(fixture, ".bed"),
+    backingfile = tempfile("proj_"), quiet = TRUE
+  )
+  # PLINK drops the monomorphic loci with --pca-cluster-names
+  missing_gt <- select_loci_if(missing_gt, loci_maf(genotypes) > 0)
+  is_ref <- rep(rep(c(TRUE, FALSE), c(8, 12)), 3)
+  # PLINK standardises with the frequencies of all the individuals
+  freq <- loci_alt_freq(missing_gt)
+  all_freq <- function(...) {
+    data.frame(center = 2 * freq, scale = sqrt(2 * freq * (1 - freq)))
+  }
+  ref_pca <- gt_pca(missing_gt[is_ref, ],
+    k = 3, fun_scaling = all_freq, n_cores = 1
+  )
+  plink_vec <- as.matrix(
+    read.table(paste0(fixture, "_proj.eigenvec"))[, -(1:2)]
+  )
+  signs <- sign(colSums(ref_pca$u * plink_vec[is_ref, ]))
+  expect_lt(
+    max(abs(sweep(ref_pca$u, 2, signs, "*") - plink_vec[is_ref, ])), 1e-5
+  )
+  # PLINK's eigenvectors of projected individuals are scores / d
+  plink_proj <- predict(ref_pca,
+    new_data = missing_gt[!is_ref, ], project_method = "plink"
+  )
+  plink_scaled <- sweep(plink_proj, 2, signs * ref_pca$d, "/")
+  expect_lt(max(abs(plink_scaled - plink_vec[!is_ref, ])), 1e-5)
+})
+
 test_that("gt_pca matches gt_pca_partialSVD on complete data", {
   # the deprecated function is the reference
   withr::local_options(lifecycle_verbosity = "quiet")
@@ -794,6 +828,13 @@ test_that("projections with missing genotypes match an R reference", {
     new_data = new_gt, project_method = "simple", block_size = 7
   )
   expect_equal(simple, z %*% v, ignore_attr = TRUE)
+  # "plink": the simple projection divided by the fraction of loci genotyped
+  plink_proj <- predict(pca,
+    new_data = new_gt, project_method = "plink", block_size = 7
+  )
+  expect_equal(plink_proj, z %*% v / rowMeans(!is.na(geno)),
+    ignore_attr = TRUE
+  )
   # least squares on the loci genotyped in each individual
   lsq_ref <- t(sapply(seq_len(nrow(geno)), function(i) {
     obs <- !is.na(geno[i, ])
