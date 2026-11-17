@@ -13,12 +13,12 @@
 #'
 #' With `method = "plink"`, the GRM is the variance-standardised relationship
 #' matrix of PLINK 1.9 (`plink --make-rel`), the matrix whose eigenvectors are
-#' the principal components of `plink --pca` and of [gt_pca_grm()]:
+#' the principal components of `plink --pca` and of [gt_pca()]:
 #' \eqn{G_{ij} = \sum_l z_{il} z_{jl} / n_{ij}}, with standardised genotypes
 #' \eqn{z_{il} = (g_{il} - 2p_l) / \sqrt{2p_l(1-p_l)}} (so that rare variants
 #' count more), missing genotypes set to 0, and \eqn{n_{ij}} the number of
 #' loci genotyped in both individuals. Pairs with no locus genotyped in both
-#' are `NaN`. See [gt_pca_grm()] for details.
+#' are `NaN`. See [gt_pca()] for details.
 #'
 #' @param x a `gen_tibble` object.
 #' @param allele_sharing_mat optional, the matrix of Allele Sharing returned by
@@ -27,14 +27,14 @@
 #'   more efficient to pre-compute this matrix.
 #' @param block_size the size of the blocks to use for the computation of the
 #'   allele sharing matrix (with `method = "plink"`, blocks are chosen as in
-#'   [gt_pca_grm()]).
+#'   [gt_pca()]).
 #' @param n_cores number of cores to be used for the computation of the
 #'   allele sharing matrix, it defaults to [bigstatsr::nb_cores()]
 #' @param method the estimator: `"WG17"` (Weir and Goudet 2017, the default)
 #'   or `"plink"` (PLINK 1.9's variance-standardised matrix).
 #' @returns a matrix of GR between all pairs of individuals
 #' @export
-#' @seealso [hierfstat::beta.dosage()], [gt_pca_grm()]
+#' @seealso [hierfstat::beta.dosage()], [gt_pca()]
 #' @examples
 #' example_gt <- load_example_gt("gen_tbl")
 #'
@@ -45,7 +45,7 @@
 #' allele_sharing <- example_gt %>% pairwise_allele_sharing(as_matrix = TRUE)
 #' example_gt %>% pairwise_grm(allele_sharing_mat = allele_sharing)
 #'
-#' # The variance-standardised matrix of PLINK 1.9, as used by gt_pca_grm()
+#' # The variance-standardised matrix of PLINK 1.9, as used by gt_pca()
 #' example_gt %>% pairwise_grm(method = "plink")
 pairwise_grm <- function(
   x,
@@ -60,12 +60,12 @@ pairwise_grm <- function(
     if (!is.null(allele_sharing_mat)) {
       stop("'allele_sharing_mat' is only used with method = 'WG17'")
     }
+    scaling <- pca_scaling(x, fun_scaling = NULL, n_cores = n_cores)
     grm <- grm_plink(x,
-      n_cores = n_cores, block_size = grm_block_size(nrow(x)),
+      center = scaling$center, scale = scaling$scale, n_cores = n_cores,
+      block_size = grm_block_size(nrow(x)),
       use_blas = grm_use_blas("auto", n_cores)
     )
-    attr(grm, "center") <- NULL
-    attr(grm, "scale") <- NULL
     dimnames(grm) <- list(x$id, x$id)
     # add a class to indicate this is a pairwise matrix
     class(grm) <- c("pairwise_matrix", class(grm))

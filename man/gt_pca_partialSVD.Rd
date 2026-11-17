@@ -45,13 +45,19 @@ by the components (optional)
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+
+This function is deprecated: use \code{\link[=gt_pca]{gt_pca()}}, whose default method gives the
+same results on complete or imputed genotypes (it uses imputed genotypes
+only if the \code{gen_tibble} is set to use them, see \code{\link[=gt_set_imputed]{gt_set_imputed()}}), is
+faster, and handles missing genotypes as PLINK does.
+
 This function performs Principal Component Analysis on a \code{gen_tibble}, by
 partial SVD through the eigen decomposition of the covariance. It works well
 if the number of individuals is much smaller than the number of loci;
 otherwise, \code{\link[=gt_pca_randomSVD]{gt_pca_randomSVD()}} is a better option. This function is a
 wrapper for \code{\link[bigstatsr:big_SVD]{bigstatsr::big_SVD()}}.
-}
-\details{
+
 With up to a few thousand individuals, this is usually much faster than
 \code{\link[=gt_pca_randomSVD]{gt_pca_randomSVD()}} (on 1,043 individuals and 643,733 loci, about 31 s
 on one core against about 175 s). The covariance between individuals is
@@ -101,7 +107,7 @@ gt_pca_partialSVD(lobsters,
 \code{\link[bigstatsr:big_SVD]{bigstatsr::big_SVD()}} which this function wraps.
 
 Other gt_pca_functions:
-\code{\link{gt_pca}},
+\code{\link[=gt_pca]{gt_pca()}},
 \code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}},
 \code{\link[=gt_pca_randomSVD]{gt_pca_randomSVD()}}
 }

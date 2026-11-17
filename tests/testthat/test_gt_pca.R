@@ -595,7 +595,7 @@ test_that("n_cores can be set for predict_gt_pca", {
   expect_true(getOption("bigstatsr.check.parallel.blas"))
 })
 
-test_that("gt_pca_grm matches PLINK 1.9 with very high missingness", {
+test_that("gt_pca matches PLINK 1.9 with very high missingness", {
   # 60 individuals with 0 to 90% missing genotypes, and the outputs of
   # plink --make-rel square and plink --pca 5
   # (made by data-raw/create_plink_pca_fixture.R)
@@ -625,7 +625,7 @@ test_that("gt_pca_grm matches PLINK 1.9 with very high missingness", {
   # PLINK writes 6 significant digits
   expect_lt(max(abs(grm - plink_rel)), 1e-5)
   # the principal components, against PLINK (up to their sign)
-  missing_pca <- gt_pca_grm(missing_gt, k = 5, n_cores = 2)
+  missing_pca <- gt_pca(missing_gt, k = 5, n_cores = 2)
   plink_val <- scan(paste0(fixture, ".eigenval"), quiet = TRUE)
   plink_vec <- as.matrix(read.table(paste0(fixture, ".eigenvec"))[, -(1:2)])
   expect_equal(missing_pca$d^2 / count_loci(missing_gt), plink_val,
@@ -642,7 +642,7 @@ test_that("gt_pca_grm matches PLINK 1.9 with very high missingness", {
   sub_gt <- missing_gt %>%
     dplyr::slice(60:1) %>%
     select_loci(1000:1)
-  sub_pca <- gt_pca_grm(sub_gt,
+  sub_pca <- gt_pca(sub_gt,
     k = 5, n_cores = 1, block_size = 7, engine = "internal"
   )
   # (the internal engine's single precision products differ by about 1e-8)
@@ -652,7 +652,9 @@ test_that("gt_pca_grm matches PLINK 1.9 with very high missingness", {
   )
 })
 
-test_that("gt_pca_grm matches gt_pca_partialSVD on complete data", {
+test_that("gt_pca matches gt_pca_partialSVD on complete data", {
+  # the deprecated function is the reference
+  withr::local_options(lifecycle_verbosity = "quiet")
   bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
   complete_gt <- gen_tibble(bed_file,
     backingfile = tempfile("grm_complete_"), quiet = TRUE
@@ -662,7 +664,7 @@ test_that("gt_pca_grm matches gt_pca_partialSVD on complete data", {
   # drop monomorphic loci, which partialSVD can not scale
   freq <- loci_alt_freq(complete_gt)
   complete_gt <- select_loci(complete_gt, which(freq > 0 & freq < 1))
-  grm_pca <- gt_pca_grm(complete_gt, k = 4)
+  grm_pca <- gt_pca(complete_gt, k = 4)
   svd_pca <- gt_pca_partialSVD(complete_gt, k = 4)
   expect_equal(grm_pca$d, svd_pca$d, tolerance = 1e-8)
   expect_equal(abs(grm_pca$u), abs(svd_pca$u), tolerance = 1e-8,
@@ -674,7 +676,7 @@ test_that("gt_pca_grm matches gt_pca_partialSVD on complete data", {
   gt_set_imputed(complete_gt, set = FALSE)
 })
 
-test_that("gt_pca_grm rejects pairs without shared loci, dosages and bad k", {
+test_that("gt_pca rejects pairs without shared loci and bad k", {
   geno <- rbind(c(0, 1, NA, NA), c(NA, NA, 2, 1), c(1, 2, 0, 1))
   test_gt <- gen_tibble(geno,
     indiv_meta = data.frame(id = c("a", "b", "c"), population = "p"),
@@ -684,6 +686,61 @@ test_that("gt_pca_grm rejects pairs without shared loci, dosages and bad k", {
     ),
     backingfile = tempfile("grm_small_"), quiet = TRUE
   )
-  expect_error(gt_pca_grm(test_gt, k = 1), "no locus genotyped in both")
-  expect_error(gt_pca_grm(test_gt, k = 3), "'k' should be between")
+  expect_error(gt_pca(test_gt, k = 1), "no locus genotyped in both")
+  expect_error(gt_pca(test_gt, k = 3), "'k' should be between")
+})
+
+test_that("gt_pca method random needs complete or imputed genotypes", {
+  withr::local_options(lifecycle_verbosity = "quiet")
+  set.seed(1)
+  sim_gt <- gt_simulate_bn(
+    n_indiv = c(20, 20), n_loci = 500, fst = 0.1, missing = 0.1
+  )
+  expect_error(gt_pca(sim_gt, k = 2, method = "random"), "needs complete")
+  # with imputed genotypes, used automatically, as gt_pca_randomSVD() does
+  sim_gt <- gt_impute_simple(sim_gt, method = "mode")
+  gt_set_imputed(sim_gt, set = TRUE)
+  sim_gt <- select_loci_if(sim_gt, loci_maf(genotypes) > 0)
+  gt_set_imputed(sim_gt, set = FALSE)
+  random_pca <- gt_pca(sim_gt, k = 2, method = "random", n_cores = 1)
+  old_pca <- gt_pca_randomSVD(sim_gt, k = 2)
+  expect_equal(random_pca$d, old_pca$d)
+  expect_equal(random_pca$method, "random")
+  expect_false(gt_uses_imputed(sim_gt))
+  # and the same as the partial method on the imputed genotypes
+  gt_set_imputed(sim_gt, set = TRUE)
+  partial_pca <- gt_pca(sim_gt, k = 2, n_cores = 1)
+  gt_set_imputed(sim_gt, set = FALSE)
+  expect_equal(random_pca$d, partial_pca$d, tolerance = 1e-4)
+})
+
+test_that("gt_pca accepts a custom scaling, as gt_pca_partialSVD does", {
+  withr::local_options(lifecycle_verbosity = "quiet")
+  set.seed(2)
+  sim_gt <- gt_simulate_bn(n_indiv = c(15, 15), n_loci = 400, fst = 0.1)
+  sim_gt <- select_loci_if(sim_gt, loci_maf(genotypes) > 0)
+  for (scaling in list(bigstatsr::big_scale(), bigsnpr::snp_scaleAlpha(-0.5))) {
+    new_pca <- gt_pca(sim_gt, k = 3, fun_scaling = scaling, n_cores = 1)
+    old_pca <- gt_pca_partialSVD(sim_gt, k = 3, fun_scaling = scaling)
+    expect_equal(new_pca$d, old_pca$d, tolerance = 1e-6)
+    expect_equal(new_pca$center, old_pca$center)
+    expect_equal(abs(new_pca$u), abs(old_pca$u),
+      tolerance = 1e-6, ignore_attr = TRUE
+    )
+  }
+  # a custom scaling can not be computed with missing genotypes
+  sim_missing <- gt_simulate_bn(n_indiv = 20, n_loci = 300, missing = 0.2)
+  expect_error(
+    gt_pca(sim_missing, k = 2, fun_scaling = bigstatsr::big_scale()),
+    "complete"
+  )
+})
+
+test_that("the old PCA functions are deprecated", {
+  withr::local_options(lifecycle_verbosity = "warning")
+  set.seed(3)
+  sim_gt <- gt_simulate_bn(n_indiv = c(10, 10), n_loci = 200, fst = 0.1)
+  sim_gt <- select_loci_if(sim_gt, loci_maf(genotypes) > 0)
+  expect_warning(gt_pca_partialSVD(sim_gt, k = 2), "deprecated")
+  expect_warning(gt_pca_randomSVD(sim_gt, k = 2), "deprecated")
 })

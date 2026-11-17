@@ -2,9 +2,12 @@
 
 ## New features and changes
 
-* new `gt_pca_grm()` computes a PCA with missing genotypes as `plink --pca`
-  (PLINK 1.9) does, without imputation; it uses an optimised BLAS when there
-  is one, and Eigen otherwise
+* new `gt_pca()` computes PCAs: `method = "partial"` (the default) handles
+  missing genotypes as `plink --pca` (PLINK 1.9) does, without imputation, and
+  uses an optimised BLAS when there is one, and Eigen otherwise;
+  `method = "random"` is for very large numbers of individuals
+* `gt_pca_partialSVD()` and `gt_pca_randomSVD()` are deprecated in favour of
+  `gt_pca()`
 * `pairwise_grm(method = "plink")` gives PLINK 1.9's variance-standardised
   relationship matrix
 * new `gt_simulate_bn()` simulates toy datasets of unlinked loci (Balding-Nichols

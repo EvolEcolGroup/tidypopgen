@@ -1,5 +1,13 @@
 #' PCA for `gen_tibble` objects by partial SVD
 #'
+#' @description
+#' `r lifecycle::badge("deprecated")`
+#'
+#' This function is deprecated: use [gt_pca()], whose default method gives the
+#' same results on complete or imputed genotypes (it uses imputed genotypes
+#' only if the `gen_tibble` is set to use them, see [gt_set_imputed()]), is
+#' faster, and handles missing genotypes as PLINK does.
+#'
 #' This function performs Principal Component Analysis on a `gen_tibble`, by
 #' partial SVD through the eigen decomposition of the covariance. It works well
 #' if the number of individuals is much smaller than the number of loci;
@@ -84,6 +92,7 @@ gt_pca_partialSVD <- function(
   fun_scaling = bigsnpr::snp_scaleBinom(),
   total_var = TRUE
 ) {
+  lifecycle::deprecate_soft("1.1.0", "gt_pca_partialSVD()", "gt_pca()")
   if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE))

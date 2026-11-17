@@ -38,6 +38,7 @@ Imports:
     data.table,
     foreach,
     generics,
+    lifecycle,
     ggplot2 (>= 3.5.0),
     methods,
     MASS,

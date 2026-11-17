@@ -68,6 +68,11 @@ vectors)
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+
+This function is deprecated: use \code{\link[=gt_pca]{gt_pca()}} with \code{method = "random"}, which
+runs the same algorithm (and needs complete or imputed genotypes).
+
 This function performs Principal Component Analysis on a \code{gen_tibble},
 by randomised partial SVD based on the
 algorithm in RSpectra (by Yixuan Qiu and Jiali Mei).\cr
@@ -75,8 +80,7 @@ This algorithm is linear in time in all dimensions and is very
 memory-efficient. Thus, it can be used on very large big.matrices.
 This function is a wrapper
 for \code{\link[bigstatsr:big_randomSVD]{bigstatsr::big_randomSVD()}}
-}
-\details{
+
 With up to a few thousand individuals, \code{\link[=gt_pca_partialSVD]{gt_pca_partialSVD()}} is usually
 much faster: on 1,043 individuals and 643,733 loci, this function took
 about 175 s on one core (with the default \code{tol}), against about 31 s for
@@ -120,7 +124,7 @@ gt_pca_randomSVD(anole_gt, k = 10, total_var = TRUE)
 \code{\link[bigstatsr:big_randomSVD]{bigstatsr::big_randomSVD()}} which this function wraps.
 
 Other gt_pca_functions:
-\code{\link{gt_pca}},
+\code{\link[=gt_pca]{gt_pca()}},
 \code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}},
 \code{\link[=gt_pca_partialSVD]{gt_pca_partialSVD()}}
 }

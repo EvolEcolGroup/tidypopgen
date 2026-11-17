@@ -3,30 +3,213 @@
 \name{gt_pca}
 \alias{gt_pca}
 \title{Principal Component Analysis for \code{gen_tibble} objects}
+\usage{
+gt_pca(
+  x,
+  k = 10,
+  method = c("partial", "random"),
+  fun_scaling = NULL,
+  n_cores = bigstatsr::nb_cores(),
+  block_size = NULL,
+  engine = c("auto", "blas", "internal"),
+  tol = 1e-04,
+  verbose = FALSE,
+  fun_prod = bigstatsr::big_prodVec,
+  fun_cprod = bigstatsr::big_cprodVec,
+  total_var = TRUE
+)
+}
+\arguments{
+\item{x}{a \code{gen_tbl} object, with diploid genotypes}
+
+\item{k}{the number of principal components to compute. Default is \code{10}.}
+
+\item{method}{\code{"partial"} (the default) or \code{"random"} (see Methods).}
+
+\item{fun_scaling}{\code{NULL} (the default) for the binomial scaling, or a
+scaling function (see Scaling).}
+
+\item{n_cores}{the number of cores. With \code{"partial"}, they read the
+genotypes, count the loci genotyped in both individuals and run the
+internal matrix products; the BLAS uses its own threads (see the
+\code{RhpcBLASctl} package to set them).}
+
+\item{block_size}{for \code{"partial"}, the number of loci decoded at a time
+(each block takes 8 bytes per individual and locus). By default, blocks
+of about 128 MB (between 1,024 and 16,384 loci).}
+
+\item{engine}{for \code{"partial"}, the matrix products: \code{"auto"} (the
+default), \code{"blas"} or \code{"internal"} (see Speed).}
+
+\item{tol}{for \code{"random"}, the precision parameter of \code{\link[RSpectra:svds]{RSpectra::svds()}}.
+Default is \code{1e-4}.}
+
+\item{verbose}{for \code{"random"}, should some progress be printed? Default is
+\code{FALSE}.}
+
+\item{fun_prod}{for \code{"random"}, a function that takes 6 arguments (in this
+order): a matrix-like object \code{X}, a vector \code{x}, a vector of row indices
+\code{ind.row} of \code{X}, a vector of column indices \code{ind.col} of \code{X}, a vector
+of column centers (corresponding to \code{ind.col}), and a vector of column
+scales (corresponding to \code{ind.col}), and computes the product of \code{X}
+(subsetted and scaled) with \code{x}. Default is \code{\link[bigstatsr:big_prodVec]{bigstatsr::big_prodVec()}}.}
+
+\item{fun_cprod}{for \code{"random"}, the same as \code{fun_prod}, but for the
+\emph{transpose} of \code{X}. Default is \code{\link[bigstatsr:big_cprodVec]{bigstatsr::big_cprodVec()}}.}
+
+\item{total_var}{a boolean indicating whether to compute the total
+variance, needed for the proportion of variance explained by each
+component (see \code{\link{gt_pca_tidiers}}). Default is \code{TRUE}.}
+}
+\value{
+a \code{gt_pca} object, which is a subclass of \code{big_SVD}; this is an S3
+list with elements:
+\itemize{
+\item \code{d}, the singular values (the eigenvalues of the GRM are \code{d^2 / m}, with
+\code{m} the number of loci, as given by \code{plink --pca})
+\item \code{u}, the scores for each sample on each component (the left singular
+vectors, i.e. the eigenvectors of the GRM)
+\item \code{v}, the loadings (the right singular vectors; with missing genotypes
+and \code{"partial"}, \eqn{Z^T u / d}, with missing genotypes as 0)
+\item \code{center}, the centering vector
+\item \code{scale}, the scaling vector
+\item \code{method}, \code{"partial"} or \code{"random"}
+\item \code{call}, the call to the function
+\item \code{loci}, the loci used
+\item \code{square_frobenius}, the total variance (with \code{total_var = TRUE}; with
+missing genotypes and \code{"partial"}, the number of loci times the trace of
+the GRM)
+}
+}
 \description{
-There are a number of PCA methods available for \code{gen_tibble} objects. They
-are mostly designed to work on very large datasets, so they only compute a
-limited number of components. For smaller datasets, \code{\link[=gt_pca_partialSVD]{gt_pca_partialSVD()}}
-allows the use of partial (truncated) SVD to fit the PCA; this method is
-suitable when the number of individuals is much smaller than the number of
-loci. For larger dataset, \code{\link[=gt_pca_randomSVD]{gt_pca_randomSVD()}} is more appropriate. Finally,
-there is a method specifically designed for dealing with LD in large
-datasets, \code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}}. Whilst this is arguably the best option, it is
-somewhat data hungry, and so only suitable for very large datasets (hundreds
-of individuals with several hundred thousands markers, or larger).
+Computes the leading principal components of the genotypes of a
+\code{gen_tibble}, with one of two methods. \code{method = "partial"} (the default)
+is exact and handles missing genotypes as \code{plink --pca} (PLINK 1.9) does,
+without imputation; \code{method = "random"} needs complete or imputed
+genotypes, but much less memory, for very large numbers of individuals.
+For datasets with linkage disequilibrium, \code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}} implements the
+algorithm of \code{bigsnpr}, which removes regions of long-range LD and outliers.
 }
 \note{
-Monomorphic markers must be removed before PCA is computed. The error
-message 'Error: some variables have zero scaling; remove them before
-attempting to scale.' indicates that monomorphic markers are present.
-
-Using gt_pca_autoSVD with a small dataset will likely cause an error,
-see man page for details.
-
 Rather than accessing elements of a \code{gt_pca} object directly, it is
 better to use \code{tidy} and \code{augment}. See \code{\link{gt_pca_tidiers}}.
 }
+\section{Methods}{
+ Both methods compute the leading eigenvectors of the
+genetic relationship matrix (GRM) of the standardised genotypes
+\eqn{z_{il}} (by default \eqn{z_{il} = (g_{il} - 2p_l) /
+  \sqrt{2p_l(1-p_l)}}, with \eqn{g_{il}} the number of alternate alleles
+and \eqn{p_l} their frequency):
+\itemize{
+\item \code{"partial"} computes the GRM, then its leading eigenvectors (an exact,
+truncated decomposition). It is the method of choice up to some tens of
+thousands of individuals: the GRM takes 8 bytes per pair of
+individuals (0.2 GB for 5,000 individuals, 3.2 GB for 20,000), and the
+time grows with the square of the number of individuals and linearly
+with the number of loci.
+\item \code{"random"} runs \code{\link[bigstatsr:big_randomSVD]{bigstatsr::big_randomSVD()}}, which never builds the
+GRM: it multiplies blocks of the genotypes by vectors until the
+components converge (to \code{tol}), with memory linear in the numbers of
+individuals and loci. It is slower than \code{"partial"} (e.g. 175 s
+against 31 s on 1,043 individuals and 643,733 loci), but works with
+any number of individuals.
+}
+
+With complete (or imputed) genotypes, both give the singular value
+decomposition of the standardised genotypes, and \code{"partial"} gives the
+same results as the former \code{\link[=gt_pca_partialSVD]{gt_pca_partialSVD()}}.
+}
+
+\section{Missing genotypes}{
+ With \code{method = "partial"}, missing genotypes
+do not need to be imputed: as in PLINK 1.9 (\code{plink --make-rel}, which
+\code{plink --pca} decomposes), each pair of individuals is compared over the
+loci genotyped in both,
+\deqn{G_{ij} = \frac{1}{n_{ij}} \sum_l z_{il} z_{jl},}
+with \eqn{z_{il} = 0} when \eqn{g_{il}} is missing, \eqn{n_{ij}} the
+number of loci genotyped in both individuals, and allele frequencies
+from the genotyped individuals. This keeps individuals with many missing
+genotypes (e.g. ancient DNA) in place, whereas imputation pulls them
+towards the centre of the PCA, or makes missingness an axis of its own.
+The results match those of PLINK 1.9, also with very high missingness.
+Imputed genotypes are used only if the \code{gen_tibble} is set to use them
+(with \code{\link[=gt_set_imputed]{gt_set_imputed()}}). Pairs of individuals with no locus genotyped
+in both have no defined relationship and give an error: remove the
+individuals with the most missing genotypes (see \code{\link[=indiv_missingness]{indiv_missingness()}}).
+With missing genotypes, the GRM is not necessarily positive
+semi-definite; only its largest (positive) eigenvalues are used.
+
+With \code{method = "random"}, the genotypes must be complete or imputed (see
+\code{\link[=gt_impute_simple]{gt_impute_simple()}}); imputed genotypes are used automatically when
+they exist.
+}
+
+\section{Scaling}{
+ \code{fun_scaling = NULL} (the default) uses the binomial
+scaling above, as \code{\link[bigsnpr:snp_scaleBinom]{bigsnpr::snp_scaleBinom()}} (and PLINK) do, with the
+allele frequencies of the genotyped individuals. A function that returns
+a centre and a scale for each locus, such as
+\code{\link[bigsnpr:snp_scaleAlpha]{bigsnpr::snp_scaleAlpha()}} or \code{\link[bigstatsr:big_scale]{bigstatsr::big_scale()}}, can be used
+instead; it needs complete or imputed genotypes. With \code{"partial"}, loci
+with a zero scale (monomorphic loci) add nothing to the GRM, but are
+counted in \eqn{n_{ij}}, as in PLINK (filter them out first); with
+\code{"random"}, they give an error.
+}
+
+\section{Speed}{
+ With \code{method = "partial"}, the matrix products use either
+the BLAS library that R uses (\code{engine = "blas"}), which is fastest when
+it is an optimised one (OpenBLAS, MKL, Apple Accelerate), or the
+vectorised products of the Eigen library in parallel on \code{n_cores}
+(\code{engine = "internal"}), which do not depend on the BLAS and are many
+times faster than R's reference BLAS (the default on Windows and in the
+CRAN builds of R for macOS). The internal products are in single
+precision for blocks of up to 1,024 loci, summed in double precision
+(twice as fast; the relative error of the GRM is about 1e-7, well below
+the 6 significant digits that PLINK writes). \code{engine = "auto"} times both
+on a small product, once per session, and uses the faster. The number of
+loci genotyped in both individuals is counted on bit-packed genotypes, as
+in PLINK. On a laptop with 4 cores and OpenBLAS, 4,000 individuals and
+100,000 loci with 45\% missing genotypes took 32 s (62 s with PLINK 1.9),
+and 1,000 individuals and 300,000 complete loci 7 s (8 s with PLINK, 11 s
+with the former \code{\link[=gt_pca_partialSVD]{gt_pca_partialSVD()}}); with R's reference BLAS, 39 s and
+12 s.
+}
+
+\examples{
+example_gt <- load_example_gt("gen_tbl")
+# the example has missing genotypes, which are compared pairwise
+gt_pca(example_gt, k = 2)
+
+# three simulated populations, with up to 90\% missing genotypes
+set.seed(1)
+sim_gt <- gt_simulate_bn(
+  n_indiv = c(20, 20, 20), n_loci = 2000, fst = 0.1,
+  missing = rep(seq(0, 0.9, length.out = 20), 3)
+)
+sim_pca <- gt_pca(sim_gt, k = 2, n_cores = 1)
+autoplot(sim_pca, type = "scores")
+
+# the random method needs complete or imputed genotypes
+sim_gt <- gt_impute_simple(sim_gt, method = "mode")
+gt_pca(sim_gt, k = 2, method = "random")
+}
+\references{
+Purcell S. et al. (2007) PLINK: a tool set for whole-genome
+association and population-based linkage analyses. American Journal of
+Human Genetics 81: 559-575.
+
+Chang C.C. et al. (2015) Second-generation PLINK: rising to the challenge
+of larger and richer datasets. GigaScience 4: 7.
+
+Privé F., Luu K., Blum M.G.B., McGrath J.J. and Vilhjálmsson B.J. (2020)
+Efficient toolkit implementing best practices for principal component
+analysis of population genetic data. Bioinformatics 36: 4449-4457.
+}
 \seealso{
+\code{\link[=pairwise_grm]{pairwise_grm()}} with \code{method = "plink"} for the GRM itself;
+\code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}} for data with linkage disequilibrium.
+
 Other gt_pca_functions:
 \code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}},
 \code{\link[=gt_pca_partialSVD]{gt_pca_partialSVD()}},

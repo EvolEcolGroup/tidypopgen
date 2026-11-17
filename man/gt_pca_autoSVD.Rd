@@ -145,7 +145,7 @@ gt_pca_autoSVD(lobsters,
 \code{\link[bigsnpr:snp_autoSVD]{bigsnpr::snp_autoSVD()}}  which this function wraps.
 
 Other gt_pca_functions:
-\code{\link{gt_pca}},
+\code{\link[=gt_pca]{gt_pca()}},
 \code{\link[=gt_pca_partialSVD]{gt_pca_partialSVD()}},
 \code{\link[=gt_pca_randomSVD]{gt_pca_randomSVD()}}
 }

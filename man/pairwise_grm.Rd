@@ -22,7 +22,7 @@ more efficient to pre-compute this matrix.}
 
 \item{block_size}{the size of the blocks to use for the computation of the
 allele sharing matrix (with \code{method = "plink"}, blocks are chosen as in
-\code{\link[=gt_pca_grm]{gt_pca_grm()}}).}
+\code{\link[=gt_pca]{gt_pca()}}).}
 
 \item{n_cores}{number of cores to be used for the computation of the
 allele sharing matrix, it defaults to \code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
@@ -48,12 +48,12 @@ the average pair of individuals.
 
 With \code{method = "plink"}, the GRM is the variance-standardised relationship
 matrix of PLINK 1.9 (\code{plink --make-rel}), the matrix whose eigenvectors are
-the principal components of \code{plink --pca} and of \code{\link[=gt_pca_grm]{gt_pca_grm()}}:
+the principal components of \code{plink --pca} and of \code{\link[=gt_pca]{gt_pca()}}:
 \eqn{G_{ij} = \sum_l z_{il} z_{jl} / n_{ij}}, with standardised genotypes
 \eqn{z_{il} = (g_{il} - 2p_l) / \sqrt{2p_l(1-p_l)}} (so that rare variants
 count more), missing genotypes set to 0, and \eqn{n_{ij}} the number of
 loci genotyped in both individuals. Pairs with no locus genotyped in both
-are \code{NaN}. See \code{\link[=gt_pca_grm]{gt_pca_grm()}} for details.
+are \code{NaN}. See \code{\link[=gt_pca]{gt_pca()}} for details.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")
@@ -65,9 +65,9 @@ example_gt \%>\% pairwise_grm()
 allele_sharing <- example_gt \%>\% pairwise_allele_sharing(as_matrix = TRUE)
 example_gt \%>\% pairwise_grm(allele_sharing_mat = allele_sharing)
 
-# The variance-standardised matrix of PLINK 1.9, as used by gt_pca_grm()
+# The variance-standardised matrix of PLINK 1.9, as used by gt_pca()
 example_gt \%>\% pairwise_grm(method = "plink")
 }
 \seealso{
-\code{\link[hierfstat:beta.dosage]{hierfstat::beta.dosage()}}, \code{\link[=gt_pca_grm]{gt_pca_grm()}}
+\code{\link[hierfstat:beta.dosage]{hierfstat::beta.dosage()}}, \code{\link[=gt_pca]{gt_pca()}}
 }

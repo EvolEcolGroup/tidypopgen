@@ -1,4 +1,4 @@
-# Test fixture for gt_pca_grm(): a small simulated dataset with very high
+# Test fixture for gt_pca(): a small simulated dataset with very high
 # missingness, and the outputs of PLINK 1.9 on it (--make-rel square, --pca).
 #
 # Three populations of 20 diploid individuals (Balding-Nichols, Fst about
