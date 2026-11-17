@@ -7,6 +7,8 @@
   is one, and Eigen otherwise
 * `pairwise_grm(method = "plink")` gives PLINK 1.9's variance-standardised
   relationship matrix
+* new `gt_simulate_bn()` simulates toy datasets of unlinked loci (Balding-Nichols
+  model) for quick checks
 * new `gt_merge_vcfs()` and `gt_concat_vcfs()` read several VCF files into a
   single `gen_tibble`, as `bcftools merge` and `bcftools concat`
 * integer chromosomes (`chromosomes_as_int`) for datasets with many

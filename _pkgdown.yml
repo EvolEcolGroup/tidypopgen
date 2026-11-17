@@ -168,9 +168,10 @@ reference:
         - gt_pcadapt
         - autoplot.gt_pcadapt
   - title: "Example data"
-    desc: "Function for loading an example `gen_tibble`."
+    desc: "Functions for loading an example `gen_tibble`, or simulating a toy one."
     contents:
         - load_example_gt
+        - gt_simulate_bn
   - title: "tidyverse methods"
     desc: "Methods for tidyverse verbs for `gen_tibble` objects"
     contents:
