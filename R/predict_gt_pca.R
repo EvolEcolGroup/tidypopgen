@@ -191,6 +191,10 @@ predict.gt_pca <- function(
       if (is.null(block_size)) {
         block_size <- bigstatsr::block_size(nrow(new_data))
       }
+      # loci with a scale of 0 (monomorphic loci, which gt_pca() keeps, as
+      # PLINK does) have loadings of 0: a scale of 1 avoids 0 / 0 (NaN)
+      scale <- object$scale
+      scale[scale == 0] <- 1
       # X * V #nolint
       XV <- bigstatsr::big_prodMat(
         .gt_get_fbm(new_data), # nolint
@@ -199,7 +203,7 @@ predict.gt_pca <- function(
         ind.col = .gt_fbm_cols(new_data)[loci_subset],
         block.size = block_size,
         center = object$center,
-        scale = object$scale
+        scale = scale
       )
       dimnames(XV) <- list(new_data$id, paste0(".PC", seq_len(ncol(XV)))) # nolint
       output <- output_type(object = XV, as_matrix, id = new_data$id)

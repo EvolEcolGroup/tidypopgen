@@ -828,6 +828,15 @@ test_that("projections with missing genotypes match an R reference", {
     new_data = new_gt, project_method = "simple", block_size = 7
   )
   expect_equal(simple, z %*% v, ignore_attr = TRUE)
+  # "none" on the complete individuals gives the same scores, also with loci
+  # monomorphic in the reference (a scale of 0)
+  expect_true(any(pca$scale == 0))
+  # ("none" needs imputed genotypes, which change nothing for these)
+  complete <- which(rowSums(is.na(geno)) == 0)
+  complete_gt <- gt_update_backingfile(new_gt[complete, ], quiet = TRUE)
+  complete_gt <- gt_impute_simple(complete_gt, method = "mode")
+  none_proj <- predict(pca, new_data = complete_gt, project_method = "none")
+  expect_equal(none_proj, simple[complete, ], ignore_attr = TRUE)
   # "plink": the simple projection divided by the fraction of loci genotyped
   plink_proj <- predict(pca,
     new_data = new_gt, project_method = "plink", block_size = 7
