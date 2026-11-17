@@ -151,7 +151,7 @@ static void grm_rank_update(double* G, const double* Z, std::size_t n,
 }
 
 // Seconds taken by grm_rank_update() for a random n x nb block, to choose
-// the faster engine (see gt_pca_grm())
+// the faster engine (see gt_pca())
 // [[Rcpp::export]]
 double grm_rank_update_seconds(int n, int nb, bool use_blas, int ncores) {
   std::vector<double> Z(static_cast<std::size_t>(n) * nb);
@@ -241,7 +241,7 @@ NumericMatrix grm_plink_cpp(Environment BM,
   return G;
 }
 
-// Loadings of a gt_pca_grm(): V = Z^T U / d, with Z the standardised
+// Loadings of a gt_pca(): V = Z^T U / d, with Z the standardised
 // genotypes (missing as 0) of the loci in colInd, U the n x k eigenvectors
 // and d the singular values; for complete data, this is V of the singular
 // value decomposition Z = U D V^T.

@@ -175,7 +175,7 @@ struct PwAlleleSharing {
 
 // Valid loci: one plane (valid) and one count, the number of loci valid in
 // both individuals (the denominator of PLINK 1.9's relationship matrix with
-// missing genotypes, see gt_pca_grm()).
+// missing genotypes, see gt_pca()).
 struct PwValid {
   static const int N_PLANES = 1;
   static const int N_COUNTS = 1;
