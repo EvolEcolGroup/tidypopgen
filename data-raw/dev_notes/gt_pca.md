@@ -142,9 +142,11 @@ uses imputed genotypes only if the `gen_tibble` is set to use them.
 
 ### Inventory
 
-- **Need a PCA of complete or imputed genotypes:** `gt_pcadapt()` and
-  `gt_dapc()`, also through a `gt_cluster_pca`, which keeps the attributes
-  of its PCA. Both now stop with `stopifnot_complete_pca()`.
+- **Need a PCA of complete or imputed genotypes:** none, since later on 18
+  Nov (see "DAPC and pcadapt with missing genotypes"). Until then,
+  `gt_pcadapt()` and `gt_dapc()` (also through a `gt_cluster_pca`, which
+  keeps the attributes of its PCA) stopped with `stopifnot_complete_pca()`,
+  now removed.
 - **Need complete or imputed raw genotypes:** all of these switch to the
   imputed genotypes when they exist.
 
@@ -183,6 +185,10 @@ uses imputed genotypes only if the `gen_tibble` is set to use them.
 - **Silent wrong results** when the check misses missing genotypes (shown
   with the check turned off): `snp_clumping()` kept 392 of 500 loci, against
   35 after imputation, and `snp_pcadapt()` gave statistics with no `NA`.
+  (Correction, later on 18 Nov: bigsnpr's `multLinReg` skips missing
+  genotypes, so those pcadapt statistics were computed on the individuals
+  genotyped at each locus, as in the pcadapt package: not wrong, only
+  different from those of imputed genotypes.)
 
 ### Decisions (Andrea, 18 Nov 2026)
 
@@ -205,7 +211,8 @@ uses imputed genotypes only if the `gen_tibble` is set to use them.
   `local_no_bigstatsr_checks()`).
 - **Clumping and pcadapt keep only the sampled check** (Andrea). Missing
   genotypes that escape it give silently wrong results, as with bigsnpr
-  before; their help pages say so.
+  before; their help pages say so. (For pcadapt, those genotypes are left
+  out of the test of their locus; see the correction above.)
 - **One wording**: every missing-genotype error comes from
   `stop_missing_genotypes()` ("<fn> needs complete or imputed genotypes, but
   some genotypes are missing: impute them ...").
@@ -216,7 +223,8 @@ uses imputed genotypes only if the `gen_tibble` is set to use them.
   `gt_pcadapt()` now counts them (one pass, only then) and names them.
 - **Vignette a03** imputes the anoles again, and sets the imputed genotypes
   only for the PCA (DAPC needs a complete PCA; ADMIXTURE and sNMF still get
-  the missing genotypes).
+  the missing genotypes). Undone later on 18 Nov, when DAPC came to work on
+  the PCA of missing genotypes.
 
 ### Verification (18 Nov 2026, laptop)
 
@@ -244,6 +252,150 @@ uses imputed genotypes only if the `gen_tibble` is set to use them.
   gt_pca_autoSVD problem" draws random genotypes without `set.seed()`. It
   failed once with the roll_size error; 0 of 90 seeds reproduced it. It now
   sets a seed (`c6088bf5`).
+
+## DAPC and pcadapt with missing genotypes (18 Nov 2026, laptop)
+
+Andrea asked for a DAPC that works on the PCA of missing genotypes (method
+`"partial"`, PLINK's estimator), with particular care for the loadings of
+the loci (the loadings plots used to find the loci that contribute most to
+differentiation), and to check a suggestion from Copilot (regress each locus
+on the scores, over the individuals genotyped at it), then for pcadapt in
+the same branch. With complete or imputed genotypes
+(`attr(pca, "missing")` is `FALSE`), both functions keep their earlier code
+path and give the same results.
+
+### Analysis
+
+Checked numerically in small simulations (inline R): 200 individuals, 4
+populations (F_ST 0.03), ~3,000 loci, 40 loci made differentiated in
+population 1.
+
+- **DAPC sample space: no change.** The LDA (`MASS::lda`) only uses the
+  scores `u d`, which the PCA gives with or without missing genotypes.
+- **Locus loadings.** `var.load = V[, 1:n_pca] %*% A` (`A` the LDA
+  scaling). With complete data, `V` is exactly the matrix of the least
+  squares coefficients of each standardised locus on an intercept and the
+  scores `u d` (largest difference 4e-16). The generalisation: regress each
+  locus on `[1, (u d)[, 1:n_pca]]` over the individuals genotyped at it,
+  giving `B`, and `var.load = B A`. It equals `V A` with complete data.
+- **The PCA's loadings are biased with missing genotypes.**
+  `v = Z0^T u / d` (missing genotypes as 0) shrinks each locus by the
+  fraction of individuals genotyped there, and is distorted when
+  missingness differs between groups. LD1 loadings (`n_pca = 3`), against
+  those of the complete data:
+
+  | Missingness | Estimator | cor. with complete | shrinkage, most / least missing loci | planted loci in the top 40 (complete: 25) |
+  |---|---|---|---|---|
+  | per locus, 0-70% | missing as 0 | 0.885 | 0.41 | 18 |
+  | | regression | 0.899 | 0.97 | 18 |
+  | 70% in pop. 1, 10% in others | missing as 0 | 0.48 | 0.83 | 0 |
+  | | regression | 0.66 | 0.99 | 3 |
+
+  With the planted loci 60% missing, and loci ranked by their contribution
+  over all LD axes, missing-as-0 found 0 of the 40 in the top 40, the
+  regression 12 (complete data: 15). Dividing `v` by the fraction genotyped
+  corrects the shrinkage of each locus, but not missingness that depends on
+  the population (1 against 9 planted loci).
+- **Copilot's suggestion.** Right: PCA of the GRM, then LDA, for the
+  individuals; per-locus regression on the individuals genotyped, in place
+  of the loadings; the link with pcadapt. To fix: regress the standardised
+  genotype `z`, not the raw one (which multiplies the loadings by
+  `sqrt(2p(1-p))`); on the scores `u d`, not `u` (which gives `D V`); with
+  an intercept (`z` is centred with the frequency of the genotyped
+  individuals); on the `n_pca` components of the DAPC; then multiply by
+  `A`. Its other suggestion, `g ~ LD1 + LD2 + ...`, estimates a different
+  quantity (see below). "Never needs imputed genotypes" is true, but the
+  regression needs the genotypes when the DAPC is run, which the `gt_pca`
+  object does not keep.
+- **pcadapt needs no new kernel.** `snp_pcadapt()` computes, for each locus
+  and component, the t-score of a simple regression on the scores over the
+  individuals genotyped at that locus (`multLinReg` skips byte code 3), then
+  the robust Mahalanobis distance (`dist_ogk`) and genomic control: the
+  pcadapt package does the same. Planted loci in the top 40 of the
+  statistic (`K = 3`):
+
+  | Missingness | PCA of missing genotypes, bigsnpr's t-scores | same, multiple regression | impute (mode), PCA, pcadapt |
+  |---|---|---|---|
+  | complete | 18 | 17 | 18 |
+  | per individual, 0-80% | 16 | 16 | 12 |
+  | 70% in pop. 1, 10% in others | 10 | 8 | 0 |
+  | planted loci 60% missing | 4 | 4 | 1 |
+
+### How it works
+
+- `grm_loci_lsq_cpp()` (`src/gt_grm_plink.cpp`, next to
+  `grm_loadings_cpp()`): the standardised genotype of a locus takes one value
+  per genotype, so `X_O^T z_O` only needs the sums of the regressors over
+  the individuals with genotypes 1 and 2 (those with genotype 0 are the
+  totals minus the rest), and `X_O^T X_O = X^T X - sum over the missing
+  individuals of w_i` (`w_i` the products `x_ia x_ib`, a <= b, whose first
+  q entries are `x_i`). Each locus reads its bytes once and accumulates
+  these, in parallel over loci (OpenMP), with no BLAS or Eigen products. The
+  rows of `W` are padded to an even length and added two at a time with
+  `__restrict` pointers, so that GCC emits SSE2 adds at -O2. Each locus then
+  solves its q x q system by Cholesky (Eigen `LLT`):
+  - `NA` when fewer individuals than coefficients are genotyped (the
+    intercept's entry of the system counts them), or when `rcond()` is
+    below 1e-10 (the tolerance of `predict()`'s least squares);
+  - only the coefficients of the scores are returned (m x `n_pca`, the size
+    of `v`).
+- `loci_lsq_loadings()` (`R/gt_dapc.R`) checks that `data` has the
+  individuals of the PCA (in order) and its loci (`pca_match_loci()`, taken
+  out of `predict.gt_pca()`), switches imputed genotypes off, and regresses
+  on `u sqrt(n)`, whose columns have the norm of the intercept, so that the
+  `rcond()` test is about the individuals genotyped and not about the scale
+  of the scores; the coefficients are then rescaled to `u d`.
+- `gt_dapc(data = , n_cores = )`: with a PCA of missing genotypes and
+  `loadings_by_locus = TRUE`, an error without `data`; `var.contr` leaves out
+  `NA` loadings.
+- `gt_pcadapt()`: with a PCA of missing genotypes, tests the genotypes the
+  PCA used (imputed genotypes off, no sampled check); otherwise as before.
+  After any error of `snp_pcadapt()`, `stopifnot_variable_loci()` counts the
+  genotypes (`big_counts()`) and names the loci with a single genotype among
+  the genotyped individuals or fewer than 3 genotyped (with `k = 1` these
+  make `snp_pcadapt()` fail in its genomic control, "invalid 'xmin'
+  value").
+
+### Decisions (18 Nov 2026)
+
+- **Regression, not the PCA's loadings, for the DAPC loadings of a PCA of
+  missing genotypes** (Claude, from the analysis; Andrea approved the plan).
+- **Without `data`: an error** (Andrea, as Claude recommended), rather than
+  skipping the locus loadings or falling back on the biased ones.
+- **Examples and vignette a03 without imputation** (Andrea). In a03, 44 of
+  3,249 anole loci are genotyped in only 1 or 2 of 46 individuals and get
+  `NA` loadings, with a warning that the vignette explains.
+- **pcadapt in this branch** (Andrea). bigsnpr's simple-regression t-scores
+  are kept (Claude): they match the pcadapt package, a multiple regression
+  was no better in the simulations, and it would change results on complete
+  data.
+- **Only the DAPC loadings** (Andrea): the regression on the LD axes is
+  recorded below as a possible extra output.
+- `stopifnot_complete_pca()` had no caller left and was removed.
+
+### Possible extra output: coefficients on the LD axes
+
+Regressing each locus on the LD scores (`z ~ LD1 + LD2 + ...`) gives, since
+the LD scores are uncorrelated, the covariance of the locus with each axis
+divided by the variance of the axis: a structure coefficient (correlation
+with the axis, up to a constant per axis), not DAPC's discriminant weight.
+With complete data and `V`, `A` as above, it is proportional to
+`V D^2 A` per axis, against `V A` for `var.load`. In the simulations, the
+two rank loci almost alike (correlation ~0.99 of absolute values) but are
+not equal, and their scales differ. It could be offered later (e.g.
+`tidy(matrix = "structure")`), computed with the same kernel on the LD
+scores; for Andrea to decide.
+
+### Tried and dropped
+
+- **Blocks of doubles and matrix products** (the first version of
+  `grm_loci_lsq_cpp()`, as in `pca_project_cpp()`): decode `Z` and the
+  indicators of missing genotypes `M` for blocks of loci, then `Z^T X` and
+  `M^T W` with the BLAS or Eigen. On HGDP650 with 44% missing genotypes it
+  took about 8.6 s of `gt_dapc()`'s 10 s: perf showed the single-threaded
+  decoding into two n x nb double matrices (16 bytes per genotype), thin
+  `dgemm` products, and OpenMP threads spinning during the decoding. Reading
+  the bytes directly (above) took 4.3 s, and 3.4 s with paired adds.
 
 ## Numbers
 
@@ -303,6 +455,61 @@ Speed of the blocked kernel (`26584148`): 1,000 individuals x 300,000 loci,
 of 3 balanced runs): simple 8.1 -> 3.9 s, least squares 15.3 -> 5.4 s;
 outputs identical (relative differences 1e-14).
 
+### DAPC and pcadapt on HGDP650 with missing genotypes
+
+HGDP650 after removing monomorphic loci (1,043 individuals, 643,685 loci,
+0.09% missing), with missing genotypes added at random loci with
+per-individual rates uniform in 0-0.9 (seed 42), then the loci still
+polymorphic: 643,591 loci, 44% missing (0.07-90% per individual). Six
+regions as groups (`n_pca` = 5 by default), `gt_pca(k = 10)`,
+`gt_pcadapt(k = 5)`, `n_cores = 4`. The old route (the only one before
+this branch): `gt_impute_simple(method = "mode")`, `gt_set_imputed()`, then
+PCA, DAPC and pcadapt, from an install of `d00d726b`. The new route: the
+same on the genotypes with missing values (`gt_dapc(data = )`), from an
+install of `f26da1f7`. laptopX1 (4 cores, OpenBLAS, R 4.6.1, -O2 builds
+checked with `check_build.sh`), 18 Nov 2026; medians (min-max) of 3
+balanced runs, each on a fresh copy of the backing files (imputation
+writes into them). Indicative only (laptop).
+
+| Step | old: impute, PCA of imputed | new: PCA of missing genotypes |
+|---|---|---|
+| imputation | 3.3 s (3.3-4.0) | - |
+| PCA | 10.2 s (10.1-11.7) | 14.2 s (12.8-14.8) |
+| DAPC | 1.4 s (1.3-1.6) | 5.2 s (5.2-5.6) |
+| pcadapt | 5.7 s (5.7-6.5) | 6.6 s (6.3-6.8) |
+| total | 20.6 s (20.4-23.7) | 26.2 s (24.6-26.6) |
+
+With the first version of the kernel, the DAPC took 10.1 s (9.5-10.1) and
+the new route 29.6 s. After `f26da1f7`, the paired adds (`16445878`) took
+the regression alone from 4.28 to 3.35 s (minimum of 3), so the DAPC
+should now take about 4.3 s (not re-timed in the whole route). The PCA of
+missing genotypes costs about 4 s more than that of complete genotypes
+(the count of loci genotyped in both individuals).
+
+Accuracy, against the same analysis (old route) on the original data
+(0.09% missing):
+
+| | old: impute, PCA of imputed | new: PCA of missing genotypes |
+|---|---|---|
+| PC1-4, correlation with the complete data | 0.55, 0.00, 0.03, 0.03 | 1.000 each |
+| DAPC assignments as with complete data | 75.6% | 99.4% |
+| assignments to the right region (complete: 95.6%) | 73.1% | 95.4% |
+| locus contributions, rank correlation (top-1000 overlap) | 0.65 (387) | 0.93 (653) |
+| pcadapt scores, rank correlation (top-1000 overlap) | 0.69 (439) | 0.93 (606) |
+
+With imputation, missingness takes over the components after the first.
+The new route costs about 25% more time on this data and gives the results
+of the complete data; the old one does not. pcadapt takes about half the
+time of the PCA, so a faster reimplementation was not considered.
+
+Reproduce: the scripts (`prepare.R`, `mask_dev.R`, `run.R`, `driver.sh`,
+`compare.R`, `kernel_only.R`) are in
+`/media/andrea/annex/tmp/claude/tidypopgen/bench_dapc/scripts/` on
+laptopX1 (`driver.sh` expects the installs in `lib_old` and `lib_new` and
+the masked data in `prepared_miss` next to it).
+The article `vignettes/articles/missing_data.Rmd` shows the same contrast
+on simulated data.
+
 ## Open questions
 
 - Re-time on the desktop (manica01) and on Windows.
@@ -323,3 +530,14 @@ outputs identical (relative differences 1e-14).
 - `gt_pcadapt()` could drop the loci with the same genotype in every
   individual (with `NA` statistics, as the `pcadapt` package does) instead
   of stopping.
+- DAPC and pcadapt with missing genotypes: re-time the whole routes on the
+  desktop (manica01), with the paired adds (`16445878`), and on data with
+  more typical missingness (a few %), where the regression mostly sums the
+  regressors of genotypes 1 and 2.
+- The regression on the LD axes (structure coefficients) as an extra output
+  of `gt_dapc()`: for Andrea to decide (see "Possible extra output").
+- `predict()` for `gt_dapc` objects (adegenet's needs the PCA's
+  information, which the object does not keep).
+- The posterior probabilities of DAPC do not account for the noisier scores
+  of individuals with many missing genotypes; a weighting by missingness
+  could be explored.
