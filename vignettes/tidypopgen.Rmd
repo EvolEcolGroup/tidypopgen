@@ -14,8 +14,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 This vignette gives a short introduction on how to use the `tidypopgen` package
 to perform basic data cleaning and a PCA on a dataset of European lobsters
-(*Homarus gammarus*). The original data are available at
-https://datadryad.org/dataset/doi:10.5061/dryad.2v1kr38, but for the purpose of
+(*Homarus gammarus*) from Jenkins et al. (2019). The original data are available
+at https://datadryad.org/dataset/doi:10.5061/dryad.2v1kr38 (released under
+CC0), but for the purpose of
 this vignette we will use a subset of the data stored as a .bed file, available
 in the `inst/extdata/lobster` directory of the package. To install `tidypopgen`
 from r-universe, use:
@@ -277,3 +278,7 @@ ADMIXTURE, f statistics with admixtools2,  etc.); each resulting object has
 `autoplot`, `tidy`, and `augment`
 to explore the results and integrated into the information from the
 `gen_tibble`.
+
+## References
+
+Jenkins T.L., Ellis C.D., Triantafyllidis A. and Stevens J.R. (2019) Single nucleotide polymorphisms reveal a genetic cline across the north-east Atlantic and enable powerful population assignment in the European lobster. *Evolutionary Applications* 12: 1881-1899. doi:10.1111/eva.12849

@@ -19,7 +19,7 @@ set.seed(123)
 
 ## An example workflow with real data
 We will explore the genetic structure of *Anolis punctatus* in South America,
-using data from Prates et al 2018. We downloaded the vcf file of the genotypes
+using data from Prates et al. (2018). We downloaded the vcf file of the genotypes
 from "https://github.com/ivanprates/2018_Anolis_EcolEvol/blob/master/data/VCFtools_SNMF_punctatus_t70_s10_n46/punctatus_t70_s10_n46_filtered.recode.vcf?raw=true" and compressed it to a vcf.gz file.
 
 We read in the data from the compressed vcf with:
@@ -592,3 +592,7 @@ autoplot(get_q_matrix(q_list, k = 3, run = 1),
 
 In this way, `tidypopgen` integrates with external clustering software
 seamlessly for quick, easy plotting.
+
+# References
+
+Prates I., Penna A., Rodrigues M.T. and Carnaval A.C. (2018) Local adaptation in mainland anole lizards: integrating population history and genome-environment associations. *Ecology and Evolution* 8: 11932-11944. doi:10.1002/ece3.4650

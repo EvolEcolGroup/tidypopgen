@@ -64,3 +64,19 @@ easySFS
   https://github.com/isaacovercast/easySFS
   - tests/testthat/helper_sfs_reference.R: R translation of make_datadict()
     (the changes are described in the header of that file).
+
+
+Example data (inst/extdata/)
+  - lobster/: a subset of the SNP genotypes of European lobsters of Jenkins
+    et al. (2019) Evolutionary Applications 12: 1881-1899,
+    doi:10.1111/eva.12849; data from Dryad, doi:10.5061/dryad.2v1kr38,
+    released under CC0.
+  - anolis/: the RAD-seq genotypes of Anolis punctatus of Prates et al.
+    (2018) Ecology and Evolution 8: 11932-11944, doi:10.1002/ece3.4650,
+    from https://github.com/ivanprates/2018_Anolis_EcolEvol.
+  - ploidy/arenosa_ploidy_example.vcf.gz: 200 loci of Arabidopsis arenosa
+    from Wos et al. (2019) Annals of Botany 124: 255-268,
+    doi:10.1093/aob/mcz070, as distributed with the tutorial of Bohutinska
+    et al. (2023) Methods in Molecular Biology 2545: 297-324.
+  - data/distruct_colours.rda: the colour palette of distruct (Rosenberg
+    2004, Molecular Ecology Notes 4: 137-138).
