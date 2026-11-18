@@ -199,6 +199,7 @@ articles:
       - a01_overview
       - a02_qc
       - a03_example_clustering_and_dapc
+      - articles/missing_data
       - articles/aDNA_pseudohaploids
       - articles/interpolating
       - articles/roh_hgdp
