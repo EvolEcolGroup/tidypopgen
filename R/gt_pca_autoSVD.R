@@ -7,7 +7,9 @@
 #'
 #' The genotypes must be complete or imputed (see [gt_impute_simple()];
 #' imputed genotypes are used automatically). Missing genotypes give an
-#' error; as in `bigsnpr`, they are looked for in a sample of the genotypes.
+#' error (with a custom `fun_scaling` that does not depend on the
+#' genotypes, they are only looked for in a sample of them, as in
+#' `bigsnpr`).
 #'
 #' Using gt_pca_autoSVD requires a reasonably large dataset, as the function
 #' iteratively removes regions of long range LD. If you encounter: 'Error in

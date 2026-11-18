@@ -96,7 +96,9 @@ long-range LD regions. This function is a wrapper for
 \details{
 The genotypes must be complete or imputed (see \code{\link[=gt_impute_simple]{gt_impute_simple()}};
 imputed genotypes are used automatically). Missing genotypes give an
-error; as in \code{bigsnpr}, they are looked for in a sample of the genotypes.
+error (with a custom \code{fun_scaling} that does not depend on the
+genotypes, they are only looked for in a sample of them, as in
+\code{bigsnpr}).
 
 Using gt_pca_autoSVD requires a reasonably large dataset, as the function
 iteratively removes regions of long range LD. If you encounter: 'Error in

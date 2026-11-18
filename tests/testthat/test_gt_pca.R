@@ -847,6 +847,19 @@ test_that("the SVDs check all the genotypes they use, also in parallel", {
     ),
     "gt_pca_autoSVD\\(\\) needs complete or imputed genotypes"
   )
+  # with a scaling that does not depend on the genotypes, the sampled check
+  # finds it (the SVD failed with "TridiagEigen: eigen decomposition failed")
+  constant_scaling <- bigstatsr::big_scale(center = FALSE, scale = FALSE)
+  expect_error(
+    gt_pca(one_missing_gt,
+      k = 2, method = "random", fun_scaling = constant_scaling, n_cores = 1
+    ),
+    "gt_pca\\(method = \"random\"\\) needs complete or imputed genotypes"
+  )
+  expect_error(
+    gt_pca_partialSVD(one_missing_gt, k = 2, fun_scaling = constant_scaling),
+    "gt_pca_partialSVD\\(\\) needs complete or imputed genotypes"
+  )
   # and monomorphic loci give bigstatsr's error before the SVD starts
   mono_gt <- gt_simulate_bn(n_indiv = c(10, 10), n_loci = 300, fst = 0.1)
   expect_true(any(loci_maf(mono_gt) == 0))

@@ -214,7 +214,7 @@ local_private_fbm_dir <- function(envir = parent.frame()) {
 # over the genotypes just to check them would cost as much as some of these
 # analyses, so the genotypes are checked on a sample, as bigsnpr does
 # (stopifnot_no_missing()), and, where an analysis makes a full pass anyway,
-# exactly on its results (e.g. scaling_no_missing()). bigsnpr's own sampled
+# exactly on its results (e.g. scaling_lookup()). bigsnpr's own sampled
 # check is turned off (local_no_bigstatsr_checks()), and all these errors
 # come from stop_missing_genotypes(), so that they read the same.
 
@@ -352,8 +352,12 @@ local_no_bigstatsr_checks <- function(envir = parent.frame()) {
 # The scaling of the SVDs of bigstatsr and bigsnpr (big_SVD(),
 # big_randomSVD() and snp_autoSVD()), computed once for all the loci of x and
 # then looked up, rather than computed by the SVD functions themselves:
-# - it checks exactly, at no extra cost, that the genotypes used are
-#   complete: a missing genotype gives a missing centre and scale;
+# - it checks that the genotypes used are complete: on a sample first (see
+#   stopifnot_no_missing()), then exactly, at no extra cost, for scalings
+#   that depend on the genotypes, such as the default snp_scaleBinom(), where
+#   a missing genotype gives a missing centre and scale (a scaling that does
+#   not depend on them, e.g. big_scale(center = FALSE, scale = FALSE), only
+#   gets the sampled check);
 # - with n_cores > 1, big_randomSVD() computes the scaling of each block of
 #   loci in a worker of a PSOCK cluster, which waits forever for the others
 #   if one of them fails (on missing genotypes, or on bigstatsr's own check
@@ -380,6 +384,8 @@ local_no_bigstatsr_checks <- function(envir = parent.frame()) {
 scaling_lookup <- function(x, fun_scaling, what, hint = NULL,
                            check_zero = TRUE, n_cores = 1) {
   stopifnot_gen_tibble(x)
+  # a sampled check first, for scalings that do not depend on the genotypes
+  stopifnot_no_missing(x, what, hint = hint, n_cores = n_cores)
   ind_col <- .gt_fbm_cols(x)
   # the scaling of all the loci of x (in parallel, if the function can)
   args <- list(.gt_get_fbm(x), ind.row = .gt_fbm_rows(x), ind.col = ind_col)
@@ -398,8 +404,8 @@ scaling_lookup <- function(x, fun_scaling, what, hint = NULL,
   if (anyNA(ms$center) || anyNA(ms$scale)) {
     stop_missing_genotypes(what, hint = hint)
   }
-  # (bigstatsr's message, and its tolerance)
-  if (check_zero && any(abs(ms$scale) < sqrt(.Machine$double.eps))) {
+  # (bigstatsr's message, and its tolerance, see bigstatsr:::any_near0())
+  if (check_zero && any(abs(ms$scale) < 1e-8)) {
     stop(
       "Some variables have zero scaling; remove them before attempting ",
       "to scale.",

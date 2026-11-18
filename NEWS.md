@@ -13,8 +13,8 @@
 * `gt_pcadapt()` and `gt_dapc()` need a PCA of complete or imputed genotypes,
   not one that compared individuals over the loci genotyped in both
 * errors on missing genotypes name the function and say how to impute them;
-  the SVD-based PCAs check all their genotypes, and `gt_pca(method = "random")`
-  no longer reads them an extra time to do so
+  `gt_pca(method = "random")` no longer reads the genotypes an extra time to
+  look for them
 * `gt_pca_partialSVD()` and `gt_pca_randomSVD()` are deprecated in favour of
   `gt_pca()`
 * `predict()` of a `gt_pca` now uses `project_method = "least_squares"` on all
