@@ -370,11 +370,16 @@ NumericMatrix grm_loci_lsq_cpp(Environment BM,
   uint8_t geno_of_byte[256];
   std::vector<double> zlut = grm_z_lut(BM, center, scale, m, geno_of_byte);
 
-  // the products w_i of each individual (row-major, n x P, pairs a <= b in
+  // the products w_i of each individual (row-major, n x P2, pairs a <= b in
   // the order (0, 0), (0, 1), ..., (0, q - 1), (1, 1), ...), so that the
-  // first q entries of w_i are x_i; and X^T X, their sums over individuals
+  // first q entries of w_i are x_i; and X^T X, their sums over individuals.
+  // The rows are padded with zeros to an even number of entries (P2), and
+  // the regressors are summed over an even number of entries (q2; the extra
+  // entry is never read), so that the compiler can add them two at a time
+  const std::size_t P2 = (P + 1) / 2 * 2;
+  const std::size_t q2 = (q + 1) / 2 * 2;
   const double* p_S = S.begin();
-  std::vector<double> W(n * P), xtx(P, 0.0);
+  std::vector<double> W(n * P2, 0.0), xtx(P, 0.0);
   // pair_index[a + b * q]: the index, among the P products, of the pair (a, b)
   std::vector<std::size_t> pair_index(q * q);
   std::vector<double> x(q);
@@ -384,7 +389,7 @@ NumericMatrix grm_loci_lsq_cpp(Environment BM,
     std::size_t p = 0;
     for (std::size_t a = 0; a < q; a++) {
       for (std::size_t b = a; b < q; b++, p++) {
-        W[i * P + p] = x[a] * x[b];
+        W[i * P2 + p] = x[a] * x[b];
         xtx[p] += x[a] * x[b];
         pair_index[a + b * q] = p;
         pair_index[b + a * q] = p;
@@ -403,8 +408,8 @@ NumericMatrix grm_loci_lsq_cpp(Environment BM,
     #pragma omp parallel num_threads(ncores)
     {
       // the sums of x_i over the individuals with genotypes 1 and 2, and of
-      // w_i over the missing ones (rows 1 to 3 of acc, of P entries each)
-      std::vector<double> acc(4 * P);
+      // w_i over the missing ones (rows 1 to 3 of acc, of P2 entries each)
+      std::vector<double> acc(4 * P2);
       Eigen::MatrixXd A(q, q);
       Eigen::VectorXd rhs(q), beta(q);
       Eigen::LLT<Eigen::MatrixXd> llt(q);
@@ -419,19 +424,24 @@ NumericMatrix grm_loci_lsq_cpp(Environment BM,
           // (genotype 0 is not summed: it is the rest)
           if (g == 0) continue;
           // x_i (the first q entries of w_i) for genotypes 1 and 2, all of
-          // w_i for missing genotypes
-          const std::size_t len = (g == 3) ? P : q;
-          const double* w = &W[i * P];
-          double* a = &acc[g * P];
-          for (std::size_t k = 0; k < len; k++) a[k] += w[k];
+          // w_i for missing genotypes, two entries at a time
+          const std::size_t len = (g == 3) ? P2 : q2;
+          const double* __restrict w = &W[i * P2];
+          double* __restrict a = &acc[g * P2];
+          for (std::size_t k = 0; k < len; k += 2) {
+            a[k] += w[k];
+            a[k + 1] += w[k + 1];
+          }
         }
-        const double* miss = &acc[3 * P];
+        const double* miss = &acc[3 * P2];
         // X_O^T z_O, from the sums by genotype (those of genotype 0 are the
         // totals minus the others)
         const double* lut = &zlut[4 * l];
         for (std::size_t b = 0; b < q; b++) {
-          const double sum0 = xtx[b] - acc[P + b] - acc[2 * P + b] - miss[b];
-          rhs[b] = lut[0] * sum0 + lut[1] * acc[P + b] + lut[2] * acc[2 * P + b];
+          const double sum1 = acc[P2 + b];
+          const double sum2 = acc[2 * P2 + b];
+          const double sum0 = xtx[b] - sum1 - sum2 - miss[b];
+          rhs[b] = lut[0] * sum0 + lut[1] * sum1 + lut[2] * sum2;
         }
         // X_O^T X_O
         for (std::size_t a = 0; a < q; a++) {
