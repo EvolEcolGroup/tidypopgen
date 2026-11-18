@@ -295,6 +295,10 @@ pca_scaling <- function(x, fun_scaling, n_cores) {
     center <- 2 * freq
     scale <- sqrt(2 * freq * (1 - freq))
   } else {
+    # bigstatsr's check for missing values samples the whole backing matrix
+    # (including individuals and loci that x does not use): turn it off;
+    # missing genotypes give missing values in the scaling, checked below
+    local_no_bigstatsr_checks()
     scaling <- tryCatch(
       fun_scaling(.gt_get_fbm(x),
         ind.row = .gt_fbm_rows(x),
@@ -350,6 +354,13 @@ pca_random_svd <- function(x, k, fun_scaling, tol, verbose, n_cores,
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)
   }
+  # the SVD needs complete genotypes: bigstatsr's check samples the whole
+  # backing matrix (including individuals and loci that x does not use), so
+  # turn it off, and check a sample of the genotypes of x instead
+  local_no_bigstatsr_checks()
+  stopifnot_no_missing(x, "gt_pca(method = \"random\")",
+    hint = "or use method = \"partial\"", n_cores = n_cores
+  )
 
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
@@ -369,7 +380,8 @@ pca_random_svd <- function(x, k, fun_scaling, tol, verbose, n_cores,
     k = k,
     ind.row = .gt_fbm_rows(x),
     ind.col = .gt_fbm_cols(x),
-    fun.scaling = fun_scaling,
+    # (turning off bigstatsr's checks also in the workers)
+    fun.scaling = scaling_without_checks(fun_scaling),
     tol = tol,
     verbose = verbose,
     ncores = n_cores,

@@ -94,6 +94,10 @@ long-range LD regions. This function is a wrapper for
 \code{\link[bigsnpr:snp_autoSVD]{bigsnpr::snp_autoSVD()}}
 }
 \details{
+The genotypes must be complete or imputed (see \code{\link[=gt_impute_simple]{gt_impute_simple()}};
+imputed genotypes are used automatically). Missing genotypes give an
+error; as in \code{bigsnpr}, they are looked for in a sample of the genotypes.
+
 Using gt_pca_autoSVD requires a reasonably large dataset, as the function
 iteratively removes regions of long range LD. If you encounter: 'Error in
 rollmean(): Parameter 'size' is too large.', \code{roll_size} exceeds the number

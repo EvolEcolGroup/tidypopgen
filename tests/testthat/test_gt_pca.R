@@ -11,7 +11,7 @@ test_that("fit_gt_pca_and_predict", {
   )
   expect_error(
     missing_gt %>% gt_pca_partialSVD(),
-    "You can't have missing"
+    "needs complete or imputed genotypes"
   )
   missing_gt <- gt_impute_simple(missing_gt, method = "mode")
   # the pca of the imputed data, which predict() uses for new_data, in double
@@ -111,7 +111,7 @@ test_that("adjusting roll_size fixes gt_pca_autoSVD problem ", {
   )
   expect_error(
     missing_gt %>% gt_pca_autoSVD(),
-    "You can't have missing"
+    "needs complete or imputed genotypes"
   )
   missing_gt <- gt_impute_simple(missing_gt, method = "mode")
 
@@ -146,7 +146,7 @@ test_that("adjusting roll_size fixes gt_pca_autoSVD problem ", {
   )
   expect_error(
     families %>% gt_pca_autoSVD(),
-    "You can't have missing"
+    "needs complete or imputed genotypes"
   )
   families <- gt_impute_simple(families, method = "mode")
 
@@ -193,7 +193,7 @@ test_that("fit_gt_pca_and_predict_splitted_data", {
   # now raise an error if we don't impute to the mean
   expect_error(
     predict(modern_pca, new_data = ancient_gt, project_method = "none"),
-    "You can't have missing values in 'X'"
+    "needs complete or imputed genotypes"
   )
   # check the same with a tibble
   new_pred_tbl <- predict(
@@ -430,9 +430,6 @@ test_that("our stdevs are comparable to prcomp", {
   #########################
   # Perform PCA using gt_pca
   #########################
-  # TODO there seemed to be a bug in the former gt_pca_partialSVD function
-  # where missing values are detected even when excluded
-  families <- gt_update_backingfile(families, quiet = TRUE)
   families <- gt_impute_simple(families, method = "mode")
   gt_pca_result <- families %>% gt_pca(n_cores = 2)
   tidy_pca <- tidy(gt_pca_result, matrix = "eigenvalues")
@@ -530,12 +527,14 @@ test_that("n_cores can be set for pca functions", {
   expect_equal(one_core, two_core)
   expect_true(getOption("bigstatsr.check.parallel.blas"))
 
-  # test parallel blas is true on exit if function errors
+  # test parallel blas is true on exit if function errors (and bigstatsr's
+  # checks are turned on again)
   expect_error(
     gt_pca_autoSVD(one_core, n_cores = 2),
-    "no applicable method for 'show_loci'"
+    "not a gen_tibble"
   )
   expect_true(getOption("bigstatsr.check.parallel.blas"))
+  expect_true(getOption("bigstatsr.check.args"))
 })
 
 test_that("n_cores can be set gt_pca_autoSVD", {
@@ -564,12 +563,14 @@ test_that("n_cores can be set gt_pca_autoSVD", {
   expect_equal(one_core, two_core)
   expect_true(getOption("bigstatsr.check.parallel.blas"))
 
-  # test parallel blas is true on exit if function errors
+  # test parallel blas is true on exit if function errors (and bigstatsr's
+  # checks are turned on again)
   expect_error(
     gt_pca_autoSVD(one_core, n_cores = 2),
-    "no applicable method for 'show_loci'"
+    "not a gen_tibble"
   )
   expect_true(getOption("bigstatsr.check.parallel.blas"))
+  expect_true(getOption("bigstatsr.check.args"))
 })
 
 
@@ -610,7 +611,7 @@ test_that("n_cores can be set for predict_gt_pca", {
   # test parallel blas is true on exit if function errors
   expect_error(
     predict(modern_pca, new_data = ancient_gt, project_method = "none"),
-    "You can't have missing values in 'X'"
+    "needs complete or imputed genotypes"
   )
   expect_true(getOption("bigstatsr.check.parallel.blas"))
 })
@@ -775,6 +776,50 @@ test_that("gt_pca method random needs complete or imputed genotypes", {
   partial_pca <- gt_pca(sim_gt, k = 2, n_cores = 1)
   gt_set_imputed(sim_gt, set = FALSE)
   expect_equal(random_pca$d, partial_pca$d, tolerance = 1e-4)
+})
+
+test_that("missing genotypes are looked for only where they are used", {
+  withr::local_options(lifecycle_verbosity = "quiet")
+  # example-missing has missing genotypes at 367 of its 500 loci: keep the
+  # 133 complete loci, without resaving the backing matrix (where the other
+  # loci keep their missing genotypes)
+  bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
+  missing_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("missing_"),
+    quiet = TRUE
+  )
+  complete_gt <- missing_gt %>%
+    select_loci_if(loci_missingness(genotypes) == 0)
+  expect_false(any(loci_missingness(complete_gt) > 0))
+  # bigstatsr's check sampled the whole backing matrix, and stopped with
+  # "You can't have missing values" (and, in the workers of the parallel
+  # randomised SVD, left it waiting forever)
+  set.seed(1)
+  expect_s3_class(gt_pca_partialSVD(complete_gt, k = 2), "gt_pca")
+  expect_s3_class(
+    gt_pca(complete_gt, k = 2, method = "random", n_cores = 2), "gt_pca"
+  )
+  expect_s3_class(
+    gt_pca_autoSVD(complete_gt,
+      k = 2, roll_size = 0, verbose = FALSE, n_cores = 2
+    ),
+    "gt_pca"
+  )
+  complete_pca <- gt_pca(complete_gt, k = 2, n_cores = 1)
+  expect_identical(
+    dim(predict(complete_pca, new_data = complete_gt, project_method = "none")),
+    c(nrow(complete_gt), 2L)
+  )
+  # missing genotypes in the loci used are still found
+  expect_error(
+    gt_pca_partialSVD(missing_gt, k = 2),
+    "gt_pca_partialSVD\\(\\) needs complete or imputed genotypes"
+  )
+  expect_error(
+    gt_pca_randomSVD(missing_gt, k = 2),
+    "gt_pca\\(method = \"random\"\\) needs complete or imputed genotypes"
+  )
 })
 
 test_that("gt_pca objects record imputed and missing genotypes", {

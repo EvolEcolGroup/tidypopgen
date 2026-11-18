@@ -28,6 +28,27 @@ test_that("gt_pcadapt checks that individuals match the pca", {
   )
 })
 
+test_that("gt_pcadapt looks for missing genotypes only where they are used", {
+  # the 133 complete loci of example-missing, without resaving the backing
+  # matrix (where the other loci keep their missing genotypes)
+  raw_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("missing_"),
+    quiet = TRUE
+  )
+  complete_gt <- raw_gt %>% select_loci_if(loci_missingness(genotypes) == 0)
+  complete_pca <- gt_pca(complete_gt, k = 3, n_cores = 1)
+  # bigsnpr's check sampled the whole backing matrix, and stopped with
+  # "You can't have missing values"
+  set.seed(1)
+  expect_s3_class(gt_pcadapt(complete_gt, complete_pca, k = 3), "gt_pcadapt")
+  # missing genotypes in the loci used are still found
+  expect_error(
+    gt_pcadapt(raw_gt, complete_pca, k = 3),
+    "gt_pcadapt\\(\\) needs complete or imputed genotypes"
+  )
+})
+
 test_that("n_cores can be set", {
   expect_true(getOption("bigstatsr.check.parallel.blas"))
   one_core <- gt_pcadapt(missing_gt, missing_pca, k = 3, n_cores = 1)

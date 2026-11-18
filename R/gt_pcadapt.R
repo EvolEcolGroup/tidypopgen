@@ -7,6 +7,12 @@
 #'
 #' Internally, this function uses the `snp_pcadapt` function from the `bigsnpr`
 #' package.
+#'
+#' The genotypes of `x` must be complete or imputed (see [gt_impute_simple()];
+#' imputed genotypes are used automatically). Missing genotypes give an
+#' error; as in `bigsnpr`, they are looked for in a sample of the genotypes
+#' (all the individuals, at evenly spaced loci), so a few missing genotypes
+#' can go unnoticed and change the results.
 #' @references Luu, K., Bazin, E., Blum, M. G. B., & François, O. (2017).
 #'   pcadapt: an R package for genome scans for selection based on principal
 #'   component analysis. Molecular Ecology Resources, 17(1), 67–77.
@@ -71,6 +77,11 @@ gt_pcadapt <- function(x, pca, k, n_cores = 1) {
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)
   }
+  # pcadapt needs complete genotypes: bigsnpr's check samples the whole
+  # backing matrix (including individuals and loci that x does not use), so
+  # turn it off, and check a sample of the genotypes of x instead
+  local_no_bigstatsr_checks()
+  stopifnot_no_missing(x, "gt_pcadapt()", n_cores = n_cores)
 
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)

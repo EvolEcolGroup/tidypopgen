@@ -5,6 +5,10 @@
 #' long-range LD regions. This function is a wrapper for
 #' [bigsnpr::snp_autoSVD()]
 #'
+#' The genotypes must be complete or imputed (see [gt_impute_simple()];
+#' imputed genotypes are used automatically). Missing genotypes give an
+#' error; as in `bigsnpr`, they are looked for in a sample of the genotypes.
+#'
 #' Using gt_pca_autoSVD requires a reasonably large dataset, as the function
 #' iteratively removes regions of long range LD. If you encounter: 'Error in
 #' rollmean(): Parameter 'size' is too large.', `roll_size` exceeds the number
@@ -122,6 +126,11 @@ gt_pca_autoSVD <- function(
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)
   }
+  # the SVD needs complete genotypes: bigsnpr's check samples the whole
+  # backing matrix (including individuals and loci that x does not use), so
+  # turn it off, and check a sample of the genotypes of x instead
+  local_no_bigstatsr_checks()
+  stopifnot_no_missing(x, "gt_pca_autoSVD()", n_cores = n_cores)
 
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
@@ -165,7 +174,8 @@ gt_pca_autoSVD <- function(
         infos.pos = infos_pos,
         ind.row = .gt_fbm_rows(x),
         ind.col = .gt_fbm_cols(x),
-        fun.scaling = fun_scaling,
+        # (turning off bigstatsr's checks also in the workers)
+        fun.scaling = scaling_without_checks(fun_scaling),
         thr.r2 = thr_r2,
         size = size,
         k = k,

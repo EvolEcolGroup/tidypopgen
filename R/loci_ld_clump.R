@@ -8,9 +8,12 @@
 #' https://privefl.github.io/bigsnpr/articles/pruning-vs-clumping.html for more
 #' information on the differences between pruning and clumping.
 #'
-#' Any missing values in the genotypes of a `gen_tibble` passed to
-#' `loci_ld_clump` will cause an error. To deal with missingness, see
-#' [gt_impute_simple()].
+#' Clumping needs complete genotypes: impute the missing genotypes (see
+#' [gt_impute_simple()]; imputed genotypes are used automatically), or
+#' remove the loci that have them. Missing genotypes give an error; as in
+#' `bigsnpr`, they are looked for in a sample of the genotypes (all the
+#' individuals, at evenly spaced loci), so a few missing genotypes can go
+#' unnoticed and change the results.
 #'
 #' @param .x a [`gen_tibble`] object
 #' @param .col the column to be used when a tibble (or grouped tibble is passed
@@ -117,6 +120,15 @@ loci_ld_clump.vctrs_bigSNP <- function(
     gt_set_imputed(.x, set = TRUE)
     on.exit(gt_set_imputed(.x, set = FALSE), add = TRUE)
   }
+  # clumping needs complete genotypes: bigsnpr's check samples the whole
+  # backing matrix (including individuals and loci that .x does not use), so
+  # turn it off, and check a sample of the genotypes used here instead (the
+  # loci in `exclude` are not used)
+  local_no_bigstatsr_checks()
+  stopifnot_no_missing(.x, "loci_ld_clump()",
+    loci = setdiff(seq_along(show_loci(.x)$big_index), exclude),
+    n_cores = n_cores
+  )
 
   is_loci_table_ordered(.x, error_on_false = TRUE)
 

@@ -77,9 +77,12 @@ https://privefl.github.io/bigsnpr/articles/pruning-vs-clumping.html for more
 information on the differences between pruning and clumping.
 }
 \details{
-Any missing values in the genotypes of a \code{gen_tibble} passed to
-\code{loci_ld_clump} will cause an error. To deal with missingness, see
-\code{\link[=gt_impute_simple]{gt_impute_simple()}}.
+Clumping needs complete genotypes: impute the missing genotypes (see
+\code{\link[=gt_impute_simple]{gt_impute_simple()}}; imputed genotypes are used automatically), or
+remove the loci that have them. Missing genotypes give an error; as in
+\code{bigsnpr}, they are looked for in a sample of the genotypes (all the
+individuals, at evenly spaced loci), so a few missing genotypes can go
+unnoticed and change the results.
 }
 \examples{
 \dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}

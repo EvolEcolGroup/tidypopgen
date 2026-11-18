@@ -27,6 +27,12 @@ individuals. The method is described in Luu et al. (2017). See the R package
 \details{
 Internally, this function uses the \code{snp_pcadapt} function from the \code{bigsnpr}
 package.
+
+The genotypes of \code{x} must be complete or imputed (see \code{\link[=gt_impute_simple]{gt_impute_simple()}};
+imputed genotypes are used automatically). Missing genotypes give an
+error; as in \code{bigsnpr}, they are looked for in a sample of the genotypes
+(all the individuals, at evenly spaced loci), so a few missing genotypes
+can go unnoticed and change the results.
 }
 \examples{
 \dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}

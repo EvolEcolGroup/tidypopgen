@@ -196,6 +196,10 @@ predict.gt_pca <- function(
       if (is.null(block_size)) {
         block_size <- bigstatsr::block_size(nrow(new_data))
       }
+      # bigstatsr's check for missing values samples the whole backing
+      # matrix (including individuals and loci that new_data does not use):
+      # turn it off; missing genotypes give NA products, checked below
+      local_no_bigstatsr_checks()
       # loci with a scale of 0 (monomorphic loci, which gt_pca() keeps, as
       # PLINK does) have loadings of 0: a scale of 1 avoids 0 / 0 (NaN)
       scale <- object$scale
@@ -210,6 +214,13 @@ predict.gt_pca <- function(
         center = object$center,
         scale = scale
       )
+      # a missing genotype gives NA scores to its individual (an exact
+      # check, at no cost)
+      if (anyNA(XV)) {
+        stop_missing_genotypes("predict(project_method = \"none\")",
+          hint = "or use another project_method"
+        )
+      }
       dimnames(XV) <- list(new_data$id, paste0(".PC", seq_len(ncol(XV)))) # nolint
       output <- output_type(object = XV, as_matrix, id = new_data$id)
       return(output)
