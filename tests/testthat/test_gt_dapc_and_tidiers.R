@@ -341,7 +341,7 @@ test_that("augment.gt_dapc works with one discriminant axis and checks ids", {
   )
 })
 
-test_that("gt_dapc needs a PCA of complete or imputed genotypes", {
+test_that("gt_dapc with a PCA of missing genotypes", {
   bed_file <- system.file("extdata", "example-missing.bed",
     package = "bigsnpr"
   )
@@ -353,23 +353,56 @@ test_that("gt_dapc needs a PCA of complete or imputed genotypes", {
   pops <- as.factor(c(rep("pop1", 100), rep("pop2", 100)))
   # a PCA that compared individuals over the loci genotyped in both
   pairwise_pca <- test_gt %>% gt_pca(k = 5, n_cores = 2)
+  # the loadings of the loci need the genotypes
   expect_error(
-    gt_dapc(pairwise_pca, pop = pops),
-    "gt_dapc\\(\\) needs a PCA of complete or imputed genotypes"
+    gt_dapc(pairwise_pca, pop = pops, n_pca = 3),
+    "the loadings of the loci need the genotypes"
   )
-  # also through the clusters made from it
+  # without the loadings of the loci, the genotypes are not needed
+  no_loadings <- gt_dapc(pairwise_pca,
+    pop = pops, n_pca = 3, loadings_by_locus = FALSE
+  )
+  expect_null(no_loadings$var.load)
+  # with them, the loadings of the loci are their regression coefficients on
+  # the scores, multiplied by the loadings of the discriminant functions
+  pairwise_dapc <- gt_dapc(pairwise_pca,
+    pop = pops, n_pca = 3, data = test_gt, n_cores = 2
+  )
+  expect_identical(pairwise_dapc$ind.coord, no_loadings$ind.coord)
+  lsq <- loci_lsq_loadings(pairwise_pca, test_gt, n_pca = 3, n_cores = 2)
+  expect_equal(
+    as.vector(unclass(pairwise_dapc$var.load)),
+    as.vector(lsq %*% pairwise_dapc$loadings)
+  )
+  expect_identical(row_names(pairwise_dapc$var.load), loci_names(test_gt))
+  # also through the clusters made from the PCA
   pairwise_clusters <- gt_cluster_pca(pairwise_pca,
     n_pca = 5, k_clusters = c(1, 3), quiet = TRUE
   )
-  expect_error(
-    gt_dapc(pairwise_clusters, pop = 2),
-    "gt_dapc\\(\\) needs a PCA of complete or imputed genotypes"
+  expect_s3_class(
+    gt_dapc(pairwise_clusters, pop = 2, data = test_gt),
+    "gt_dapc"
   )
-  # the PCA of the imputed genotypes works
+  # data must be the gen_tibble of the PCA
+  expect_error(
+    gt_dapc(pairwise_pca, pop = pops, data = test_gt[200:1, ]),
+    "the individuals in 'data' do not correspond to those in the PCA"
+  )
+  expect_error(
+    gt_dapc(pairwise_pca, pop = pops, data = select_loci(test_gt, 1:10)),
+    "loci used in the PCA are not present in 'data'"
+  )
+  # with a PCA of imputed genotypes, the loadings of the loci are those of
+  # the PCA, multiplied by the loadings of the discriminant functions (as
+  # before), and do not need the genotypes
   test_gt <- gt_impute_simple(test_gt, method = "mode")
   gt_set_imputed(test_gt, set = TRUE)
   imputed_pca <- test_gt %>% gt_pca(k = 5, n_cores = 2)
-  expect_s3_class(gt_dapc(imputed_pca, pop = pops), "gt_dapc")
+  imputed_dapc <- gt_dapc(imputed_pca, pop = pops, n_pca = 3)
+  expect_equal(
+    as.vector(unclass(imputed_dapc$var.load)),
+    as.vector(unclass(imputed_pca$v)[, 1:3] %*% imputed_dapc$loadings)
+  )
 })
 
 test_that("loadings of loci by least squares with missing genotypes", {

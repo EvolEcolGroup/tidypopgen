@@ -38,12 +38,22 @@
 #' these guidelines and consider their individual dataset to ensure best
 #' practices.
 #'
-#' The PCA must be of complete or imputed genotypes: a PCA that compared
-#' individuals over the loci genotyped in both (the default method of
-#' [gt_pca()], with missing genotypes) gives an error. Impute the missing
-#' genotypes (e.g. with [gt_impute_simple()]) and set the `gen_tibble` to use
-#' them ([gt_set_imputed()]) before [gt_pca()], or use
-#' `gt_pca(method = "random")`, which uses them automatically.
+#' With missing genotypes, the PCA does not need imputed genotypes: the
+#' default method of [gt_pca()] compares individuals over the loci genotyped
+#' in both (as PLINK does), and the discriminant analysis uses its scores as
+#' it would those of any PCA. The loadings of the loci (`loadings_by_locus`)
+#' are then estimated by regressing the standardised genotypes of each locus
+#' on the scores of the `n_pca` components (with an intercept), over the
+#' individuals genotyped at that locus, and multiplying these coefficients by
+#' the loadings of the discriminant functions. This needs the genotypes: give
+#' the `gen_tibble` of the PCA as `data`. With complete genotypes, the
+#' regression coefficients are the loadings of the PCA, so the results are
+#' the same as with the usual matrix product. With missing genotypes, the
+#' loadings of the PCA (which count missing genotypes as 0) would shrink loci
+#' with many missing genotypes, and hide them in the loadings plots. Loci
+#' genotyped in fewer than `n_pca + 1` individuals get `NA` loadings. The
+#' posterior probabilities of group membership do not account for the
+#' noisier scores of individuals with many missing genotypes.
 #'
 #' Note that there is no current method to predict scores for
 #' individuals not included in the original analysis. This is because we
@@ -58,8 +68,7 @@
 #'   Ecology Resources, 23, 523–538. https://doi.org/10.1111/1755-0998.13706
 #'
 #'
-#' @param x an object of class `gt_pca`, or its subclass `gt_cluster_pca`, of
-#'   complete or imputed genotypes (see Details)
+#' @param x an object of class `gt_pca`, or its subclass `gt_cluster_pca`
 #' @param pop either a factor indicating the group membership of individuals; or
 #'   an integer defining the desired *k* if x is a `gt_cluster_pca`; or NULL, if
 #'   'x' is a `gt_cluster_pca` and contain an element 'best_k', usually
@@ -73,6 +82,12 @@
 #'   contribution of each locus should be stored (TRUE, default) or not (FALSE).
 #'   Such output can be useful, but can also create large matrices when there
 #'   are a lot of loci and many dimensions.
+#' @param data the `gen_tibble` the PCA `x` was computed on (it can have more
+#'   loci than the PCA). It is needed only for the loadings of the loci of a
+#'   PCA with missing genotypes (see Details), and ignored otherwise.
+#' @param n_cores the number of cores used to estimate the loadings of the
+#'   loci of a PCA with missing genotypes. Default is
+#'   [bigstatsr::nb_cores()].
 #' @returns an object of class [adegenet::dapc]
 #' @export
 #' @seealso [gt_cluster_pca()] [gt_cluster_pca_best_k()] [adegenet::dapc()]
@@ -85,18 +100,17 @@
 #'   quiet = TRUE
 #' )
 #'
-#' # Remove monomorphic loci, and impute (DAPC needs a PCA of complete
-#' # genotypes)
+#' # Remove monomorphic loci
 #' lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
-#' lobsters <- gt_impute_simple(lobsters, method = "mode")
-#' gt_set_imputed(lobsters, set = TRUE)
 #'
-#' # Create PCA object
+#' # Create PCA object (the lobsters have some missing genotypes, which do not
+#' # need to be imputed)
 #' pca <- gt_pca(lobsters)
 #'
-#' # Run DAPC on the `gt_pca` object, providing `pop` as factor
+#' # Run DAPC on the `gt_pca` object, providing `pop` as factor; with missing
+#' # genotypes, the loadings of the loci need the genotypes (`data`)
 #' populations <- as.factor(lobsters$population)
-#' gt_dapc(pca, n_pca = 6, n_da = 2, pop = populations)
+#' gt_dapc(pca, n_pca = 6, n_da = 2, pop = populations, data = lobsters)
 #'
 #' # Run clustering on the first 10 PCs
 #' cluster_pca <- gt_cluster_pca(
@@ -116,7 +130,7 @@
 #' )
 #'
 #' # Run DAPC on the `gt_cluster_pca` object
-#' gt_dapc(cluster_pca, n_pca = 10, n_da = 2)
+#' gt_dapc(cluster_pca, n_pca = 10, n_da = 2, data = lobsters)
 #'
 # @param pca_info a logical indicating whether information about the prior PCA
 #' #  should be stored (TRUE, default) or not (FALSE). This information is
@@ -135,15 +149,25 @@ gt_dapc <- function(
   pop = NULL,
   n_pca = NULL,
   n_da = NULL,
-  loadings_by_locus = TRUE
+  loadings_by_locus = TRUE,
+  data = NULL,
+  n_cores = bigstatsr::nb_cores()
 ) {
   if (!inherits(x, "gt_pca")) {
     stop("'x' should be a 'gt_pca' object")
   }
-  # the PCA must be of complete (or imputed) genotypes
-  stopifnot_complete_pca(x, "gt_dapc()")
   if (is.null(x$center)) {
     stop("'x' was run without centering; centering is necessary for 'gt_dapc'")
+  }
+  # with a PCA of missing genotypes, the loadings of the loci are estimated
+  # from the genotypes (see loci_lsq_loadings()), so they are needed
+  pca_missing <- isTRUE(attr(x, "missing"))
+  if (loadings_by_locus && pca_missing && is.null(data)) {
+    stop(
+      "'x' is a PCA of genotypes with missing values: the loadings of the ",
+      "loci need the genotypes, so give the gen_tibble of the PCA as ",
+      "'data', or set 'loadings_by_locus = FALSE'"
+    )
   }
 
   pop.fac <- NULL
@@ -258,10 +282,19 @@ gt_dapc <- function(
   ## optional: get loadings of variables
   if (loadings_by_locus) {
     V <- x$v[, 1:n_pca, drop = FALSE] # principal axes
+    if (pca_missing) {
+      # with missing genotypes, the loadings of the PCA (missing genotypes as
+      # 0) are biased: regress each locus on the scores instead, over the
+      # individuals genotyped at that locus (with complete genotypes, this
+      # gives the loadings of the PCA)
+      V[] <- loci_lsq_loadings(x, data, n_pca = n_pca, n_cores = n_cores)
+    }
     colnames(V) <- paste("PCA-pa", seq_len(ncol(V)), sep = ".")
     var.load <- as.matrix(V) %*% as.matrix(ldaX$scaling[, 1:n_da, drop = FALSE])
     f1 <- function(x) {
-      temp <- sum(x * x)
+      # (loci whose loadings could not be estimated are NA, and are left out
+      # of the sum)
+      temp <- sum(x * x, na.rm = TRUE)
       if (temp < 1e-12) {
         return(rep(0, length(x)))
       }

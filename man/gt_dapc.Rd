@@ -4,11 +4,18 @@
 \alias{gt_dapc}
 \title{Discriminant Analysis of Principal Components for gen_tibble}
 \usage{
-gt_dapc(x, pop = NULL, n_pca = NULL, n_da = NULL, loadings_by_locus = TRUE)
+gt_dapc(
+  x,
+  pop = NULL,
+  n_pca = NULL,
+  n_da = NULL,
+  loadings_by_locus = TRUE,
+  data = NULL,
+  n_cores = bigstatsr::nb_cores()
+)
 }
 \arguments{
-\item{x}{an object of class \code{gt_pca}, or its subclass \code{gt_cluster_pca}, of
-complete or imputed genotypes (see Details)}
+\item{x}{an object of class \code{gt_pca}, or its subclass \code{gt_cluster_pca}}
 
 \item{pop}{either a factor indicating the group membership of individuals; or
 an integer defining the desired \emph{k} if x is a \code{gt_cluster_pca}; or NULL, if
@@ -26,6 +33,14 @@ Discriminant Analysis step.}
 contribution of each locus should be stored (TRUE, default) or not (FALSE).
 Such output can be useful, but can also create large matrices when there
 are a lot of loci and many dimensions.}
+
+\item{data}{the \code{gen_tibble} the PCA \code{x} was computed on (it can have more
+loci than the PCA). It is needed only for the loadings of the loci of a
+PCA with missing genotypes (see Details), and ignored otherwise.}
+
+\item{n_cores}{the number of cores used to estimate the loadings of the
+loci of a PCA with missing genotypes. Default is
+\code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}.}
 }
 \value{
 an object of class \link[adegenet:dapc]{adegenet::dapc}
@@ -70,12 +85,22 @@ adjusting \code{n_pca} to avoid potential overfitting. We recommend users consul
 these guidelines and consider their individual dataset to ensure best
 practices.
 
-The PCA must be of complete or imputed genotypes: a PCA that compared
-individuals over the loci genotyped in both (the default method of
-\code{\link[=gt_pca]{gt_pca()}}, with missing genotypes) gives an error. Impute the missing
-genotypes (e.g. with \code{\link[=gt_impute_simple]{gt_impute_simple()}}) and set the \code{gen_tibble} to use
-them (\code{\link[=gt_set_imputed]{gt_set_imputed()}}) before \code{\link[=gt_pca]{gt_pca()}}, or use
-\code{gt_pca(method = "random")}, which uses them automatically.
+With missing genotypes, the PCA does not need imputed genotypes: the
+default method of \code{\link[=gt_pca]{gt_pca()}} compares individuals over the loci genotyped
+in both (as PLINK does), and the discriminant analysis uses its scores as
+it would those of any PCA. The loadings of the loci (\code{loadings_by_locus})
+are then estimated by regressing the standardised genotypes of each locus
+on the scores of the \code{n_pca} components (with an intercept), over the
+individuals genotyped at that locus, and multiplying these coefficients by
+the loadings of the discriminant functions. This needs the genotypes: give
+the \code{gen_tibble} of the PCA as \code{data}. With complete genotypes, the
+regression coefficients are the loadings of the PCA, so the results are
+the same as with the usual matrix product. With missing genotypes, the
+loadings of the PCA (which count missing genotypes as 0) would shrink loci
+with many missing genotypes, and hide them in the loadings plots. Loci
+genotyped in fewer than \code{n_pca + 1} individuals get \code{NA} loadings. The
+posterior probabilities of group membership do not account for the
+noisier scores of individuals with many missing genotypes.
 
 Note that there is no current method to predict scores for
 individuals not included in the original analysis. This is because we
@@ -91,18 +116,17 @@ lobsters <- gen_tibble(bed_file,
   quiet = TRUE
 )
 
-# Remove monomorphic loci, and impute (DAPC needs a PCA of complete
-# genotypes)
+# Remove monomorphic loci
 lobsters <- lobsters \%>\% select_loci_if(loci_maf(genotypes) > 0)
-lobsters <- gt_impute_simple(lobsters, method = "mode")
-gt_set_imputed(lobsters, set = TRUE)
 
-# Create PCA object
+# Create PCA object (the lobsters have some missing genotypes, which do not
+# need to be imputed)
 pca <- gt_pca(lobsters)
 
-# Run DAPC on the `gt_pca` object, providing `pop` as factor
+# Run DAPC on the `gt_pca` object, providing `pop` as factor; with missing
+# genotypes, the loadings of the loci need the genotypes (`data`)
 populations <- as.factor(lobsters$population)
-gt_dapc(pca, n_pca = 6, n_da = 2, pop = populations)
+gt_dapc(pca, n_pca = 6, n_da = 2, pop = populations, data = lobsters)
 
 # Run clustering on the first 10 PCs
 cluster_pca <- gt_cluster_pca(
@@ -122,7 +146,7 @@ cluster_pca <- gt_cluster_pca_best_k(cluster_pca,
 )
 
 # Run DAPC on the `gt_cluster_pca` object
-gt_dapc(cluster_pca, n_pca = 10, n_da = 2)
+gt_dapc(cluster_pca, n_pca = 10, n_da = 2, data = lobsters)
 
 #  should be stored (TRUE, default) or not (FALSE). This information is
 #  required to predict group membership of new individuals using predict, but
