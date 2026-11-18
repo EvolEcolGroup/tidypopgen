@@ -152,9 +152,9 @@ uses imputed genotypes only if the `gen_tibble` is set to use them.
   |---|---|---|
   | `loci_ld_clump()` | `snp_clumping` | sampled, `stopifnot_no_missing()` |
   | `gt_pcadapt()` (its `x`) | `snp_pcadapt` | sampled |
-  | `gt_pca(method = "random")`, `gt_pca_randomSVD()` | `big_randomSVD` | exact, through the scaling (`scaling_lookup()`) |
-  | `gt_pca_partialSVD()` | `big_SVD` | exact, through the scaling |
-  | `gt_pca_autoSVD()` | `snp_autoSVD` | exact, through the scaling |
+  | `gt_pca(method = "random")`, `gt_pca_randomSVD()` | `big_randomSVD` | sampled, then exact through the scaling (`scaling_lookup()`) for scalings that depend on the genotypes (the default) |
+  | `gt_pca_partialSVD()` | `big_SVD` | the same |
+  | `gt_pca_autoSVD()` | `snp_autoSVD` | the same |
   | `gt_pca(fun_scaling = <fn>)` | the custom scaling | exact (NA in the scaling) |
   | `predict(project_method = "none")` | `big_prodMat` | exact (NA in the product) |
 
@@ -200,7 +200,9 @@ uses imputed genotypes only if the `gen_tibble` is set to use them.
   - Or count, only after an error, e.g. after a custom scaling fails.
 - **bigsnpr's own check is off** (`bigstatsr.check.args = FALSE`, restored
   on exit, and set in the workers by the scaling lookup). Its other
-  assertions are of indices and cores, which tidypopgen builds itself.
+  assertions are of indices, which tidypopgen builds itself, and of the
+  number of cores, which is kept (`bigparallelr::assert_cores()` in
+  `local_no_bigstatsr_checks()`).
 - **Clumping and pcadapt keep only the sampled check** (Andrea). Missing
   genotypes that escape it give silently wrong results, as with bigsnpr
   before; their help pages say so.
@@ -215,6 +217,32 @@ uses imputed genotypes only if the `gen_tibble` is set to use them.
 - **Vignette a03** imputes the anoles again, and sets the imputed genotypes
   only for the PCA (DAPC needs a complete PCA; ADMIXTURE and sNMF still get
   the missing genotypes).
+
+### Verification (18 Nov 2026, laptop)
+
+- **Fix tests:** a separate agent checked that each fix's tests fail on the
+  code before it and pass on the fix. Some fail only because an error
+  message changed. The agent's review found:
+  - a missed `gt_dapc()` caller (`test_vcf_int.R`);
+  - scalings that ignore the genotypes;
+  - the lost check of `n_cores`.
+
+  All three were fixed in their own commits.
+- **Run on the laptop:** the affected test files (`test_gt_pca`,
+  `test_loci_ld_clump`, `test_gt_pcadapt`, `test_gt_dapc_and_tidiers`,
+  `test_gt_impute_*`, `test_pairwise_grm`, `test_gen_tibble_phased`,
+  `test_vcf_int`), the examples of the changed help pages, the a03 vignette
+  and `lintr::lint_package()`. The lint gives only "no visible global
+  function" notes for internal functions.
+- **Left for the desktop** (Andrea, 18 Nov: no big tests on the laptop):
+  - the full test suite;
+  - all examples;
+  - all vignettes;
+  - timing `stopifnot_no_missing()` on 1,000 x 300k loci (it should take
+    milliseconds).
+- **Flaky test, before this branch:** "adjusting roll_size fixes
+  gt_pca_autoSVD problem" draws random genotypes without `set.seed()`. It
+  failed once with the roll_size error; 0 of 90 seeds reproduced it.
 
 ## Numbers
 
