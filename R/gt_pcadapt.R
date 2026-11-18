@@ -8,19 +8,27 @@
 #' Internally, this function uses the `snp_pcadapt` function from the `bigsnpr`
 #' package.
 #'
-#' The genotypes of `x` must be complete or imputed (see [gt_impute_simple()];
-#' imputed genotypes are used automatically). Missing genotypes give an
-#' error; as in `bigsnpr`, they are looked for in a sample of the genotypes
-#' (all the individuals, at evenly spaced loci), so a few missing genotypes
-#' can go unnoticed and change the results.
+#' The genotypes tested are those that the PCA was computed on:
+#' - with a PCA of genotypes with missing values (the default method of
+#'   [gt_pca()], which compares individuals over the loci genotyped in both,
+#'   as PLINK does), the genotypes of `x` with their missing values: each
+#'   locus is tested on the individuals genotyped at it, as in the `pcadapt`
+#'   package. Imputed genotypes are not used.
+#' - with a PCA of complete or imputed genotypes, the genotypes of `x` must be
+#'   complete or imputed (see [gt_impute_simple()]; imputed genotypes are
+#'   used automatically). Missing genotypes give an error; as in `bigsnpr`,
+#'   they are looked for in a sample of the genotypes (all the individuals,
+#'   at evenly spaced loci), and any that go unnoticed are left out of the
+#'   test of their locus.
+#'
+#' Loci with the same genotype in every individual genotyped, or genotyped
+#' in fewer than 3 individuals, can not be tested, and give an error.
 #' @references Luu, K., Bazin, E., Blum, M. G. B., & François, O. (2017).
 #'   pcadapt: an R package for genome scans for selection based on principal
 #'   component analysis. Molecular Ecology Resources, 17(1), 67–77.
 #' @param x A `gen_tibble` object.
-#' @param pca a [`gt_pca`] object, as returned by [gt_pca()], of complete or
-#'   imputed genotypes: with missing genotypes, set the `gen_tibble` to use
-#'   imputed genotypes ([gt_set_imputed()]) before [gt_pca()], or use
-#'   `gt_pca(method = "random")`, which uses them automatically.
+#' @param pca a [`gt_pca`] object, as returned by [gt_pca()], of the
+#'   individuals of `x` (see Details for missing genotypes).
 #' @param k Number of principal components to use in the analysis.
 #' @param n_cores Number of cores to use.
 #' @returns An object of subclass `gt_pcadapt`, a subclass of `mhtest`.
@@ -40,12 +48,11 @@
 #'   quiet = TRUE
 #' )
 #'
-#' # Remove monomorphic loci and impute (pcadapt needs complete genotypes)
+#' # Remove monomorphic loci
 #' lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
-#' lobsters <- gt_impute_simple(lobsters, method = "mode")
 #'
-#' # Create PCA object, of the imputed genotypes
-#' gt_set_imputed(lobsters, set = TRUE)
+#' # Create PCA object (the lobsters have some missing genotypes, which do not
+#' # need to be imputed)
 #' pca <- gt_pca(lobsters)
 #'
 #' # Create a gt_pcadapt object
@@ -61,8 +68,6 @@ gt_pcadapt <- function(x, pca, k, n_cores = 1) {
   if (!inherits(pca, "gt_pca")) {
     stop("pca must be a gt_pca object")
   }
-  # the scores must come from a PCA of complete (or imputed) genotypes
-  stopifnot_complete_pca(pca, "gt_pcadapt()")
   # check that k is a scalar
   if (!is.numeric(k) || length(k) != 1) {
     stop("k must be a scalar")
@@ -78,17 +83,29 @@ gt_pcadapt <- function(x, pca, k, n_cores = 1) {
   ) {
     stop("the individuals in 'x' do not correspond to those in 'pca'")
   }
-  # set imputation if needed
-  if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {
+  # the genotypes to test: those the PCA was computed on
+  pca_missing <- isTRUE(attr(pca, "missing"))
+  if (pca_missing) {
+    # a PCA of genotypes with missing values: test them (without imputed
+    # genotypes); each locus is then tested on the individuals genotyped at
+    # it, as in the pcadapt package
+    if (gt_has_imputed(x) && gt_uses_imputed(x)) {
+      gt_set_imputed(x, set = FALSE)
+      on.exit(gt_set_imputed(x, set = TRUE), add = TRUE)
+    }
+  } else if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {
+    # a PCA of complete or imputed genotypes: use the imputed genotypes
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)
   }
-  # pcadapt needs complete genotypes: bigsnpr's check samples the whole
-  # backing matrix (including individuals and loci that x does not use), so
-  # turn it off, and check a sample of the genotypes of x instead
-  # (keeping bigstatsr's check of n_cores)
+  # bigsnpr's check for missing values samples the whole backing matrix
+  # (including individuals and loci that x does not use), so turn it off
+  # (keeping bigstatsr's check of n_cores); with a PCA of complete or imputed
+  # genotypes, check a sample of the genotypes of x instead
   local_no_bigstatsr_checks(n_cores = n_cores)
-  stopifnot_no_missing(x, "gt_pcadapt()", n_cores = n_cores)
+  if (!pca_missing) {
+    stopifnot_no_missing(x, "gt_pcadapt()", n_cores = n_cores)
+  }
 
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
@@ -121,30 +138,36 @@ gt_pcadapt <- function(x, pca, k, n_cores = 1) {
   return(res)
 }
 
-# Stop if some loci have the same genotype in every individual (monomorphic,
-# or heterozygous in every individual, as heavy imputation can make them):
-# pcadapt can not test them. It reads all the genotypes (one pass), so it is
-# only called after snp_pcadapt() has failed.
+# Stop if some loci have the same genotype in every individual genotyped
+# (monomorphic, or heterozygous in every individual, as heavy imputation can
+# make them), or are genotyped in fewer than 3 individuals: pcadapt can not
+# test them (their t-scores are NA in bigsnpr). It reads all the genotypes
+# (one pass), so it is only called after snp_pcadapt() has failed.
 # @param x a gen_tibble
 # @param ind_row,ind_col the rows and columns of its backing matrix
 # @keywords internal
 # @noRd
 stopifnot_variable_loci <- function(x, ind_row, ind_col) {
-  stats <- bigstatsr::big_colstats(
+  # the counts of each genotype (0, 1 and 2, and missing, NA) at each locus
+  counts <- bigstatsr::big_counts(
     .gt_get_fbm(x),
     ind.row = ind_row,
     ind.col = ind_col
   )
-  constant <- which(stats$var < 1e-12)
+  counts <- counts[!is.na(rownames(counts)), , drop = FALSE]
+  # loci with a single genotype among the individuals genotyped there, or
+  # with fewer than 3 of them (a perfect fit with 2)
+  constant <- which(colSums(counts > 0) < 2 | colSums(counts) < 3)
   if (length(constant) > 0) {
     stop(
       "gt_pcadapt() can not test loci with the same genotype in every ",
       "individual, and ", length(constant), " loci are monomorphic or ",
-      "heterozygous in every individual (e.g. ",
+      "heterozygous in every individual (genotyped), or genotyped in fewer ",
+      "than 3 individuals (e.g. ",
       paste(utils::head(loci_names(x)[constant], 3), collapse = ", "),
-      "), as heavy imputation can make them: remove them (e.g. with ",
-      "select_loci()), or remove the loci with many missing genotypes ",
-      "before imputing",
+      "): remove them (e.g. with select_loci()); heavy imputation can make ",
+      "loci heterozygous in every individual, so remove the loci with many ",
+      "missing genotypes before imputing",
       call. = FALSE
     )
   }

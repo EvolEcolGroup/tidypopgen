@@ -240,30 +240,6 @@ stop_missing_genotypes <- function(what, hint = NULL, imputed_auto = TRUE) {
   )
 }
 
-# Stop if a gt_pca was computed on genotypes with missing values (by
-# gt_pca(method = "partial"), which compares individuals over the loci
-# genotyped in both; see the attribute "missing" set by pca_set_genotypes()),
-# for the functions that need a PCA of complete genotypes. PCAs made by
-# earlier versions have no attribute: their methods needed complete or
-# imputed genotypes.
-# @param pca a gt_pca object
-# @param what the name of the function that needs the PCA (with its
-#   brackets), for the message
-# @keywords internal
-# @noRd
-stopifnot_complete_pca <- function(pca, what) {
-  if (isTRUE(attr(pca, "missing"))) {
-    stop(
-      what, " needs a PCA of complete or imputed genotypes, but the PCA was ",
-      "computed with missing genotypes: impute them (e.g. with ",
-      "gt_impute_simple()), set the gen_tibble to use them ",
-      "(gt_set_imputed(x, set = TRUE)) and run gt_pca() again",
-      call. = FALSE
-    )
-  }
-  invisible(TRUE)
-}
-
 # Whether the genotypes used by x (after any switch to imputed genotypes)
 # have missing values, counted at all the loci, or at a sample of them.
 # Like bigstatsr's assert_noNA(), the sample is only part of the genotypes,

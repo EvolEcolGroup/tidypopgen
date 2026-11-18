@@ -9,10 +9,8 @@ gt_pcadapt(x, pca, k, n_cores = 1)
 \arguments{
 \item{x}{A \code{gen_tibble} object.}
 
-\item{pca}{a \code{\link{gt_pca}} object, as returned by \code{\link[=gt_pca]{gt_pca()}}, of complete or
-imputed genotypes: with missing genotypes, set the \code{gen_tibble} to use
-imputed genotypes (\code{\link[=gt_set_imputed]{gt_set_imputed()}}) before \code{\link[=gt_pca]{gt_pca()}}, or use
-\code{gt_pca(method = "random")}, which uses them automatically.}
+\item{pca}{a \code{\link{gt_pca}} object, as returned by \code{\link[=gt_pca]{gt_pca()}}, of the
+individuals of \code{x} (see Details for missing genotypes).}
 
 \item{k}{Number of principal components to use in the analysis.}
 
@@ -31,11 +29,23 @@ individuals. The method is described in Luu et al. (2017). See the R package
 Internally, this function uses the \code{snp_pcadapt} function from the \code{bigsnpr}
 package.
 
-The genotypes of \code{x} must be complete or imputed (see \code{\link[=gt_impute_simple]{gt_impute_simple()}};
-imputed genotypes are used automatically). Missing genotypes give an
-error; as in \code{bigsnpr}, they are looked for in a sample of the genotypes
-(all the individuals, at evenly spaced loci), so a few missing genotypes
-can go unnoticed and change the results.
+The genotypes tested are those that the PCA was computed on:
+\itemize{
+\item with a PCA of genotypes with missing values (the default method of
+\code{\link[=gt_pca]{gt_pca()}}, which compares individuals over the loci genotyped in both,
+as PLINK does), the genotypes of \code{x} with their missing values: each
+locus is tested on the individuals genotyped at it, as in the \code{pcadapt}
+package. Imputed genotypes are not used.
+\item with a PCA of complete or imputed genotypes, the genotypes of \code{x} must be
+complete or imputed (see \code{\link[=gt_impute_simple]{gt_impute_simple()}}; imputed genotypes are
+used automatically). Missing genotypes give an error; as in \code{bigsnpr},
+they are looked for in a sample of the genotypes (all the individuals,
+at evenly spaced loci), and any that go unnoticed are left out of the
+test of their locus.
+}
+
+Loci with the same genotype in every individual genotyped, or genotyped
+in fewer than 3 individuals, can not be tested, and give an error.
 }
 \examples{
 \dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}
@@ -52,12 +62,11 @@ lobsters <- gen_tibble(bed_file,
   quiet = TRUE
 )
 
-# Remove monomorphic loci and impute (pcadapt needs complete genotypes)
+# Remove monomorphic loci
 lobsters <- lobsters \%>\% select_loci_if(loci_maf(genotypes) > 0)
-lobsters <- gt_impute_simple(lobsters, method = "mode")
 
-# Create PCA object, of the imputed genotypes
-gt_set_imputed(lobsters, set = TRUE)
+# Create PCA object (the lobsters have some missing genotypes, which do not
+# need to be imputed)
 pca <- gt_pca(lobsters)
 
 # Create a gt_pcadapt object

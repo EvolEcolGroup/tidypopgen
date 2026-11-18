@@ -153,10 +153,10 @@ With \code{method = "random"}, the genotypes must be complete or imputed (see
 \code{\link[=gt_impute_simple]{gt_impute_simple()}}); imputed genotypes are used automatically when
 they exist.
 
-\code{\link[=gt_pcadapt]{gt_pcadapt()}} and \code{\link[=gt_dapc]{gt_dapc()}} need a PCA of complete or imputed
-genotypes: with missing genotypes, set the \code{gen_tibble} to use imputed
-genotypes before \code{gt_pca()}, or use \code{method = "random"}. The PCA records
-which genotypes it used (see Value).
+The PCA records which genotypes it used (see Value). With missing
+genotypes, \code{\link[=gt_pcadapt]{gt_pcadapt()}} tests each locus on the individuals genotyped
+at it, and \code{\link[=gt_dapc]{gt_dapc()}} estimates the loadings of the loci without
+counting missing genotypes as 0 (for which it needs the \code{gen_tibble}).
 }
 
 \section{Scaling}{

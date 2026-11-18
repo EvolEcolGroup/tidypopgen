@@ -10,8 +10,8 @@
   `method = "random"` is for very large numbers of individuals
 * `gt_pca` objects record whether they used imputed genotypes and whether
   their genotypes had missing values (attributes `imputed` and `missing`)
-* `gt_pcadapt()` needs a PCA of complete or imputed genotypes, not one that
-  compared individuals over the loci genotyped in both
+* `gt_pcadapt()` works on a PCA of missing genotypes, testing each locus on
+  the individuals genotyped at it, as the `pcadapt` package does
 * `gt_dapc()` works on a PCA of missing genotypes: give the `gen_tibble` as
   `data`, and the loadings of the loci are estimated without counting missing
   genotypes as 0 (new arguments `data` and `n_cores`)

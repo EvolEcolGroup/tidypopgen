@@ -22,17 +22,48 @@ test_that("gt_pcadapt works on gt_pca object", {
   expect_true((inherits(missing_pcadapt, "gt_pcadapt")))
 })
 
-test_that("gt_pcadapt needs a PCA of complete or imputed genotypes", {
+test_that("gt_pcadapt with a PCA of missing genotypes", {
   # a PCA that compared individuals over the loci genotyped in both
   pairwise_pca <- missing_gt %>% gt_pca(k = 3, n_cores = 2)
   expect_true(attr(pairwise_pca, "missing"))
-  expect_error(
-    gt_pcadapt(missing_gt, pairwise_pca, k = 3),
-    "gt_pcadapt\\(\\) needs a PCA of complete or imputed genotypes"
+  pairwise_pcadapt <- gt_pcadapt(missing_gt, pairwise_pca, k = 1)
+  # each locus is tested on the individuals genotyped at it (not on the
+  # imputed genotypes of missing_gt): with k = 1, the statistic is the
+  # squared deviation from the median of the t-score of the regression of the
+  # genotypes on the scores
+  expect_false(gt_uses_imputed(missing_gt))
+  geno <- show_genotypes(missing_gt)
+  u <- pairwise_pca$u[, 1]
+  t_scores <- apply(geno, 2, function(g) {
+    obs <- !is.na(g)
+    r <- stats::cor(g[obs], u[obs])
+    r * sqrt((sum(obs) - 2) / (1 - r^2))
+  })
+  expect_equal(
+    pairwise_pcadapt$score,
+    (t_scores - stats::median(t_scores))^2
   )
-  # PCAs without the attribute (from earlier versions) are accepted
-  attr(pairwise_pca, "missing") <- NULL
-  expect_s3_class(gt_pcadapt(missing_gt, pairwise_pca, k = 3), "gt_pcadapt")
+  # loci with the same genotype in every individual genotyped are named
+  het_gt <- gen_tibble(
+    x = rbind(
+      c(2, 1, 0, 1, 1, 1), c(0, 1, 2, 0, 1, NA), c(1, 2, 0, 1, 0, 1),
+      c(2, 0, 1, 2, 1, 1), c(0, 2, 1, 0, 2, NA), c(1, 1, 2, 2, 0, 1),
+      c(2, 0, 0, 1, 2, 1), c(0, 1, 1, 0, 1, 1)
+    ),
+    indiv_meta = data.frame(
+      id = paste0("ind", 1:8), population = rep(c("a", "b"), each = 4)
+    ),
+    loci = data.frame(
+      name = paste0("rs", 1:6), chromosome = 1, position = 1:6 * 100,
+      genetic_dist = 0, allele_ref = "A", allele_alt = "T"
+    ),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  het_pca <- gt_pca(het_gt, k = 2, n_cores = 1)
+  expect_error(
+    gt_pcadapt(het_gt, het_pca, k = 2),
+    "1 loci are monomorphic or heterozygous in every individual \\(genotyped"
+  )
 })
 
 test_that("gt_pcadapt checks that individuals match the pca", {

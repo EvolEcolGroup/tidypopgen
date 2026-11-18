@@ -53,10 +53,10 @@
 #'   [gt_impute_simple()]); imputed genotypes are used automatically when
 #'   they exist.
 #'
-#'   [gt_pcadapt()] and [gt_dapc()] need a PCA of complete or imputed
-#'   genotypes: with missing genotypes, set the `gen_tibble` to use imputed
-#'   genotypes before `gt_pca()`, or use `method = "random"`. The PCA records
-#'   which genotypes it used (see Value).
+#'   The PCA records which genotypes it used (see Value). With missing
+#'   genotypes, [gt_pcadapt()] tests each locus on the individuals genotyped
+#'   at it, and [gt_dapc()] estimates the loadings of the loci without
+#'   counting missing genotypes as 0 (for which it needs the `gen_tibble`).
 #'
 #' @section Scaling: `fun_scaling = NULL` (the default) uses the binomial
 #'   scaling above, as [bigsnpr::snp_scaleBinom()] (and PLINK) do, with the
@@ -262,7 +262,7 @@ gt_pca <- function(x, k = 10, method = c("partial", "random"),
   class(this_pca) <- c("gt_pca", "big_SVD")
   # record the genotypes the PCA was computed on: imputed or not, and with
   # missing genotypes or not (counted by grm_plink_cpp()), for the functions
-  # that need a PCA of complete genotypes (see stopifnot_complete_pca())
+  # that treat the two differently (gt_dapc() and gt_pcadapt())
   pca_set_genotypes(this_pca,
     imputed = imputed,
     missing = attr(grm, "n_missing") > 0
