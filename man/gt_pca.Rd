@@ -152,6 +152,11 @@ semi-definite; only its largest (positive) eigenvalues are used.
 With \code{method = "random"}, the genotypes must be complete or imputed (see
 \code{\link[=gt_impute_simple]{gt_impute_simple()}}); imputed genotypes are used automatically when
 they exist.
+
+\code{\link[=gt_pcadapt]{gt_pcadapt()}} and \code{\link[=gt_dapc]{gt_dapc()}} need a PCA of complete or imputed
+genotypes: with missing genotypes, set the \code{gen_tibble} to use imputed
+genotypes before \code{gt_pca()}, or use \code{method = "random"}. The PCA records
+which genotypes it used (see Value).
 }
 
 \section{Scaling}{

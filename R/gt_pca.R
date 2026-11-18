@@ -53,6 +53,11 @@
 #'   [gt_impute_simple()]); imputed genotypes are used automatically when
 #'   they exist.
 #'
+#'   [gt_pcadapt()] and [gt_dapc()] need a PCA of complete or imputed
+#'   genotypes: with missing genotypes, set the `gen_tibble` to use imputed
+#'   genotypes before `gt_pca()`, or use `method = "random"`. The PCA records
+#'   which genotypes it used (see Value).
+#'
 #' @section Scaling: `fun_scaling = NULL` (the default) uses the binomial
 #'   scaling above, as [bigsnpr::snp_scaleBinom()] (and PLINK) do, with the
 #'   allele frequencies of the genotyped individuals. A function that returns
