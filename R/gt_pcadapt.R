@@ -122,11 +122,10 @@ gt_pcadapt <- function(x, pca, k, n_cores = 1) {
     error = function(e) {
       # loci with the same genotype in every individual have no variance,
       # and so undefined statistics, which snp_pcadapt() reports as "You
-      # can't have missing values in 'U'" (#179): look for them (only after
-      # this error) and say which they are
-      if (grepl("missing values in 'U'", conditionMessage(e), fixed = TRUE)) {
-        stopifnot_variable_loci(x, x_ind_row, x_ind_col)
-      }
+      # can't have missing values in 'U'" (#179), or, with k = 1, as an
+      # error of its genomic control ("invalid 'xmin' value"): look for them
+      # (only after an error) and say which they are
+      stopifnot_variable_loci(x, x_ind_row, x_ind_col)
       stop(e)
     }
   )

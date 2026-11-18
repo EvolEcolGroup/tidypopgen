@@ -64,6 +64,12 @@ test_that("gt_pcadapt with a PCA of missing genotypes", {
     gt_pcadapt(het_gt, het_pca, k = 2),
     "1 loci are monomorphic or heterozygous in every individual \\(genotyped"
   )
+  # also with k = 1, where snp_pcadapt() fails in its genomic control
+  # (after warnings of its own)
+  suppressWarnings(expect_error(
+    gt_pcadapt(het_gt, het_pca, k = 1),
+    "1 loci are monomorphic or heterozygous in every individual \\(genotyped"
+  ))
 })
 
 test_that("gt_pcadapt checks that individuals match the pca", {
