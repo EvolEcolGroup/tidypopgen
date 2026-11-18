@@ -47,6 +47,11 @@ test_that("missing genotypes are looked for only in the loci used", {
   set.seed(1)
   keep_complete <- loci_ld_clump(complete_gt, thr_r2 = 0.2, size = 10)
   expect_length(keep_complete, 133)
+  # the number of cores is still checked
+  expect_error(
+    loci_ld_clump(complete_gt, thr_r2 = 0.2, size = 10, n_cores = 0),
+    "'ncores' should be at least 1"
+  )
   # missing genotypes in the loci used are still found
   expect_error(
     loci_ld_clump(missing_gt, thr_r2 = 0.2, size = 10),

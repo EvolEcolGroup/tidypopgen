@@ -124,7 +124,8 @@ loci_ld_clump.vctrs_bigSNP <- function(
   # backing matrix (including individuals and loci that .x does not use), so
   # turn it off, and check a sample of the genotypes used here instead (the
   # loci in `exclude` are not used)
-  local_no_bigstatsr_checks()
+  # (keeping bigstatsr's check of n_cores)
+  local_no_bigstatsr_checks(n_cores = n_cores)
   stopifnot_no_missing(.x, "loci_ld_clump()",
     loci = setdiff(seq_along(show_loci(.x)$big_index), exclude),
     n_cores = n_cores

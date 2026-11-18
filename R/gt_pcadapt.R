@@ -86,7 +86,8 @@ gt_pcadapt <- function(x, pca, k, n_cores = 1) {
   # pcadapt needs complete genotypes: bigsnpr's check samples the whole
   # backing matrix (including individuals and loci that x does not use), so
   # turn it off, and check a sample of the genotypes of x instead
-  local_no_bigstatsr_checks()
+  # (keeping bigstatsr's check of n_cores)
+  local_no_bigstatsr_checks(n_cores = n_cores)
   stopifnot_no_missing(x, "gt_pcadapt()", n_cores = n_cores)
 
   x_ind_col <- show_loci(x)$big_index

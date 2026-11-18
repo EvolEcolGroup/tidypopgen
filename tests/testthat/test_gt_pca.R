@@ -869,6 +869,29 @@ test_that("the SVDs check all the genotypes they use, also in parallel", {
   )
 })
 
+test_that("the number of cores is checked, as bigstatsr did", {
+  set.seed(7)
+  sim_gt <- gt_simulate_bn(n_indiv = c(10, 10), n_loci = 200, fst = 0.1)
+  sim_gt <- select_loci_if(sim_gt, loci_maf(genotypes) > 0)
+  # (bigstatsr's own checks are off, for the genotypes; this one is kept)
+  expect_error(
+    gt_pca(sim_gt, k = 2, method = "random", n_cores = 0),
+    "'ncores' should be at least 1"
+  )
+  expect_error(
+    gt_pca_autoSVD(sim_gt, k = 2, roll_size = 0, verbose = FALSE, n_cores = 0),
+    "'ncores' should be at least 1"
+  )
+  expect_error(
+    gt_pca(sim_gt,
+      k = 2, method = "random",
+      n_cores = getOption("bigstatsr.ncores.max") + 1
+    ),
+    "more cores than allowed"
+  )
+  expect_true(getOption("bigstatsr.check.args"))
+})
+
 test_that("gt_pca objects record imputed and missing genotypes", {
   withr::local_options(lifecycle_verbosity = "quiet")
   set.seed(1)

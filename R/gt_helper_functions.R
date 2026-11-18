@@ -334,12 +334,19 @@ stopifnot_no_missing <- function(x, what, hint = NULL, loci = NULL,
 # values (assert_noNA()) samples the whole backing matrix, not the rows and
 # columns that the analysis uses, and so gives false errors on a gen_tibble
 # that no longer uses some individuals or loci with missing genotypes; the
-# genotypes are checked with stopifnot_no_missing() instead. (The other
-# checks are of indices and numbers of cores, which tidypopgen builds.)
+# genotypes are checked with stopifnot_no_missing() instead. The other
+# checks are of indices, which tidypopgen builds, and of the number of cores,
+# which comes from the user: it is kept, with bigparallelr::assert_cores()
+# (call it after setting bigstatsr.check.parallel.blas, as bigstatsr would).
 # @param envir the frame whose exit restores the option
+# @param n_cores the number of cores that the function will use (NULL if it
+#   does not use several)
 # @keywords internal
 # @noRd
-local_no_bigstatsr_checks <- function(envir = parent.frame()) {
+local_no_bigstatsr_checks <- function(envir = parent.frame(), n_cores = NULL) {
+  if (!is.null(n_cores)) {
+    bigparallelr::assert_cores(n_cores)
+  }
   old_opts <- options(bigstatsr.check.args = FALSE)
   # restore the option when envir exits (add = TRUE keeps its own on.exit()
   # code)

@@ -357,21 +357,21 @@ pca_random_svd <- function(x, k, fun_scaling, tol, verbose, n_cores,
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)
   }
-  # the SVD needs complete genotypes: bigstatsr's check samples the whole
-  # backing matrix (including individuals and loci that x does not use), so
-  # turn it off; the scaling, computed once for all the loci, checks the
-  # genotypes of x exactly (see scaling_lookup())
-  local_no_bigstatsr_checks()
-  fun_scaling <- scaling_lookup(x, fun_scaling,
-    what = what, hint = hint, n_cores = n_cores
-  )
-
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
     .old_opt <- getOption("bigstatsr.check.parallel.blas", TRUE)
     options(bigstatsr.check.parallel.blas = FALSE)
     on.exit(options(bigstatsr.check.parallel.blas = .old_opt), add = TRUE)
   }
+  # the SVD needs complete genotypes: bigstatsr's check samples the whole
+  # backing matrix (including individuals and loci that x does not use), so
+  # turn it off; the scaling, computed once for all the loci, checks the
+  # genotypes of x (see scaling_lookup())
+  # (keeping bigstatsr's check of n_cores)
+  local_no_bigstatsr_checks(n_cores = n_cores)
+  fun_scaling <- scaling_lookup(x, fun_scaling,
+    what = what, hint = hint, n_cores = n_cores
+  )
 
   X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index
