@@ -52,29 +52,29 @@ comments.
 
 ### Code copied without attribution
 
-- [ ] `5788fbf2` · `read_packedancestry()` — adapted from bigsnpr's
+- [x] `5788fbf2` · `read_packedancestry()` — adapted from bigsnpr's
   `readbina()` (GPL-3, Florian Privé) without any credit *[licence]*
-- [ ] `2f227f44` · `gt_extract_f2()` — follows `admixtools::extract_f2()`
+- [x] `2f227f44` · `gt_extract_f2()` — follows `admixtools::extract_f2()`
   (GPL-3, Robert Maier); docs only said "equivalent to" *[licence]*
-- [ ] `e55379c5` · `helper_sfs_reference.R`, `sfs_cpp.cpp` — port of easySFS
+- [x] `e55379c5` · `helper_sfs_reference.R`, `sfs_cpp.cpp` — port of easySFS
   (CC BY 4.0) and dadi (BSD-3) without the BSD notice and disclaimer, or the
   CC BY licence and statement of changes *[licence]*
 
 ### DESCRIPTION and copyrights
 
-- [ ] `20580430` · DESCRIPTION — given and family names of Christopher Chang
+- [x] `20580430` · DESCRIPTION — given and family names of Christopher Chang
   and Henrik Bengtsson swapped; PLINK credit widened to `qc_report_loci()`
   and `windows_indiv_roh()` *[attribution]*
-- [ ] `c38f73f3` · DESCRIPTION — Privé, Goudet, Maier, Gutenkunst, Overcast
+- [x] `c38f73f3` · DESCRIPTION — Privé, Goudet, Maier, Gutenkunst, Overcast
   and Wigginton added as `ctb` *[attribution]*
-- [ ] `8b1cffdc` · DESCRIPTION, `inst/COPYRIGHTS`, NEWS — `cph` roles and a
+- [x] `8b1cffdc` · DESCRIPTION, `inst/COPYRIGHTS`, NEWS — `cph` roles and a
   COPYRIGHTS file listing each source, holder, licence and file *[CRAN
   policy]*
-- [ ] `db6f18a7` · `inst/COPYRIGHTS` — correction of `8b1cffdc`
+- [x] `db6f18a7` · `inst/COPYRIGHTS` — correction of `8b1cffdc`
   (`hwe.cpp` has only `SNPHWE2()`)
-- [ ] `b35b2d2c` · `man/tidypopgen-package.Rd` — regenerated for the new
+- [x] `b35b2d2c` · `man/tidypopgen-package.Rd` — regenerated for the new
   authors
-- [ ] `863c7ad8` · DESCRIPTION — Max Carter-Brown, Jason Hodgson, Margherita
+- [x] `863c7ad8` · DESCRIPTION — Max Carter-Brown, Jason Hodgson, Margherita
   Colucci and Dominik Jud (from the git history) added as `ctb`
   *[attribution]*
   (Colucci and Jud removed again by Andrea in `2e868c97`: only substantial
@@ -82,22 +82,22 @@ comments.
 
 ### Data and references
 
-- [ ] `4218da60` · `data-raw/misc/` — copy of `AdegenetPolyplChapter.R`
+- [x] `4218da60` · `data-raw/misc/` — copy of `AdegenetPolyplChapter.R`
   (repository without a licence) replaced by a text file with its URL
   *[licence]*
-- [ ] `21766c20` · vignettes, `distruct_colours`, `create_ploidy_vcf.R`,
+- [x] `21766c20` · vignettes, `distruct_colours`, `create_ploidy_vcf.R`,
   `inst/COPYRIGHTS` — citations for the lobster, anolis, arenosa data and
   the distruct palette *[attribution]*
-- [ ] `106719ac` · `predict.gt_pca()` — Privé et al. 2020 cited for OADP
+- [x] `106719ac` · `predict.gt_pca()` — Privé et al. 2020 cited for OADP
   *[attribution]*
-- [ ] `81da8db6` · `inst/COPYRIGHTS`, `create_ploidy_vcf.R` — the polyploid
+- [x] `81da8db6` · `inst/COPYRIGHTS`, `create_ploidy_vcf.R` — the polyploid
   tutorial (repository, authors, chapter) named as the source of the arenosa
   VCF *[attribution]*
 
 ### Other
 
-- [ ] `2f6f85ca` · `inst/WORDLIST` — new names and words
-- [ ] `2f10c21a` · `vignettes/tidypopgen.Rmd` — typos "speciifc" and
+- [x] `2f6f85ca` · `inst/WORDLIST` — new names and words
+- [x] `2f10c21a` · `vignettes/tidypopgen.Rmd` — typos "speciifc" and
   "clumpping"
 
 ## Findings not fixed
