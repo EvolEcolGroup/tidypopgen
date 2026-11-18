@@ -115,14 +115,18 @@ Forest.
 ## PCA
 
 That was easy. The loci had already been filtered and cleaned, so we don't need 
-to do any QC. Let us jump straight into analysis and run a PCA:
+to do any QC. Let us jump straight into analysis and run a PCA. There are
+missing data. The default method of `gt_pca()` does not need them to be imputed:
+as `plink --pca`, it compares individuals over the loci genotyped in both. But
+we will use the PCA for a DAPC, which needs a PCA of complete genotypes, so we
+first impute the missing genotypes with `gt_impute_simple()`, and set the
+`gen_tibble` to use the imputed genotypes for the PCA:
 ```{r}
+anole_gt <- gt_impute_simple(anole_gt, method = "mode")
+gt_set_imputed(anole_gt, set = TRUE)
 anole_pca <- anole_gt %>% gt_pca(k = 30)
+gt_set_imputed(anole_gt, set = FALSE)
 ```
-There are missing data, but we do not need to impute them: the default method
-of `gt_pca()`, as `plink --pca`, compares individuals over the loci genotyped in
-both (other analyses, e.g. `gt_pca(method = "random")`, need complete data, and
-we would first impute the missing genotypes with `gt_impute_simple()`).
 
 Let us look at the object:
 ```{r}

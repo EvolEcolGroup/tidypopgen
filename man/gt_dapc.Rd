@@ -7,7 +7,8 @@
 gt_dapc(x, pop = NULL, n_pca = NULL, n_da = NULL, loadings_by_locus = TRUE)
 }
 \arguments{
-\item{x}{an object of class \code{gt_pca}, or its subclass \code{gt_cluster_pca}}
+\item{x}{an object of class \code{gt_pca}, or its subclass \code{gt_cluster_pca}, of
+complete or imputed genotypes (see Details)}
 
 \item{pop}{either a factor indicating the group membership of individuals; or
 an integer defining the desired \emph{k} if x is a \code{gt_cluster_pca}; or NULL, if
@@ -69,6 +70,13 @@ adjusting \code{n_pca} to avoid potential overfitting. We recommend users consul
 these guidelines and consider their individual dataset to ensure best
 practices.
 
+The PCA must be of complete or imputed genotypes: a PCA that compared
+individuals over the loci genotyped in both (the default method of
+\code{\link[=gt_pca]{gt_pca()}}, with missing genotypes) gives an error. Impute the missing
+genotypes (e.g. with \code{\link[=gt_impute_simple]{gt_impute_simple()}}) and set the \code{gen_tibble} to use
+them (\code{\link[=gt_set_imputed]{gt_set_imputed()}}) before \code{\link[=gt_pca]{gt_pca()}}, or use
+\code{gt_pca(method = "random")}, which uses them automatically.
+
 Note that there is no current method to predict scores for
 individuals not included in the original analysis. This is because we
 currently do not have a mechanism to store the pca information in the
@@ -83,8 +91,11 @@ lobsters <- gen_tibble(bed_file,
   quiet = TRUE
 )
 
-# Remove monomorphic loci
+# Remove monomorphic loci, and impute (DAPC needs a PCA of complete
+# genotypes)
 lobsters <- lobsters \%>\% select_loci_if(loci_maf(genotypes) > 0)
+lobsters <- gt_impute_simple(lobsters, method = "mode")
+gt_set_imputed(lobsters, set = TRUE)
 
 # Create PCA object
 pca <- gt_pca(lobsters)

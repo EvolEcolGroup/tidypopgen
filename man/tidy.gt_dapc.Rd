@@ -74,8 +74,11 @@ lobsters <- gen_tibble(bed_file,
   quiet = TRUE
 )
 
-# Remove monomorphic loci
+# Remove monomorphic loci, and impute (DAPC needs a PCA of complete
+# genotypes)
 lobsters <- lobsters \%>\% select_loci_if(loci_maf(genotypes) > 0)
+lobsters <- gt_impute_simple(lobsters, method = "mode")
+gt_set_imputed(lobsters, set = TRUE)
 
 # Create PCA and run DAPC
 pca <- gt_pca(lobsters)

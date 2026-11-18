@@ -10,8 +10,8 @@
   `method = "random"` is for very large numbers of individuals
 * `gt_pca` objects record whether they used imputed genotypes and whether
   their genotypes had missing values (attributes `imputed` and `missing`)
-* `gt_pcadapt()` needs a PCA of complete or imputed genotypes, not one that
-  compared individuals over the loci genotyped in both
+* `gt_pcadapt()` and `gt_dapc()` need a PCA of complete or imputed genotypes,
+  not one that compared individuals over the loci genotyped in both
 * errors on missing genotypes name the function and say how to impute them;
   the SVD-based PCAs check all their genotypes, and `gt_pca(method = "random")`
   no longer reads them an extra time to do so

@@ -38,6 +38,13 @@
 #' these guidelines and consider their individual dataset to ensure best
 #' practices.
 #'
+#' The PCA must be of complete or imputed genotypes: a PCA that compared
+#' individuals over the loci genotyped in both (the default method of
+#' [gt_pca()], with missing genotypes) gives an error. Impute the missing
+#' genotypes (e.g. with [gt_impute_simple()]) and set the `gen_tibble` to use
+#' them ([gt_set_imputed()]) before [gt_pca()], or use
+#' `gt_pca(method = "random")`, which uses them automatically.
+#'
 #' Note that there is no current method to predict scores for
 #' individuals not included in the original analysis. This is because we
 #' currently do not have a mechanism to store the pca information in the
@@ -51,7 +58,8 @@
 #'   Ecology Resources, 23, 523–538. https://doi.org/10.1111/1755-0998.13706
 #'
 #'
-#' @param x an object of class `gt_pca`, or its subclass `gt_cluster_pca`
+#' @param x an object of class `gt_pca`, or its subclass `gt_cluster_pca`, of
+#'   complete or imputed genotypes (see Details)
 #' @param pop either a factor indicating the group membership of individuals; or
 #'   an integer defining the desired *k* if x is a `gt_cluster_pca`; or NULL, if
 #'   'x' is a `gt_cluster_pca` and contain an element 'best_k', usually
@@ -77,8 +85,11 @@
 #'   quiet = TRUE
 #' )
 #'
-#' # Remove monomorphic loci
+#' # Remove monomorphic loci, and impute (DAPC needs a PCA of complete
+#' # genotypes)
 #' lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
+#' lobsters <- gt_impute_simple(lobsters, method = "mode")
+#' gt_set_imputed(lobsters, set = TRUE)
 #'
 #' # Create PCA object
 #' pca <- gt_pca(lobsters)
@@ -129,6 +140,8 @@ gt_dapc <- function(
   if (!inherits(x, "gt_pca")) {
     stop("'x' should be a 'gt_pca' object")
   }
+  # the PCA must be of complete (or imputed) genotypes
+  stopifnot_complete_pca(x, "gt_dapc()")
   if (is.null(x$center)) {
     stop("'x' was run without centering; centering is necessary for 'gt_dapc'")
   }

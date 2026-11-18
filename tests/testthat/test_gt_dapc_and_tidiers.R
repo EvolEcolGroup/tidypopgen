@@ -11,6 +11,7 @@ test_that("gt_dapc_and_tidiers", {
   )
 
   test_gt <- gt_impute_simple(test_gt, method = "mode")
+  gt_set_imputed(test_gt, set = TRUE)
   test_pca <- test_gt %>% gt_pca(k = 15, n_cores = 2)
   ############################
   # unit tests for gt_cluster_pca
@@ -135,6 +136,7 @@ test_that("scores plot error if only 2 populations", {
   test_gt$population <- c(rep("pop1", 100), rep("pop2", 100))
   test_gt <- test_gt %>% group_by(population)
   test_gt <- gt_impute_simple(test_gt, method = "mode")
+  gt_set_imputed(test_gt, set = TRUE)
   test_pca <- test_gt %>% gt_pca(k = 2, n_cores = 2)
   test_dapc <- test_pca %>% gt_dapc(pop = as.factor(test_gt$population))
   expect_error(
@@ -153,6 +155,7 @@ test_that("gt_cluster_pca works with a single k and a single component", {
     quiet = TRUE
   )
   test_gt <- gt_impute_simple(test_gt, method = "mode")
+  gt_set_imputed(test_gt, set = TRUE)
   test_pca <- test_gt %>% gt_pca(k = 5, n_cores = 2)
   # only one k larger than 1
   test_cluster <- gt_cluster_pca(test_pca,
@@ -193,6 +196,7 @@ test_that("best_k is a value of k when k_clusters does not start at 1", {
     quiet = TRUE
   )
   test_gt <- gt_impute_simple(test_gt, method = "mode")
+  gt_set_imputed(test_gt, set = TRUE)
   test_pca <- test_gt %>% gt_pca(k = 10, n_cores = 2)
   test_cluster <- gt_cluster_pca(test_pca,
     n_pca = 10, k_clusters = c(3, 8),
@@ -238,6 +242,7 @@ test_that("gt_dapc var is the proportion of variance of the retained PCs", {
     quiet = TRUE
   )
   test_gt <- gt_impute_simple(test_gt, method = "mode")
+  gt_set_imputed(test_gt, set = TRUE)
   test_pca <- test_gt %>% gt_pca(k = 10, n_cores = 2)
   pops <- as.factor(rep(c("pop1", "pop2", "pop3", "pop4"), each = 50))
   test_dapc <- gt_dapc(test_pca, pop = pops, n_pca = 6)
@@ -255,6 +260,7 @@ test_that("gt_dapc uses k-1 PCs by default", {
     quiet = TRUE
   )
   test_gt <- gt_impute_simple(test_gt, method = "mode")
+  gt_set_imputed(test_gt, set = TRUE)
   test_pca <- test_gt %>% gt_pca(k = 5, n_cores = 2)
   # as many populations as PCs
   pops <- as.factor(rep(paste0("pop", 1:5), each = 40))
@@ -280,6 +286,7 @@ test_that("gt_dapc gives an informative error for an invalid pop", {
     quiet = TRUE
   )
   test_gt <- gt_impute_simple(test_gt, method = "mode")
+  gt_set_imputed(test_gt, set = TRUE)
   test_pca <- test_gt %>% gt_pca(k = 5, n_cores = 2)
   pops <- c(rep("pop1", 100), rep("pop2", 100))
   # a character vector rather than a factor
@@ -313,6 +320,7 @@ test_that("augment.gt_dapc works with one discriminant axis and checks ids", {
     quiet = TRUE
   )
   test_gt <- gt_impute_simple(test_gt, method = "mode")
+  gt_set_imputed(test_gt, set = TRUE)
   # use integer ids
   test_gt$id <- seq_len(nrow(test_gt))
   test_pca <- test_gt %>% gt_pca(k = 5, n_cores = 2)
@@ -331,4 +339,35 @@ test_that("augment.gt_dapc works with one discriminant axis and checks ids", {
     test_dapc %>% augment(data = test_gt[rev(seq_len(nrow(test_gt))), ]),
     "the data id column does not correspond to the individuals"
   )
+})
+
+test_that("gt_dapc needs a PCA of complete or imputed genotypes", {
+  bed_file <- system.file("extdata", "example-missing.bed",
+    package = "bigsnpr"
+  )
+  test_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("test_"),
+    quiet = TRUE
+  )
+  pops <- as.factor(c(rep("pop1", 100), rep("pop2", 100)))
+  # a PCA that compared individuals over the loci genotyped in both
+  pairwise_pca <- test_gt %>% gt_pca(k = 5, n_cores = 2)
+  expect_error(
+    gt_dapc(pairwise_pca, pop = pops),
+    "gt_dapc\\(\\) needs a PCA of complete or imputed genotypes"
+  )
+  # also through the clusters made from it
+  pairwise_clusters <- gt_cluster_pca(pairwise_pca,
+    n_pca = 5, k_clusters = c(1, 3), quiet = TRUE
+  )
+  expect_error(
+    gt_dapc(pairwise_clusters, pop = 2),
+    "gt_dapc\\(\\) needs a PCA of complete or imputed genotypes"
+  )
+  # the PCA of the imputed genotypes works
+  test_gt <- gt_impute_simple(test_gt, method = "mode")
+  gt_set_imputed(test_gt, set = TRUE)
+  imputed_pca <- test_gt %>% gt_pca(k = 5, n_cores = 2)
+  expect_s3_class(gt_dapc(imputed_pca, pop = pops), "gt_dapc")
 })
