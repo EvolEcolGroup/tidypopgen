@@ -73,10 +73,15 @@ Example data (inst/extdata/)
     released under CC0.
   - anolis/: the RAD-seq genotypes of Anolis punctatus of Prates et al.
     (2018) Ecology and Evolution 8: 11932-11944, doi:10.1002/ece3.4650,
-    from https://github.com/ivanprates/2018_Anolis_EcolEvol.
+    from https://github.com/ivanprates/2018_Anolis_EcolEvol
+    (data/VCFtools_SNMF_punctatus_t70_s10_n46/).
   - ploidy/arenosa_ploidy_example.vcf.gz: 200 loci of Arabidopsis arenosa
     from Wos et al. (2019) Annals of Botany 124: 255-268,
-    doi:10.1093/aob/mcz070, as distributed with the tutorial of Bohutinska
-    et al. (2023) Methods in Molecular Biology 2545: 297-324.
+    doi:10.1093/aob/mcz070, taken from the data of the tutorial on
+    polyploid population genomics by Magdalena Bohutinska and Filip Kolar
+    (https://github.com/mbohutinska/PolyplChapter), which accompanies
+    Bohutinska et al. (2023) Population genomic analysis of
+    diploid-autopolyploid species. Methods in Molecular Biology 2545:
+    297-324, doi:10.1007/978-1-0716-2561-3_16.
   - data/distruct_colours.rda: the colour palette of distruct (Rosenberg
     2004, Molecular Ecology Notes 4: 137-138).
