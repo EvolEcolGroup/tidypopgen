@@ -85,6 +85,7 @@ Remember to time installed (-O2) builds, not `load_all()` (see `CLAUDE.md`).
 |---|---|
 | `code_review_2026-10.md` | The October 2026 code review: the fixes, with a checkbox for each commit once checked, and the findings not fixed. |
 | `code_review_2026-10_review_strategy.md` | How the commits of that review are checked and accepted or reverted. |
+| `code_review_2026-11_attribution.md` | The November 2026 review of attribution and licences of third-party code and data: the fixes, with a checkbox for each commit, and the findings not fixed. |
 | `speed_review_2026-11.md` | The November 2026 speed work (`speed`, `speed_extra`, `roh`): each commit, its timings and the further ideas. |
 | `speed_accessors_guide.md` | A developer guide to the fast C++ accessors of the genotypes and how to write new kernels. |
 | `article_timings_speed_vs_big_data_article.md` | Timings of the big data article before and after the speed work. |
