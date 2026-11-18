@@ -84,6 +84,8 @@ list with elements: A named list (an S3 class "big_SVD") of
 \item \code{call}, the call that generated the object.
 \item \code{loci}, the loci used after long range LD removal.
 }
+
+and the attributes \code{imputed} and \code{missing} (see \code{\link[=gt_pca]{gt_pca()}}).
 }
 \description{
 This function performs Principal Component Analysis on a \code{gen_tibble}, using

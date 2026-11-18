@@ -66,6 +66,8 @@ pairwise_grm <- function(
       block_size = grm_block_size(nrow(x)),
       use_blas = grm_use_blas("auto", n_cores)
     )
+    # the count of missing genotypes is only used by gt_pca()
+    attr(grm, "n_missing") <- NULL
     dimnames(grm) <- list(x$id, x$id)
     # add a class to indicate this is a pairwise matrix
     class(grm) <- c("pairwise_matrix", class(grm))

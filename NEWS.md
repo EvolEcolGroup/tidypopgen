@@ -8,6 +8,8 @@
   missing genotypes as `plink --pca` (PLINK 1.9) does, without imputation, and
   uses an optimised BLAS when there is one, and Eigen otherwise;
   `method = "random"` is for very large numbers of individuals
+* `gt_pca` objects record whether they used imputed genotypes and whether
+  their genotypes had missing values (attributes `imputed` and `missing`)
 * `gt_pca_partialSVD()` and `gt_pca_randomSVD()` are deprecated in favour of
   `gt_pca()`
 * `predict()` of a `gt_pca` now uses `project_method = "least_squares"` on all

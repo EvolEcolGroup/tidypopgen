@@ -98,6 +98,9 @@ test_that("adjusting roll_size fixes gt_pca_autoSVD problem ", {
 
   # gen_tibble with no missingness runs
   test_pca <- test %>% gt_pca_autoSVD(verbose = FALSE)
+  # and records complete genotypes, not imputed
+  expect_false(attr(test_pca, "imputed"))
+  expect_false(attr(test_pca, "missing"))
 
   # Now try with imputed data
   bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
@@ -125,6 +128,9 @@ test_that("adjusting roll_size fixes gt_pca_autoSVD problem ", {
   test_pca_roll7 <- missing_gt %>%
     gt_pca_autoSVD(roll_size = 7, verbose = FALSE)
   expect_s3_class(test_pca_roll7, "gt_pca")
+  # the imputed genotypes were used
+  expect_true(attr(test_pca_roll7, "imputed"))
+  expect_false(attr(test_pca_roll7, "missing"))
 
   # testing with the families dataset too
   bed_file <- system.file(
@@ -633,6 +639,9 @@ test_that("gt_pca matches PLINK 1.9 with very high missingness", {
       scale = sqrt(2 * freq * (1 - freq)), block_size = 64, ncores = 2,
       use_blas = use_blas
     )
+    # the number of missing genotypes (for the attributes of gt_pca objects)
+    expect_equal(attr(grm, "n_missing"), sum(is.na(geno)))
+    attr(grm, "n_missing") <- NULL
     expect_equal(grm, grm_ref, tolerance = if (use_blas) 1e-12 else 1e-6)
   }
   plink_rel <- unname(as.matrix(read.table(paste0(fixture, ".rel"))))
@@ -766,6 +775,44 @@ test_that("gt_pca method random needs complete or imputed genotypes", {
   partial_pca <- gt_pca(sim_gt, k = 2, n_cores = 1)
   gt_set_imputed(sim_gt, set = FALSE)
   expect_equal(random_pca$d, partial_pca$d, tolerance = 1e-4)
+})
+
+test_that("gt_pca objects record imputed and missing genotypes", {
+  withr::local_options(lifecycle_verbosity = "quiet")
+  set.seed(1)
+  sim_gt <- gt_simulate_bn(
+    n_indiv = c(20, 20), n_loci = 500, fst = 0.1, missing = 0.1
+  )
+  sim_gt <- select_loci_if(sim_gt, loci_maf(genotypes) > 0)
+  # partial, with missing genotypes compared pairwise
+  missing_pca <- gt_pca(sim_gt, k = 2, n_cores = 1)
+  expect_false(attr(missing_pca, "imputed"))
+  expect_true(attr(missing_pca, "missing"))
+  expect_output(print(missing_pca), "with missing genotypes")
+  # partial, on imputed genotypes (only if the gen_tibble uses them)
+  sim_gt <- gt_impute_simple(sim_gt, method = "mode")
+  expect_true(attr(gt_pca(sim_gt, k = 2, n_cores = 1), "missing"))
+  gt_set_imputed(sim_gt, set = TRUE)
+  imputed_pca <- gt_pca(sim_gt, k = 2, n_cores = 1)
+  gt_set_imputed(sim_gt, set = FALSE)
+  expect_true(attr(imputed_pca, "imputed"))
+  expect_false(attr(imputed_pca, "missing"))
+  expect_output(print(imputed_pca), "Genotypes: imputed")
+  # random and the deprecated functions use the imputed genotypes
+  for (pca in list(
+    gt_pca(sim_gt, k = 2, method = "random", n_cores = 1),
+    gt_pca_randomSVD(sim_gt, k = 2),
+    gt_pca_partialSVD(sim_gt, k = 2)
+  )) {
+    expect_true(attr(pca, "imputed"))
+    expect_false(attr(pca, "missing"))
+  }
+  # partial, on complete genotypes
+  complete_gt <- gt_simulate_bn(n_indiv = c(10, 10), n_loci = 200, fst = 0.1)
+  complete_pca <- gt_pca(complete_gt, k = 2, n_cores = 1)
+  expect_false(attr(complete_pca, "imputed"))
+  expect_false(attr(complete_pca, "missing"))
+  expect_output(print(complete_pca), "Genotypes: complete")
 })
 
 test_that("gt_pca accepts a custom scaling, as gt_pca_partialSVD does", {

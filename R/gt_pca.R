@@ -127,6 +127,14 @@
 #'   missing genotypes and `"partial"`, the number of loci times the trace of
 #'   the GRM)
 #'
+#' Two attributes record the genotypes that the PCA was computed on:
+#' - `imputed`, `TRUE` if the PCA used imputed genotypes
+#' - `missing`, `TRUE` if the genotypes had missing values (only possible
+#'   with `"partial"`)
+#'
+#' PCAs made by earlier versions of `tidypopgen` do not have these
+#' attributes; their methods needed complete or imputed genotypes.
+#'
 #' @note Rather than accessing elements of a `gt_pca` object directly, it is
 #'   better to use `tidy` and `augment`. See [`gt_pca_tidiers`].
 #' @references Purcell S. et al. (2007) PLINK: a tool set for whole-genome
@@ -206,6 +214,8 @@ gt_pca <- function(x, k = 10, method = c("partial", "random"),
   }
 
   # method "partial": the GRM, then its leading eigenvectors
+  # (imputed genotypes are used only if x is set to use them)
+  imputed <- gt_has_imputed(x) && gt_uses_imputed(x)
   if (is.null(block_size)) block_size <- grm_block_size(n_ind)
   use_blas <- grm_use_blas(engine, n_cores)
   scaling <- pca_scaling(x, fun_scaling, n_cores)
@@ -254,7 +264,22 @@ gt_pca <- function(x, k = 10, method = c("partial", "random"),
   )
   if (total_var) this_pca$square_frobenius <- m * sum(diag(grm))
   class(this_pca) <- c("gt_pca", "big_SVD")
-  this_pca
+  # record the genotypes the PCA was computed on: imputed or not, and with
+  # missing genotypes or not (counted by grm_plink_cpp()), for the functions
+  # that need a PCA of complete genotypes (see stopifnot_complete_pca())
+  pca_set_genotypes(this_pca,
+    imputed = imputed,
+    missing = attr(grm, "n_missing") > 0
+  )
+}
+
+# Record, as attributes of a gt_pca, whether the PCA used imputed genotypes
+# ("imputed") and whether the genotypes it decomposed had missing values
+# ("missing"; only possible with method "partial")
+pca_set_genotypes <- function(pca, imputed, missing) {
+  attr(pca, "imputed") <- imputed
+  attr(pca, "missing") <- missing
+  pca
 }
 
 # Centering and scaling of the loci for method "partial": the binomial
@@ -367,7 +392,8 @@ pca_random_svd <- function(x, k, fun_scaling, tol, verbose, n_cores,
       scale = this_svd$scale
     )
   }
-  this_svd
+  # the genotypes were complete (or imputed, if x has imputed genotypes)
+  pca_set_genotypes(this_svd, imputed = gt_has_imputed(x), missing = FALSE)
 }
 
 # Whether the products of the PLINK relationship matrix use the BLAS (TRUE)

@@ -63,6 +63,8 @@
 #' - `method`, a string defining the method (in this case 'autoSVD'),
 #' - `call`, the call that generated the object.
 #' - `loci`, the loci used after long range LD removal.
+#'
+#' and the attributes `imputed` and `missing` (see [gt_pca()]).
 #' @seealso [bigsnpr::snp_autoSVD()]  which this function wraps.
 #' @export
 #' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
@@ -214,6 +216,6 @@ gt_pca_autoSVD <- function(
       scale = this_svd$scale
     )
   }
-
-  this_svd
+  # the genotypes were complete (or imputed, if x has imputed genotypes)
+  pca_set_genotypes(this_svd, imputed = gt_has_imputed(x), missing = FALSE)
 }

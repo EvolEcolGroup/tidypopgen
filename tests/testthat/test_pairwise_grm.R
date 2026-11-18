@@ -54,6 +54,8 @@ test_that("pairwise_grm(method = 'plink') matches plink --make-rel", {
   expect_lt(max(abs(unclass(plink_grm) - plink_rel)), 1e-5)
   expect_s3_class(plink_grm, "pairwise_matrix")
   expect_equal(rownames(plink_grm), missing_gt$id)
+  # without the count of missing genotypes that gt_pca() uses
+  expect_null(attr(plink_grm, "n_missing"))
   # the default estimator is unchanged, and differs from PLINK's
   expect_false(isTRUE(all.equal(
     unclass(pairwise_grm(missing_gt)), unclass(plink_grm),

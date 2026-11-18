@@ -129,5 +129,6 @@ gt_pca_partialSVD <- function(
       scale = this_svd$scale
     )
   }
-  this_svd
+  # the genotypes were complete (or imputed, if x has imputed genotypes)
+  pca_set_genotypes(this_svd, imputed = gt_has_imputed(x), missing = FALSE)
 }

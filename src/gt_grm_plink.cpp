@@ -179,7 +179,8 @@ double grm_rank_update_seconds(int n, int nb, bool use_blas, int ncores) {
 // pairwise_bitpacked.h.
 // center (2 p) and scale (sqrt(2 p (1 - p))) are given for the loci in colInd.
 // Returns the full symmetric n x n matrix; pairs with no locus valid in both
-// individuals are NaN (as in PLINK).
+// individuals are NaN (as in PLINK). The attribute "n_missing" gives the
+// number of missing genotypes.
 // [[Rcpp::export]]
 NumericMatrix grm_plink_cpp(Environment BM,
                             const IntegerVector& rowInd,
@@ -238,6 +239,9 @@ NumericMatrix grm_plink_cpp(Environment BM,
       p_G[i + j * n] = value;
     }
   }
+  // the number of missing genotypes, so that gt_pca() can record whether the
+  // genotypes it decomposed were complete (pairwise_grm() drops it)
+  G.attr("n_missing") = static_cast<double>(n_missing);
   return G;
 }
 
