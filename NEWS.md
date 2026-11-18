@@ -67,6 +67,9 @@
 
 ## Bug fixes
 
+* `gt_pcadapt()`: a clear error, naming them, for loci with the same genotype
+  in every individual (e.g. all heterozygous after heavy imputation), instead
+  of "You can't have missing values in 'U'" (#179)
 * fix false "You can't have missing values" errors (or hangs, with
   `n_cores > 1`) in `loci_ld_clump()`, `gt_pcadapt()`, the PCA functions and
   `predict(project_method = "none")` after removing loci or individuals with

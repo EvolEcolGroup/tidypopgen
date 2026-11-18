@@ -87,12 +87,24 @@ gt_pcadapt <- function(x, pca, k, n_cores = 1) {
   x_ind_row <- vctrs::vec_data(x$genotypes)
 
   # Run the analysis
-  res <- bigsnpr::snp_pcadapt(
-    G = .gt_get_fbm(x),
-    U.row = pca$u[, 1:k, drop = FALSE],
-    ind.row = x_ind_row,
-    ind.col = x_ind_col,
-    ncores = n_cores
+  res <- tryCatch(
+    bigsnpr::snp_pcadapt(
+      G = .gt_get_fbm(x),
+      U.row = pca$u[, 1:k, drop = FALSE],
+      ind.row = x_ind_row,
+      ind.col = x_ind_col,
+      ncores = n_cores
+    ),
+    error = function(e) {
+      # loci with the same genotype in every individual have no variance,
+      # and so undefined statistics, which snp_pcadapt() reports as "You
+      # can't have missing values in 'U'" (#179): look for them (only after
+      # this error) and say which they are
+      if (grepl("missing values in 'U'", conditionMessage(e), fixed = TRUE)) {
+        stopifnot_variable_loci(x, x_ind_row, x_ind_col)
+      }
+      stop(e)
+    }
   )
 
   # add the loci table to the object
@@ -100,4 +112,33 @@ gt_pcadapt <- function(x, pca, k, n_cores = 1) {
   class(res) <- c("gt_pcadapt", class(res))
   # Return the result
   return(res)
+}
+
+# Stop if some loci have the same genotype in every individual (monomorphic,
+# or heterozygous in every individual, as heavy imputation can make them):
+# pcadapt can not test them. It reads all the genotypes (one pass), so it is
+# only called after snp_pcadapt() has failed.
+# @param x a gen_tibble
+# @param ind_row,ind_col the rows and columns of its backing matrix
+# @keywords internal
+# @noRd
+stopifnot_variable_loci <- function(x, ind_row, ind_col) {
+  stats <- bigstatsr::big_colstats(
+    .gt_get_fbm(x),
+    ind.row = ind_row,
+    ind.col = ind_col
+  )
+  constant <- which(stats$var < 1e-12)
+  if (length(constant) > 0) {
+    stop(
+      "gt_pcadapt() can not test loci with the same genotype in every ",
+      "individual, and ", length(constant), " loci are monomorphic or ",
+      "heterozygous in every individual (e.g. ",
+      paste(utils::head(loci_names(x)[constant], 3), collapse = ", "),
+      "), as heavy imputation can make them: remove them (e.g. with ",
+      "select_loci()), or remove the loci with many missing genotypes ",
+      "before imputing",
+      call. = FALSE
+    )
+  }
 }

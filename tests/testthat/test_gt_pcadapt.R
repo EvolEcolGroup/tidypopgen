@@ -80,10 +80,11 @@ test_that("gt_pcadapt 'U' error with heavily imputed SNPs", {
   gt_set_imputed(anolis, TRUE)
   # test pca
   anolis_pca <- gt_pca(anolis, method = "random", n_cores = 1)
-  # fails in gt_pcadapt
+  # fails in gt_pcadapt (snp_pcadapt() reported "You can't have missing
+  # values in 'U'"): the loci heterozygous in every individual are found
   expect_error(
     gt_pcadapt(anolis, anolis_pca, k = 2),
-    "You can't have missing values in 'U'"
+    "27 loci are monomorphic or heterozygous in every individual"
   )
 
   # double check our data is imputed (no missingness)
