@@ -99,9 +99,10 @@ gt_pca_partialSVD <- function(
   }
   # the SVD needs complete genotypes: bigstatsr's check samples the whole
   # backing matrix (including individuals and loci that x does not use), so
-  # turn it off, and check a sample of the genotypes of x instead
+  # turn it off; the scaling, computed once for all the loci, checks the
+  # genotypes of x exactly (see scaling_lookup())
   local_no_bigstatsr_checks()
-  stopifnot_no_missing(x, "gt_pca_partialSVD()")
+  fun_scaling <- scaling_lookup(x, fun_scaling, what = "gt_pca_partialSVD()")
   X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
@@ -113,7 +114,7 @@ gt_pca_partialSVD <- function(
     k = k,
     ind.row = x_ind_row,
     ind.col = x_ind_col,
-    fun.scaling = scaling_without_checks(fun_scaling),
+    fun.scaling = fun_scaling,
     block.size = bigstatsr::block_size(nrow(X))
   )) # TODO check that this is correct and expose it, maybe create convenience
   # function to get the values

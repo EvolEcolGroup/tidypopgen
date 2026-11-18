@@ -128,9 +128,14 @@ gt_pca_autoSVD <- function(
   }
   # the SVD needs complete genotypes: bigsnpr's check samples the whole
   # backing matrix (including individuals and loci that x does not use), so
-  # turn it off, and check a sample of the genotypes of x instead
+  # turn it off; the scaling, computed once for all the loci, checks the
+  # genotypes of x exactly (see scaling_lookup()); snp_autoSVD() removes
+  # loci with too few copies of the minor allele (min_mac) before scaling,
+  # so loci with a zero scale are left to it
   local_no_bigstatsr_checks()
-  stopifnot_no_missing(x, "gt_pca_autoSVD()", n_cores = n_cores)
+  fun_scaling <- scaling_lookup(x, fun_scaling,
+    what = "gt_pca_autoSVD()", check_zero = FALSE, n_cores = n_cores
+  )
 
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
@@ -174,8 +179,8 @@ gt_pca_autoSVD <- function(
         infos.pos = infos_pos,
         ind.row = .gt_fbm_rows(x),
         ind.col = .gt_fbm_cols(x),
-        # (turning off bigstatsr's checks also in the workers)
-        fun.scaling = scaling_without_checks(fun_scaling),
+        # (which also turns off bigstatsr's checks in the workers)
+        fun.scaling = fun_scaling,
         thr.r2 = thr_r2,
         size = size,
         k = k,

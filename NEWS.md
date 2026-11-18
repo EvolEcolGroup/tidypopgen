@@ -10,6 +10,9 @@
   `method = "random"` is for very large numbers of individuals
 * `gt_pca` objects record whether they used imputed genotypes and whether
   their genotypes had missing values (attributes `imputed` and `missing`)
+* errors on missing genotypes name the function and say how to impute them;
+  the SVD-based PCAs check all their genotypes, and `gt_pca(method = "random")`
+  no longer reads them an extra time to do so
 * `gt_pca_partialSVD()` and `gt_pca_randomSVD()` are deprecated in favour of
   `gt_pca()`
 * `predict()` of a `gt_pca` now uses `project_method = "least_squares"` on all

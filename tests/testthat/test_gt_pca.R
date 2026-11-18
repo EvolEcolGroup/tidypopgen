@@ -818,7 +818,41 @@ test_that("missing genotypes are looked for only where they are used", {
   )
   expect_error(
     gt_pca_randomSVD(missing_gt, k = 2),
+    "gt_pca_randomSVD\\(\\) needs complete or imputed genotypes"
+  )
+})
+
+test_that("the SVDs check all the genotypes they use, also in parallel", {
+  withr::local_options(lifecycle_verbosity = "quiet")
+  set.seed(6)
+  sim_gt <- gt_simulate_bn(n_indiv = c(10, 10), n_loci = 300, fst = 0.1)
+  sim_gt <- select_loci_if(sim_gt, loci_maf(genotypes) > 0)
+  # a single missing genotype is found by the scaling (computed once, before
+  # the SVD), which gave a cryptic error, or, with n_cores > 1, left the
+  # workers of the randomised SVD waiting forever
+  one_missing <- show_genotypes(sim_gt)
+  one_missing[3, 150] <- NA
+  one_missing_gt <- gen_tibble(one_missing,
+    indiv_meta = sim_gt %>% select(id, population),
+    loci = show_loci(sim_gt) %>% select(-big_index),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  expect_error(
+    gt_pca(one_missing_gt, k = 2, method = "random", n_cores = 2),
     "gt_pca\\(method = \"random\"\\) needs complete or imputed genotypes"
+  )
+  expect_error(
+    gt_pca_autoSVD(one_missing_gt,
+      k = 2, roll_size = 0, verbose = FALSE, n_cores = 2
+    ),
+    "gt_pca_autoSVD\\(\\) needs complete or imputed genotypes"
+  )
+  # and monomorphic loci give bigstatsr's error before the SVD starts
+  mono_gt <- gt_simulate_bn(n_indiv = c(10, 10), n_loci = 300, fst = 0.1)
+  expect_true(any(loci_maf(mono_gt) == 0))
+  expect_error(
+    gt_pca(mono_gt, k = 2, method = "random", n_cores = 2),
+    "zero scaling"
   )
 })
 

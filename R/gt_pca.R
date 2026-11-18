@@ -185,19 +185,8 @@ gt_pca <- function(x, k = 10, method = c("partial", "random"),
     stop("'k' should be between 1 and the number of individuals - 1")
   }
   if (method == "random") {
-    # use imputed genotypes if they exist; otherwise they must be complete
-    if (gt_has_imputed(x) && !gt_uses_imputed(x)) {
-      gt_set_imputed(x, set = TRUE)
-      on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)
-    }
-    # (on the genotypes column, which gives one value per locus also for a
-    # grouped gen_tibble)
-    if (any(loci_missingness(x$genotypes, n_cores = n_cores) > 0)) {
-      stop(
-        "method = 'random' needs complete or imputed genotypes: impute them ",
-        "(e.g. with gt_impute_simple()), or use method = 'partial'"
-      )
-    }
+    # (pca_random_svd() uses imputed genotypes if they exist; otherwise they
+    # must be complete, which its scaling checks)
     this_pca <- pca_random_svd(x,
       k = k,
       fun_scaling = if (is.null(fun_scaling)) {
@@ -206,7 +195,9 @@ gt_pca <- function(x, k = 10, method = c("partial", "random"),
         fun_scaling
       },
       tol = tol, verbose = verbose, n_cores = n_cores, fun_prod = fun_prod,
-      fun_cprod = fun_cprod, total_var = total_var
+      fun_cprod = fun_cprod, total_var = total_var,
+      what = "gt_pca(method = \"random\")",
+      hint = "or use method = \"partial\""
     )
     this_pca$method <- "random"
     this_pca$call <- match.call()
@@ -305,19 +296,24 @@ pca_scaling <- function(x, fun_scaling, n_cores) {
         ind.col = .gt_fbm_cols(x)
       ),
       error = function(e) {
-        stop(
-          "'fun_scaling' failed (", conditionMessage(e), "): a custom ",
-          "scaling needs complete or imputed genotypes (see gt_set_imputed())",
-          call. = FALSE
-        )
+        # (bigstatsr's own check for missing values is off, so scalings can
+        # fail on them with a cryptic error: count them, only now)
+        if (any_missing_genotypes(x, n_cores = n_cores)) {
+          stop_missing_genotypes("gt_pca() with a custom 'fun_scaling'",
+            hint = "or use the default scaling (fun_scaling = NULL)",
+            imputed_auto = FALSE
+          )
+        }
+        stop("'fun_scaling' failed: ", conditionMessage(e), call. = FALSE)
       }
     )
     center <- scaling$center
     scale <- scaling$scale
+    # missing genotypes give missing values in the scaling (an exact check)
     if (anyNA(center) || anyNA(scale)) {
-      stop(
-        "'fun_scaling' gave missing values: a custom scaling needs complete ",
-        "or imputed genotypes (see gt_set_imputed())"
+      stop_missing_genotypes("gt_pca() with a custom 'fun_scaling'",
+        hint = "or use the default scaling (fun_scaling = NULL)",
+        imputed_auto = FALSE
       )
     }
   }
@@ -347,19 +343,22 @@ grm_plink <- function(x, center, scale, n_cores, block_size, use_blas) {
 }
 
 # Method "random": bigstatsr::big_randomSVD(), using imputed genotypes if they
-# exist (also used by the deprecated gt_pca_randomSVD())
+# exist (also used by the deprecated gt_pca_randomSVD()); `what` and `hint`
+# are for the error on missing genotypes (see stop_missing_genotypes())
 pca_random_svd <- function(x, k, fun_scaling, tol, verbose, n_cores,
-                           fun_prod, fun_cprod, total_var) {
+                           fun_prod, fun_cprod, total_var,
+                           what = "gt_pca_randomSVD()", hint = NULL) {
   if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)
   }
   # the SVD needs complete genotypes: bigstatsr's check samples the whole
   # backing matrix (including individuals and loci that x does not use), so
-  # turn it off, and check a sample of the genotypes of x instead
+  # turn it off; the scaling, computed once for all the loci, checks the
+  # genotypes of x exactly (see scaling_lookup())
   local_no_bigstatsr_checks()
-  stopifnot_no_missing(x, "gt_pca(method = \"random\")",
-    hint = "or use method = \"partial\"", n_cores = n_cores
+  fun_scaling <- scaling_lookup(x, fun_scaling,
+    what = what, hint = hint, n_cores = n_cores
   )
 
   if (n_cores > 1) {
@@ -380,8 +379,8 @@ pca_random_svd <- function(x, k, fun_scaling, tol, verbose, n_cores,
     k = k,
     ind.row = .gt_fbm_rows(x),
     ind.col = .gt_fbm_cols(x),
-    # (turning off bigstatsr's checks also in the workers)
-    fun.scaling = scaling_without_checks(fun_scaling),
+    # (which also turns off bigstatsr's checks in the workers)
+    fun.scaling = fun_scaling,
     tol = tol,
     verbose = verbose,
     ncores = n_cores,
