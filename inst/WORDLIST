@@ -17,6 +17,7 @@ Bougainville
 Busing
 Bustamante
 CMD
+Carnaval
 Chr
 Cozzi
 Czabarka
@@ -91,6 +92,7 @@ PED
 PLINK's
 PLoS
 Papuan
+Penna
 Phyllomedusa
 Privé
 Procrustes
@@ -107,6 +109,7 @@ SFS
 SGDP
 SMARTPCA
 SNMF
+SNPHWE
 Samuk
 Sankararaman
 Stevison
@@ -145,6 +148,7 @@ bgzipped
 biallelic
 bigSNP
 bigsnpr
+bigstatsr
 bim
 bmerge
 booleans
@@ -160,6 +164,7 @@ centimorgans
 cheatsheet
 chr
 chrom
+cline
 coancestries
 coancestry
 codecov
@@ -181,11 +186,13 @@ distruct
 doi
 dplyr
 easySFS
+ece
 eig
 eigen
 eigenanalysis
 eqn
 etc
+eva
 exomes
 fam
 fastsimcoal
@@ -210,6 +217,7 @@ heterozygosities
 heterozygosity
 heterozygote
 heterozygotes
+hierfstat
 hoan
 homozyg
 homozygosity
@@ -273,6 +281,7 @@ qpGraph
 qq
 randomSVD
 rds
+roh
 rollmean
 rowname
 rs
