@@ -7,9 +7,10 @@ is credited and that its licence is followed.
 ## Summary
 
 - **Branch:** `codereview_attribution`, from `pca_missing` at `ac2f9ca2`.
-- **Commits:** 13 (11 fixes, 1 correction of a fix, 1 WORDLIST); this
+- **Commits:** 15 (13 fixes, 1 correction of a fix, 1 WORDLIST); this
   report is committed separately.
-- **Not fixed:** 3 findings (see [Findings not fixed](#findings-not-fixed)).
+- **Not fixed:** 1 finding (see [Findings not fixed](#findings-not-fixed));
+  2 settled by a decision (example data used with a clear source).
 - **Version:** unchanged; one `NEWS.md` bullet (in `8b1cffdc`). Not pushed,
   no pull request.
 
@@ -20,7 +21,7 @@ is credited and that its licence is followed.
 | `R CMD build` + `R CMD check --no-manual --no-tests --no-vignettes` (installed, -O2) | Status: OK (DESCRIPTION, Rd, examples, non-ASCII all OK) |
 | `test_easysfs.R` (uses the edited `helper_sfs_reference.R`) | pass |
 | `test_gt_extract_f2.R` | pass |
-| `spelling::spell_check_package()` | only `clumpping` and `speciifc` in `vignettes/tidypopgen.Rmd`, typos that were already there |
+| `spelling::spell_check_package()` | clean after `2f10c21a` |
 | `lintr` on the edited R files | no new lints |
 | Full test suite, vignette renders | not run: the changes are comments, documentation and DESCRIPTION only |
 
@@ -87,25 +88,29 @@ comments.
   the distruct palette *[attribution]*
 - [ ] `106719ac` · `predict.gt_pca()` — Privé et al. 2020 cited for OADP
   *[attribution]*
+- [ ] `81da8db6` · `inst/COPYRIGHTS`, `create_ploidy_vcf.R` — the polyploid
+  tutorial (repository, authors, chapter) named as the source of the arenosa
+  VCF *[attribution]*
 
 ### Other
 
 - [ ] `2f6f85ca` · `inst/WORDLIST` — new names and words
+- [ ] `2f10c21a` · `vignettes/tidypopgen.Rmd` — typos "speciifc" and
+  "clumpping"
 
 ## Findings not fixed
 
+### Decided
+
+- **Anolis and *A. arenosa* example data without a licence.** The anolis VCF
+  comes from `ivanprates/2018_Anolis_EcolEvol` and the arenosa VCF from the
+  polyploid tutorial (`mbohutinska/PolyplChapter`); neither repository has
+  a licence. Decision (Andrea, 2026-11-18): keep using the data, with their
+  sources stated clearly (vignettes, `inst/COPYRIGHTS`, `data-raw/`), as done
+  in `21766c20` and `81da8db6`.
+
 ### Decision needed
 
-- **The anolis VCF has no clear licence.** `inst/extdata/anolis/` comes from
-  `ivanprates/2018_Anolis_EcolEvol` on GitHub, which has no licence. The
-  Dryad deposit of Prates et al. 2018 (doi:10.5061/dryad.1bj51s9) seems to
-  hold only the supplementary material. **Decision needed:** ask Ivan Prates
-  for permission (or a licence on the repository), or replace the data.
-- **The *A. arenosa* VCF comes from the same unlicensed tutorial.**
-  `inst/extdata/ploidy/arenosa_ploidy_example.vcf.gz` is the first 200 loci
-  of the tutorial's VCF (data of Wos et al. 2019). **Decision needed:** ask
-  the authors (Bohutínská, Kolář) for permission, or check whether the data
-  are deposited with a licence (e.g. in the archive of Wos et al. 2019).
 - **`AdegenetPolyplChapter.R` is still in the git history.** Removing it
   from history would need a rewrite of the public repository. **Decision
   needed:** leave it there (it is no longer in the current tree)?
