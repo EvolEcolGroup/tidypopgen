@@ -10,8 +10,8 @@ licences allow the code to be distributed as part of a GPL >= 3 package.
 PLINK 1.90
   Copyright (C) 2005-2023 Shaun Purcell, Christopher Chang.
   Licence: GPL-3. https://github.com/chrchang/plink-ng
-  - src/hwe.cpp: the Hardy-Weinberg exact test (SNPHWE2() and SNPHWE_t(),
-    from plink_stats.c, commit 3848a39), written by Christopher Chang from
+  - src/hwe.cpp: the Hardy-Weinberg exact test (SNPHWE2(), from
+    plink_stats.c, commit 3848a39), written by Christopher Chang from
     the original code of Jan Wigginton (Wigginton, Cutler and Abecasis 2005).
     Used by loci_hwe() and qc_report_loci().
   - src/roh_sliding_cpp.cpp (windows_indiv_roh()) follows the algorithm of
