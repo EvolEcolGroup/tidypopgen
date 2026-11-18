@@ -134,6 +134,88 @@ PLINK to 5e-7 (`data-raw/validate/create_plink_pca_test_data.R`, test
   helped an -O0 build). AVX2/FMA compilation of the Eigen kernel: needs
   non-portable flags (a CRAN NOTE) and run-time dispatch; not done.
 
+## Analyses that need complete genotypes (18 Nov 2026, laptop)
+
+CodeRabbit (PR #231) found that the `gt_pcadapt()` example ran pcadapt on
+the scores of a PCA with missing genotypes. That PCA was `"partial"`, which
+uses imputed genotypes only if the `gen_tibble` is set to use them.
+
+### Inventory
+
+- **Need a PCA of complete or imputed genotypes:** `gt_pcadapt()` and
+  `gt_dapc()`, also through a `gt_cluster_pca`, which keeps the attributes
+  of its PCA. Both now stop with `stopifnot_complete_pca()`.
+- **Need complete or imputed raw genotypes:** all of these switch to the
+  imputed genotypes when they exist.
+
+  | Function | Engine | Check |
+  |---|---|---|
+  | `loci_ld_clump()` | `snp_clumping` | sampled, `stopifnot_no_missing()` |
+  | `gt_pcadapt()` (its `x`) | `snp_pcadapt` | sampled |
+  | `gt_pca(method = "random")`, `gt_pca_randomSVD()` | `big_randomSVD` | exact, through the scaling (`scaling_lookup()`) |
+  | `gt_pca_partialSVD()` | `big_SVD` | exact, through the scaling |
+  | `gt_pca_autoSVD()` | `snp_autoSVD` | exact, through the scaling |
+  | `gt_pca(fun_scaling = <fn>)` | the custom scaling | exact (NA in the scaling) |
+  | `predict(project_method = "none")` | `big_prodMat` | exact (NA in the product) |
+
+- **Handle missing genotypes themselves** (no change): the `pairwise_*()`,
+  `indiv_*()`, `loci_*()`, `pop_*()`, `windows_*()` and `jackknife_*()`
+  functions, `gt_pca(method = "partial")`, the ROH functions, and
+  `gt_admixture()`, `gt_snmf()` and `gt_extract_f2()` (through the external
+  tools).
+
+### What was wrong with bigsnpr's check
+
+- **A small sample of the whole matrix.** bigstatsr's `assert_noNA()`
+  (through `check_args()`) samples 5 runs of 101 genotypes, about 5 loci,
+  from the **whole backing matrix**, not from `ind.row`/`ind.col`. A
+  `gen_tibble` filtered to the 133 complete loci of `example-missing.bed`
+  always failed `loci_ld_clump()` and `gt_pca_partialSVD()` with "You can't
+  have missing values". This is what the old TODO in `test_gt_pca.R` was
+  about ("missing values are detected even when excluded"), worked around
+  with `gt_update_backingfile()`.
+- **Hangs in parallel.** With `n_cores > 1`, `big_randomSVD()` computes the
+  scaling and the products in PSOCK workers, which do not inherit the
+  session's options, and its main task waits on the workers in a busy loop.
+  When a worker fails (on that false check, on an `NA` scale, or after
+  another worker found a zero scale), the SVD waits forever. tidypopgen
+  1.0.0.9010 hung like this on the filtered data with 2 cores.
+- **Silent wrong results** when the check misses missing genotypes (shown
+  with the check turned off): `snp_clumping()` kept 392 of 500 loci, against
+  35 after imputation, and `snp_pcadapt()` gave statistics with no `NA`.
+
+### Decisions (Andrea, 18 Nov 2026)
+
+- **Attributes** `imputed` and `missing` on `gt_pca` objects, rather than one
+  character attribute. `missing` comes for free from the count of missing
+  genotypes in `grm_plink_cpp()`. PCAs without the attributes (from
+  earlier versions) are accepted, since their methods needed complete data.
+- **No full pass over the genotypes just to check them** (too expensive).
+  - Use a sample, as bigsnpr does, but of the rows and loci in use only:
+    all the individuals, at evenly spaced loci, about 1e6 genotypes and at
+    least 100 loci. The sample is deterministic, so the seed is untouched.
+  - Or reuse a pass that the method makes anyway. The SVDs compute the
+    scaling once in the session; `NA` there is an exact check, and the
+    workers only look values up, so they can no longer fail.
+  - Or count, only after an error, e.g. after a custom scaling fails.
+- **bigsnpr's own check is off** (`bigstatsr.check.args = FALSE`, restored
+  on exit, and set in the workers by the scaling lookup). Its other
+  assertions are of indices and cores, which tidypopgen builds itself.
+- **Clumping and pcadapt keep only the sampled check** (Andrea). Missing
+  genotypes that escape it give silently wrong results, as with bigsnpr
+  before; their help pages say so.
+- **One wording**: every missing-genotype error comes from
+  `stop_missing_genotypes()` ("<fn> needs complete or imputed genotypes, but
+  some genotypes are missing: impute them ...").
+- **#179** ("You can't have missing values in 'U'" from `snp_pcadapt()`)
+  was not about missing genotypes. It was loci with the same genotype in
+  every individual (in its anolis test, 27 loci heterozygous in all 138
+  individuals), whose statistics are undefined. After that error,
+  `gt_pcadapt()` now counts them (one pass, only then) and names them.
+- **Vignette a03** imputes the anoles again, and sets the imputed genotypes
+  only for the PCA (DAPC needs a complete PCA; ADMIXTURE and sNMF still get
+  the missing genotypes).
+
 ## Numbers
 
 ### PCA
@@ -206,4 +288,9 @@ outputs identical (relative differences 1e-14).
   loadings would show the expected advantage of least squares.
 - The precomputed articles (big_data, benchmark_hgdp, interpolating,
   aDNA_pseudohaploids) still call the deprecated functions and need to be
-  re-rendered; the clustering vignette's numbers changed with `gt_pca()`.
+  re-rendered. Check that those running pcadapt or DAPC set the imputed
+  genotypes before the PCA. The clustering vignette (a03) imputes again,
+  so its numbers are back to those of dev.
+- `gt_pcadapt()` could drop the loci with the same genotype in every
+  individual (with `NA` statistics, as the `pcadapt` package does) instead
+  of stopping.
