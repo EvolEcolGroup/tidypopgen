@@ -360,9 +360,7 @@ loci_lsq_loadings <- function(pca, data, n_pca, n_cores) {
     center = pca$center,
     scale = pca$scale,
     S = u * sqrt(n_ind),
-    block_size = grm_block_size(n_ind),
-    ncores = n_cores,
-    use_blas = grm_use_blas("auto", n_cores)
+    ncores = n_cores
   )
   # rescale the coefficients to the scores u d:
   # z = a + (u sqrt(n)) c = a + (u d) (c sqrt(n) / d)

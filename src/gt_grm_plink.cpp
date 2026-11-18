@@ -79,9 +79,7 @@ static std::vector<double> grm_z_lut(Environment BM,
 }
 
 // Fill the n x nb block Z (column-major) with the standardised genotypes of
-// loci l0 to l0 + nb - 1, and return the number of missing genotypes. If M is
-// given, also fill it (n x nb) with the indicators of missing genotypes (1 if
-// missing, 0 otherwise).
+// loci l0 to l0 + nb - 1, and return the number of missing genotypes.
 // This is done on one thread: the fill is a small part of the work, and an
 // OpenMP team spinning between blocks would compete with the threads of the
 // BLAS (with 1,000 individuals, half the CPU time went to spinning).
@@ -91,20 +89,17 @@ static std::size_t grm_fill_block(double* Z, std::size_t n, std::size_t l0,
                                   const std::vector<std::size_t>& rows,
                                   const std::vector<std::size_t>& cols,
                                   const std::vector<double>& zlut,
-                                  const uint8_t* geno_of_byte,
-                                  double* M = nullptr) {
+                                  const uint8_t* geno_of_byte) {
   std::size_t n_missing = 0;
   for (std::size_t s = 0; s < nb; s++) {
     // the bytes of this locus are contiguous in the column-major FBM
     const unsigned char* p_col = p_mat + cols[l0 + s] * nrow_fbm;
     const double* lut = &zlut[4 * (l0 + s)];
     double* z = Z + s * n;
-    double* mi = M ? M + s * n : nullptr;
     for (std::size_t i = 0; i < n; i++) {
       uint8_t g = geno_of_byte[p_col[rows[i]]];
       n_missing += (g == 3);
       z[i] = lut[g];
-      if (mi) mi[i] = (g == 3);
     }
   }
   return n_missing;
@@ -327,17 +322,21 @@ NumericMatrix grm_loadings_cpp(Environment BM,
 // the loci in gt_dapc() with a PCA of missing genotypes, S being (scaled)
 // scores of the PCA. With X = [1, S] (n x q, q = K + 1), O the individuals
 // genotyped at locus l and z_l its standardised genotypes (as in
-// grm_plink_cpp(), missing as 0), the coefficients b_l solve
+// grm_plink_cpp()), the coefficients b_l solve
 //   (X_O^T X_O) b_l = X_O^T z_O,
-// with X_O^T z_O = X^T z_l (the missing genotypes are 0) and
-//   X_O^T X_O = X^T X - sum_{i missing at l} x_i x_i^T.
-// As in pca_project_cpp(), the loci are processed in blocks: the
-// standardised genotypes Z (n x nb) and the indicators of missing genotypes
-// M (n x nb) of a block are decoded, and XtZ = Z^T X (nb x q) and
-// Miss = M^T W (nb x q(q+1)/2) are matrix products (with the BLAS or Eigen,
-// see grm_rank_update()), with W the products x_ia x_ib (a <= b) of each
-// individual. The q x q system of each locus is then solved by a Cholesky
-// decomposition, in parallel over the loci of the block.
+// with
+//   X_O^T X_O = X^T X - sum_{i missing at l} x_i x_i^T, and
+//   X_O^T z_O = sum_g z(g) sum_{i with genotype g at l} x_i,
+// since z takes one value z(g) for each genotype g (0, 1, 2) of a locus.
+// Each locus therefore needs, from its bytes, the sums of x_i over the
+// individuals with genotypes 1 and 2 (those with genotype 0 are the rest)
+// and the sum of the products w_i = x_i x_i^T (the P = q(q+1)/2 entries
+// a <= b) over the missing individuals; the first q entries of w_i (the
+// pairs (0, b)) are x_i itself. This reads each genotype once, without
+// decoding blocks of doubles or matrix products (which took 8 times longer
+// on 1,043 individuals and 643,591 loci with 44% missing genotypes), in
+// parallel over the loci. The q x q system of each locus is then solved by a
+// Cholesky decomposition.
 // With complete genotypes, and columns of S that are orthogonal and of mean
 // 0 (the scores of a PCA), the coefficients of S are the loadings V of the
 // PCA, up to the scale of S.
@@ -352,9 +351,7 @@ NumericMatrix grm_loci_lsq_cpp(Environment BM,
                                const NumericVector& center,
                                const NumericVector& scale,
                                const NumericMatrix& S,
-                               int block_size,
-                               int ncores,
-                               bool use_blas) {
+                               int ncores) {
   XPtr<FBM> xpBM = BM["address"];
   const unsigned char* p_mat =
     static_cast<const unsigned char*>(xpBM->matrix());
@@ -368,30 +365,29 @@ NumericMatrix grm_loci_lsq_cpp(Environment BM,
   if (static_cast<std::size_t>(S.nrow()) != n) {
     Rcpp::stop("S should have one row per individual.");
   }
-  if (block_size < 1) Rcpp::stop("block_size should be positive.");
   std::vector<std::size_t> rows, cols;
   grm_offsets(xpBM, rowInd, colInd, rows, cols);
   uint8_t geno_of_byte[256];
   std::vector<double> zlut = grm_z_lut(BM, center, scale, m, geno_of_byte);
 
-  // X (n x q, column-major), the products W (n x P) of the columns of X for
-  // each individual (pairs a <= b), and X^T X (the column sums of W)
-  std::vector<double> X(n * q), W(n * P), xtx(P, 0.0);
+  // the products w_i of each individual (row-major, n x P, pairs a <= b in
+  // the order (0, 0), (0, 1), ..., (0, q - 1), (1, 1), ...), so that the
+  // first q entries of w_i are x_i; and X^T X, their sums over individuals
   const double* p_S = S.begin();
-  for (std::size_t i = 0; i < n; i++) X[i] = 1.0;
-  for (std::size_t k = 0; k < K; k++) {
-    for (std::size_t i = 0; i < n; i++) X[i + (k + 1) * n] = p_S[i + k * n];
-  }
+  std::vector<double> W(n * P), xtx(P, 0.0);
   // pair_index[a + b * q]: the index, among the P products, of the pair (a, b)
   std::vector<std::size_t> pair_index(q * q);
-  std::size_t p = 0;
-  for (std::size_t a = 0; a < q; a++) {
-    for (std::size_t b = a; b < q; b++, p++) {
-      pair_index[a + b * q] = p;
-      pair_index[b + a * q] = p;
-      for (std::size_t i = 0; i < n; i++) {
-        W[i + p * n] = X[i + a * n] * X[i + b * n];
-        xtx[p] += W[i + p * n];
+  std::vector<double> x(q);
+  for (std::size_t i = 0; i < n; i++) {
+    x[0] = 1.0;
+    for (std::size_t k = 0; k < K; k++) x[k + 1] = p_S[i + k * n];
+    std::size_t p = 0;
+    for (std::size_t a = 0; a < q; a++) {
+      for (std::size_t b = a; b < q; b++, p++) {
+        W[i * P + p] = x[a] * x[b];
+        xtx[p] += x[a] * x[b];
+        pair_index[a + b * q] = p;
+        pair_index[b + a * q] = p;
       }
     }
   }
@@ -400,70 +396,48 @@ NumericMatrix grm_loci_lsq_cpp(Environment BM,
   double* p_B = B.begin();
   // (NA_REAL is read once, outside the parallel loops)
   const double na = NA_REAL;
-  const std::size_t bs =
-    std::min<std::size_t>(block_size, std::max<std::size_t>(m, 1));
-  std::vector<double> Z(n * bs), M(n * bs), XtZ(bs * q), Miss(bs * P);
-  for (std::size_t l0 = 0; l0 < m; l0 += bs) {
-    const std::size_t nb = std::min(bs, m - l0);
-    const std::size_t n_missing =
-      grm_fill_block(Z.data(), n, l0, nb, p_mat, nrow_fbm, rows, cols, zlut,
-                     geno_of_byte, M.data());
-    // XtZ = Z^T X and, only if some genotypes of the block are missing,
-    // Miss = M^T W
-    if (use_blas) {
-      int n_i = static_cast<int>(n), nb_i = static_cast<int>(nb);
-      int q_i = static_cast<int>(q), P_i = static_cast<int>(P);
-      double one = 1.0, zero = 0.0;
-      F77_CALL(dgemm)("T", "N", &nb_i, &q_i, &n_i, &one, Z.data(), &n_i,
-                      X.data(), &n_i, &zero, XtZ.data(), &nb_i FCONE FCONE);
-      if (n_missing > 0) {
-        F77_CALL(dgemm)("T", "N", &nb_i, &P_i, &n_i, &one, M.data(), &n_i,
-                        W.data(), &n_i, &zero, Miss.data(), &nb_i
-                        FCONE FCONE);
-      }
-    } else {
-      typedef Eigen::Map<Eigen::MatrixXd> MapMat;
-      typedef Eigen::Map<const Eigen::MatrixXd> ConstMapMat;
-      const Eigen::Index n_e = static_cast<Eigen::Index>(n);
-      const Eigen::Index nb_e = static_cast<Eigen::Index>(nb);
-      const Eigen::Index q_e = static_cast<Eigen::Index>(q);
-      const Eigen::Index P_e = static_cast<Eigen::Index>(P);
-      ConstMapMat z(Z.data(), n_e, nb_e);
-      ConstMapMat mi(M.data(), n_e, nb_e);
-      ConstMapMat x(X.data(), n_e, q_e);
-      ConstMapMat w(W.data(), n_e, P_e);
-      MapMat xtz(XtZ.data(), nb_e, q_e);
-      MapMat miss(Miss.data(), nb_e, P_e);
-      // in parallel over chunks of loci (rows of the products)
-      const Eigen::Index chunk = 256;
-      const Eigen::Index n_chunks = (nb_e + chunk - 1) / chunk;
-      #pragma omp parallel for num_threads(ncores) schedule(dynamic, 1)
-      for (Eigen::Index c = 0; c < n_chunks; c++) {
-        Eigen::Index s0 = c * chunk;
-        Eigen::Index ns = std::min(chunk, nb_e - s0);
-        xtz.middleRows(s0, ns).noalias() =
-          z.middleCols(s0, ns).transpose() * x;
-        if (n_missing > 0) {
-          miss.middleRows(s0, ns).noalias() =
-            mi.middleCols(s0, ns).transpose() * w;
-        }
-      }
-    }
-    // solve the q x q system of each locus of the block
-    const Eigen::Index nb_e = static_cast<Eigen::Index>(nb);
+  // the loci are processed in chunks, to check for user interrupts
+  const std::size_t chunk = 16384;
+  for (std::size_t l0 = 0; l0 < m; l0 += chunk) {
+    const Eigen::Index nb = static_cast<Eigen::Index>(std::min(chunk, m - l0));
     #pragma omp parallel num_threads(ncores)
     {
+      // the sums of x_i over the individuals with genotypes 1 and 2, and of
+      // w_i over the missing ones (rows 1 to 3 of acc, of P entries each)
+      std::vector<double> acc(4 * P);
       Eigen::MatrixXd A(q, q);
       Eigen::VectorXd rhs(q), beta(q);
       Eigen::LLT<Eigen::MatrixXd> llt(q);
-      #pragma omp for schedule(static)
-      for (Eigen::Index s = 0; s < nb_e; s++) {
-        // X_O^T X_O and X_O^T z_O
+      #pragma omp for schedule(dynamic, 64)
+      for (Eigen::Index s = 0; s < nb; s++) {
+        const std::size_t l = l0 + s;
+        // the bytes of this locus are contiguous in the column-major FBM
+        const unsigned char* p_col = p_mat + cols[l] * nrow_fbm;
+        std::fill(acc.begin(), acc.end(), 0.0);
+        for (std::size_t i = 0; i < n; i++) {
+          const uint8_t g = geno_of_byte[p_col[rows[i]]];
+          // (genotype 0 is not summed: it is the rest)
+          if (g == 0) continue;
+          // x_i (the first q entries of w_i) for genotypes 1 and 2, all of
+          // w_i for missing genotypes
+          const std::size_t len = (g == 3) ? P : q;
+          const double* w = &W[i * P];
+          double* a = &acc[g * P];
+          for (std::size_t k = 0; k < len; k++) a[k] += w[k];
+        }
+        const double* miss = &acc[3 * P];
+        // X_O^T z_O, from the sums by genotype (those of genotype 0 are the
+        // totals minus the others)
+        const double* lut = &zlut[4 * l];
+        for (std::size_t b = 0; b < q; b++) {
+          const double sum0 = xtx[b] - acc[P + b] - acc[2 * P + b] - miss[b];
+          rhs[b] = lut[0] * sum0 + lut[1] * acc[P + b] + lut[2] * acc[2 * P + b];
+        }
+        // X_O^T X_O
         for (std::size_t a = 0; a < q; a++) {
-          rhs[a] = XtZ[s + a * nb];
           for (std::size_t b = 0; b < q; b++) {
             const std::size_t pq = pair_index[a + b * q];
-            A(a, b) = xtx[pq] - (n_missing > 0 ? Miss[s + pq * nb] : 0.0);
+            A(a, b) = xtx[pq] - miss[pq];
           }
         }
         // the number of individuals genotyped is the entry of the intercept
@@ -474,7 +448,7 @@ NumericMatrix grm_loci_lsq_cpp(Environment BM,
         }
         if (ok) beta = llt.solve(rhs);
         for (std::size_t k = 0; k < K; k++) {
-          p_B[(l0 + s) + k * m] = ok ? beta[k + 1] : na;
+          p_B[l + k * m] = ok ? beta[k + 1] : na;
         }
       }
     }

@@ -426,18 +426,10 @@ test_that("loadings of loci by least squares with missing genotypes", {
     stats::lm.fit(cbind(1, scores[obs, ]), z[obs, l])$coefficients[-1]
   }))
   expect_equal(unname(lsq), unname(ref), tolerance = 1e-8)
-  # the BLAS and the internal engine give the same coefficients (with several
-  # blocks of loci)
-  args <- list(
-    BM = .gt_get_fbm(sim_gt), rowInd = .gt_fbm_rows(sim_gt),
-    colInd = .gt_fbm_cols(sim_gt), center = sim_pca$center,
-    scale = sim_pca$scale, S = unclass(sim_pca$u)[, 1:n_pca],
-    block_size = 64L, ncores = 2L
-  )
-  expect_equal(
-    do.call(grm_loci_lsq_cpp, c(args, use_blas = TRUE)),
-    do.call(grm_loci_lsq_cpp, c(args, use_blas = FALSE)),
-    tolerance = 1e-10
+  # the same on one core
+  expect_identical(
+    loci_lsq_loadings(sim_pca, sim_gt, n_pca = n_pca, n_cores = 1),
+    lsq
   )
 
   # with complete genotypes, they are the loadings of the PCA
