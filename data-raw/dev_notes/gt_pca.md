@@ -242,7 +242,8 @@ uses imputed genotypes only if the `gen_tibble` is set to use them.
     milliseconds).
 - **Flaky test, before this branch:** "adjusting roll_size fixes
   gt_pca_autoSVD problem" draws random genotypes without `set.seed()`. It
-  failed once with the roll_size error; 0 of 90 seeds reproduced it.
+  failed once with the roll_size error; 0 of 90 seeds reproduced it. It now
+  sets a seed (`c6088bf5`).
 
 ## Numbers
 
