@@ -371,3 +371,78 @@ test_that("gt_dapc needs a PCA of complete or imputed genotypes", {
   imputed_pca <- test_gt %>% gt_pca(k = 5, n_cores = 2)
   expect_s3_class(gt_dapc(imputed_pca, pop = pops), "gt_dapc")
 })
+
+test_that("loadings of loci by least squares with missing genotypes", {
+  set.seed(1)
+  sim_gt <- gt_simulate_bn(
+    n_indiv = c(20, 20, 20), n_loci = 400, fst = 0.1,
+    missing = rep(seq(0, 0.6, length.out = 20), 3)
+  )
+  sim_gt <- select_loci_if(sim_gt, loci_maf(genotypes) > 0)
+  sim_pca <- gt_pca(sim_gt, k = 4, n_cores = 1)
+  n_pca <- 3
+  lsq <- loci_lsq_loadings(sim_pca, sim_gt, n_pca = n_pca, n_cores = 2)
+  # the reference: the regression of the standardised genotypes of each
+  # locus on an intercept and the scores, over the individuals genotyped at
+  # that locus
+  geno <- show_genotypes(sim_gt)
+  z <- sweep(sweep(geno, 2, sim_pca$center), 2, sim_pca$scale, "/")
+  scores <- sweep(sim_pca$u[, 1:n_pca], 2, sim_pca$d[1:n_pca], "*")
+  ref <- t(sapply(seq_len(ncol(z)), function(l) {
+    obs <- !is.na(z[, l])
+    stats::lm.fit(cbind(1, scores[obs, ]), z[obs, l])$coefficients[-1]
+  }))
+  expect_equal(unname(lsq), unname(ref), tolerance = 1e-8)
+  # the BLAS and the internal engine give the same coefficients (with several
+  # blocks of loci)
+  args <- list(
+    BM = .gt_get_fbm(sim_gt), rowInd = .gt_fbm_rows(sim_gt),
+    colInd = .gt_fbm_cols(sim_gt), center = sim_pca$center,
+    scale = sim_pca$scale, S = unclass(sim_pca$u)[, 1:n_pca],
+    block_size = 64L, ncores = 2L
+  )
+  expect_equal(
+    do.call(grm_loci_lsq_cpp, c(args, use_blas = TRUE)),
+    do.call(grm_loci_lsq_cpp, c(args, use_blas = FALSE)),
+    tolerance = 1e-10
+  )
+
+  # with complete genotypes, they are the loadings of the PCA
+  complete_gt <- gt_simulate_bn(
+    n_indiv = c(20, 20, 20), n_loci = 400, fst = 0.1
+  )
+  complete_gt <- select_loci_if(complete_gt, loci_maf(genotypes) > 0)
+  complete_pca <- gt_pca(complete_gt, k = 4, n_cores = 1)
+  expect_equal(
+    unname(loci_lsq_loadings(complete_pca, complete_gt,
+      n_pca = n_pca, n_cores = 2
+    )),
+    unname(unclass(complete_pca$v)[, 1:n_pca]),
+    tolerance = 1e-6
+  )
+
+  # a locus genotyped in fewer individuals than there are coefficients
+  # (n_pca + 1) has NA loadings, with a warning
+  few_gt <- gen_tibble(
+    x = rbind(
+      c(2, 1, 0, 1, 1, NA), c(0, 1, 2, 0, 1, NA), c(1, 2, 0, 1, 0, NA),
+      c(2, 0, 1, 2, 1, 1), c(0, 2, 1, 0, 2, 0), c(1, 1, 2, 2, 0, NA),
+      c(2, 0, 0, 1, 2, NA), c(0, 1, 1, 0, 1, NA)
+    ),
+    indiv_meta = data.frame(
+      id = paste0("ind", 1:8), population = rep(c("a", "b"), each = 4)
+    ),
+    loci = data.frame(
+      name = paste0("rs", 1:6), chromosome = 1, position = 1:6 * 100,
+      genetic_dist = 0, allele_ref = "A", allele_alt = "T"
+    ),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  few_pca <- gt_pca(few_gt, k = 2, n_cores = 1)
+  expect_warning(
+    few <- loci_lsq_loadings(few_pca, few_gt, n_pca = 2, n_cores = 1),
+    "1 loci are genotyped in too few individuals"
+  )
+  expect_true(all(is.na(few[6, ])))
+  expect_false(anyNA(few[1:5, ]))
+})

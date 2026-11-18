@@ -278,3 +278,69 @@ gt_dapc <- function(
   class(res) <- c("gt_dapc", "dapc")
   return(res)
 }
+
+# Loadings of the loci for gt_dapc() with a PCA of missing genotypes: the
+# coefficients of the least squares regression of the standardised genotypes
+# of each locus (with the centre and scale of the PCA) on an intercept and
+# the scores (u d) of the first n_pca components, over the individuals
+# genotyped at that locus (see grm_loci_lsq_cpp()). With complete genotypes,
+# these are the loadings v of the PCA; with missing genotypes, the loadings
+# of the PCA (missing genotypes as 0) shrink each locus by the fraction of
+# individuals genotyped there, and are distorted when missingness differs
+# between groups.
+# @param pca a gt_pca object
+# @param data the gen_tibble the PCA was computed on (it can have more loci)
+# @param n_pca the number of components
+# @param n_cores the number of cores
+# @returns a matrix with one row per locus of the PCA and n_pca columns, NA
+#   for loci genotyped in too few individuals (with a warning)
+# @keywords internal
+# @noRd
+loci_lsq_loadings <- function(pca, data, n_pca, n_cores) {
+  if (!inherits(data, "gen_tbl")) {
+    stop("'data' should be a gen_tibble")
+  }
+  # the individuals must be those of the PCA, in the same order
+  if (!identical(as.character(data$id), rownames(pca$u))) {
+    stop("the individuals in 'data' do not correspond to those in the PCA")
+  }
+  # the loci of the PCA in data, with the same alleles
+  loci_subset <- pca_match_loci(pca, data,
+    what = "'data'", pca_name = "the PCA"
+  )
+  # the PCA used the genotypes with their missing values, not imputed ones
+  if (gt_has_imputed(data) && gt_uses_imputed(data)) {
+    gt_set_imputed(data, set = FALSE)
+    on.exit(gt_set_imputed(data, set = TRUE), add = TRUE)
+  }
+  n_ind <- nrow(data)
+  pcs <- seq_len(n_pca)
+  # the regression is on u sqrt(n), whose columns have the same norm as the
+  # intercept, so that the test of nearly singular systems (in
+  # grm_loci_lsq_cpp()) is about the individuals genotyped at a locus, not
+  # about the scale of the scores
+  u <- unclass(pca$u)[, pcs, drop = FALSE]
+  coefs <- grm_loci_lsq_cpp(
+    BM = .gt_get_fbm(data),
+    rowInd = .gt_fbm_rows(data),
+    colInd = .gt_fbm_cols(data)[loci_subset],
+    center = pca$center,
+    scale = pca$scale,
+    S = u * sqrt(n_ind),
+    block_size = grm_block_size(n_ind),
+    ncores = n_cores,
+    use_blas = grm_use_blas("auto", n_cores)
+  )
+  # rescale the coefficients to the scores u d:
+  # z = a + (u sqrt(n)) c = a + (u d) (c sqrt(n) / d)
+  coefs <- sweep(coefs, 2, sqrt(n_ind) / pca$d[pcs], "*")
+  n_na <- sum(is.na(coefs[, 1]))
+  if (n_na > 0) {
+    warning(
+      n_na, " loci are genotyped in too few individuals to estimate their ",
+      "loadings (at least n_pca + 1 are needed, with varied scores): ",
+      "their loadings are NA"
+    )
+  }
+  coefs
+}

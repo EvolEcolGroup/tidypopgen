@@ -49,6 +49,10 @@ grm_loadings_cpp <- function(BM, rowInd, colInd, center, scale, U, d, block_size
     .Call(`_tidypopgen_grm_loadings_cpp`, BM, rowInd, colInd, center, scale, U, d, block_size, ncores, use_blas)
 }
 
+grm_loci_lsq_cpp <- function(BM, rowInd, colInd, center, scale, S, block_size, ncores, use_blas) {
+    .Call(`_tidypopgen_grm_loci_lsq_cpp`, BM, rowInd, colInd, center, scale, S, block_size, ncores, use_blas)
+}
+
 gt_grouped_pi_diploid <- function(BM, rowInd, colInd, groupIds, ngroups, ncores, block_size = 100000L, return_n = FALSE) {
     .Call(`_tidypopgen_gt_grouped_pi_diploid`, BM, rowInd, colInd, groupIds, ngroups, ncores, block_size, return_n)
 }

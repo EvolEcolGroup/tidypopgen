@@ -212,6 +212,25 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// grm_loci_lsq_cpp
+NumericMatrix grm_loci_lsq_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const NumericVector& center, const NumericVector& scale, const NumericMatrix& S, int block_size, int ncores, bool use_blas);
+RcppExport SEXP _tidypopgen_grm_loci_lsq_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP centerSEXP, SEXP scaleSEXP, SEXP SSEXP, SEXP block_sizeSEXP, SEXP ncoresSEXP, SEXP use_blasSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type center(centerSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type scale(scaleSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< int >::type block_size(block_sizeSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    Rcpp::traits::input_parameter< bool >::type use_blas(use_blasSEXP);
+    rcpp_result_gen = Rcpp::wrap(grm_loci_lsq_cpp(BM, rowInd, colInd, center, scale, S, block_size, ncores, use_blas));
+    return rcpp_result_gen;
+END_RCPP
+}
 // gt_grouped_pi_diploid
 ListOf<NumericMatrix> gt_grouped_pi_diploid(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, int ngroups, int ncores, int block_size, bool return_n);
 RcppExport SEXP _tidypopgen_gt_grouped_pi_diploid(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ncoresSEXP, SEXP block_sizeSEXP, SEXP return_nSEXP) {
@@ -1026,6 +1045,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_grm_rank_update_seconds", (DL_FUNC) &_tidypopgen_grm_rank_update_seconds, 4},
     {"_tidypopgen_grm_plink_cpp", (DL_FUNC) &_tidypopgen_grm_plink_cpp, 8},
     {"_tidypopgen_grm_loadings_cpp", (DL_FUNC) &_tidypopgen_grm_loadings_cpp, 10},
+    {"_tidypopgen_grm_loci_lsq_cpp", (DL_FUNC) &_tidypopgen_grm_loci_lsq_cpp, 9},
     {"_tidypopgen_gt_grouped_pi_diploid", (DL_FUNC) &_tidypopgen_gt_grouped_pi_diploid, 8},
     {"_tidypopgen_gt_grouped_pi_polyploid", (DL_FUNC) &_tidypopgen_gt_grouped_pi_polyploid, 10},
     {"_tidypopgen_gt_ind_hetero", (DL_FUNC) &_tidypopgen_gt_ind_hetero, 4},
