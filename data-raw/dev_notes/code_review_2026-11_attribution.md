@@ -77,6 +77,8 @@ comments.
 - [ ] `863c7ad8` · DESCRIPTION — Max Carter-Brown, Jason Hodgson, Margherita
   Colucci and Dominik Jud (from the git history) added as `ctb`
   *[attribution]*
+  (Colucci and Jud removed again by Andrea in `2e868c97`: only substantial
+  code contributions are listed)
 
 ### Data and references
 
