@@ -55,6 +55,9 @@ test_that("fit_gt_pca_and_predict", {
 })
 
 test_that("adjusting roll_size fixes gt_pca_autoSVD problem ", {
+  # the genotypes are random: without a seed, the first gt_pca_autoSVD()
+  # call occasionally failed with the roll_size error
+  set.seed(1)
   # Generate example_indiv_meta data frame
   individual_ids <- paste0("indiv", 1:200)
   populations <- sample(
