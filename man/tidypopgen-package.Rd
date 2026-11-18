@@ -31,6 +31,10 @@ Authors:
 
 Other contributors:
 \itemize{
+  \item Max Carter-Brown [contributor]
+  \item Jason Hodgson [contributor]
+  \item Margherita Colucci [contributor]
+  \item Dominik Jud [contributor]
   \item Christopher Chang (Author of PLINK 1.90: Hardy-Weinberg exact test code used in loci_hwe() and qc_report_loci(); runs of homozygosity algorithm followed by windows_indiv_roh()) [contributor, copyright holder]
   \item Shaun Purcell (Author of PLINK 1.90: Hardy-Weinberg exact test code used in loci_hwe() and qc_report_loci(); runs of homozygosity algorithm followed by windows_indiv_roh()) [contributor, copyright holder]
   \item Henrik Bengtsson (Author of countLines() in R.utils, modified for .vcf in count_vcf_variants()) [contributor, copyright holder]
