@@ -31,7 +31,7 @@ vignettes and `dev_notes/` point to some of these files.
 | `create_distruct_colours.R` | The `distruct_colours` dataset (`data/`), from `data_files/default_colors.txt`. |
 | `create_roh_dataset.R` | A simulated dataset with known runs of homozygosity (`inst/extdata/roh/roh_sim.*` and `roh_sim_truth.csv`): 30 individuals in three populations with increasing inbreeding, 3,000 loci on three chromosomes, and runs (all longer than 1 Mb and 100 loci, so that they are found with the defaults of PLINK) designed to test edge cases. Used by the examples and tests of `windows_indiv_roh()`. |
 | `create_ibs_dataset.R` | The simulated families (`inst/extdata/related/families.*`), used to test relatedness and IBS. |
-| `create_ploidy_vcf.R` | A small VCF of mixed ploidy (*Arabidopsis arenosa*), from the data of the chapter whose script is `misc/AdegenetPolyplChapter.R`. |
+| `create_ploidy_vcf.R` | A small VCF of mixed ploidy (*Arabidopsis arenosa*), from the data of the tutorial whose script is linked in `misc/AdegenetPolyplChapter_url.txt`. |
 | `create_a03_admixture_output.Rmd` | The ADMIXTURE results for the anolis data, used by vignette a03 (`vignettes/a03_anole_adm.rds`) and in `inst/extdata/anolis/anole_adm_k3.rds`. |
 | `create_hgdp_coordinates.Rmd` | Adds coordinates to the HGDP metadata (works on a local copy of the HGDP in `./data/hgdp`, not in the repository). |
 | `create_sgdp_subset_s01_metadata.R` | Step 1 of the SGDP data for the big data article: the lists of individuals, written to `data_files/sgdp/<region>_subset.txt`. |
@@ -76,7 +76,7 @@ Remember to time installed (-O2) builds, not `load_all()` (see `CLAUDE.md`).
 |---|---|
 | `submitting_to_cran.R` | Notes on the steps before a CRAN submission (now covered by the submit-to-cran skill of Claude Code, kept outside this repository). |
 | `test_with_valgrind.sh` | Runs a test file under valgrind. |
-| `AdegenetPolyplChapter.R` | An external example script (polyploid analysis with adegenet), the source of the data of `create_ploidy_vcf.R`. |
+| `AdegenetPolyplChapter_url.txt` | The link to an external example script (polyploid analysis with adegenet), the source of the data of `create_ploidy_vcf.R`; the script itself has no licence, so it is not copied here. |
 | `ideas/` | Notes and drafts of possible features: `ideas.R` and `packages_to_look_into` (to-do notes), `fs_stats_WG.R` (F-statistics from allele sharing), `ibd_notes` and `ibd_r.R` (IBD estimation), `pruning` (LD pruning removed from bigsnpr), `prettify_chromosomes/` (ordering chromosome names, with tests). |
 
 ### `dev_notes/`
@@ -85,6 +85,7 @@ Remember to time installed (-O2) builds, not `load_all()` (see `CLAUDE.md`).
 |---|---|
 | `code_review_2026-10.md` | The October 2026 code review: the fixes, with a checkbox for each commit once checked, and the findings not fixed. |
 | `code_review_2026-10_review_strategy.md` | How the commits of that review are checked and accepted or reverted. |
+| `code_review_2026-11_attribution.md` | The November 2026 review of attribution and licences of third-party code and data: the fixes, with a checkbox for each commit, and the findings not fixed. |
 | `speed_review_2026-11.md` | The November 2026 speed work (`speed`, `speed_extra`, `roh`): each commit, its timings and the further ideas. |
 | `speed_accessors_guide.md` | A developer guide to the fast C++ accessors of the genotypes and how to write new kernels. |
 | `article_timings_speed_vs_big_data_article.md` | Timings of the big data article before and after the speed work. |

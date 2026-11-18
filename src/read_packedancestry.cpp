@@ -1,5 +1,13 @@
 /******************************************************************************/
 
+// read_packedancestry() is adapted from readbina() in src/read-plink.cpp of
+// the R package bigsnpr (https://github.com/privefl/bigsnpr), copyright (C)
+// Florian Prive, released under the GNU General Public License version 3
+// (GPL-3). readbina() reads a PLINK .bed file into an FBM.code256; here it
+// was modified to read the .geno files of the packedancestrymap format (with
+// a header record, and records of max(48, ceil(n / 4)) bytes per locus), and
+// to check the size of the file before reading it.
+
 #include <bigstatsr/BMCodeAcc.h>
 #include <fstream>
 #include <algorithm>

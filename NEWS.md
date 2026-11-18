@@ -2,6 +2,8 @@
 
 ## New features and changes
 
+* the authors of code adapted from other software are credited in
+  `DESCRIPTION`, and their copyrights and licences listed in `inst/COPYRIGHTS`
 * new `gt_pca()` computes PCAs: `method = "partial"` (the default) handles
   missing genotypes as `plink --pca` (PLINK 1.9) does, without imputation, and
   uses an optimised BLAS when there is one, and Eigen otherwise;

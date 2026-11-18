@@ -147,4 +147,9 @@ principal component analysis. Bioinformatics 36(11): 3439–3446.
 
 Patterson N., Price A.L. and Reich D. (2006) Population structure and
 eigenanalysis. PLoS Genetics 2: e190.
+
+Privé F., Luu K., Blum M.G.B., McGrath J.J. and Vilhjálmsson B.J. (2020)
+Efficient toolkit implementing best practices for principal component
+analysis of population genetic data. Bioinformatics 36: 4449-4457 (for
+the implementation of OADP in bigsnpr, which \code{"OADP"} uses).
 }
