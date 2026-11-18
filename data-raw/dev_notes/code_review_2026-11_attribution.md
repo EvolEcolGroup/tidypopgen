@@ -9,8 +9,8 @@ is credited and that its licence is followed.
 - **Branch:** `codereview_attribution`, from `pca_missing` at `ac2f9ca2`.
 - **Commits:** 15 (13 fixes, 1 correction of a fix, 1 WORDLIST); this
   report is committed separately.
-- **Not fixed:** 1 finding (see [Findings not fixed](#findings-not-fixed));
-  2 settled by a decision (example data used with a clear source).
+- **Not fixed:** none open; 2 findings settled by a decision (see
+  [Findings not fixed](#findings-not-fixed)).
 - **Version:** unchanged; one `NEWS.md` bullet (in `8b1cffdc`). Not pushed,
   no pull request.
 
@@ -111,11 +111,9 @@ comments.
   sources stated clearly (vignettes, `inst/COPYRIGHTS`, `data-raw/`), as done
   in `21766c20` and `81da8db6`.
 
-### Decision needed
-
 - **`AdegenetPolyplChapter.R` is still in the git history.** Removing it
-  from history would need a rewrite of the public repository. **Decision
-  needed:** leave it there (it is no longer in the current tree)?
+  would need a rewrite of the public repository. Decision (Andrea,
+  2026-11-18): leave it; it is no longer in the current tree.
 
 ### Low priority, not requested
 
