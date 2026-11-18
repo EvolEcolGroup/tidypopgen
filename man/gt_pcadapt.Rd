@@ -9,7 +9,10 @@ gt_pcadapt(x, pca, k, n_cores = 1)
 \arguments{
 \item{x}{A \code{gen_tibble} object.}
 
-\item{pca}{a \code{\link{gt_pca}} object, as returned by \code{\link[=gt_pca]{gt_pca()}}.}
+\item{pca}{a \code{\link{gt_pca}} object, as returned by \code{\link[=gt_pca]{gt_pca()}}, of complete or
+imputed genotypes: with missing genotypes, set the \code{gen_tibble} to use
+imputed genotypes (\code{\link[=gt_set_imputed]{gt_set_imputed()}}) before \code{\link[=gt_pca]{gt_pca()}}, or use
+\code{gt_pca(method = "random")}, which uses them automatically.}
 
 \item{k}{Number of principal components to use in the analysis.}
 
@@ -53,7 +56,8 @@ lobsters <- gen_tibble(bed_file,
 lobsters <- lobsters \%>\% select_loci_if(loci_maf(genotypes) > 0)
 lobsters <- gt_impute_simple(lobsters, method = "mode")
 
-# Create PCA object
+# Create PCA object, of the imputed genotypes
+gt_set_imputed(lobsters, set = TRUE)
 pca <- gt_pca(lobsters)
 
 # Create a gt_pcadapt object

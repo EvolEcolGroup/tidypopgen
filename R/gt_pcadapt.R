@@ -17,7 +17,10 @@
 #'   pcadapt: an R package for genome scans for selection based on principal
 #'   component analysis. Molecular Ecology Resources, 17(1), 67–77.
 #' @param x A `gen_tibble` object.
-#' @param pca a [`gt_pca`] object, as returned by [gt_pca()].
+#' @param pca a [`gt_pca`] object, as returned by [gt_pca()], of complete or
+#'   imputed genotypes: with missing genotypes, set the `gen_tibble` to use
+#'   imputed genotypes ([gt_set_imputed()]) before [gt_pca()], or use
+#'   `gt_pca(method = "random")`, which uses them automatically.
 #' @param k Number of principal components to use in the analysis.
 #' @param n_cores Number of cores to use.
 #' @returns An object of subclass `gt_pcadapt`, a subclass of `mhtest`.
@@ -41,7 +44,8 @@
 #' lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
 #' lobsters <- gt_impute_simple(lobsters, method = "mode")
 #'
-#' # Create PCA object
+#' # Create PCA object, of the imputed genotypes
+#' gt_set_imputed(lobsters, set = TRUE)
 #' pca <- gt_pca(lobsters)
 #'
 #' # Create a gt_pcadapt object
@@ -57,6 +61,8 @@ gt_pcadapt <- function(x, pca, k, n_cores = 1) {
   if (!inherits(pca, "gt_pca")) {
     stop("pca must be a gt_pca object")
   }
+  # the scores must come from a PCA of complete (or imputed) genotypes
+  stopifnot_complete_pca(pca, "gt_pcadapt()")
   # check that k is a scalar
   if (!is.numeric(k) || length(k) != 1) {
     stop("k must be a scalar")

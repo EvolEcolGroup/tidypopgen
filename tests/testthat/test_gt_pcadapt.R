@@ -12,11 +12,27 @@ missing_gt <- gen_tibble(
   quiet = TRUE
 )
 missing_gt <- gt_impute_simple(missing_gt, method = "mode")
+# the PCA of the imputed genotypes
+gt_set_imputed(missing_gt, set = TRUE)
 missing_pca <- missing_gt %>% gt_pca(n_cores = 2)
+gt_set_imputed(missing_gt, set = FALSE)
 
 test_that("gt_pcadapt works on gt_pca object", {
   missing_pcadapt <- gt_pcadapt(missing_gt, missing_pca, k = 3)
   expect_true((inherits(missing_pcadapt, "gt_pcadapt")))
+})
+
+test_that("gt_pcadapt needs a PCA of complete or imputed genotypes", {
+  # a PCA that compared individuals over the loci genotyped in both
+  pairwise_pca <- missing_gt %>% gt_pca(k = 3, n_cores = 2)
+  expect_true(attr(pairwise_pca, "missing"))
+  expect_error(
+    gt_pcadapt(missing_gt, pairwise_pca, k = 3),
+    "gt_pcadapt\\(\\) needs a PCA of complete or imputed genotypes"
+  )
+  # PCAs without the attribute (from earlier versions) are accepted
+  attr(pairwise_pca, "missing") <- NULL
+  expect_s3_class(gt_pcadapt(missing_gt, pairwise_pca, k = 3), "gt_pcadapt")
 })
 
 test_that("gt_pcadapt checks that individuals match the pca", {
