@@ -115,18 +115,14 @@ Forest.
 ## PCA
 
 That was easy. The loci had already been filtered and cleaned, so we don't need 
-to do any QC. Let us jump straight into analysis and run a PCA. There are
-missing data. The default method of `gt_pca()` does not need them to be imputed:
-as `plink --pca`, it compares individuals over the loci genotyped in both. But
-we will use the PCA for a DAPC, which needs a PCA of complete genotypes, so we
-first impute the missing genotypes with `gt_impute_simple()`, and set the
-`gen_tibble` to use the imputed genotypes for the PCA:
+to do any QC. Let us jump straight into analysis and run a PCA:
 ```{r}
-anole_gt <- gt_impute_simple(anole_gt, method = "mode")
-gt_set_imputed(anole_gt, set = TRUE)
 anole_pca <- anole_gt %>% gt_pca(k = 30)
-gt_set_imputed(anole_gt, set = FALSE)
 ```
+There are missing data, but we do not need to impute them: the default method
+of `gt_pca()`, as `plink --pca`, compares individuals over the loci genotyped in
+both (other analyses, e.g. `gt_pca(method = "random")`, need complete data, and
+we would first impute the missing genotypes with `gt_impute_simple()`).
 
 Let us look at the object:
 ```{r}
@@ -267,10 +263,17 @@ anole_clusters$best_k
 If we decided that we wanted to explore a different value, we could simply overwrite
 that number with `anole_clusters$best_k<-5`
 
-In this case, we are happy with the option of 3 clusters, and we can run a DAPC:
+In this case, we are happy with the option of 3 clusters, and we can run a DAPC.
+Because the PCA was computed with missing genotypes, we also give the `gen_tibble`
+(`data`): `gt_dapc()` uses the genotypes to estimate the loadings of the loci
+without counting the missing genotypes as zeros:
 ```{r}
-anole_dapc <- gt_dapc(anole_clusters)
+anole_dapc <- gt_dapc(anole_clusters, data = anole_gt)
 ```
+The warning tells us that a few loci are genotyped in too few individuals (here,
+in only one or two of them) to estimate their loadings, which are left as `NA`;
+we could remove such loci before the analysis, e.g. with
+`select_loci_if(anole_gt, loci_missingness(genotypes) < 0.5)`.
 
 Note that `gt_dapc()` takes automatically the number of clusters from the `anole_clusters` object,
 but can change that behaviour by setting some of its parameters (see the help
