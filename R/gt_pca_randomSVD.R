@@ -34,7 +34,7 @@
 #'   but the total variance will not be stored in the output (and thus it will
 #'   not be possible to assign a proportion of variance explained to the
 #'   components).
-#' @param n_cores Number of cores used.
+#' @param n_cores Number of cores used (see [gt_pca()]).
 #' @param tol Precision parameter of [svds][RSpectra::svds]. Default is `1e-4`.
 #' @param verbose Should some progress be printed? Default is `FALSE`.
 #' @param fun_prod Function that takes 6 arguments (in this order):

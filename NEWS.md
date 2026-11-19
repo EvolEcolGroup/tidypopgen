@@ -89,6 +89,9 @@
 * `gt_pca(method = "random")` and `gt_pca_autoSVD()` with a custom
   `fun_scaling`: fix hangs (with `n_cores > 1`) or cryptic errors on missing
   genotypes
+* `gt_pca(method = "random")` and `gt_pca_autoSVD()` use at most `n_cores`
+  cores (bigstatsr's parallel SVD started one more process); the former, with
+  the default products, runs on `n_cores` threads, which is also faster
 * functions using temporary backing files (PCA, LD clumping, KING, IBS and
   allele sharing) delete them, fixing occasional "File '...bk' already
   exists" errors

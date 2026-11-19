@@ -500,6 +500,47 @@ test_that("our stdevs are comparable to prcomp", {
   )
 })
 
+test_that("the randomised SVDs use at most n_cores cores", {
+  withr::local_options(lifecycle_verbosity = "quiet")
+  bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
+  missing_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("missing_"),
+    quiet = TRUE
+  )
+  complete_gt <- missing_gt %>%
+    select_loci_if(loci_missingness(genotypes) == 0)
+  # R CMD check allows 2 processes (which parallel::makeCluster() checks with
+  # this variable): with n_cores = 2, bigstatsr's parallel SVD started 3
+  withr::local_envvar(c("_R_CHECK_LIMIT_CORES_" = "TRUE"))
+  set.seed(1)
+  one_core <- gt_pca(complete_gt, k = 2, method = "random", n_cores = 1)
+  # with bigstatsr's products, on n_cores threads, in one process
+  set.seed(1)
+  two_cores <- gt_pca(complete_gt, k = 2, method = "random", n_cores = 2)
+  expect_equal(two_cores$d, one_core$d)
+  expect_equal(abs(two_cores$u), abs(one_core$u), tolerance = 1e-6)
+  # with products given by the user, the parallel SVD on n_cores - 1
+  # workers, or the sequential SVD with fewer than 3 cores
+  my_prod <- function(X, x, ind.row, ind.col, center, scale) { # nolint
+    bigstatsr::big_prodVec(X, x, ind.row, ind.col,
+      center = center, scale = scale
+    )
+  }
+  environment(my_prod) <- baseenv()
+  set.seed(1)
+  my_prod_pca <- gt_pca(complete_gt,
+    k = 2, method = "random", fun_prod = my_prod, n_cores = 2
+  )
+  expect_equal(my_prod_pca$d, one_core$d)
+  expect_s3_class(
+    gt_pca_autoSVD(complete_gt,
+      k = 2, roll_size = 0, verbose = FALSE, n_cores = 2
+    ),
+    "gt_pca"
+  )
+})
+
 # The tests below require more than 2 cores, so we skip on CRAN
 skip_on_cran()
 
@@ -826,8 +867,9 @@ test_that("missing genotypes are looked for only where they are used", {
 })
 
 test_that("missing genotypes not used are ignored by the parallel SVD", {
-  # the parallel randomised SVD runs 1 + n_cores processes, more than the 2
-  # allowed by R CMD check
+  # bigstatsr's parallel randomised SVD (used with products given by the
+  # user, and by gt_pca_autoSVD()) runs on n_cores - 1 workers and one more
+  # process: 3 processes, more than the 2 allowed by R CMD check
   skip_if(
     Sys.getenv("_R_CHECK_LIMIT_CORES_", "") != "",
     "Skipping due to core limitation in R CMD check"
@@ -843,13 +885,22 @@ test_that("missing genotypes not used are ignored by the parallel SVD", {
     select_loci_if(loci_missingness(genotypes) == 0)
   # bigstatsr's check in the workers sampled the whole backing matrix, and
   # left the SVD waiting forever
+  my_prod <- function(X, x, ind.row, ind.col, center, scale) { # nolint
+    bigstatsr::big_prodVec(X, x, ind.row, ind.col,
+      center = center, scale = scale
+    )
+  }
+  environment(my_prod) <- baseenv()
   set.seed(1)
   expect_s3_class(
-    gt_pca(complete_gt, k = 2, method = "random", n_cores = 2), "gt_pca"
+    gt_pca(complete_gt,
+      k = 2, method = "random", fun_prod = my_prod, n_cores = 3
+    ),
+    "gt_pca"
   )
   expect_s3_class(
     gt_pca_autoSVD(complete_gt,
-      k = 2, roll_size = 0, verbose = FALSE, n_cores = 2
+      k = 2, roll_size = 0, verbose = FALSE, n_cores = 3
     ),
     "gt_pca"
   )

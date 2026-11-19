@@ -57,7 +57,10 @@
 #' @param max_iter Maximum number of iterations of outlier detection. Default is
 #'   `5`.
 #' @param n_cores Number of cores used. Default doesn't use parallelism. You may
-#'   use [bigstatsr::nb_cores()].
+#'   use [bigstatsr::nb_cores()]. As the randomised SVD of
+#'   [bigsnpr::snp_autoSVD()] runs one more process than its number of cores
+#'   (to coordinate the others), it is given `n_cores - 1` cores (or one,
+#'   with fewer than 3 cores), so that at most `n_cores` are used.
 #' @returns a `gt_pca` object, which is a subclass of `bigSVD`; this is an S3
 #'   list with elements: A named list (an S3 class "big_SVD") of
 #' - `d`, the eigenvalues (singular values, i.e. as variances),
@@ -194,7 +197,9 @@ gt_pca_autoSVD <- function(
         alpha.tukey = alpha_tukey,
         min.mac = min_mac,
         max.iter = max_iter,
-        ncores = n_cores,
+        # its randomised SVD runs 1 + ncores processes: use at most n_cores
+        # cores (see svd_n_cores())
+        ncores = svd_n_cores(n_cores),
         verbose = verbose
       ))
     },
