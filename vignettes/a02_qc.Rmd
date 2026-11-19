@@ -182,7 +182,7 @@ For further analyses, it may be necessary to control for linkage in the data set
 
 To explore why clumping is preferable to pruning, see <https://privefl.github.io/bigsnpr/articles/pruning-vs-clumping.html>
 
-Missing genotypes do not need to be imputed: as in plink, the correlation between two loci is computed over the individuals genotyped at both.
+Missing genotypes do not need to be imputed: the correlation between two loci is computed over the individuals genotyped at both (as in PLINK).
 
 In this example, if we want to remove SNPs with a correlation greater than 0.2 within windows of 10 kb, we can set these parameters with `thr_r2` and `size` respectively (with `use_positions = FALSE`, `size` would be a number of SNPs instead).
 

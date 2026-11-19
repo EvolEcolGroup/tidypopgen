@@ -120,8 +120,8 @@ to do any QC. Let us jump straight into analysis and run a PCA:
 anole_pca <- anole_gt %>% gt_pca(k = 30)
 ```
 There are missing data, but we do not need to impute them: the default method
-of `gt_pca()`, as `plink --pca`, compares individuals over the loci genotyped in
-both (other analyses, e.g. `gt_pca(method = "random")`, need complete data, and
+of `gt_pca()` compares individuals over the loci genotyped in
+both (a few analyses, e.g. `gt_pca(method = "random")`, need complete data, and
 we would first impute the missing genotypes with `gt_impute_simple()`).
 
 Let us look at the object:

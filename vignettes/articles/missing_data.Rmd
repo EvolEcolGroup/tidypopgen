@@ -21,8 +21,8 @@ towards the centre of the data and make the individuals with much missing
 data look alike. Missingness then becomes a signal of its own.
 
 `tidypopgen` avoids this where it can. The default PCA, `gt_pca()`, compares
-each pair of individuals over the loci genotyped in both, as `plink --pca`
-does. `gt_dapc()` and `gt_pcadapt()` work on that PCA: DAPC estimates the
+each pair of individuals over the loci genotyped in both (as `plink --pca`
+does). `gt_dapc()` and `gt_pcadapt()` work on that PCA: DAPC estimates the
 loadings of each locus over the individuals genotyped at it, and pcadapt
 tests each locus on the individuals genotyped at it. LD clumping
 (`loci_ld_clump()`) and pruning (`loci_ld_prune()`) compute the correlation
@@ -265,7 +265,9 @@ Use the genotypes with their missing values whenever the analysis can: the
 default `gt_pca()` (and `pairwise_grm(method = "plink")`), `gt_dapc()`,
 `gt_pcadapt()`, `predict()` of a PCA (least squares projection),
 `loci_ld_clump()` and `loci_ld_prune()`, and the `pairwise_*()`,
-`indiv_*()`, `loci_*()` and `pop_*()` statistics. Impute (e.g. with
+`indiv_*()`, `loci_*()` and `pop_*()` statistics.
+
+Impute (e.g. with
 `gt_impute_simple()`, and `gt_set_imputed()` to use the imputed genotypes)
 only for the methods that need complete data, such as
 `gt_pca(method = "random")` and `gt_pca_autoSVD()`; those functions say so if
