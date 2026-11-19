@@ -4,7 +4,7 @@
 \alias{gt_pcadapt}
 \title{pcadapt analysis on a \code{gen_tibble} object}
 \usage{
-gt_pcadapt(x, pca, k, n_cores = 1)
+gt_pcadapt(x, pca, k, n_cores = 1, max_missing = 0.5)
 }
 \arguments{
 \item{x}{A \code{gen_tibble} object.}
@@ -15,6 +15,12 @@ individuals of \code{x} (see Details for missing genotypes).}
 \item{k}{Number of principal components to use in the analysis.}
 
 \item{n_cores}{Number of cores to use.}
+
+\item{max_missing}{with a PCA of missing genotypes, the largest fraction of
+missing genotypes at a locus for it to be tested (see Details); loci
+with more get \code{NA} statistics. Default is \code{0.5}, which tests the loci
+that \code{select_loci_if(x, loci_missingness(genotypes) <= 0.5)} would keep.
+Ignored with a PCA of complete or imputed genotypes.}
 }
 \value{
 An object of subclass \code{gt_pcadapt}, a subclass of \code{mhtest}.
@@ -35,7 +41,12 @@ The genotypes tested are those that the PCA was computed on:
 \code{\link[=gt_pca]{gt_pca()}}, which compares individuals over the loci genotyped in both,
 as PLINK does), the genotypes of \code{x} with their missing values: each
 locus is tested on the individuals genotyped at it, as in the \code{pcadapt}
-package. Imputed genotypes are not used.
+package. Imputed genotypes are not used. Loci with more than a fraction
+\code{max_missing} of their genotypes missing (by default, more than half),
+or genotyped in fewer than \code{k + 2} individuals, are not tested, and get
+\code{NA} statistics: their t-scores, from few individuals, are noisy (and
+infinite with \code{k + 1} individuals, an exact fit), and would top the
+rankings of the loci.
 \item with a PCA of complete or imputed genotypes, the genotypes of \code{x} must be
 complete or imputed (see \code{\link[=gt_impute_simple]{gt_impute_simple()}}; imputed genotypes are
 used automatically). Missing genotypes give an error; as in \code{bigsnpr},
@@ -44,8 +55,8 @@ at evenly spaced loci), and any that go unnoticed are left out of the
 test of their locus.
 }
 
-Loci with the same genotype in every individual genotyped, or genotyped
-in fewer than 3 individuals, can not be tested, and give an error.
+Loci with the same genotype in every individual genotyped can not be
+tested, and give an error.
 }
 \examples{
 \dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}

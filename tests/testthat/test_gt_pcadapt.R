@@ -72,6 +72,65 @@ test_that("gt_pcadapt with a PCA of missing genotypes", {
   ))
 })
 
+test_that("gt_pcadapt does not test loci with many missing genotypes", {
+  set.seed(2)
+  sim_gt <- gt_simulate_bn(n_indiv = c(10, 10, 10), n_loci = 200, fst = 0.2)
+  sim_gt <- select_loci_if(sim_gt, loci_maf(genotypes) > 0.05)
+  geno <- show_genotypes(sim_gt)
+  # loci genotyped in 3 of the 30 individuals (fewer than k + 2 = 4, an exact
+  # fit), in 14 (more than half of the genotypes missing), in 15 (exactly
+  # half missing, tested) and in 4, each spread over the three populations
+  geno[-c(1, 11, 21), 1] <- NA
+  geno[-c(1:5, 11:15, 21:24), 2] <- NA
+  geno[-c(1:5, 11:15, 21:25), 3] <- NA
+  geno[-c(1, 2, 11, 21), 4] <- NA
+  # (all four are polymorphic among the individuals genotyped)
+  geno[c(1, 11), 1:4] <- matrix(c(0, 2), nrow = 2, ncol = 4)
+  miss_gt <- gen_tibble(geno,
+    indiv_meta = sim_gt %>% select(id, population),
+    loci = show_loci(sim_gt) %>% select(-big_index),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  miss_pca <- gt_pca(miss_gt, k = 4, n_cores = 1)
+  # by default, the loci with more than half of their genotypes missing are
+  # not tested, and get NA statistics
+  miss_pcadapt <- gt_pcadapt(miss_gt, miss_pca, k = 2)
+  sparse <- c(1L, 2L, 4L)
+  expect_identical(which(is.na(miss_pcadapt$score)), sparse)
+  expect_identical(
+    which(is.na(miss_pcadapt$score)),
+    which(loci_missingness(miss_gt) > 0.5)
+  )
+  # the other loci are tested as they would be on their own (the robust
+  # distances and the genomic control are those of the loci tested)
+  tested_gt <- select_loci_if(miss_gt, !is.na(miss_pcadapt$score))
+  tested_pcadapt <- gt_pcadapt(tested_gt, miss_pca, k = 2)
+  expect_identical(miss_pcadapt$score[-sparse], tested_pcadapt$score)
+  expect_identical(
+    stats::predict(miss_pcadapt)[-sparse], stats::predict(tested_pcadapt)
+  )
+  expect_true(all(is.na(stats::predict(miss_pcadapt)[sparse])))
+  # with max_missing = 1, only the locus genotyped in fewer than k + 2
+  # individuals is not tested (its fit would be exact, with an infinite
+  # t-score)
+  all_pcadapt <- gt_pcadapt(miss_gt, miss_pca, k = 2, max_missing = 1)
+  expect_identical(which(is.na(all_pcadapt$score)), 1L)
+  # the plots leave the loci not tested out
+  expect_s3_class(
+    ggplot2::ggplot_build(autoplot(miss_pcadapt, type = "qq")),
+    "ggplot_built"
+  )
+  expect_s3_class(
+    ggplot2::ggplot_build(autoplot(miss_pcadapt, type = "manhattan")),
+    "ggplot_built"
+  )
+  # max_missing is checked
+  expect_error(
+    gt_pcadapt(miss_gt, miss_pca, k = 2, max_missing = 2),
+    "'max_missing' should be a number between 0 and 1"
+  )
+})
+
 test_that("gt_pcadapt checks that individuals match the pca", {
   # same individuals, in a different order
   rev_gt <- missing_gt[rev(seq_len(nrow(missing_gt))), ]

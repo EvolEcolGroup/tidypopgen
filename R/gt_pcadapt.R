@@ -13,7 +13,12 @@
 #'   [gt_pca()], which compares individuals over the loci genotyped in both,
 #'   as PLINK does), the genotypes of `x` with their missing values: each
 #'   locus is tested on the individuals genotyped at it, as in the `pcadapt`
-#'   package. Imputed genotypes are not used.
+#'   package. Imputed genotypes are not used. Loci with more than a fraction
+#'   `max_missing` of their genotypes missing (by default, more than half),
+#'   or genotyped in fewer than `k + 2` individuals, are not tested, and get
+#'   `NA` statistics: their t-scores, from few individuals, are noisy (and
+#'   infinite with `k + 1` individuals, an exact fit), and would top the
+#'   rankings of the loci.
 #' - with a PCA of complete or imputed genotypes, the genotypes of `x` must be
 #'   complete or imputed (see [gt_impute_simple()]; imputed genotypes are
 #'   used automatically). Missing genotypes give an error; as in `bigsnpr`,
@@ -21,8 +26,8 @@
 #'   at evenly spaced loci), and any that go unnoticed are left out of the
 #'   test of their locus.
 #'
-#' Loci with the same genotype in every individual genotyped, or genotyped
-#' in fewer than 3 individuals, can not be tested, and give an error.
+#' Loci with the same genotype in every individual genotyped can not be
+#' tested, and give an error.
 #' @references Luu, K., Bazin, E., Blum, M. G. B., & François, O. (2017).
 #'   pcadapt: an R package for genome scans for selection based on principal
 #'   component analysis. Molecular Ecology Resources, 17(1), 67–77.
@@ -31,6 +36,11 @@
 #'   individuals of `x` (see Details for missing genotypes).
 #' @param k Number of principal components to use in the analysis.
 #' @param n_cores Number of cores to use.
+#' @param max_missing with a PCA of missing genotypes, the largest fraction of
+#'   missing genotypes at a locus for it to be tested (see Details); loci
+#'   with more get `NA` statistics. Default is `0.5`, which tests the loci
+#'   that `select_loci_if(x, loci_missingness(genotypes) <= 0.5)` would keep.
+#'   Ignored with a PCA of complete or imputed genotypes.
 #' @returns An object of subclass `gt_pcadapt`, a subclass of `mhtest`.
 #' @export
 #' @seealso [bigsnpr::snp_pcadapt()] which this function wraps.
@@ -57,8 +67,9 @@
 #'
 #' # Create a gt_pcadapt object
 #' gt_pcadapt(lobsters, pca, k = 2)
-gt_pcadapt <- function(x, pca, k, n_cores = 1) {
+gt_pcadapt <- function(x, pca, k, n_cores = 1, max_missing = 0.5) {
   stopifnot_gen_tibble(x)
+  stopifnot_max_missing(max_missing)
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
     .old_opt <- getOption("bigstatsr.check.parallel.blas", TRUE)
@@ -110,13 +121,34 @@ gt_pcadapt <- function(x, pca, k, n_cores = 1) {
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
 
+  # with a PCA of missing genotypes, test only the loci genotyped in enough
+  # individuals: with at most a fraction max_missing of missing genotypes (as
+  # loci_missingness() computes it), and at least k + 2 individuals (with
+  # k + 1, the fit is exact, and the t-scores infinite); the others get NA
+  tested <- rep(TRUE, length(x_ind_col))
+  if (pca_missing) {
+    n_ind <- length(x_ind_row)
+    n_missing <- missingness_cpp(
+      BM = .gt_get_fbm(x), rowInd = x_ind_row, colInd = x_ind_col,
+      ncores = n_cores
+    )
+    tested <- n_missing / n_ind <= max_missing & n_ind - n_missing >= k + 2
+    if (!any(tested)) {
+      stop(
+        "no locus is genotyped in enough individuals to be tested: at most ",
+        "a fraction 'max_missing' of missing genotypes, and at least k + 2 ",
+        "individuals, are needed"
+      )
+    }
+  }
+
   # Run the analysis
   res <- tryCatch(
     bigsnpr::snp_pcadapt(
       G = .gt_get_fbm(x),
       U.row = pca$u[, 1:k, drop = FALSE],
       ind.row = x_ind_row,
-      ind.col = x_ind_col,
+      ind.col = x_ind_col[tested],
       ncores = n_cores
     ),
     error = function(e) {
@@ -125,10 +157,22 @@ gt_pcadapt <- function(x, pca, k, n_cores = 1) {
       # can't have missing values in 'U'" (#179), or, with k = 1, as an
       # error of its genomic control ("invalid 'xmin' value"): look for them
       # (only after an error) and say which they are
-      stopifnot_variable_loci(x, x_ind_row, x_ind_col)
+      stopifnot_variable_loci(x, x_ind_row, x_ind_col[tested],
+        names = loci_names(x)[tested]
+      )
       stop(e)
     }
   )
+  if (!all(tested)) {
+    # the loci not tested get NA statistics (the robust distances and the
+    # genomic control, in the attributes of res, are those of the loci tested)
+    all_res <- data.frame(score = rep(NA_real_, length(tested)))
+    all_res$score[tested] <- res$score
+    for (a in setdiff(names(attributes(res)), c("names", "row.names"))) {
+      attr(all_res, a) <- attr(res, a)
+    }
+    res <- all_res
+  }
 
   # add the loci table to the object
   attr(res, "loci") <- show_loci(x)
@@ -144,9 +188,11 @@ gt_pcadapt <- function(x, pca, k, n_cores = 1) {
 # (one pass), so it is only called after snp_pcadapt() has failed.
 # @param x a gen_tibble
 # @param ind_row,ind_col the rows and columns of its backing matrix
+# @param names the names of the loci of ind_col
 # @keywords internal
 # @noRd
-stopifnot_variable_loci <- function(x, ind_row, ind_col) {
+stopifnot_variable_loci <- function(x, ind_row, ind_col,
+                                    names = loci_names(x)) {
   # the counts of each genotype (0, 1 and 2, and missing, NA) at each locus
   counts <- bigstatsr::big_counts(
     .gt_get_fbm(x),
@@ -163,7 +209,7 @@ stopifnot_variable_loci <- function(x, ind_row, ind_col) {
       "individual, and ", length(constant), " loci are monomorphic or ",
       "heterozygous in every individual (genotyped), or genotyped in fewer ",
       "than 3 individuals (e.g. ",
-      paste(utils::head(loci_names(x)[constant], 3), collapse = ", "),
+      paste(utils::head(names[constant], 3), collapse = ", "),
       "): remove them (e.g. with select_loci()); heavy imputation can make ",
       "loci heterozygous in every individual, so remove the loci with many ",
       "missing genotypes before imputing",
