@@ -80,6 +80,16 @@ and \code{"partial"}, \eqn{Z^T u / d}, with missing genotypes as 0)
 missing genotypes and \code{"partial"}, the number of loci times the trace of
 the GRM)
 }
+
+Two attributes record the genotypes that the PCA was computed on:
+\itemize{
+\item \code{imputed}, \code{TRUE} if the PCA used imputed genotypes
+\item \code{missing}, \code{TRUE} if the genotypes had missing values (only possible
+with \code{"partial"})
+}
+
+PCAs made by earlier versions of \code{tidypopgen} do not have these
+attributes; their methods needed complete or imputed genotypes.
 }
 \description{
 Computes the leading principal components of the genotypes of a
@@ -142,6 +152,11 @@ semi-definite; only its largest (positive) eigenvalues are used.
 With \code{method = "random"}, the genotypes must be complete or imputed (see
 \code{\link[=gt_impute_simple]{gt_impute_simple()}}); imputed genotypes are used automatically when
 they exist.
+
+The PCA records which genotypes it used (see Value). With missing
+genotypes, \code{\link[=gt_pcadapt]{gt_pcadapt()}} tests each locus on the individuals genotyped
+at it, and \code{\link[=gt_dapc]{gt_dapc()}} estimates the loadings of the loci without
+counting missing genotypes as 0 (for which it needs the \code{gen_tibble}).
 }
 
 \section{Scaling}{

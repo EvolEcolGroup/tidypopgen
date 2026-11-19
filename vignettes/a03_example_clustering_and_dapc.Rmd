@@ -263,10 +263,17 @@ anole_clusters$best_k
 If we decided that we wanted to explore a different value, we could simply overwrite
 that number with `anole_clusters$best_k<-5`
 
-In this case, we are happy with the option of 3 clusters, and we can run a DAPC:
+In this case, we are happy with the option of 3 clusters, and we can run a DAPC.
+Because the PCA was computed with missing genotypes, we also give the `gen_tibble`
+(`data`): `gt_dapc()` uses the genotypes to estimate the loadings of the loci
+without counting the missing genotypes as zeros:
 ```{r}
-anole_dapc <- gt_dapc(anole_clusters)
+anole_dapc <- gt_dapc(anole_clusters, data = anole_gt)
 ```
+The warning tells us that a few loci are genotyped in too few individuals (here,
+in only one or two of them) to estimate their loadings, which are left as `NA`;
+we could remove such loci before the analysis, e.g. with
+`select_loci_if(anole_gt, loci_missingness(genotypes) < 0.5)`.
 
 Note that `gt_dapc()` takes automatically the number of clusters from the `anole_clusters` object,
 but can change that behaviour by setting some of its parameters (see the help

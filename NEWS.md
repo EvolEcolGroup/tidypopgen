@@ -8,6 +8,16 @@
   missing genotypes as `plink --pca` (PLINK 1.9) does, without imputation, and
   uses an optimised BLAS when there is one, and Eigen otherwise;
   `method = "random"` is for very large numbers of individuals
+* `gt_pca` objects record whether they used imputed genotypes and whether
+  their genotypes had missing values (attributes `imputed` and `missing`)
+* `gt_pcadapt()` works on a PCA of missing genotypes, testing each locus on
+  the individuals genotyped at it, as the `pcadapt` package does
+* `gt_dapc()` works on a PCA of missing genotypes: give the `gen_tibble` as
+  `data`, and the loadings of the loci are estimated without counting missing
+  genotypes as 0 (new arguments `data` and `n_cores`)
+* errors on missing genotypes name the function and say how to impute them;
+  `gt_pca(method = "random")` no longer reads the genotypes an extra time to
+  look for them
 * `gt_pca_partialSVD()` and `gt_pca_randomSVD()` are deprecated in favour of
   `gt_pca()`
 * `predict()` of a `gt_pca` now uses `project_method = "least_squares"` on all
@@ -62,6 +72,13 @@
 
 ## Bug fixes
 
+* `gt_pcadapt()`: a clear error, naming them, for loci with the same genotype
+  in every individual (e.g. all heterozygous after heavy imputation), instead
+  of "You can't have missing values in 'U'" (#179)
+* fix false "You can't have missing values" errors (or hangs, with
+  `n_cores > 1`) in `loci_ld_clump()`, `gt_pcadapt()`, the PCA functions and
+  `predict(project_method = "none")` after removing loci or individuals with
+  missing genotypes: only the genotypes in use are checked
 * functions using temporary backing files (PCA, LD clumping, KING, IBS and
   allele sharing) delete them, fixing occasional "File '...bk' already
   exists" errors

@@ -95,8 +95,14 @@ gt_pca_partialSVD <- function(
   lifecycle::deprecate_soft("1.1.0", "gt_pca_partialSVD()", "gt_pca()")
   if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {
     gt_set_imputed(x, set = TRUE)
-    on.exit(gt_set_imputed(x, set = FALSE))
+    on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)
   }
+  # the SVD needs complete genotypes: bigstatsr's check samples the whole
+  # backing matrix (including individuals and loci that x does not use), so
+  # turn it off; the scaling, computed once for all the loci, checks the
+  # genotypes of x exactly (see scaling_lookup())
+  local_no_bigstatsr_checks()
+  fun_scaling <- scaling_lookup(x, fun_scaling, what = "gt_pca_partialSVD()")
   X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
@@ -129,5 +135,6 @@ gt_pca_partialSVD <- function(
       scale = this_svd$scale
     )
   }
-  this_svd
+  # the genotypes were complete (or imputed, if x has imputed genotypes)
+  pca_set_genotypes(this_svd, imputed = gt_has_imputed(x), missing = FALSE)
 }

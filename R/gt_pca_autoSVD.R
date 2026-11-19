@@ -5,6 +5,12 @@
 #' long-range LD regions. This function is a wrapper for
 #' [bigsnpr::snp_autoSVD()]
 #'
+#' The genotypes must be complete or imputed (see [gt_impute_simple()];
+#' imputed genotypes are used automatically). Missing genotypes give an
+#' error (with a custom `fun_scaling` that does not depend on the
+#' genotypes, they are only looked for in a sample of them, as in
+#' `bigsnpr`).
+#'
 #' Using gt_pca_autoSVD requires a reasonably large dataset, as the function
 #' iteratively removes regions of long range LD. If you encounter: 'Error in
 #' rollmean(): Parameter 'size' is too large.', `roll_size` exceeds the number
@@ -63,6 +69,8 @@
 #' - `method`, a string defining the method (in this case 'autoSVD'),
 #' - `call`, the call that generated the object.
 #' - `loci`, the loci used after long range LD removal.
+#'
+#' and the attributes `imputed` and `missing` (see [gt_pca()]).
 #' @seealso [bigsnpr::snp_autoSVD()]  which this function wraps.
 #' @export
 #' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
@@ -120,13 +128,23 @@ gt_pca_autoSVD <- function(
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)
   }
-
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
     .old_opt <- getOption("bigstatsr.check.parallel.blas", TRUE)
     options(bigstatsr.check.parallel.blas = FALSE)
     on.exit(options(bigstatsr.check.parallel.blas = .old_opt), add = TRUE)
   }
+  # the SVD needs complete genotypes: bigsnpr's check samples the whole
+  # backing matrix (including individuals and loci that x does not use), so
+  # turn it off; the scaling, computed once for all the loci, checks the
+  # genotypes of x (see scaling_lookup()); snp_autoSVD() removes
+  # loci with too few copies of the minor allele (min_mac) before scaling,
+  # so loci with a zero scale are left to it
+  # (keeping bigstatsr's check of n_cores)
+  local_no_bigstatsr_checks(n_cores = n_cores)
+  fun_scaling <- scaling_lookup(x, fun_scaling,
+    what = "gt_pca_autoSVD()", check_zero = FALSE, n_cores = n_cores
+  )
 
   X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index
@@ -163,6 +181,7 @@ gt_pca_autoSVD <- function(
         infos.pos = infos_pos,
         ind.row = .gt_fbm_rows(x),
         ind.col = .gt_fbm_cols(x),
+        # (which also turns off bigstatsr's checks in the workers)
         fun.scaling = fun_scaling,
         thr.r2 = thr_r2,
         size = size,
@@ -214,6 +233,6 @@ gt_pca_autoSVD <- function(
       scale = this_svd$scale
     )
   }
-
-  this_svd
+  # the genotypes were complete (or imputed, if x has imputed genotypes)
+  pca_set_genotypes(this_svd, imputed = gt_has_imputed(x), missing = FALSE)
 }

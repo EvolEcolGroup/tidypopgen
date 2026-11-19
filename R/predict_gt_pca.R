@@ -166,26 +166,8 @@ predict.gt_pca <- function(
     # with_private_fbm_dir())
     local_private_fbm_dir()
     # get id of loci in new_data, and check that new_data have all the loci
-    # used to build the pca (a single match() hashes the loci names once)
-    loci_subset <- match(object$loci$name, show_loci(new_data)$name)
-    if (anyNA(loci_subset)) {
-      stop("loci used in object are not present in new_data")
-    }
-    if (
-      !all(
-        all(
-          show_loci(new_data)$allele_ref[loci_subset] == object$loci$allele_ref
-        ), # nolint
-        all(
-          show_loci(new_data)$allele_alt[loci_subset] == object$loci$allele_alt
-        )
-      )
-    ) {
-      stop(paste(
-        "ref and alt alleles differ between new_data and the data",
-        "used to create the pca object"
-      ))
-    }
+    # used to build the pca, with the same alleles
+    loci_subset <- pca_match_loci(object, new_data)
 
     if (project_method == "none") {
       if (gt_has_imputed(new_data) && !gt_uses_imputed(new_data)) {
@@ -196,6 +178,10 @@ predict.gt_pca <- function(
       if (is.null(block_size)) {
         block_size <- bigstatsr::block_size(nrow(new_data))
       }
+      # bigstatsr's check for missing values samples the whole backing
+      # matrix (including individuals and loci that new_data does not use):
+      # turn it off; missing genotypes give NA products, checked below
+      local_no_bigstatsr_checks()
       # loci with a scale of 0 (monomorphic loci, which gt_pca() keeps, as
       # PLINK does) have loadings of 0: a scale of 1 avoids 0 / 0 (NaN)
       scale <- object$scale
@@ -210,6 +196,13 @@ predict.gt_pca <- function(
         center = object$center,
         scale = scale
       )
+      # a missing genotype gives NA scores to its individual (an exact
+      # check, at no cost)
+      if (anyNA(XV)) {
+        stop_missing_genotypes("predict(project_method = \"none\")",
+          hint = "or use another project_method"
+        )
+      }
       dimnames(XV) <- list(new_data$id, paste0(".PC", seq_len(ncol(XV)))) # nolint
       output <- output_type(object = XV, as_matrix, id = new_data$id)
       return(output)
@@ -314,6 +307,31 @@ predict.gt_pca <- function(
       return(output)
     }
   }
+}
+
+# The indices, in the loci of data, of the loci of the gt_pca object, after
+# checking that data has all of them, with the same alleles (for predict()
+# and for the loadings of gt_dapc()). `what` and `pca_name` name data and the
+# PCA in the errors.
+pca_match_loci <- function(object, data, what = "new_data",
+                           pca_name = "object") {
+  # (a single match() hashes the loci names once)
+  loci_subset <- match(object$loci$name, show_loci(data)$name)
+  if (anyNA(loci_subset)) {
+    stop("loci used in ", pca_name, " are not present in ", what)
+  }
+  if (
+    !all(
+      all(show_loci(data)$allele_ref[loci_subset] == object$loci$allele_ref),
+      all(show_loci(data)$allele_alt[loci_subset] == object$loci$allele_alt)
+    )
+  ) {
+    stop(paste(
+      "ref and alt alleles differ between", what, "and the data",
+      "used to create the pca object"
+    ))
+  }
+  loci_subset
 }
 
 # The projection of new_data on the loadings of a gt_pca (for the loci

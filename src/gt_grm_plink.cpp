@@ -8,6 +8,8 @@
 // Eigen (from RcppEigen) provides portable, vectorised matrix products that
 // do not depend on the BLAS that R uses
 #include <Eigen/Core>
+// (Cholesky decompositions of small systems, in grm_loci_lsq_cpp())
+#include <Eigen/Cholesky>
 #include <chrono>
 #include <cmath>
 #include <limits>
@@ -179,7 +181,8 @@ double grm_rank_update_seconds(int n, int nb, bool use_blas, int ncores) {
 // pairwise_bitpacked.h.
 // center (2 p) and scale (sqrt(2 p (1 - p))) are given for the loci in colInd.
 // Returns the full symmetric n x n matrix; pairs with no locus valid in both
-// individuals are NaN (as in PLINK).
+// individuals are NaN (as in PLINK). The attribute "n_missing" gives the
+// number of missing genotypes.
 // [[Rcpp::export]]
 NumericMatrix grm_plink_cpp(Environment BM,
                             const IntegerVector& rowInd,
@@ -238,6 +241,9 @@ NumericMatrix grm_plink_cpp(Environment BM,
       p_G[i + j * n] = value;
     }
   }
+  // the number of missing genotypes, so that gt_pca() can record whether the
+  // genotypes it decomposed were complete (pairwise_grm() drops it)
+  G.attr("n_missing") = static_cast<double>(n_missing);
   return G;
 }
 
@@ -307,4 +313,156 @@ NumericMatrix grm_loadings_cpp(Environment BM,
     Rcpp::checkUserInterrupt();
   }
   return V;
+}
+
+/******************************************************************************/
+
+// Least squares regression of each locus on an intercept and the columns of
+// S (n x K), over the individuals genotyped at that locus: the loadings of
+// the loci in gt_dapc() with a PCA of missing genotypes, S being (scaled)
+// scores of the PCA. With X = [1, S] (n x q, q = K + 1), O the individuals
+// genotyped at locus l and z_l its standardised genotypes (as in
+// grm_plink_cpp()), the coefficients b_l solve
+//   (X_O^T X_O) b_l = X_O^T z_O,
+// with
+//   X_O^T X_O = X^T X - sum_{i missing at l} x_i x_i^T, and
+//   X_O^T z_O = sum_g z(g) sum_{i with genotype g at l} x_i,
+// since z takes one value z(g) for each genotype g (0, 1, 2) of a locus.
+// Each locus therefore needs, from its bytes, the sums of x_i over the
+// individuals with genotypes 1 and 2 (those with genotype 0 are the rest)
+// and the sum of the products w_i = x_i x_i^T (the P = q(q+1)/2 entries
+// a <= b) over the missing individuals; the first q entries of w_i (the
+// pairs (0, b)) are x_i itself. This reads each genotype once, without
+// decoding blocks of doubles or matrix products (which took 8 times longer
+// on 1,043 individuals and 643,591 loci with 44% missing genotypes), in
+// parallel over the loci. The q x q system of each locus is then solved by a
+// Cholesky decomposition.
+// With complete genotypes, and columns of S that are orthogonal and of mean
+// 0 (the scores of a PCA), the coefficients of S are the loadings V of the
+// PCA, up to the scale of S.
+// Loci genotyped in fewer than q individuals, or whose system is nearly
+// singular (reciprocal condition number below 1e-10, as in the least squares
+// of predict.gt_pca()), get NA.
+// Returns the m x K coefficients of the columns of S (not of the intercept).
+// [[Rcpp::export]]
+NumericMatrix grm_loci_lsq_cpp(Environment BM,
+                               const IntegerVector& rowInd,
+                               const IntegerVector& colInd,
+                               const NumericVector& center,
+                               const NumericVector& scale,
+                               const NumericMatrix& S,
+                               int ncores) {
+  XPtr<FBM> xpBM = BM["address"];
+  const unsigned char* p_mat =
+    static_cast<const unsigned char*>(xpBM->matrix());
+  const std::size_t nrow_fbm = xpBM->nrow();
+  const std::size_t n = rowInd.size();
+  const std::size_t m = colInd.size();
+  const std::size_t K = S.ncol();
+  // the columns of X = [1, S], and the number of their distinct products
+  const std::size_t q = K + 1;
+  const std::size_t P = q * (q + 1) / 2;
+  if (static_cast<std::size_t>(S.nrow()) != n) {
+    Rcpp::stop("S should have one row per individual.");
+  }
+  std::vector<std::size_t> rows, cols;
+  grm_offsets(xpBM, rowInd, colInd, rows, cols);
+  uint8_t geno_of_byte[256];
+  std::vector<double> zlut = grm_z_lut(BM, center, scale, m, geno_of_byte);
+
+  // the products w_i of each individual (row-major, n x P2, pairs a <= b in
+  // the order (0, 0), (0, 1), ..., (0, q - 1), (1, 1), ...), so that the
+  // first q entries of w_i are x_i; and X^T X, their sums over individuals.
+  // The rows are padded with zeros to an even number of entries (P2), and
+  // the regressors are summed over an even number of entries (q2; the extra
+  // entry is never read), so that the compiler can add them two at a time
+  const std::size_t P2 = (P + 1) / 2 * 2;
+  const std::size_t q2 = (q + 1) / 2 * 2;
+  const double* p_S = S.begin();
+  std::vector<double> W(n * P2, 0.0), xtx(P, 0.0);
+  // pair_index[a + b * q]: the index, among the P products, of the pair (a, b)
+  std::vector<std::size_t> pair_index(q * q);
+  std::vector<double> x(q);
+  for (std::size_t i = 0; i < n; i++) {
+    x[0] = 1.0;
+    for (std::size_t k = 0; k < K; k++) x[k + 1] = p_S[i + k * n];
+    std::size_t p = 0;
+    for (std::size_t a = 0; a < q; a++) {
+      for (std::size_t b = a; b < q; b++, p++) {
+        W[i * P2 + p] = x[a] * x[b];
+        xtx[p] += x[a] * x[b];
+        pair_index[a + b * q] = p;
+        pair_index[b + a * q] = p;
+      }
+    }
+  }
+
+  NumericMatrix B(m, K);
+  double* p_B = B.begin();
+  // (NA_REAL is read once, outside the parallel loops)
+  const double na = NA_REAL;
+  // the loci are processed in chunks, to check for user interrupts
+  const std::size_t chunk = 16384;
+  for (std::size_t l0 = 0; l0 < m; l0 += chunk) {
+    const Eigen::Index nb = static_cast<Eigen::Index>(std::min(chunk, m - l0));
+    #pragma omp parallel num_threads(ncores)
+    {
+      // the sums of x_i over the individuals with genotypes 1 and 2, and of
+      // w_i over the missing ones (rows 1 to 3 of acc, of P2 entries each)
+      std::vector<double> acc(4 * P2);
+      Eigen::MatrixXd A(q, q);
+      Eigen::VectorXd rhs(q), beta(q);
+      Eigen::LLT<Eigen::MatrixXd> llt(q);
+      #pragma omp for schedule(dynamic, 64)
+      for (Eigen::Index s = 0; s < nb; s++) {
+        const std::size_t l = l0 + s;
+        // the bytes of this locus are contiguous in the column-major FBM
+        const unsigned char* p_col = p_mat + cols[l] * nrow_fbm;
+        std::fill(acc.begin(), acc.end(), 0.0);
+        for (std::size_t i = 0; i < n; i++) {
+          const uint8_t g = geno_of_byte[p_col[rows[i]]];
+          // (genotype 0 is not summed: it is the rest)
+          if (g == 0) continue;
+          // x_i (the first q entries of w_i) for genotypes 1 and 2, all of
+          // w_i for missing genotypes, two entries at a time
+          const std::size_t len = (g == 3) ? P2 : q2;
+          const double* __restrict w = &W[i * P2];
+          double* __restrict a = &acc[g * P2];
+          for (std::size_t k = 0; k < len; k += 2) {
+            a[k] += w[k];
+            a[k + 1] += w[k + 1];
+          }
+        }
+        const double* miss = &acc[3 * P2];
+        // X_O^T z_O, from the sums by genotype (those of genotype 0 are the
+        // totals minus the others)
+        const double* lut = &zlut[4 * l];
+        for (std::size_t b = 0; b < q; b++) {
+          const double sum1 = acc[P2 + b];
+          const double sum2 = acc[2 * P2 + b];
+          const double sum0 = xtx[b] - sum1 - sum2 - miss[b];
+          rhs[b] = lut[0] * sum0 + lut[1] * sum1 + lut[2] * sum2;
+        }
+        // X_O^T X_O
+        for (std::size_t a = 0; a < q; a++) {
+          for (std::size_t b = 0; b < q; b++) {
+            const std::size_t pq = pair_index[a + b * q];
+            A(a, b) = xtx[pq] - miss[pq];
+          }
+        }
+        // the number of individuals genotyped is the entry of the intercept
+        bool ok = A(0, 0) > static_cast<double>(q) - 0.5;
+        if (ok) {
+          llt.compute(A);
+          ok = llt.info() == Eigen::Success && llt.rcond() >= 1e-10;
+        }
+        if (ok) beta = llt.solve(rhs);
+        for (std::size_t k = 0; k < K; k++) {
+          p_B[l + k * m] = ok ? beta[k + 1] : na;
+        }
+      }
+    }
+    Rcpp::checkUserInterrupt();
+  }
+  return B;
 }

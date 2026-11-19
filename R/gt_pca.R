@@ -53,6 +53,11 @@
 #'   [gt_impute_simple()]); imputed genotypes are used automatically when
 #'   they exist.
 #'
+#'   The PCA records which genotypes it used (see Value). With missing
+#'   genotypes, [gt_pcadapt()] tests each locus on the individuals genotyped
+#'   at it, and [gt_dapc()] estimates the loadings of the loci without
+#'   counting missing genotypes as 0 (for which it needs the `gen_tibble`).
+#'
 #' @section Scaling: `fun_scaling = NULL` (the default) uses the binomial
 #'   scaling above, as [bigsnpr::snp_scaleBinom()] (and PLINK) do, with the
 #'   allele frequencies of the genotyped individuals. A function that returns
@@ -127,6 +132,14 @@
 #'   missing genotypes and `"partial"`, the number of loci times the trace of
 #'   the GRM)
 #'
+#' Two attributes record the genotypes that the PCA was computed on:
+#' - `imputed`, `TRUE` if the PCA used imputed genotypes
+#' - `missing`, `TRUE` if the genotypes had missing values (only possible
+#'   with `"partial"`)
+#'
+#' PCAs made by earlier versions of `tidypopgen` do not have these
+#' attributes; their methods needed complete or imputed genotypes.
+#'
 #' @note Rather than accessing elements of a `gt_pca` object directly, it is
 #'   better to use `tidy` and `augment`. See [`gt_pca_tidiers`].
 #' @references Purcell S. et al. (2007) PLINK: a tool set for whole-genome
@@ -177,19 +190,8 @@ gt_pca <- function(x, k = 10, method = c("partial", "random"),
     stop("'k' should be between 1 and the number of individuals - 1")
   }
   if (method == "random") {
-    # use imputed genotypes if they exist; otherwise they must be complete
-    if (gt_has_imputed(x) && !gt_uses_imputed(x)) {
-      gt_set_imputed(x, set = TRUE)
-      on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)
-    }
-    # (on the genotypes column, which gives one value per locus also for a
-    # grouped gen_tibble)
-    if (any(loci_missingness(x$genotypes, n_cores = n_cores) > 0)) {
-      stop(
-        "method = 'random' needs complete or imputed genotypes: impute them ",
-        "(e.g. with gt_impute_simple()), or use method = 'partial'"
-      )
-    }
+    # (pca_random_svd() uses imputed genotypes if they exist; otherwise they
+    # must be complete, which its scaling checks)
     this_pca <- pca_random_svd(x,
       k = k,
       fun_scaling = if (is.null(fun_scaling)) {
@@ -198,7 +200,9 @@ gt_pca <- function(x, k = 10, method = c("partial", "random"),
         fun_scaling
       },
       tol = tol, verbose = verbose, n_cores = n_cores, fun_prod = fun_prod,
-      fun_cprod = fun_cprod, total_var = total_var
+      fun_cprod = fun_cprod, total_var = total_var,
+      what = "gt_pca(method = \"random\")",
+      hint = "or use method = \"partial\""
     )
     this_pca$method <- "random"
     this_pca$call <- match.call()
@@ -206,6 +210,8 @@ gt_pca <- function(x, k = 10, method = c("partial", "random"),
   }
 
   # method "partial": the GRM, then its leading eigenvectors
+  # (imputed genotypes are used only if x is set to use them)
+  imputed <- gt_has_imputed(x) && gt_uses_imputed(x)
   if (is.null(block_size)) block_size <- grm_block_size(n_ind)
   use_blas <- grm_use_blas(engine, n_cores)
   scaling <- pca_scaling(x, fun_scaling, n_cores)
@@ -254,7 +260,22 @@ gt_pca <- function(x, k = 10, method = c("partial", "random"),
   )
   if (total_var) this_pca$square_frobenius <- m * sum(diag(grm))
   class(this_pca) <- c("gt_pca", "big_SVD")
-  this_pca
+  # record the genotypes the PCA was computed on: imputed or not, and with
+  # missing genotypes or not (counted by grm_plink_cpp()), for the functions
+  # that treat the two differently (gt_dapc() and gt_pcadapt())
+  pca_set_genotypes(this_pca,
+    imputed = imputed,
+    missing = attr(grm, "n_missing") > 0
+  )
+}
+
+# Record, as attributes of a gt_pca, whether the PCA used imputed genotypes
+# ("imputed") and whether the genotypes it decomposed had missing values
+# ("missing"; only possible with method "partial")
+pca_set_genotypes <- function(pca, imputed, missing) {
+  attr(pca, "imputed") <- imputed
+  attr(pca, "missing") <- missing
+  pca
 }
 
 # Centering and scaling of the loci for method "partial": the binomial
@@ -270,25 +291,34 @@ pca_scaling <- function(x, fun_scaling, n_cores) {
     center <- 2 * freq
     scale <- sqrt(2 * freq * (1 - freq))
   } else {
+    # bigstatsr's check for missing values samples the whole backing matrix
+    # (including individuals and loci that x does not use): turn it off;
+    # missing genotypes give missing values in the scaling, checked below
+    local_no_bigstatsr_checks()
     scaling <- tryCatch(
       fun_scaling(.gt_get_fbm(x),
         ind.row = .gt_fbm_rows(x),
         ind.col = .gt_fbm_cols(x)
       ),
       error = function(e) {
-        stop(
-          "'fun_scaling' failed (", conditionMessage(e), "): a custom ",
-          "scaling needs complete or imputed genotypes (see gt_set_imputed())",
-          call. = FALSE
-        )
+        # (bigstatsr's own check for missing values is off, so scalings can
+        # fail on them with a cryptic error: count them, only now)
+        if (any_missing_genotypes(x, n_cores = n_cores)) {
+          stop_missing_genotypes("gt_pca() with a custom 'fun_scaling'",
+            hint = "or use the default scaling (fun_scaling = NULL)",
+            imputed_auto = FALSE
+          )
+        }
+        stop("'fun_scaling' failed: ", conditionMessage(e), call. = FALSE)
       }
     )
     center <- scaling$center
     scale <- scaling$scale
+    # missing genotypes give missing values in the scaling (an exact check)
     if (anyNA(center) || anyNA(scale)) {
-      stop(
-        "'fun_scaling' gave missing values: a custom scaling needs complete ",
-        "or imputed genotypes (see gt_set_imputed())"
+      stop_missing_genotypes("gt_pca() with a custom 'fun_scaling'",
+        hint = "or use the default scaling (fun_scaling = NULL)",
+        imputed_auto = FALSE
       )
     }
   }
@@ -318,20 +348,30 @@ grm_plink <- function(x, center, scale, n_cores, block_size, use_blas) {
 }
 
 # Method "random": bigstatsr::big_randomSVD(), using imputed genotypes if they
-# exist (also used by the deprecated gt_pca_randomSVD())
+# exist (also used by the deprecated gt_pca_randomSVD()); `what` and `hint`
+# are for the error on missing genotypes (see stop_missing_genotypes())
 pca_random_svd <- function(x, k, fun_scaling, tol, verbose, n_cores,
-                           fun_prod, fun_cprod, total_var) {
+                           fun_prod, fun_cprod, total_var,
+                           what = "gt_pca_randomSVD()", hint = NULL) {
   if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)
   }
-
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
     .old_opt <- getOption("bigstatsr.check.parallel.blas", TRUE)
     options(bigstatsr.check.parallel.blas = FALSE)
     on.exit(options(bigstatsr.check.parallel.blas = .old_opt), add = TRUE)
   }
+  # the SVD needs complete genotypes: bigstatsr's check samples the whole
+  # backing matrix (including individuals and loci that x does not use), so
+  # turn it off; the scaling, computed once for all the loci, checks the
+  # genotypes of x (see scaling_lookup())
+  # (keeping bigstatsr's check of n_cores)
+  local_no_bigstatsr_checks(n_cores = n_cores)
+  fun_scaling <- scaling_lookup(x, fun_scaling,
+    what = what, hint = hint, n_cores = n_cores
+  )
 
   X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index
@@ -344,6 +384,7 @@ pca_random_svd <- function(x, k, fun_scaling, tol, verbose, n_cores,
     k = k,
     ind.row = .gt_fbm_rows(x),
     ind.col = .gt_fbm_cols(x),
+    # (which also turns off bigstatsr's checks in the workers)
     fun.scaling = fun_scaling,
     tol = tol,
     verbose = verbose,
@@ -367,7 +408,8 @@ pca_random_svd <- function(x, k, fun_scaling, tol, verbose, n_cores,
       scale = this_svd$scale
     )
   }
-  this_svd
+  # the genotypes were complete (or imputed, if x has imputed genotypes)
+  pca_set_genotypes(this_svd, imputed = gt_has_imputed(x), missing = FALSE)
 }
 
 # Whether the products of the PLINK relationship matrix use the BLAS (TRUE)

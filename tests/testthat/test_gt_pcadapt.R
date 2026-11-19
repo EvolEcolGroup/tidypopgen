@@ -12,11 +12,64 @@ missing_gt <- gen_tibble(
   quiet = TRUE
 )
 missing_gt <- gt_impute_simple(missing_gt, method = "mode")
+# the PCA of the imputed genotypes
+gt_set_imputed(missing_gt, set = TRUE)
 missing_pca <- missing_gt %>% gt_pca(n_cores = 2)
+gt_set_imputed(missing_gt, set = FALSE)
 
 test_that("gt_pcadapt works on gt_pca object", {
   missing_pcadapt <- gt_pcadapt(missing_gt, missing_pca, k = 3)
   expect_true((inherits(missing_pcadapt, "gt_pcadapt")))
+})
+
+test_that("gt_pcadapt with a PCA of missing genotypes", {
+  # a PCA that compared individuals over the loci genotyped in both
+  pairwise_pca <- missing_gt %>% gt_pca(k = 3, n_cores = 2)
+  expect_true(attr(pairwise_pca, "missing"))
+  pairwise_pcadapt <- gt_pcadapt(missing_gt, pairwise_pca, k = 1)
+  # each locus is tested on the individuals genotyped at it (not on the
+  # imputed genotypes of missing_gt): with k = 1, the statistic is the
+  # squared deviation from the median of the t-score of the regression of the
+  # genotypes on the scores
+  expect_false(gt_uses_imputed(missing_gt))
+  geno <- show_genotypes(missing_gt)
+  u <- pairwise_pca$u[, 1]
+  t_scores <- apply(geno, 2, function(g) {
+    obs <- !is.na(g)
+    r <- stats::cor(g[obs], u[obs])
+    r * sqrt((sum(obs) - 2) / (1 - r^2))
+  })
+  expect_equal(
+    pairwise_pcadapt$score,
+    (t_scores - stats::median(t_scores))^2
+  )
+  # loci with the same genotype in every individual genotyped are named
+  het_gt <- gen_tibble(
+    x = rbind(
+      c(2, 1, 0, 1, 1, 1), c(0, 1, 2, 0, 1, NA), c(1, 2, 0, 1, 0, 1),
+      c(2, 0, 1, 2, 1, 1), c(0, 2, 1, 0, 2, NA), c(1, 1, 2, 2, 0, 1),
+      c(2, 0, 0, 1, 2, 1), c(0, 1, 1, 0, 1, 1)
+    ),
+    indiv_meta = data.frame(
+      id = paste0("ind", 1:8), population = rep(c("a", "b"), each = 4)
+    ),
+    loci = data.frame(
+      name = paste0("rs", 1:6), chromosome = 1, position = 1:6 * 100,
+      genetic_dist = 0, allele_ref = "A", allele_alt = "T"
+    ),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  het_pca <- gt_pca(het_gt, k = 2, n_cores = 1)
+  expect_error(
+    gt_pcadapt(het_gt, het_pca, k = 2),
+    "1 loci are monomorphic or heterozygous in every individual \\(genotyped"
+  )
+  # also with k = 1, where snp_pcadapt() fails in its genomic control
+  # (after warnings of its own)
+  suppressWarnings(expect_error(
+    gt_pcadapt(het_gt, het_pca, k = 1),
+    "1 loci are monomorphic or heterozygous in every individual \\(genotyped"
+  ))
 })
 
 test_that("gt_pcadapt checks that individuals match the pca", {
@@ -25,6 +78,27 @@ test_that("gt_pcadapt checks that individuals match the pca", {
   expect_error(
     gt_pcadapt(rev_gt, missing_pca, k = 3),
     "the individuals in 'x' do not correspond to those in 'pca'"
+  )
+})
+
+test_that("gt_pcadapt looks for missing genotypes only where they are used", {
+  # the 133 complete loci of example-missing, without resaving the backing
+  # matrix (where the other loci keep their missing genotypes)
+  raw_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("missing_"),
+    quiet = TRUE
+  )
+  complete_gt <- raw_gt %>% select_loci_if(loci_missingness(genotypes) == 0)
+  complete_pca <- gt_pca(complete_gt, k = 3, n_cores = 1)
+  # bigsnpr's check sampled the whole backing matrix, and stopped with
+  # "You can't have missing values"
+  set.seed(1)
+  expect_s3_class(gt_pcadapt(complete_gt, complete_pca, k = 3), "gt_pcadapt")
+  # missing genotypes in the loci used are still found
+  expect_error(
+    gt_pcadapt(raw_gt, complete_pca, k = 3),
+    "gt_pcadapt\\(\\) needs complete or imputed genotypes"
   )
 })
 
@@ -59,10 +133,11 @@ test_that("gt_pcadapt 'U' error with heavily imputed SNPs", {
   gt_set_imputed(anolis, TRUE)
   # test pca
   anolis_pca <- gt_pca(anolis, method = "random", n_cores = 1)
-  # fails in gt_pcadapt
+  # fails in gt_pcadapt (snp_pcadapt() reported "You can't have missing
+  # values in 'U'"): the loci heterozygous in every individual are found
   expect_error(
     gt_pcadapt(anolis, anolis_pca, k = 2),
-    "You can't have missing values in 'U'"
+    "27 loci are monomorphic or heterozygous in every individual"
   )
 
   # double check our data is imputed (no missingness)

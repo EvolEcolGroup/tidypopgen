@@ -305,6 +305,20 @@ print.gt_pca <- function(x, ...) {
   cat(" === PCA of gen_tibble object ===")
   cat("\nMethod: ")
   print(x$method)
+  # the genotypes used (objects from older versions do not record them)
+  if (!is.null(attr(x, "missing"))) {
+    cat(
+      "\nGenotypes:",
+      if (isTRUE(attr(x, "missing"))) {
+        "with missing genotypes (compared pairwise)"
+      } else if (isTRUE(attr(x, "imputed"))) {
+        "imputed"
+      } else {
+        "complete"
+      },
+      "\n"
+    )
+  }
   cat("\nCall ($call):")
   print(x$call)
   cat(

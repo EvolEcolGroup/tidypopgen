@@ -84,6 +84,8 @@ list with elements: A named list (an S3 class "big_SVD") of
 \item \code{call}, the call that generated the object.
 \item \code{loci}, the loci used after long range LD removal.
 }
+
+and the attributes \code{imputed} and \code{missing} (see \code{\link[=gt_pca]{gt_pca()}}).
 }
 \description{
 This function performs Principal Component Analysis on a \code{gen_tibble}, using
@@ -92,6 +94,12 @@ long-range LD regions. This function is a wrapper for
 \code{\link[bigsnpr:snp_autoSVD]{bigsnpr::snp_autoSVD()}}
 }
 \details{
+The genotypes must be complete or imputed (see \code{\link[=gt_impute_simple]{gt_impute_simple()}};
+imputed genotypes are used automatically). Missing genotypes give an
+error (with a custom \code{fun_scaling} that does not depend on the
+genotypes, they are only looked for in a sample of them, as in
+\code{bigsnpr}).
+
 Using gt_pca_autoSVD requires a reasonably large dataset, as the function
 iteratively removes regions of long range LD. If you encounter: 'Error in
 rollmean(): Parameter 'size' is too large.', \code{roll_size} exceeds the number

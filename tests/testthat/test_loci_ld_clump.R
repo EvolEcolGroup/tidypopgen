@@ -30,6 +30,44 @@ test_that("ld clumping runs", {
   expect_true(all.equal(keep, c(1, 2, 3, 4, 6)) == TRUE)
 })
 
+test_that("missing genotypes are looked for only in the loci used", {
+  # example-missing has missing genotypes at 367 of its 500 loci: keep the
+  # 133 complete loci, without resaving the backing matrix (where the other
+  # loci keep their missing genotypes)
+  bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
+  missing_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("missing_"),
+    quiet = TRUE
+  )
+  complete_gt <- missing_gt %>%
+    select_loci_if(loci_missingness(genotypes) == 0)
+  # bigsnpr's check sampled the whole backing matrix, and stopped with
+  # "You can't have missing values"
+  set.seed(1)
+  keep_complete <- loci_ld_clump(complete_gt, thr_r2 = 0.2, size = 10)
+  expect_length(keep_complete, 133)
+  # the number of cores is still checked
+  expect_error(
+    loci_ld_clump(complete_gt, thr_r2 = 0.2, size = 10, n_cores = 0),
+    "'ncores' should be at least 1"
+  )
+  # missing genotypes in the loci used are still found
+  expect_error(
+    loci_ld_clump(missing_gt, thr_r2 = 0.2, size = 10),
+    "loci_ld_clump\\(\\) needs complete or imputed genotypes"
+  )
+  # but not in the loci excluded from clumping, which give the same clumps
+  keep_excluded <- loci_ld_clump(missing_gt,
+    thr_r2 = 0.2, size = 10,
+    exclude = which(loci_missingness(missing_gt) > 0)
+  )
+  expect_identical(
+    loci_names(missing_gt)[keep_excluded],
+    loci_names(complete_gt)[keep_complete]
+  )
+})
+
 test_that("ld clumping leaves no temporary FBMs in tempdir()", {
   # bigsnpr::snp_clumping() creates (and never removes) a temporary FBM for
   # each chromosome; their .bk files used to accumulate in tempdir(), where

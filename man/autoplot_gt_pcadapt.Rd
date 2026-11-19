@@ -41,11 +41,11 @@ lobsters <- gen_tibble(bed_file,
   quiet = TRUE
 )
 
-# Remove monomorphic loci and impute (pcadapt needs complete genotypes)
+# Remove monomorphic loci
 lobsters <- lobsters \%>\% select_loci_if(loci_maf(genotypes) > 0)
-lobsters <- gt_impute_simple(lobsters, method = "mode")
 
-# Create PCA object
+# Create PCA object (the lobsters have some missing genotypes, which do not
+# need to be imputed)
 pca <- gt_pca(lobsters)
 
 # Create a gt_pcadapt object

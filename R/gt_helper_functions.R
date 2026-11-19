@@ -206,3 +206,209 @@ local_private_fbm_dir <- function(envir = parent.frame()) {
   do.call(base::on.exit, list(cleanup, add = TRUE), envir = envir)
   invisible(fbm_dir)
 }
+
+# Missing genotypes ------------------------------------------------------------
+#
+# Some analyses (those of bigsnpr and bigstatsr: clumping, randomised and
+# partial SVD, pcadapt, matrix products) need complete genotypes. A full pass
+# over the genotypes just to check them would cost as much as some of these
+# analyses, so the genotypes are checked on a sample, as bigsnpr does
+# (stopifnot_no_missing()), and, where an analysis makes a full pass anyway,
+# exactly on its results (e.g. scaling_lookup()). bigsnpr's own sampled
+# check is turned off (local_no_bigstatsr_checks()), and all these errors
+# come from stop_missing_genotypes(), so that they read the same.
+
+# Stop because the genotypes used by a function have missing values.
+# @param what the name of the function that needs complete genotypes (with
+#   its brackets), for the message
+# @param hint an alternative to imputation, appended to the message
+# @param imputed_auto whether the function uses imputed genotypes
+#   automatically (otherwise the gen_tibble must be set to use them)
+# @keywords internal
+# @noRd
+stop_missing_genotypes <- function(what, hint = NULL, imputed_auto = TRUE) {
+  stop(
+    what, " needs complete or imputed genotypes, but some genotypes are ",
+    "missing: impute them (e.g. with gt_impute_simple())",
+    if (imputed_auto) {
+      ", and the imputed genotypes are used automatically"
+    } else {
+      ", and set the gen_tibble to use them (gt_set_imputed(x, set = TRUE))"
+    },
+    if (!is.null(hint)) paste0("; ", hint),
+    call. = FALSE
+  )
+}
+
+# Whether the genotypes used by x (after any switch to imputed genotypes)
+# have missing values, counted at all the loci, or at a sample of them.
+# Like bigstatsr's assert_noNA(), the sample is only part of the genotypes,
+# but only of the individuals and loci that x uses (the backing matrix can
+# also hold individuals and loci, with missing genotypes, that x no longer
+# uses): all the individuals, at evenly spaced loci (no random numbers, so
+# that the user's seed is left alone), for about `max_genotypes` genotypes
+# and at least 100 loci.
+# @param x a gen_tibble, or its genotypes column
+# @param loci the indices of the loci of x that are used (all of them by
+#   default)
+# @param max_genotypes the size of the sample (Inf to count all the loci)
+# @param n_cores the number of cores
+# @keywords internal
+# @noRd
+any_missing_genotypes <- function(x, loci = NULL, max_genotypes = Inf,
+                                  n_cores = 1) {
+  if (!inherits(x, "vctrs_bigSNP")) {
+    stopifnot_gen_tibble(x)
+    x <- x$genotypes
+  }
+  # the rows (individuals) and columns (loci) of the backing matrix used by x
+  rows <- vctrs::vec_data(x)
+  cols <- attr(x, "loci")$big_index
+  if (!is.null(loci)) {
+    cols <- cols[loci]
+  }
+  if (length(rows) == 0 || length(cols) == 0) {
+    return(FALSE)
+  }
+  # a sample of evenly spaced loci, with all the individuals
+  n_sample <- min(
+    length(cols),
+    max(100, ceiling(max_genotypes / length(rows)))
+  )
+  if (n_sample < length(cols)) {
+    cols <- cols[unique(round(seq(1, length(cols), length.out = n_sample)))]
+  }
+  # count the missing genotypes at each locus
+  n_na <- missingness_cpp(
+    BM = .gt_get_fbm(x), rowInd = rows, colInd = cols, ncores = n_cores
+  )
+  any(n_na > 0)
+}
+
+# Stop if a sample of the genotypes used by x has missing values (see
+# any_missing_genotypes(); about 1e6 genotypes, which takes milliseconds).
+# Missing genotypes at a few loci can escape it, so the help pages ask for
+# all of them to be imputed (or the loci removed) first.
+# @param x a gen_tibble, or its genotypes column
+# @param what,hint as in stop_missing_genotypes()
+# @param loci,n_cores as in any_missing_genotypes()
+# @keywords internal
+# @noRd
+stopifnot_no_missing <- function(x, what, hint = NULL, loci = NULL,
+                                 n_cores = 1) {
+  if (any_missing_genotypes(x,
+    loci = loci, max_genotypes = 1e6,
+    n_cores = n_cores
+  )) {
+    stop_missing_genotypes(what, hint = hint)
+  }
+  invisible(TRUE)
+}
+
+# Turn off the argument checks of bigstatsr and bigsnpr (their option
+# "bigstatsr.check.args") until `envir` exits. Their check for missing
+# values (assert_noNA()) samples the whole backing matrix, not the rows and
+# columns that the analysis uses, and so gives false errors on a gen_tibble
+# that no longer uses some individuals or loci with missing genotypes; the
+# genotypes are checked with stopifnot_no_missing() instead. The other
+# checks are of indices, which tidypopgen builds, and of the number of cores,
+# which comes from the user: it is kept, with bigparallelr::assert_cores()
+# (call it after setting bigstatsr.check.parallel.blas, as bigstatsr would).
+# @param envir the frame whose exit restores the option
+# @param n_cores the number of cores that the function will use (NULL if it
+#   does not use several)
+# @keywords internal
+# @noRd
+local_no_bigstatsr_checks <- function(envir = parent.frame(), n_cores = NULL) {
+  if (!is.null(n_cores)) {
+    bigparallelr::assert_cores(n_cores)
+  }
+  old_opts <- options(bigstatsr.check.args = FALSE)
+  # restore the option when envir exits (add = TRUE keeps its own on.exit()
+  # code)
+  do.call(base::on.exit, list(bquote(options(.(old_opts))), add = TRUE),
+    envir = envir
+  )
+  invisible(old_opts)
+}
+
+# The scaling of the SVDs of bigstatsr and bigsnpr (big_SVD(),
+# big_randomSVD() and snp_autoSVD()), computed once for all the loci of x and
+# then looked up, rather than computed by the SVD functions themselves:
+# - it checks that the genotypes used are complete: on a sample first (see
+#   stopifnot_no_missing()), then exactly, at no extra cost, for scalings
+#   that depend on the genotypes, such as the default snp_scaleBinom(), where
+#   a missing genotype gives a missing centre and scale (a scaling that does
+#   not depend on them, e.g. big_scale(center = FALSE, scale = FALSE), only
+#   gets the sampled check);
+# - with n_cores > 1, big_randomSVD() computes the scaling of each block of
+#   loci in a worker of a PSOCK cluster, which waits forever for the others
+#   if one of them fails (on missing genotypes, or on bigstatsr's own check
+#   for missing values in the products, which samples the whole backing
+#   matrix); and a worker that finds a zero scale can leave another one
+#   waiting forever. Here, these errors are raised before the SVD starts;
+# - the workers do not inherit the options of the session: the lookup turns
+#   off bigstatsr's checks (see local_no_bigstatsr_checks()), as it is the
+#   first thing each worker runs (in the session itself, the option is
+#   already off, and restored when the calling function exits).
+# Scalings such as bigsnpr::snp_scaleBinom() and bigstatsr::big_scale() are
+# computed locus by locus, so looking them up gives the same values.
+# @param x a gen_tibble
+# @param fun_scaling a scaling function, e.g. bigsnpr::snp_scaleBinom()
+# @param what,hint as in stop_missing_genotypes()
+# @param check_zero whether loci with a zero scale (monomorphic loci) give
+#   an error now (as the SVD would), or are left to the SVD function (e.g.
+#   snp_autoSVD() removes them before its SVD)
+# @param n_cores the number of cores (for a scaling with an `ncores`
+#   argument, such as snp_scaleBinom())
+# @returns a scaling function, with the arguments of fun_scaling
+# @keywords internal
+# @noRd
+scaling_lookup <- function(x, fun_scaling, what, hint = NULL,
+                           check_zero = TRUE, n_cores = 1) {
+  stopifnot_gen_tibble(x)
+  # a sampled check first, for scalings that do not depend on the genotypes
+  stopifnot_no_missing(x, what, hint = hint, n_cores = n_cores)
+  ind_col <- .gt_fbm_cols(x)
+  # the scaling of all the loci of x (in parallel, if the function can)
+  args <- list(.gt_get_fbm(x), ind.row = .gt_fbm_rows(x), ind.col = ind_col)
+  if ("ncores" %in% names(formals(fun_scaling))) {
+    args$ncores <- n_cores
+  }
+  ms <- tryCatch(do.call(fun_scaling, args), error = function(e) {
+    # some scalings (e.g. big_scale()) fail on missing genotypes with a
+    # cryptic error, as bigstatsr's own check is off: count them, only now
+    if (any_missing_genotypes(x, n_cores = n_cores)) {
+      stop_missing_genotypes(what, hint = hint)
+    }
+    stop(e)
+  })
+  # missing genotypes give a missing centre or scale (snp_scaleBinom())
+  if (anyNA(ms$center) || anyNA(ms$scale)) {
+    stop_missing_genotypes(what, hint = hint)
+  }
+  # (bigstatsr's message, and its tolerance, see bigstatsr:::any_near0())
+  if (check_zero && any(abs(ms$scale) < 1e-8)) {
+    stop(
+      "Some variables have zero scaling; remove them before attempting ",
+      "to scale.",
+      call. = FALSE
+    )
+  }
+  center <- ms$center
+  scale <- ms$scale
+  scaling <- function(X, ind.row, ind.col) { # nolint: object_name_linter
+    # (in a worker, the option stays off until the cluster is stopped)
+    options(bigstatsr.check.args = FALSE)
+    # the loci asked for, among those of x
+    i <- match(ind.col, ind_col)
+    data.frame(center = center[i], scale = scale[i])
+  }
+  # the function is sent to the workers: keep its environment small, without
+  # the namespace of tidypopgen (which the workers would have to load)
+  environment(scaling) <- list2env(
+    list(center = center, scale = scale, ind_col = ind_col),
+    parent = baseenv()
+  )
+  scaling
+}

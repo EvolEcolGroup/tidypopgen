@@ -11,6 +11,7 @@ test_that("gt_dapc_and_tidiers", {
   )
 
   test_gt <- gt_impute_simple(test_gt, method = "mode")
+  gt_set_imputed(test_gt, set = TRUE)
   test_pca <- test_gt %>% gt_pca(k = 15, n_cores = 2)
   ############################
   # unit tests for gt_cluster_pca
@@ -135,6 +136,7 @@ test_that("scores plot error if only 2 populations", {
   test_gt$population <- c(rep("pop1", 100), rep("pop2", 100))
   test_gt <- test_gt %>% group_by(population)
   test_gt <- gt_impute_simple(test_gt, method = "mode")
+  gt_set_imputed(test_gt, set = TRUE)
   test_pca <- test_gt %>% gt_pca(k = 2, n_cores = 2)
   test_dapc <- test_pca %>% gt_dapc(pop = as.factor(test_gt$population))
   expect_error(
@@ -153,6 +155,7 @@ test_that("gt_cluster_pca works with a single k and a single component", {
     quiet = TRUE
   )
   test_gt <- gt_impute_simple(test_gt, method = "mode")
+  gt_set_imputed(test_gt, set = TRUE)
   test_pca <- test_gt %>% gt_pca(k = 5, n_cores = 2)
   # only one k larger than 1
   test_cluster <- gt_cluster_pca(test_pca,
@@ -193,6 +196,7 @@ test_that("best_k is a value of k when k_clusters does not start at 1", {
     quiet = TRUE
   )
   test_gt <- gt_impute_simple(test_gt, method = "mode")
+  gt_set_imputed(test_gt, set = TRUE)
   test_pca <- test_gt %>% gt_pca(k = 10, n_cores = 2)
   test_cluster <- gt_cluster_pca(test_pca,
     n_pca = 10, k_clusters = c(3, 8),
@@ -238,6 +242,7 @@ test_that("gt_dapc var is the proportion of variance of the retained PCs", {
     quiet = TRUE
   )
   test_gt <- gt_impute_simple(test_gt, method = "mode")
+  gt_set_imputed(test_gt, set = TRUE)
   test_pca <- test_gt %>% gt_pca(k = 10, n_cores = 2)
   pops <- as.factor(rep(c("pop1", "pop2", "pop3", "pop4"), each = 50))
   test_dapc <- gt_dapc(test_pca, pop = pops, n_pca = 6)
@@ -255,6 +260,7 @@ test_that("gt_dapc uses k-1 PCs by default", {
     quiet = TRUE
   )
   test_gt <- gt_impute_simple(test_gt, method = "mode")
+  gt_set_imputed(test_gt, set = TRUE)
   test_pca <- test_gt %>% gt_pca(k = 5, n_cores = 2)
   # as many populations as PCs
   pops <- as.factor(rep(paste0("pop", 1:5), each = 40))
@@ -280,6 +286,7 @@ test_that("gt_dapc gives an informative error for an invalid pop", {
     quiet = TRUE
   )
   test_gt <- gt_impute_simple(test_gt, method = "mode")
+  gt_set_imputed(test_gt, set = TRUE)
   test_pca <- test_gt %>% gt_pca(k = 5, n_cores = 2)
   pops <- c(rep("pop1", 100), rep("pop2", 100))
   # a character vector rather than a factor
@@ -313,6 +320,7 @@ test_that("augment.gt_dapc works with one discriminant axis and checks ids", {
     quiet = TRUE
   )
   test_gt <- gt_impute_simple(test_gt, method = "mode")
+  gt_set_imputed(test_gt, set = TRUE)
   # use integer ids
   test_gt$id <- seq_len(nrow(test_gt))
   test_pca <- test_gt %>% gt_pca(k = 5, n_cores = 2)
@@ -331,4 +339,135 @@ test_that("augment.gt_dapc works with one discriminant axis and checks ids", {
     test_dapc %>% augment(data = test_gt[rev(seq_len(nrow(test_gt))), ]),
     "the data id column does not correspond to the individuals"
   )
+})
+
+test_that("gt_dapc with a PCA of missing genotypes", {
+  bed_file <- system.file("extdata", "example-missing.bed",
+    package = "bigsnpr"
+  )
+  test_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("test_"),
+    quiet = TRUE
+  )
+  pops <- as.factor(c(rep("pop1", 100), rep("pop2", 100)))
+  # a PCA that compared individuals over the loci genotyped in both
+  pairwise_pca <- test_gt %>% gt_pca(k = 5, n_cores = 2)
+  # the loadings of the loci need the genotypes
+  expect_error(
+    gt_dapc(pairwise_pca, pop = pops, n_pca = 3),
+    "the loadings of the loci need the genotypes"
+  )
+  # without the loadings of the loci, the genotypes are not needed
+  no_loadings <- gt_dapc(pairwise_pca,
+    pop = pops, n_pca = 3, loadings_by_locus = FALSE
+  )
+  expect_null(no_loadings$var.load)
+  # with them, the loadings of the loci are their regression coefficients on
+  # the scores, multiplied by the loadings of the discriminant functions
+  pairwise_dapc <- gt_dapc(pairwise_pca,
+    pop = pops, n_pca = 3, data = test_gt, n_cores = 2
+  )
+  expect_identical(pairwise_dapc$ind.coord, no_loadings$ind.coord)
+  lsq <- loci_lsq_loadings(pairwise_pca, test_gt, n_pca = 3, n_cores = 2)
+  expect_equal(
+    as.vector(unclass(pairwise_dapc$var.load)),
+    as.vector(lsq %*% pairwise_dapc$loadings)
+  )
+  expect_identical(row_names(pairwise_dapc$var.load), loci_names(test_gt))
+  # also through the clusters made from the PCA
+  pairwise_clusters <- gt_cluster_pca(pairwise_pca,
+    n_pca = 5, k_clusters = c(1, 3), quiet = TRUE
+  )
+  expect_s3_class(
+    gt_dapc(pairwise_clusters, pop = 2, data = test_gt),
+    "gt_dapc"
+  )
+  # data must be the gen_tibble of the PCA
+  expect_error(
+    gt_dapc(pairwise_pca, pop = pops, data = test_gt[200:1, ]),
+    "the individuals in 'data' do not correspond to those in the PCA"
+  )
+  expect_error(
+    gt_dapc(pairwise_pca, pop = pops, data = select_loci(test_gt, 1:10)),
+    "loci used in the PCA are not present in 'data'"
+  )
+  # with a PCA of imputed genotypes, the loadings of the loci are those of
+  # the PCA, multiplied by the loadings of the discriminant functions (as
+  # before), and do not need the genotypes
+  test_gt <- gt_impute_simple(test_gt, method = "mode")
+  gt_set_imputed(test_gt, set = TRUE)
+  imputed_pca <- test_gt %>% gt_pca(k = 5, n_cores = 2)
+  imputed_dapc <- gt_dapc(imputed_pca, pop = pops, n_pca = 3)
+  expect_equal(
+    as.vector(unclass(imputed_dapc$var.load)),
+    as.vector(unclass(imputed_pca$v)[, 1:3] %*% imputed_dapc$loadings)
+  )
+})
+
+test_that("loadings of loci by least squares with missing genotypes", {
+  set.seed(1)
+  sim_gt <- gt_simulate_bn(
+    n_indiv = c(20, 20, 20), n_loci = 400, fst = 0.1,
+    missing = rep(seq(0, 0.6, length.out = 20), 3)
+  )
+  sim_gt <- select_loci_if(sim_gt, loci_maf(genotypes) > 0)
+  sim_pca <- gt_pca(sim_gt, k = 4, n_cores = 1)
+  n_pca <- 3
+  lsq <- loci_lsq_loadings(sim_pca, sim_gt, n_pca = n_pca, n_cores = 2)
+  # the reference: the regression of the standardised genotypes of each
+  # locus on an intercept and the scores, over the individuals genotyped at
+  # that locus
+  geno <- show_genotypes(sim_gt)
+  z <- sweep(sweep(geno, 2, sim_pca$center), 2, sim_pca$scale, "/")
+  scores <- sweep(sim_pca$u[, 1:n_pca], 2, sim_pca$d[1:n_pca], "*")
+  ref <- t(sapply(seq_len(ncol(z)), function(l) {
+    obs <- !is.na(z[, l])
+    stats::lm.fit(cbind(1, scores[obs, ]), z[obs, l])$coefficients[-1]
+  }))
+  expect_equal(unname(lsq), unname(ref), tolerance = 1e-8)
+  # the same on one core
+  expect_identical(
+    loci_lsq_loadings(sim_pca, sim_gt, n_pca = n_pca, n_cores = 1),
+    lsq
+  )
+
+  # with complete genotypes, they are the loadings of the PCA
+  complete_gt <- gt_simulate_bn(
+    n_indiv = c(20, 20, 20), n_loci = 400, fst = 0.1
+  )
+  complete_gt <- select_loci_if(complete_gt, loci_maf(genotypes) > 0)
+  complete_pca <- gt_pca(complete_gt, k = 4, n_cores = 1)
+  expect_equal(
+    unname(loci_lsq_loadings(complete_pca, complete_gt,
+      n_pca = n_pca, n_cores = 2
+    )),
+    unname(unclass(complete_pca$v)[, 1:n_pca]),
+    tolerance = 1e-6
+  )
+
+  # a locus genotyped in fewer individuals than there are coefficients
+  # (n_pca + 1) has NA loadings, with a warning
+  few_gt <- gen_tibble(
+    x = rbind(
+      c(2, 1, 0, 1, 1, NA), c(0, 1, 2, 0, 1, NA), c(1, 2, 0, 1, 0, NA),
+      c(2, 0, 1, 2, 1, 1), c(0, 2, 1, 0, 2, 0), c(1, 1, 2, 2, 0, NA),
+      c(2, 0, 0, 1, 2, NA), c(0, 1, 1, 0, 1, NA)
+    ),
+    indiv_meta = data.frame(
+      id = paste0("ind", 1:8), population = rep(c("a", "b"), each = 4)
+    ),
+    loci = data.frame(
+      name = paste0("rs", 1:6), chromosome = 1, position = 1:6 * 100,
+      genetic_dist = 0, allele_ref = "A", allele_alt = "T"
+    ),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  few_pca <- gt_pca(few_gt, k = 2, n_cores = 1)
+  expect_warning(
+    few <- loci_lsq_loadings(few_pca, few_gt, n_pca = 2, n_cores = 1),
+    "1 loci are genotyped in too few individuals"
+  )
+  expect_true(all(is.na(few[6, ])))
+  expect_false(anyNA(few[1:5, ]))
 })
