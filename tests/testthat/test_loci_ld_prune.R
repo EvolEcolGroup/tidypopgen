@@ -26,6 +26,37 @@ test_that("r2 over the individuals genotyped at both loci matches PLINK", {
   expect_identical(r2$n_shared[1], sum(shared))
 })
 
+test_that("r2 of complete and incomplete loci matches cor()", {
+  # example-missing (bigsnpr): 200 individuals and 500 loci, 133 of them
+  # complete; the r2 of two complete loci takes a shortcut (only the sum of
+  # the products is counted), which must not be taken when only one of the
+  # two loci is complete
+  bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
+  missing_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("missing_"),
+    quiet = TRUE
+  )
+  geno <- show_genotypes(missing_gt)
+  complete <- colSums(is.na(geno)) == 0
+  # each locus with the next five
+  pairs <- rbind(rep(1:495, each = 5), rep(1:495, each = 5) + 1:5)
+  # pairs of two complete loci, of a complete and an incomplete locus (in
+  # both orders), and of two incomplete loci are all tested
+  expect_true(all(table(complete[pairs[1, ]], complete[pairs[2, ]]) > 0))
+  r2 <- ld_r2_pairs_cpp(
+    .gt_get_fbm(missing_gt), .gt_fbm_rows(missing_gt),
+    .gt_fbm_cols(missing_gt), pairs
+  )
+  # the reference: cor() over the individuals genotyped at both loci
+  ref <- apply(pairs, 2, function(p) {
+    shared <- !is.na(geno[, p[1]]) & !is.na(geno[, p[2]])
+    c(sum(shared), stats::cor(geno[shared, p[1]], geno[shared, p[2]])^2)
+  })
+  expect_identical(r2$n_shared, as.integer(ref[1, ]))
+  expect_equal(r2$r2, ref[2, ])
+})
+
 test_that("loci_ld_prune matches plink --indep-pairwise", {
   # file name, then window_size, step_size, thr_r2 and window_in_kb
   settings <- list(
