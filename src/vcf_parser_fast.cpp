@@ -196,15 +196,45 @@ inline bool is_biallelic_snp(const size_t* field_len) {
 // Function to read a position (a 32 bit integer, as in std::stoi) from its
 // field (of length len), stopping with an error if the field is not a number
 // (e.g. "12junk", which would otherwise be read as 12)
-inline int32_t parse_position(const char* p, size_t len) {
+// (parse_position_ok() is the same, without stopping: it returns whether
+// the field is a valid position, so that it can be called from a parallel
+// region)
+inline bool parse_position_ok(const char* p, size_t len, int32_t &position) {
+  // the usual case, a field of 1 to 9 digits (which can not overflow), is
+  // read without strtol(), which is slower (it handles locales, bases and
+  // white space)
+  if ((len > 0) && (len < 10)) {
+    int32_t value = 0;
+    size_t i = 0;
+    for (; i < len; i++) {
+      unsigned int digit = (unsigned char) p[i] - '0';
+      if (digit > 9) {
+        break;
+      }
+      value = value * 10 + (int32_t) digit;
+    }
+    if (i == len) {
+      position = value;
+      return true;
+    }
+  }
+  // any other field, as std::stoi would read it
   char* end;
   errno = 0;
   long value = std::strtol(p, &end, 10);
   if ((end == p) || (end != p + len) || (errno == ERANGE) ||
       (value > INT_MAX) || (value < INT_MIN)) {
+    return false;
+  }
+  position = static_cast<int32_t>(value);
+  return true;
+}
+inline int32_t parse_position(const char* p, size_t len) {
+  int32_t position;
+  if (!parse_position_ok(p, len, position)) {
     stop("the position of a variant is not a valid integer");
   }
-  return static_cast<int32_t>(value);
+  return position;
 }
 
 // the outcome of count_alt_alleles() and phased_genotype_bytes()
@@ -498,7 +528,8 @@ inline bool read_phased_lut(const IntegerVector &phased_lut,
 // "NA" for a missing chromosome ".", as vcfR does), as vcf_to_bk() fills the
 // names it reads, so that the names are those that names_as_int = FALSE
 // gives
-inline void write_locus_line(SidecarWriter &writer, size_t key,
+template <class Sink>
+inline void write_locus_line(Sink &writer, size_t key,
                              const char* const* field_start,
                              const size_t* field_len, int32_t position) {
   writer.add_int(key);
@@ -520,6 +551,51 @@ inline void write_locus_line(SidecarWriter &writer, size_t key,
   writer.add_int(position);
   writer.end_line();
 }
+
+// A sink for write_locus_line() that appends to a string (the lines of the
+// locus sidecar of the loci parsed by a thread, see vcf_to_bk())
+struct StringSink {
+  std::string buffer;
+  void add(const char* x, size_t len) { buffer.append(x, len); }
+  void add_int(int64_t x) {
+    char digits[24];
+    int n = 0;
+    uint64_t u = (x < 0) ? (uint64_t) (-(x + 1)) + 1 : (uint64_t) x;
+    do {
+      digits[n++] = '0' + (char) (u % 10);
+      u /= 10;
+    } while (u > 0);
+    if (x < 0) {
+      digits[n++] = '-';
+    }
+    // (the digits are in reverse order)
+    std::reverse(digits, digits + n);
+    buffer.append(digits, n);
+  }
+  void tab() { buffer.push_back('\t'); }
+  void end_line() { buffer.push_back('\n'); }
+};
+
+// The metadata of a biallelic snp found by a thread (see vcf_to_bk()): its
+// chromosome and ID (pointers into its line), position, alleles, and line
+struct SnpMeta {
+  const char* field_start[3];
+  size_t field_len[3];
+  int32_t position;
+  char ref;
+  char alt;
+  size_t line;
+};
+
+// The biallelic snps of a range of lines of a chunk, parsed by a thread, and
+// the first error (the line of an error, and its type: 1 for a line with
+// fewer than 5 fields, 2 for a position that is not a valid integer)
+struct ParsedLines {
+  std::vector<SnpMeta> snps;
+  StringSink sidecar;
+  int error;
+  size_t error_line;
+};
 
 class BkWriter {
 public:
@@ -743,9 +819,15 @@ List vcf_to_bk(std::string filename, std::string bk_file,
   std::vector<size_t> line_len;
   // the lines of a chunk that are biallelic snps
   std::vector<size_t> snp_lines;
+  // the snps parsed by each thread (see below)
+  std::vector<ParsedLines> parts;
   while (reader.next_chunk(line_start, line_len)) {
     snp_lines.clear();
-    for (size_t l = 0; l < line_start.size(); l++) {
+    const size_t n_lines = line_start.size();
+    size_t l = 0;
+    // the lines are read one at a time until the ploidies are known (from
+    // the first variants), and then in parallel (below)
+    for (; (l < n_lines) && !ploidy_known; l++) {
       char* line = line_start[l];
       size_t len = line_len[l];
       // skip empty lines
@@ -859,6 +941,130 @@ List vcf_to_bk(std::string filename, std::string bk_file,
         allele1.push_back(field_start[4][0]);
         allele2.push_back(field_start[3][0]);
         snp_lines.push_back(l);
+      }
+    }
+    if (l < n_lines) {
+      // the other lines of the chunk, in parallel: each thread finds the
+      // biallelic snps of a range of lines, with their metadata (and their
+      // lines of the locus sidecar), which are then added in order
+      int n_parts = (int) std::min((size_t) n_threads,
+                                   (n_lines - l) / 4096 + 1);
+      if ((int) parts.size() < n_parts) {
+        parts.resize(n_parts);
+      }
+      const size_t first_line = l;
+      // the key of the first snp of the chunk in the locus sidecar is the
+      // number of snps so far + 1; that of each range is only known once
+      // the snps of the ranges before it are counted
+#pragma omp parallel for num_threads(n_parts) schedule(static, 1)
+      for (int t = 0; t < n_parts; t++) {
+        ParsedLines &part = parts[t];
+        part.snps.clear();
+        part.sidecar.buffer.clear();
+        part.error = 0;
+        size_t from = first_line + (n_lines - first_line) * t / n_parts;
+        size_t to = first_line + (n_lines - first_line) * (t + 1) / n_parts;
+        for (size_t j = from; j < to; j++) {
+          const char* line = line_start[j];
+          size_t len = line_len[j];
+          // (empty lines and header lines are skipped)
+          if ((len == 0) || (line[0] == '#')) {
+            continue;
+          }
+          const char* field_start[5];
+          size_t field_len[5];
+          if (!find_locus_meta(line, len, field_start, field_len)) {
+            part.error = 1;
+            part.error_line = j;
+            break;
+          }
+          if (!is_biallelic_snp(field_len)) {
+            continue;
+          }
+          SnpMeta snp;
+          if (!parse_position_ok(field_start[1], field_len[1],
+                                 snp.position)) {
+            part.error = 2;
+            part.error_line = j;
+            break;
+          }
+          for (int f = 0; f < 3; f++) {
+            snp.field_start[f] = field_start[f];
+            snp.field_len[f] = field_len[f];
+          }
+          snp.ref = field_start[3][0];
+          snp.alt = field_start[4][0];
+          snp.line = j;
+          part.snps.push_back(snp);
+        }
+      }
+      // stop at the first error of the chunk (the one a serial reading would
+      // find)
+      int error = 0;
+      size_t error_line = n_lines;
+      for (int t = 0; t < n_parts; t++) {
+        if ((parts[t].error != 0) && (parts[t].error_line < error_line)) {
+          error = parts[t].error;
+          error_line = parts[t].error_line;
+        }
+      }
+      if (error == 1) {
+        stop("a variant line of the VCF has fewer than 5 fields");
+      } else if (error == 2) {
+        stop("the position of a variant is not a valid integer");
+      }
+      // the lines of the locus sidecar, in parallel (keyed by the index of
+      // each snp among the biallelic snps of the file)
+      if (loci_writer) {
+        std::vector<size_t> first_key(n_parts, physical_pos.size() + 1);
+        for (int t = 1; t < n_parts; t++) {
+          first_key[t] = first_key[t - 1] + parts[t - 1].snps.size();
+        }
+#pragma omp parallel for num_threads(n_parts) schedule(static, 1)
+        for (int t = 0; t < n_parts; t++) {
+          ParsedLines &part = parts[t];
+          for (size_t k = 0; k < part.snps.size(); k++) {
+            const SnpMeta &snp = part.snps[k];
+            write_locus_line(part.sidecar, first_key[t] + k, snp.field_start,
+                             snp.field_len, snp.position);
+          }
+        }
+      }
+      // add the snps in order
+      for (int t = 0; t < n_parts; t++) {
+        const ParsedLines &part = parts[t];
+        for (size_t k = 0; k < part.snps.size(); k++) {
+          const SnpMeta &snp = part.snps[k];
+          // (loci are usually sorted by chromosome, so we only need a lookup
+          // when the chromosome changes)
+          if ((this_chromosome < 0) ||
+              !chromosomes.is(this_chromosome, snp.field_start[0],
+                              snp.field_len[0])) {
+            this_chromosome = chromosomes.find_or_add(snp.field_start[0],
+                                                      snp.field_len[0]);
+          }
+          chromosome_index.push_back(this_chromosome + 1);
+          physical_pos.push_back(snp.position);
+          if (read_names) {
+            if ((snp.field_len[2] == 1) && (snp.field_start[2][0] == '.')) {
+              // a missing ID: the chromosome and position (as
+              // write_locus_line() writes it to the sidecar)
+              std::string filled = ((snp.field_len[0] == 1) &&
+                                    (snp.field_start[0][0] == '.')) ? "NA" :
+                std::string(snp.field_start[0], snp.field_len[0]);
+              filled += "_" + std::to_string(snp.position);
+              marker_id.push_back(filled);
+            } else {
+              marker_id.push_back(snp.field_start[2], snp.field_len[2]);
+            }
+          }
+          allele1.push_back(snp.alt);
+          allele2.push_back(snp.ref);
+          snp_lines.push_back(snp.line);
+        }
+        if (loci_writer) {
+          loci_writer->add_lines(part.sidecar.buffer);
+        }
       }
     }
     if (!read_genotypes) {
