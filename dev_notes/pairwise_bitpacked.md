@@ -22,6 +22,7 @@ header.
 | Pack each genotype with a "spread" table (planes 16 bits apart) into a 64-bit accumulator: a lookup, a shift and an or per genotype | the old loop, a read-modify-write of each plane per genotype | packing was ~90% of grouped KING; 3x faster packing | 2026-11-19 | Claude |
 | Prefetch (into L2) the lines of the next block of individuals | no prefetch; into L1; two blocks ahead | once packing was cheap it waited on memory: grouped KING 0.49-0.70 -> 0.36-0.41 s (1 core), 0.15 -> 0.083 s (8 cores); L1 and two blocks ahead were slower | 2026-11-19 | Claude |
 | SIMD packing (SSSE3 byte transposition, `pshufb`, `movemask`) left on branch `king_simd_packing` (`9853e055`), not merged | merge it | below the agreed bar of 1.5x on grouped KING: 1.35-1.5x on 1 core, 1.04x on 8 cores (memory-bound), for ~170 lines of x86-only code | 2026-11-19 | Andrea set the bar; Claude measured |
+| `indiv_inbreeding()` on a grouped `gen_tibble` uses the same kernel within groups (`as_counts_within_groups()`), computing WG17 from the pair counts (no matrices); the `group_map()` fallback of grouped `pairwise_king()` for other classes of genotypes removed | keep `group_map()` | `group_map()` built an allele-sharing matrix per group, re-reading all loci each time; the fallback never runs for gen_tibbles | 2026-11-19 | Andrea |
 | Size the chunks of loci on the largest group (the planes visited by an individual), capped at 64 words, with the planes of all individuals under ~64 MB | size on all individuals | with groups, only a group's planes need to stay in cache; fewer chunks and barriers | 2026-11-19 | Claude |
 
 ## How it works
@@ -74,6 +75,8 @@ antivirus scan were running, so compare within rounds.
 | HGDP650 after the QC and clumping of the benchmark article (1041 x 151,769, 8 cores): `pairwise_ibs()` / `pairwise_allele_sharing()` matrices, before / after | | 0.25 / 0.28 -> 0.19 / 0.22 s | `8ade0b8d` / `e39cdf49` | 2026-11-19 |
 | same data: `gt_pca()` (count of shared loci through this kernel), before / after | | 0.88 / 0.87-0.95 s (no change) | `8ade0b8d` / `e39cdf49` | 2026-11-19 |
 | ~350 random families of 3, matrices / tidy | | 0.081 / 0.09 s (tidy was 0.32 s) | `e39cdf49` | 2026-11-19 |
+
+Grouped `indiv_inbreeding()` (HGDP650, laptopX1, 4 cores, load 2.8-7 from other jobs, so indicative; medians of 3 balanced runs, 19 Nov 2026, `5e207d78` against `5e207d78` + the one-pass change): by population (51 groups) 4.40 s (3.1-9.6) -> 0.44 s (0.34-0.53); by region (6 groups) 3.9 -> 2.3 s, with the same instructions (49.6 vs 49.3 G) and 16% fewer cycles (`perf stat`). Outputs identical. Scripts: `/media/andrea/annex/tmp/claude/tidypopgen/bench_inb/`.
 
 Outputs were identical to `8ade0b8d` for KING within groups and full, IBS,
 IBS adjusted counts, allele sharing and the GRM (HGDP650, and a shuffled

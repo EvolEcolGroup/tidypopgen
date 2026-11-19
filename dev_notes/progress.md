@@ -4,6 +4,18 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-19 (laptopX1): grouped `indiv_inbreeding()` in one pass
+
+- **Done:** grouped `indiv_inbreeding()` uses the within-group bit-packed
+  kernel (new `as_counts_within_groups()`), instead of `group_map()`; the
+  `group_map()` fallback of grouped `pairwise_king()` removed (Andrea: the
+  genotypes are always `vctrs_bigSNP`). A search of `R/` found no other
+  `group_map()` on the main path.
+- **Where:** `pca_missing` (pushed 19 Nov, with the two commits before this one).
+- **Result:** HGDP650 by population 4.4 -> 0.44 s (laptop, indicative);
+  outputs identical; affected test files pass.
+- **Notes changed:** `pairwise_bitpacked.md`.
+
 ## 2026-11-19 (manica01): fast `pairwise_king()` within groups
 
 - **Done:** `pairwise_king()` on a grouped `gen_tibble` computes kinship
