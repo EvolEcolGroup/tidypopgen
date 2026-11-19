@@ -16,12 +16,12 @@ individuals of \code{x} (see Details for missing genotypes).}
 
 \item{n_cores}{Number of cores to use.}
 
-\item{max_missing}{with a PCA of missing genotypes, the largest fraction of
-missing genotypes at a locus for it to be tested (see Details); loci
-with more get \code{NA} statistics. Default is \code{0.5}. The fraction is that of
-the genotypes without imputation, as given by \code{\link[=loci_missingness]{loci_missingness()}} when
-\code{x} is not set to use imputed genotypes. Ignored with a PCA of complete
-or imputed genotypes.}
+\item{max_missing}{the largest fraction of missing genotypes at a locus for
+it to be tested (see Details); loci with more get \code{NA} statistics.
+Default is \code{0.5}. The fraction is that of the genotypes tested: without
+imputation with a PCA of missing genotypes (as given by
+\code{\link[=loci_missingness]{loci_missingness()}} when \code{x} is not set to use imputed genotypes), and
+none if the imputed genotypes are used.}
 }
 \value{
 An object of subclass \code{gt_pcadapt}, a subclass of \code{mhtest}.
@@ -40,21 +40,20 @@ The genotypes tested are those that the PCA was computed on:
 \itemize{
 \item with a PCA of genotypes with missing values (the default method of
 \code{\link[=gt_pca]{gt_pca()}}, which compares individuals over the loci genotyped in both,
-as PLINK does), the genotypes of \code{x} with their missing values: each
-locus is tested on the individuals genotyped at it, as in the \code{pcadapt}
-package. Imputed genotypes are not used. Loci with more than a fraction
-\code{max_missing} of their genotypes missing (by default, more than half),
-or genotyped in fewer than \code{k + 2} individuals, are not tested, and get
-\code{NA} statistics: their t-scores, from few individuals, are noisy (and
-infinite with \code{k + 1} individuals, an exact fit), and would top the
-rankings of the loci.
-\item with a PCA of complete or imputed genotypes, the genotypes of \code{x} must be
-complete or imputed (see \code{\link[=gt_impute_simple]{gt_impute_simple()}}; imputed genotypes are
-used automatically). Missing genotypes give an error; as in \code{bigsnpr},
-they are looked for in a sample of the genotypes (all the individuals,
-at evenly spaced loci), and any that go unnoticed are left out of the
-test of their locus.
+as PLINK does), the genotypes of \code{x} with their missing values; imputed
+genotypes are not used.
+\item with a PCA of complete or imputed genotypes, the imputed genotypes of
+\code{x} if it has any (see \code{\link[=gt_impute_simple]{gt_impute_simple()}}; they are used
+automatically), and otherwise its genotypes with their missing values.
 }
+
+With missing genotypes, each locus is tested on the individuals genotyped
+at it, as in the \code{pcadapt} package. Loci with more than a fraction
+\code{max_missing} of their genotypes missing (by default, more than half), or
+genotyped in fewer than \code{k + 2} individuals, are not tested, and get \code{NA}
+statistics: their t-scores, from few individuals, are noisy (and infinite
+with \code{k + 1} individuals, an exact fit), and would top the rankings of
+the loci.
 
 Loci with the same genotype in every individual genotyped can not be
 tested, and give an error.

@@ -10,9 +10,9 @@
   `method = "random"` is for very large numbers of individuals
 * `gt_pca` objects record whether they used imputed genotypes and whether
   their genotypes had missing values (attributes `imputed` and `missing`)
-* `gt_pcadapt()` works on a PCA of missing genotypes, testing each locus on
-  its genotyped individuals as `pcadapt` does (imputed genotypes are not
-  used), unless more than `max_missing` of its genotypes are missing
+* `gt_pcadapt()` works with missing genotypes, also on a PCA of missing
+  genotypes, testing each locus on its genotyped individuals as `pcadapt`
+  does, unless more than `max_missing` of its genotypes are missing
 * `loci_ld_clump()` works with missing genotypes, without imputation: r^2 is
   computed over the individuals genotyped at both loci, as in PLINK (new
   arguments `min_shared` and `insufficient`); it uses imputed genotypes only

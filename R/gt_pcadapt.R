@@ -11,20 +11,19 @@
 #' The genotypes tested are those that the PCA was computed on:
 #' - with a PCA of genotypes with missing values (the default method of
 #'   [gt_pca()], which compares individuals over the loci genotyped in both,
-#'   as PLINK does), the genotypes of `x` with their missing values: each
-#'   locus is tested on the individuals genotyped at it, as in the `pcadapt`
-#'   package. Imputed genotypes are not used. Loci with more than a fraction
-#'   `max_missing` of their genotypes missing (by default, more than half),
-#'   or genotyped in fewer than `k + 2` individuals, are not tested, and get
-#'   `NA` statistics: their t-scores, from few individuals, are noisy (and
-#'   infinite with `k + 1` individuals, an exact fit), and would top the
-#'   rankings of the loci.
-#' - with a PCA of complete or imputed genotypes, the genotypes of `x` must be
-#'   complete or imputed (see [gt_impute_simple()]; imputed genotypes are
-#'   used automatically). Missing genotypes give an error; as in `bigsnpr`,
-#'   they are looked for in a sample of the genotypes (all the individuals,
-#'   at evenly spaced loci), and any that go unnoticed are left out of the
-#'   test of their locus.
+#'   as PLINK does), the genotypes of `x` with their missing values; imputed
+#'   genotypes are not used.
+#' - with a PCA of complete or imputed genotypes, the imputed genotypes of
+#'   `x` if it has any (see [gt_impute_simple()]; they are used
+#'   automatically), and otherwise its genotypes with their missing values.
+#'
+#' With missing genotypes, each locus is tested on the individuals genotyped
+#' at it, as in the `pcadapt` package. Loci with more than a fraction
+#' `max_missing` of their genotypes missing (by default, more than half), or
+#' genotyped in fewer than `k + 2` individuals, are not tested, and get `NA`
+#' statistics: their t-scores, from few individuals, are noisy (and infinite
+#' with `k + 1` individuals, an exact fit), and would top the rankings of
+#' the loci.
 #'
 #' Loci with the same genotype in every individual genotyped can not be
 #' tested, and give an error.
@@ -36,12 +35,12 @@
 #'   individuals of `x` (see Details for missing genotypes).
 #' @param k Number of principal components to use in the analysis.
 #' @param n_cores Number of cores to use.
-#' @param max_missing with a PCA of missing genotypes, the largest fraction of
-#'   missing genotypes at a locus for it to be tested (see Details); loci
-#'   with more get `NA` statistics. Default is `0.5`. The fraction is that of
-#'   the genotypes without imputation, as given by [loci_missingness()] when
-#'   `x` is not set to use imputed genotypes. Ignored with a PCA of complete
-#'   or imputed genotypes.
+#' @param max_missing the largest fraction of missing genotypes at a locus for
+#'   it to be tested (see Details); loci with more get `NA` statistics.
+#'   Default is `0.5`. The fraction is that of the genotypes tested: without
+#'   imputation with a PCA of missing genotypes (as given by
+#'   [loci_missingness()] when `x` is not set to use imputed genotypes), and
+#'   none if the imputed genotypes are used.
 #' @returns An object of subclass `gt_pcadapt`, a subclass of `mhtest`.
 #' @export
 #' @seealso [bigsnpr::snp_pcadapt()] which this function wraps.
@@ -106,41 +105,39 @@ gt_pcadapt <- function(x, pca, k, n_cores = 1, max_missing = 0.5) {
       on.exit(gt_set_imputed(x, set = TRUE), add = TRUE)
     }
   } else if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {
-    # a PCA of complete or imputed genotypes: use the imputed genotypes
+    # a PCA of complete or imputed genotypes: use the imputed genotypes, if
+    # x has any (otherwise, its missing genotypes are handled as with a PCA
+    # of missing genotypes)
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)
   }
   # bigsnpr's check for missing values samples the whole backing matrix
   # (including individuals and loci that x does not use), so turn it off
-  # (keeping bigstatsr's check of n_cores); with a PCA of complete or imputed
-  # genotypes, check a sample of the genotypes of x instead
+  # (keeping bigstatsr's check of n_cores); missing genotypes are counted
+  # below
   local_no_bigstatsr_checks(n_cores = n_cores)
-  if (!pca_missing) {
-    stopifnot_no_missing(x, "gt_pcadapt()", n_cores = n_cores)
-  }
 
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
 
-  # with a PCA of missing genotypes, test only the loci genotyped in enough
+  # snp_pcadapt() tests each locus on the individuals genotyped at it (as
+  # the pcadapt package does); test only the loci genotyped in enough
   # individuals: with at most a fraction max_missing of missing genotypes (as
   # loci_missingness() computes it), and at least k + 2 individuals (with
-  # k + 1, the fit is exact, and the t-scores infinite); the others get NA
-  tested <- rep(TRUE, length(x_ind_col))
-  if (pca_missing) {
-    n_ind <- length(x_ind_row)
-    n_missing <- missingness_cpp(
-      BM = .gt_get_fbm(x), rowInd = x_ind_row, colInd = x_ind_col,
-      ncores = n_cores
+  # k + 1, the fit is exact, and the t-scores infinite); the others get NA.
+  # (With complete or imputed genotypes, all the loci are tested.)
+  n_ind <- length(x_ind_row)
+  n_missing <- missingness_cpp(
+    BM = .gt_get_fbm(x), rowInd = x_ind_row, colInd = x_ind_col,
+    ncores = n_cores
+  )
+  tested <- n_missing / n_ind <= max_missing & n_ind - n_missing >= k + 2
+  if (!any(tested)) {
+    stop(
+      "no locus is genotyped in enough individuals to be tested: at most ",
+      "a fraction 'max_missing' of missing genotypes, and at least k + 2 ",
+      "individuals, are needed"
     )
-    tested <- n_missing / n_ind <= max_missing & n_ind - n_missing >= k + 2
-    if (!any(tested)) {
-      stop(
-        "no locus is genotyped in enough individuals to be tested: at most ",
-        "a fraction 'max_missing' of missing genotypes, and at least k + 2 ",
-        "individuals, are needed"
-      )
-    }
   }
 
   # Run the analysis

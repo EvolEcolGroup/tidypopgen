@@ -186,10 +186,25 @@ test_that("gt_pcadapt looks for missing genotypes only where they are used", {
   # "You can't have missing values"
   set.seed(1)
   expect_s3_class(gt_pcadapt(complete_gt, complete_pca, k = 3), "gt_pcadapt")
-  # missing genotypes in the loci used are still found
-  expect_error(
-    gt_pcadapt(raw_gt, complete_pca, k = 3),
-    "gt_pcadapt\\(\\) needs complete or imputed genotypes"
+  # with missing genotypes in the loci used (and no imputed genotypes), each
+  # locus is tested on the individuals genotyped at it, as with a PCA of
+  # missing genotypes (it stopped: "needs complete or imputed genotypes");
+  # with k = 1, the statistic is the squared deviation from the median of the
+  # t-score of the regression of the genotypes on the scores
+  raw_pcadapt <- gt_pcadapt(raw_gt, complete_pca, k = 1)
+  geno <- show_genotypes(raw_gt)
+  u <- complete_pca$u[, 1]
+  t_scores <- apply(geno, 2, function(g) {
+    obs <- !is.na(g)
+    r <- stats::cor(g[obs], u[obs])
+    r * sqrt((sum(obs) - 2) / (1 - r^2))
+  })
+  expect_equal(raw_pcadapt$score, (t_scores - stats::median(t_scores))^2)
+  # and max_missing applies (with 0, only the complete loci are tested)
+  complete_only <- gt_pcadapt(raw_gt, complete_pca, k = 1, max_missing = 0)
+  expect_identical(
+    which(!is.na(complete_only$score)),
+    which(loci_missingness(raw_gt) == 0)
   )
 })
 
