@@ -45,7 +45,7 @@ population (ROH islands) can point to selection.
 PLINK 1.9 (`plink --homozyg`), with the same parameters and defaults, and
 gives the same runs. In this article, we look at the runs of homozygosity of
 the Human Genome Diversity Project (HGDP): 1,043 individuals from 51
-populations, typed at about 650k loci. We also time each step, on a laptop
+populations, typed at about 650k loci. We also time each step, on a machine
 with a `r cpu` CPU.
 
 ```{r}
