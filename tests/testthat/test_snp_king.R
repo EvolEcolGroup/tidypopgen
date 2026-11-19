@@ -248,14 +248,6 @@ test_that("pairwise_king is a generic with methods for gen_tibbles", {
   expect_s3_class(dummy_king, "pairwise_tbl")
   expect_identical(dummy_king$item2, c("b", "c", "c"))
   expect_identical(dummy_king$value, c(0, 0, 0))
-  # grouped tibbles of other classes of genotypes are computed group by group
-  dummy_grouped <- dummy_tbl %>%
-    mutate(pop = c("p1", "p2", "p1")) %>%
-    group_by(pop)
-  dummy_king <- pairwise_king(dummy_grouped)
-  expect_identical(dummy_king$group, "p1")
-  expect_identical(dummy_king$item2, "c")
-  expect_length(pairwise_king(dummy_grouped, as_matrix = TRUE), 2)
 })
 
 test_that("pairwise_king on a grouped gen_tibble works within groups", {

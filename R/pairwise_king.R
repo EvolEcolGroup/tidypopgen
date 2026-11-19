@@ -20,8 +20,7 @@
 #' per group in the order of [dplyr::group_keys()] (an empty group gives an
 #' empty matrix); otherwise, it is a tibble with the pairs of individuals of
 #' all groups, preceded by a `group` column (or by one column per grouping
-#' variable, if there are several). Grouped tibbles with other classes of
-#' genotypes are computed with [dplyr::group_map()].
+#' variable, if there are several).
 #'
 #' @references Manichaikul, A. et al. (2010) Robust relationship inference in
 #'   genome-wide association studies. Bioinformatics, 26(22), 2867–2873.
@@ -137,26 +136,13 @@ pairwise_king.grouped_df <- function(
   ...
 ) {
   stopifnot_has_genotypes(x)
-  if (inherits(x$genotypes, "vctrs_bigSNP")) {
-    # gen_tibbles (also those that have lost their class): the genotypes of
-    # all individuals are read once, comparing only the pairs within groups
-    rlang::check_dots_empty()
-    king <- .pairwise_king_by_group(x,
-      block_size = block_size,
-      n_cores = n_cores
-    )
-  } else {
-    # other classes of genotypes: the method of the ungrouped tibble on each
-    # group
-    king <- dplyr::group_map(x, function(.x, .y) {
-      pairwise_king(.x,
-        as_matrix = TRUE,
-        block_size = block_size,
-        n_cores = n_cores,
-        ...
-      )
-    })
-  }
+  rlang::check_dots_empty()
+  # the genotypes of all individuals are read once, comparing only the pairs
+  # within groups
+  king <- .pairwise_king_by_group(x,
+    block_size = block_size,
+    n_cores = n_cores
+  )
   if (as_matrix) {
     return(king)
   }

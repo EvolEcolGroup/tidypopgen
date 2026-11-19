@@ -79,8 +79,7 @@ compared. With \code{as_matrix = TRUE}, the result is a list of matrices, one
 per group in the order of \code{\link[dplyr:group_keys]{dplyr::group_keys()}} (an empty group gives an
 empty matrix); otherwise, it is a tibble with the pairs of individuals of
 all groups, preceded by a \code{group} column (or by one column per grouping
-variable, if there are several). Grouped tibbles with other classes of
-genotypes are computed with \code{\link[dplyr:group_map]{dplyr::group_map()}}.
+variable, if there are several).
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")
