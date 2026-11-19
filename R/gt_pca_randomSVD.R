@@ -103,10 +103,12 @@ gt_pca_randomSVD <- function(
   lifecycle::deprecate_soft(
     "1.1.0", "gt_pca_randomSVD()", "gt_pca(method = 'random')"
   )
+  # a scaling given by the user (see scaling_lookup())
+  custom_scaling <- !missing(fun_scaling)
   this_svd <- pca_random_svd(x,
     k = k, fun_scaling = fun_scaling, tol = tol, verbose = verbose,
     n_cores = n_cores, fun_prod = fun_prod, fun_cprod = fun_cprod,
-    total_var = total_var
+    total_var = total_var, custom_scaling = custom_scaling
   )
   this_svd$call <- match.call()
   this_svd

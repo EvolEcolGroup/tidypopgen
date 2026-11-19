@@ -902,6 +902,52 @@ test_that("the SVDs check all the genotypes they use, also in parallel", {
   )
 })
 
+test_that("a custom scaling gets all the genotypes checked", {
+  withr::local_options(lifecycle_verbosity = "quiet")
+  # with 10,000 individuals, the sampled check for missing genotypes looks at
+  # 100 evenly spaced loci (see any_missing_genotypes()), and so misses some
+  # of these 120 loci
+  set.seed(6)
+  sim_gt <- gt_simulate_bn(n_indiv = c(5000, 5000), n_loci = 120, fst = 0.1)
+  sim_gt <- select_loci_if(sim_gt, loci_maf(genotypes) > 0)
+  one_missing <- show_genotypes(sim_gt)
+  one_missing[3, 4] <- NA
+  one_missing_gt <- gen_tibble(one_missing,
+    indiv_meta = sim_gt %>% select(id, population),
+    loci = show_loci(sim_gt) %>% select(-big_index),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  # (the missing genotype is at a locus that the sample leaves out)
+  expect_false(any_missing_genotypes(one_missing_gt, max_genotypes = 1e6))
+  expect_true(any_missing_genotypes(one_missing_gt))
+  # a scaling that does not depend on the genotypes does not reveal the
+  # missing genotype either, which reached the SVD: it failed ("TridiagEigen:
+  # eigen decomposition failed"), or, with n_cores > 1, left the workers of
+  # the randomised SVD waiting forever
+  constant_scaling <- bigstatsr::big_scale(center = FALSE, scale = FALSE)
+  expect_error(
+    gt_pca(one_missing_gt,
+      k = 2, method = "random", fun_scaling = constant_scaling, n_cores = 1
+    ),
+    "gt_pca\\(method = \"random\"\\) needs complete or imputed genotypes"
+  )
+  expect_error(
+    gt_pca_autoSVD(one_missing_gt,
+      k = 2, fun_scaling = constant_scaling, roll_size = 0, verbose = FALSE,
+      n_cores = 1
+    ),
+    "gt_pca_autoSVD\\(\\) needs complete or imputed genotypes"
+  )
+  expect_error(
+    gt_pca_partialSVD(one_missing_gt, k = 2, fun_scaling = constant_scaling),
+    "gt_pca_partialSVD\\(\\) needs complete or imputed genotypes"
+  )
+  expect_error(
+    gt_pca_randomSVD(one_missing_gt, k = 2, fun_scaling = constant_scaling),
+    "gt_pca_randomSVD\\(\\) needs complete or imputed genotypes"
+  )
+})
+
 test_that("the number of cores is checked, as bigstatsr did", {
   set.seed(7)
   sim_gt <- gt_simulate_bn(n_indiv = c(10, 10), n_loci = 200, fst = 0.1)

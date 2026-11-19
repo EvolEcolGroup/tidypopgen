@@ -85,6 +85,9 @@
   `n_cores > 1`) in `loci_ld_clump()`, `gt_pcadapt()`, the PCA functions and
   `predict(project_method = "none")` after removing loci or individuals with
   missing genotypes: only the genotypes in use are checked
+* `gt_pca(method = "random")` and `gt_pca_autoSVD()` with a custom
+  `fun_scaling`: fix missing genotypes that went unnoticed, and failed or hung
+  the SVD (with `n_cores > 1`)
 * functions using temporary backing files (PCA, LD clumping, KING, IBS and
   allele sharing) delete them, fixing occasional "File '...bk' already
   exists" errors

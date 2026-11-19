@@ -124,6 +124,8 @@ gt_pca_autoSVD <- function(
   verbose = TRUE,
   total_var = TRUE
 ) {
+  # a scaling given by the user (see scaling_lookup())
+  custom_scaling <- !missing(fun_scaling)
   if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)
@@ -143,7 +145,8 @@ gt_pca_autoSVD <- function(
   # (keeping bigstatsr's check of n_cores)
   local_no_bigstatsr_checks(n_cores = n_cores)
   fun_scaling <- scaling_lookup(x, fun_scaling,
-    what = "gt_pca_autoSVD()", check_zero = FALSE, n_cores = n_cores
+    what = "gt_pca_autoSVD()", check_zero = FALSE, n_cores = n_cores,
+    custom_scaling = custom_scaling
   )
 
   X <- attr(x$genotypes, "fbm") # convenient pointer #nolint

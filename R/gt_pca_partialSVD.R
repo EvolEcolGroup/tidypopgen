@@ -93,6 +93,8 @@ gt_pca_partialSVD <- function(
   total_var = TRUE
 ) {
   lifecycle::deprecate_soft("1.1.0", "gt_pca_partialSVD()", "gt_pca()")
+  # a scaling given by the user (see scaling_lookup())
+  custom_scaling <- !missing(fun_scaling)
   if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)
@@ -102,7 +104,10 @@ gt_pca_partialSVD <- function(
   # turn it off; the scaling, computed once for all the loci, checks the
   # genotypes of x exactly (see scaling_lookup())
   local_no_bigstatsr_checks()
-  fun_scaling <- scaling_lookup(x, fun_scaling, what = "gt_pca_partialSVD()")
+  fun_scaling <- scaling_lookup(x, fun_scaling,
+    what = "gt_pca_partialSVD()",
+    custom_scaling = custom_scaling
+  )
   X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)

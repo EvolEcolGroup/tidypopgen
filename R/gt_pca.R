@@ -202,7 +202,8 @@ gt_pca <- function(x, k = 10, method = c("partial", "random"),
       tol = tol, verbose = verbose, n_cores = n_cores, fun_prod = fun_prod,
       fun_cprod = fun_cprod, total_var = total_var,
       what = "gt_pca(method = \"random\")",
-      hint = "or use method = \"partial\""
+      hint = "or use method = \"partial\"",
+      custom_scaling = !is.null(fun_scaling)
     )
     this_pca$method <- "random"
     this_pca$call <- match.call()
@@ -349,10 +350,13 @@ grm_plink <- function(x, center, scale, n_cores, block_size, use_blas) {
 
 # Method "random": bigstatsr::big_randomSVD(), using imputed genotypes if they
 # exist (also used by the deprecated gt_pca_randomSVD()); `what` and `hint`
-# are for the error on missing genotypes (see stop_missing_genotypes())
+# are for the error on missing genotypes (see stop_missing_genotypes()), and
+# `custom_scaling` says whether the user gave fun_scaling (see
+# scaling_lookup())
 pca_random_svd <- function(x, k, fun_scaling, tol, verbose, n_cores,
                            fun_prod, fun_cprod, total_var,
-                           what = "gt_pca_randomSVD()", hint = NULL) {
+                           what = "gt_pca_randomSVD()", hint = NULL,
+                           custom_scaling = TRUE) {
   if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)
@@ -370,7 +374,8 @@ pca_random_svd <- function(x, k, fun_scaling, tol, verbose, n_cores,
   # (keeping bigstatsr's check of n_cores)
   local_no_bigstatsr_checks(n_cores = n_cores)
   fun_scaling <- scaling_lookup(x, fun_scaling,
-    what = what, hint = hint, n_cores = n_cores
+    what = what, hint = hint, n_cores = n_cores,
+    custom_scaling = custom_scaling
   )
 
   X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
