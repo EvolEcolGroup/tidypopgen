@@ -76,8 +76,11 @@ by \code{step_size} loci. Within each window, pairs of loci whose squared
 correlation (r^2) is above \code{thr_r2} are found in order, and the locus with
 the lower minor allele frequency of each pair is removed (the later one
 when their frequencies are equal), until no such pair remains. Loci with
-no variance (e.g. monomorphic loci) are removed, as in PLINK. Clumping
-(\code{\link[=loci_ld_clump]{loci_ld_clump()}}) gives a better spread of loci along the chromosomes.
+no variance (e.g. monomorphic loci) are removed, as in PLINK; but, also as
+in PLINK, a locus alone on its chromosome, or alone in the first window of
+its chromosome (with a window in kb), is kept even if it has no variance.
+Clumping (\code{\link[=loci_ld_clump]{loci_ld_clump()}}) gives a better spread of loci along the
+chromosomes.
 }
 \details{
 Missing genotypes do not need to be imputed: as in PLINK, r^2 is the
@@ -90,8 +93,12 @@ frequency is removed, as if they were linked. Imputed genotypes are used
 only if the \code{gen_tibble} is set to use them (see \code{\link[=gt_set_imputed]{gt_set_imputed()}}).
 
 Differences from PLINK: all individuals are used (PLINK uses only
-founders), and all chromosomes are treated as autosomes (PLINK treats the
-sex chromosomes of males as haploid).
+founders); all chromosomes are treated as autosomes (PLINK treats the
+sex chromosomes of males as haploid); and loci on chromosome "0"
+(unplaced) are pruned as those of any other chromosome, whereas PLINK
+ignores them and lists them in neither its \emph{.prune.in} nor its
+\emph{.prune.out} file (so that \code{--extract} with \emph{.prune.in} drops them, but
+\code{--exclude} with \emph{.prune.out} keeps them).
 }
 \examples{
 # (the example has missing genotypes, which do not need to be imputed)

@@ -304,6 +304,45 @@ test_that("loci_ld_prune windows in kb can be shorter than the gaps", {
   )
 })
 
+test_that("loci_ld_prune keeps lone loci with no variance, as PLINK", {
+  # the first, third and fifth loci are monomorphic: the first and third on
+  # chromosome 1, far from the others; the fifth alone on chromosome 2
+  monomorphic <- rep(0, 6)
+  lone_gt <- gen_tibble(
+    x = cbind(
+      monomorphic, c(0, 1, 2, 0, 1, 2), monomorphic, c(1, 0, 2, 1, 0, 1),
+      monomorphic
+    ),
+    indiv_meta = data.frame(id = letters[1:6], population = "pop1"),
+    loci = data.frame(
+      name = paste0("rs", 1:5),
+      chromosome = c(1, 1, 1, 1, 2),
+      position = c(1, 200, 300, 400, 1) * 1000,
+      genetic_dist = 0,
+      allele_ref = "A",
+      allele_alt = "T"
+    ),
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  # with windows of 50 kb, the first locus is alone in the first window of
+  # its chromosome, and is kept, while the third is removed when it enters
+  # a later window (as plink --indep-pairwise 50kb 1 0.2)
+  expect_identical(
+    loci_ld_prune(lone_gt,
+      window_size = 50, step_size = 1, thr_r2 = 0.2, window_in_kb = TRUE
+    ),
+    c(TRUE, TRUE, FALSE, TRUE, TRUE)
+  )
+  # with windows of 2 loci, the first window holds the first two loci, and
+  # the first is removed; the locus alone on its chromosome is still kept
+  # (as plink --indep-pairwise 2 1 0.2)
+  expect_identical(
+    loci_ld_prune(lone_gt, window_size = 2, step_size = 1, thr_r2 = 0.2),
+    c(FALSE, TRUE, FALSE, TRUE, TRUE)
+  )
+})
+
 test_that("loci_ld_prune works with several cores and grouped gen_tibbles", {
   one_core <- loci_ld_prune(ld_gt,
     window_size = 10, step_size = 1, thr_r2 = 0.5, n_cores = 1
