@@ -796,16 +796,16 @@ test_that("missing genotypes are looked for only where they are used", {
     select_loci_if(loci_missingness(genotypes) == 0)
   expect_false(any(loci_missingness(complete_gt) > 0))
   # bigstatsr's check sampled the whole backing matrix, and stopped with
-  # "You can't have missing values" (and, in the workers of the parallel
-  # randomised SVD, left it waiting forever)
+  # "You can't have missing values" (for the workers of the parallel
+  # randomised SVD, see the next test)
   set.seed(1)
   expect_s3_class(gt_pca_partialSVD(complete_gt, k = 2), "gt_pca")
   expect_s3_class(
-    gt_pca(complete_gt, k = 2, method = "random", n_cores = 2), "gt_pca"
+    gt_pca(complete_gt, k = 2, method = "random", n_cores = 1), "gt_pca"
   )
   expect_s3_class(
     gt_pca_autoSVD(complete_gt,
-      k = 2, roll_size = 0, verbose = FALSE, n_cores = 2
+      k = 2, roll_size = 0, verbose = FALSE, n_cores = 1
     ),
     "gt_pca"
   )
@@ -822,6 +822,36 @@ test_that("missing genotypes are looked for only where they are used", {
   expect_error(
     gt_pca_randomSVD(missing_gt, k = 2),
     "gt_pca_randomSVD\\(\\) needs complete or imputed genotypes"
+  )
+})
+
+test_that("missing genotypes not used are ignored by the parallel SVD", {
+  # the parallel randomised SVD runs 1 + n_cores processes, more than the 2
+  # allowed by R CMD check
+  skip_if(
+    Sys.getenv("_R_CHECK_LIMIT_CORES_", "") != "",
+    "Skipping due to core limitation in R CMD check"
+  )
+  withr::local_options(lifecycle_verbosity = "quiet")
+  bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
+  missing_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("missing_"),
+    quiet = TRUE
+  )
+  complete_gt <- missing_gt %>%
+    select_loci_if(loci_missingness(genotypes) == 0)
+  # bigstatsr's check in the workers sampled the whole backing matrix, and
+  # left the SVD waiting forever
+  set.seed(1)
+  expect_s3_class(
+    gt_pca(complete_gt, k = 2, method = "random", n_cores = 2), "gt_pca"
+  )
+  expect_s3_class(
+    gt_pca_autoSVD(complete_gt,
+      k = 2, roll_size = 0, verbose = FALSE, n_cores = 2
+    ),
+    "gt_pca"
   )
 })
 
