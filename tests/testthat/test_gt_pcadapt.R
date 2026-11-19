@@ -131,6 +131,38 @@ test_that("gt_pcadapt does not test loci with many missing genotypes", {
   )
 })
 
+test_that("gt_pcadapt names the right loci when some are not tested", {
+  set.seed(4)
+  sim_gt <- gt_simulate_bn(n_indiv = c(10, 10, 10), n_loci = 60, fst = 0.2)
+  sim_gt <- select_loci_if(sim_gt, loci_maf(genotypes) > 0.05)
+  geno <- show_genotypes(sim_gt)
+  # a missing genotype at every locus
+  geno[cbind(
+    (seq_len(ncol(geno)) - 1) %% nrow(geno) + 1, seq_len(ncol(geno))
+  )] <- NA
+  # locus 1 genotyped in 3 individuals (not tested), and locus 2 with the
+  # same genotype in every individual genotyped (it can not be tested)
+  geno[-c(1, 11, 21), 1] <- NA
+  geno[!is.na(geno[, 2]), 2] <- 0
+  test_gt <- gen_tibble(geno,
+    indiv_meta = sim_gt %>% select(id, population),
+    loci = show_loci(sim_gt) %>% select(-big_index),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  test_pca <- gt_pca(test_gt, k = 3, n_cores = 1)
+  # the error names locus 2, which comes after a locus not tested
+  expect_error(
+    gt_pcadapt(test_gt, test_pca, k = 2),
+    paste0("(e.g. ", loci_names(test_gt)[2], ")"),
+    fixed = TRUE
+  )
+  # with max_missing = 0, no locus can be tested
+  expect_error(
+    gt_pcadapt(test_gt, test_pca, k = 2, max_missing = 0),
+    "no locus is genotyped in enough individuals to be tested"
+  )
+})
+
 test_that("gt_pcadapt checks that individuals match the pca", {
   # same individuals, in a different order
   rev_gt <- missing_gt[rev(seq_len(nrow(missing_gt))), ]
