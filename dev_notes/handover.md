@@ -8,30 +8,29 @@ documents listed in `README.md`.
 
 | branch | purpose | base | pushed | merged |
 |---|---|---|---|---|
-| `ld_missing` | LD clumping and pruning with missing genotypes; the notes moved to `dev_notes/` | `pca_missing` | yes | no (PR #233) |
-| `pca_missing` | `gt_pca()` with missing genotypes as PLINK, projections; with #232 (checks, DAPC and pcadapt) | `dev` | yes | no (PR #231) |
-| `pca_missing_checks` | missing-genotype checks, DAPC and pcadapt on the PCA of missing genotypes | `pca_missing` | deleted on GitHub | yes (#232, squash `e4b5a46a`); local copy only |
+| `pca_missing` | `gt_pca()` with missing genotypes as PLINK, projections; with #232 (checks, DAPC and pcadapt) and #233 (LD clumping and pruning) | `dev` | yes | no (PR #231) |
+| `ld_missing` | LD clumping and pruning with missing genotypes | `pca_missing` | yes (to delete on GitHub) | yes (#233, squash `9272aab9`); deleted locally |
+
+`pca_missing_checks` was merged as #232 (squash `e4b5a46a`) and deleted, on
+GitHub and on the laptop.
 
 About 19 other local branches look unmerged to git (`git branch --no-merged
 origin/dev`), but many were squash-merged; see the clean-up task.
 
 ## Next tasks
 
-### 1. **P1** [review] Review and merge PR #233, then PR #231
-
-- #233 (`ld_missing` → `pca_missing`): missing-aware `loci_ld_clump()`, new
-  `loci_ld_prune()`, docs, and the notes moved to `dev_notes/`.
-- #231 (`pca_missing` → `dev`): the PCA work and #232.
-- **Done when:** both merged into `dev`.
-
-### 2. **P2** [desktop] Full checks of `pca_missing`, articles, and timings
+### 1. **P1** [desktop] Full checks of `pca_missing`, articles, and timings
 
 See the desktop queue.
 
+### 2. **P1** [review] Review and merge PR #231
+
+- #231 (`pca_missing` → `dev`): the PCA work, #232 and #233.
+- **Done when:** merged into `dev`, after the desktop checks.
+
 ### 3. **P2** [claude] Keep optimising (Andrea)
 
-- **Branch:** a new branch from `pca_missing` (or `ld_missing` before #233 is
-  merged).
+- **Branch:** a new branch from `pca_missing`.
 - **Read first:** `gt_pca.md` ("Breakdown by operation"), `ld_missing.md`.
 - **Candidates:** pcadapt's t-scores (bigsnpr's `multLinReg`, ~5 of 7 s on
   HGDP650 with 44% missing genotypes) with the accumulation of
@@ -73,18 +72,18 @@ See the desktop queue.
 
 ### 8. **P3** [cleanup] Branches and scratch files
 
-- Delete the local `pca_missing_checks` (merged as #232), then `ld_missing`
-  and `pca_missing` once merged; review the other local branches (many
-  squash-merged).
+- Delete the branch `ld_missing` on GitHub (merged as #233), and
+  `pca_missing` once merged; review the other local branches on the laptop
+  (many squash-merged).
 - When the optimisation is done: `/media/andrea/annex/tmp/claude/tidypopgen/bench_dapc/`
   (~3 GB) and `bench_ld/` (~0.5 GB).
 
 ## Desktop queue
 
-### Full checks of `pca_missing` (after #233), articles and timings
+### Full checks of `pca_missing`, articles and timings
 
-- **Branch and set-up:** `pca_missing` after #233 (or `ld_missing` before);
-  the HGDP650 files of `vignettes/articles/data/hgdp/`.
+- **Branch and set-up:** `pca_missing` (with #232 and #233); the HGDP650
+  files of `vignettes/articles/data/hgdp/`.
 - **Run:**
   - `devtools::test()`, all examples, all vignettes, `devtools::check()`
     (8 P-cores, about 1 h; not timing-sensitive, so the E-cores are fine);

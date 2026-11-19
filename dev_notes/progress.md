@@ -4,6 +4,15 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-19 (laptopX1): #233 merged, local clean-up
+
+- **Done:** PR #233 squash-merged into `pca_missing` (`9272aab9`) by Andrea;
+  the local branches `ld_missing` and `pca_missing_checks` deleted (their
+  content checked against the squash commits); the next work moves to the
+  desktop (`handover.md`).
+- **Where:** `pca_missing`, PR #231 (open).
+- **Notes changed:** `handover.md`, `summary.md`.
+
 ## 2026-11-19 (laptopX1): LD clumping and pruning with missing genotypes
 
 - **Done:** `loci_ld_clump()` computes r^2 over the individuals genotyped at
