@@ -196,7 +196,7 @@ gt_restore_loci <- function(.x, names = TRUE, chromosomes = TRUE,
 # tab separated text, with a header, then one line per locus whose first
 # field is its integer name (the key, strictly increasing), no quoting, and
 # "." for missing values (see src/loci_sidecar.h, and
-# data-raw/dev_notes/loci_sidecar_plan.md). The sidecar is found from the
+# dev_notes/loci_sidecar_plan.md). The sidecar is found from the
 # path of the backing file, so the gen_tibble needs no attribute for it (and
 # gt_load(reattach_to = ) finds it too). Sidecars are never edited: functions
 # that write a new backing file write a new sidecar for it, with the lines of
