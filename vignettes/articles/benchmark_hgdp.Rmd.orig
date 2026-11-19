@@ -150,25 +150,12 @@ to_keep_indiv <- which(indiv_report$missingness < 0.01)
 hgdp <- hgdp[to_keep_indiv, ]
 ```
 
-# Update backingfile
-
-After removing individuals from the dataset, and before imputing, we need to
-update the file backing matrix with `gt_update_backingfile`.
-
-```{r update_backingfile}
-hgdp <- gt_update_backingfile(hgdp)
-```
-
-# Impute data
-
-Some functions, such as `loci_ld_clump` and the `gt_pca` functions, require that
-there is no missingness in the dataset, so we use `gt_impute_simple` to impute
-any remaining missing genotypes.
-
-```{r impute, benchmark = TRUE}
-hgdp <- gt_impute_simple(hgdp, method = "mode", n_cores = n_cores)
-gt_set_imputed(hgdp, TRUE)
-```
+A few missing genotypes remain after filtering. We do not need to impute
+them: LD clumping, the PCA and the DAPC below use, for each locus (or pair of
+loci), the individuals genotyped at it (see the article on
+[missing genotypes](missing_data.html)). Nor do we need to rewrite the backing
+file with `gt_update_backingfile()` after filtering: the following steps only
+use the individuals and loci that are left in the `gen_tibble`.
 
 # LD clumping
 
@@ -185,7 +172,7 @@ A principal components analysis can then be computed using the resulting cleaned
 and LD clumped dataset.
 
 ```{r pca, benchmark = TRUE}
-test_pca <- hgdp %>% gt_pca_partialSVD()
+test_pca <- hgdp %>% gt_pca(n_cores = n_cores)
 ```
 
 Plot PCA:
@@ -199,10 +186,15 @@ autoplot(test_pca, type = "scores") +
 
 We can continue with a discriminant analysis of principal
 components using `gt_dapc`, setting 6 groups corresponding to
-the main geographic regions covered by the dataset.
+the main geographic regions covered by the dataset. As the PCA was computed
+with missing genotypes, we also give the `gen_tibble` (`data`), which
+`gt_dapc` uses to estimate the loadings of the loci.
 
 ```{r dapc, benchmark = TRUE}
-test_dapc <- gt_dapc(test_pca, pop = as.factor(hgdp$region))
+test_dapc <- gt_dapc(test_pca,
+  pop = as.factor(hgdp$region),
+  data = hgdp, n_cores = n_cores
+)
 ```
 
 Plot DAPC:
