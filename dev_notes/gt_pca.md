@@ -383,8 +383,9 @@ population 1.
   `max_missing`** (Andrea, 19 Nov 2026, from Claude's options after the
   review). In `gt_dapc()` and `gt_pcadapt()`, loci with more than a fraction
   `max_missing` (default 0.5) of their genotypes missing get `NA` loadings
-  or statistics; pcadapt also needs `k + 2` genotyped individuals (with
-  `k + 1` the fit is exact). Alternatives: a count (`min_genotyped = 20`),
+  or statistics; pcadapt also needs 3 genotyped individuals (its t-scores
+  are of simple regressions on each component; `k + 2` at first, `e103fc6b`).
+  Alternatives: a count (`min_genotyped = 20`),
   or both. Why a fraction: the noise of a locus's loading, relative to a
   complete locus, grows as sqrt(n / n_genotyped), so which loci dominate
   depends on the fraction genotyped; a count of 20 is too weak on 1,000
@@ -395,6 +396,25 @@ population 1.
   (largest loading 1.02 times the 99th percentile); pcadapt's top loci are
   genotyped in 24-46 (largest -log10 p 9.2, against 1,539 before). Commits
   `e5ad3272`, `e7976d6b`, `af55bd5a` on `codereview_missing`.
+- **`gt_pcadapt()` tests locus by locus also with a PCA of complete
+  genotypes** when `x` has missing genotypes and no imputed ones (Andrea,
+  19 Nov 2026; it stopped before), with the same `max_missing` and minimum
+  of 3 genotyped individuals (`b335d314`).
+- **The randomised SVDs use at most `n_cores` cores** (Andrea, 19 Nov 2026,
+  after the CI failure of #231): bigstatsr's parallel SVD runs
+  `1 + ncores` processes. `gt_pca(method = "random")` with the default
+  products runs the sequential SVD with the products on `n_cores` OpenMP
+  threads (one process); with products given by the user, and in
+  `gt_pca_autoSVD()`, bigstatsr gets `n_cores - 1` cores (1 below 3). On
+  HGDP650 (1,043 individuals, 488,797 complete loci, k = 10, 4 P-cores of
+  manica01, 3 runs each, 19 Nov 2026): threads 15.1 s, parallel SVD on
+  1 + 4 processes 17.2 s, on 1 + 3 processes 20.9 s; identical singular
+  values. Alternative rejected: always `n_cores - 1` (slower, and one core
+  with `n_cores = 2`). Commit `70f7f572`. To reproduce: time
+  `bigstatsr::big_randomSVD()` on the same data with `ncores = 4`; with
+  `ncores = 1` and `fun.prod`/`fun.cprod` wrapping `big_prodVec()` and
+  `big_cprodVec()` with `ncores = 4`; and with `ncores = 3`, each pinned to
+  4 cores (`taskset -c 0-3`).
 - **No minimum for the PCA itself** (Claude, 19 Nov 2026; Andrea asked):
   each pair of individuals is compared over the loci genotyped in both, and
   removing the anolis loci genotyped in fewer than 10, 20 or 30 individuals
@@ -584,13 +604,11 @@ on simulated data.
 - `gt_pcadapt()` could drop the loci with the same genotype in every
   individual (with `NA` statistics, as the `pcadapt` package does) instead
   of stopping, now that loci above `max_missing` get `NA` statistics.
-- `gt_pcadapt()` with a PCA of complete genotypes and `x` with missing
-  genotypes stops; it could test locus by locus, as with a PCA of missing
-  genotypes (for Andrea to decide; see the review report).
-- `gt_pcadapt()` with a PCA of missing genotypes counts the missing
-  genotypes in one more pass: +4% on HGDP650 (2.88 s to 3.00 s, k = 5,
-  4 P-cores, 19 Nov 2026, manica01); bigsnpr's `multLinReg()` could return
-  the counts if it is replaced by our own t-scores.
+- `gt_pcadapt()` counts the missing genotypes in one more pass: +4% on
+  HGDP650 with a PCA of missing genotypes (2.88 s to 3.00 s, k = 5,
+  4 P-cores, 19 Nov 2026, manica01); since `b335d314`, also with complete
+  data. bigsnpr's `multLinReg()` could return the counts if it is replaced
+  by our own t-scores.
 - DAPC and pcadapt with missing genotypes: re-time the whole routes on the
   desktop (manica01), with the paired adds (`16445878`), and on data with
   more typical missingness (a few %), where the regression mostly sums the

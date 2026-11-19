@@ -8,14 +8,17 @@
   and `gt_pcadapt()` on the PCA of missing genotypes) and `9272aab9` (#233:
   LD clumping with missing genotypes, `loci_ld_prune()`).
 - **Fixes:** on the local branch `codereview_missing` (named by Andrea), from
-  `pca_missing` at `e185047f`: 17 commits, of which 6 change code (each with
-  a test that fails on its parent), 8 add tests only (or fix a test comment)
-  and 3 change documentation only. The CI failure of #231 was fixed separately
+  `pca_missing` at `e185047f`: 22 commits, of which 9 change code (each with
+  a test that fails on its parent), 9 add tests only (or fix a test comment)
+  and 4 change documentation only; then merged into `pca_missing`. The CI failure of #231 was fixed separately
   (`e3b2b69c`, a test only, see below).
 - **Decisions taken (Andrea, 19 Nov):** a minimum of genotyped individuals
   per locus for the DAPC loadings and pcadapt, as a fraction, `max_missing`
-  (default 0.5), with `NA` below it.
-- **Findings not fixed:** 2 decisions, 2 smaller points (see the end).
+  (default 0.5), with `NA` below it; `loci_ld_prune()` keeps pruning
+  chromosome "0" as any other (documented); `gt_pcadapt()` tests locus by
+  locus also with a complete PCA; the randomised SVDs use at most `n_cores`
+  cores.
+- **Findings not fixed:** 2 smaller points (see the end).
 
 ## Verification
 
@@ -24,12 +27,13 @@
 | CI of #231 at `74498c1a` | every R-CMD-check job failed at `test_gt_pca.R:803`: `gt_pca(method = "random", n_cores = 2)` starts 3 processes, more than the 2 allowed by R CMD check; fixed in `e3b2b69c` |
 | `devtools::test()` at `e3b2b69c` | 5,773 passed, 0 failed, 0 warnings, 0 skipped |
 | `devtools::check()` (`--as-cran`) at `e3b2b69c` | 0 errors, 0 warnings, 1 NOTE (`-mno-omit-leaf-frame-pointer`, from the machine's R configuration) |
-| `devtools::test()` (`NOT_CRAN=true`) at `b32faa33`, and at `6092b973` (tip of the fixes) | 5,851, then 5,856 passed; 0 failed, 0 warnings, 0 skipped |
-| `devtools::check(cran = TRUE, run_dont_test = TRUE)` at `b32faa33` and at `6092b973` | 0 errors, 0 warnings, 2 NOTEs (the compilation flag above; "unable to verify current time"); examples, `--run-donttest`, tests and vignettes OK |
+| `devtools::test()` (`NOT_CRAN=true`) at `b32faa33`, `6092b973`, `70f7f572` and `20d45b9b` (tip of the fixes) | 5,851, 5,856, 5,861, then 5,866 passed; 0 failed, 0 warnings, 0 skipped |
+| `devtools::check(cran = TRUE, run_dont_test = TRUE)` at `b32faa33`, `6092b973`, `70f7f572` and `20d45b9b` | 0 errors, 0 warnings, 2 NOTEs (the compilation flag above; "unable to verify current time"); examples, `--run-donttest`, tests and vignettes OK |
 | `lintr::lint_package()` at `b32faa33` | 35 lints, all `object_usage_linter` on internal functions defined in other files, as the 34 of `pca_missing` (the new one: `stopifnot_max_missing` in `R/gt_pcadapt.R`) |
 | each code fix's test on its parent | fails on the parent and passes on the fix (6 of 6; recipe of the `code-review-rules` skill, in a separate worktree; checked again by the verifying agent for the first 5) |
 | each LD test commit against the review's mutants of `src/ld_bitpacked.cpp` | each kills its mutant (stride, complete shortcut, `min_shared`, window), which passed every LD test before |
 | the #232 test commit against mutants | removing the `rcond` test of `grm_loci_lsq_cpp()`, or the switch away from imputed genotypes, fails it |
+| second verifying agent (`b335d314`, `70f7f572`) | both tests fail on their parents and pass; probes of the cores (no cluster with the default products; clusters of `n_cores` processes otherwise; same results as one core) and of pcadapt with a complete PCA (statistics equal the reference for k = 1-3); found the wrong rationale of the `k + 2` floor (`e103fc6b`), documentation points (`265cb06a`) and 2 test gaps (`20d45b9b`) |
 | independent verifying agent (at `b32faa33`) | the 5 code fixes fail on their parents and pass; each test commit kills its mutants; the new pruning expectations agree with `plink1.9 --indep-pairwise`; `n_genotyped` is thread-safe and exact (against `missingness_cpp()` on 19,885 loci, 1, 2 and 4 cores); the `max_missing` thresholds match `loci_missingness()` at 0, 0.1, 0.3, 0.5, 0.7 and 1, also with groups, several cores and imputed data; found 1 bug (all-`NA` loadings gave 0 contributions, fixed in `af55bd5a`), 2 test gaps (`01e5a9ba`), documentation points (`6092b973`) and the commit-message corrections below |
 | timing (HGDP650, 1,043 individuals, 643,733 loci with 576,172 missing genotypes; -O2 builds of `e3b2b69c` and `8e436e08`; 4 P-cores; A B B A A B) | `gt_pcadapt(k = 5)`: 2.88 s (2.86-2.90) against 3.00 s (2.98-3.00), +4% for the count of missing genotypes; `gt_dapc()` with the loadings: 1.00 s (0.99-1.01) against 0.87 s (0.86-0.90); identical outputs |
 
@@ -84,7 +88,7 @@ parent and read every diff.
   `NA` loadings and contributions (84 of 3,249 loci in vignette a03, which
   no longer warns). The plots of the loadings leave them out.
 - `gt_pcadapt()` (new argument `max_missing`, default 0.5): with a PCA of
-  missing genotypes, the same loci, and those genotyped in fewer than `k + 2`
+  missing genotypes, the same loci, and those genotyped in fewer than 3
   individuals, are not tested (`NA` statistics); the robust distances and
   the genomic control are those of the loci tested.
 - `gt_pca(method = "random")`, `gt_pca_autoSVD()` and the deprecated SVD
@@ -97,6 +101,16 @@ parent and read every diff.
   accepted.
 - `loci_ld_clump()` and `loci_ld_prune()`: `min_shared` above
   `.Machine$integer.max` (or `Inf`) is an error.
+- `gt_pcadapt()` with a PCA of complete genotypes and `x` with missing
+  genotypes (and no imputed ones) tests each locus on its genotyped
+  individuals, instead of stopping; the missing genotypes are counted at all
+  the loci in every case (one pass, also with complete data).
+- `gt_pca(method = "random")` (and `gt_pca_randomSVD()`) with the default
+  products runs bigstatsr's sequential SVD with the products on `n_cores`
+  threads (one process, rather than `1 + n_cores` processes); with products
+  given by the user, and in `gt_pca_autoSVD()`, bigstatsr gets
+  `n_cores - 1` cores (1 with fewer than 3). The results are the same to
+  numerical precision.
 
 ## Fixes by area
 
@@ -109,6 +123,12 @@ parent and read every diff.
   ("TridiagEigen: eigen decomposition failed", or a hang with
   `n_cores > 1`); missing genotypes are now counted at all the loci for
   custom scalings *[hang or cryptic error]*
+- [ ] `70f7f572` · `gt_pca(method = "random")`, `gt_pca_randomSVD()`,
+  `gt_pca_autoSVD()` — bigstatsr's parallel SVD ran `1 + n_cores` processes,
+  more than asked (3 with `n_cores = 2`, the CI failure of #231); now at most
+  `n_cores` (Andrea); with the default products, `n_cores` threads in one
+  process, 15.1 s against 17.2 s on HGDP650 (488,797 complete loci, k = 10,
+  4 P-cores), identical singular values *[cores not respected]*
 
 ### DAPC and pcadapt
 
@@ -119,13 +139,25 @@ parent and read every diff.
   vignette a03's text updated *[misleading rankings]*
 - [ ] `e7976d6b` · `gt_pcadapt()` — the same for pcadapt (anolis: -log10 p
   up to 1,539 for loci genotyped in 3), plus a floor of `k + 2` genotyped
-  individuals (an exact fit with `k + 1`); the missing-data article leaves
+  individuals, lowered to 3 in `e103fc6b`; the missing-data article leaves
   the loci not tested out of its correlation *[misleading rankings]*
 - [ ] `5d8f515d` · tests — values of the loadings and of pcadapt on
   filtered, reordered and imputed data, and the `rcond` branch *[test gaps]*
 - [ ] `af55bd5a` · `gt_dapc()` — when every locus had `NA` loadings, the
   contributions were all 0, silently; they are now `NA`, with a warning
   *[silent wrong output, edge case]*
+- [ ] `b335d314` · `gt_pcadapt()` — stopped with a PCA of complete
+  genotypes and missing genotypes in `x`, while it tested the same `x` locus
+  by locus with a PCA of missing genotypes; now tests locus by locus in both
+  cases (Andrea) *[inconsistency]*
+- [ ] `e103fc6b` · `gt_pcadapt()` — the floor of `k + 2` genotyped
+  individuals rested on an exact fit with `k + 1`, but bigsnpr's t-scores
+  are of simple regressions on each component, finite from 3 individuals;
+  the floor is 3 *[wrong rationale, loci left out]*
+- [ ] `265cb06a` · docs — `max_missing` and `n_cores` help, a stale
+  comment, shorter NEWS bullets *[documentation]*
+- [ ] `20d45b9b` · tests — imputed genotypes in `gt_pcadapt()` with a
+  complete PCA; `svd_n_cores()` *[test gaps]*
 - [ ] `01e5a9ba` · tests — `gt_pcadapt()` names the right locus when loci
   before it are not tested, and stops when no locus can be tested
   *[test gaps]*
@@ -168,26 +200,25 @@ inexact (history is not rewritten, so they are corrected here):
 - `09ed9309`: on the parent, `exclude` with the index `n + 1` or with names
   excluded nothing silently; only indices from `n + 2` gave the `split()`
   warning; negative indices excluded all the other loci.
+- `e7976d6b`: "with `k + 1` individuals, the fit is exact and the t-scores
+  infinite" holds for a multiple regression, not for bigsnpr's t-scores
+  (simple regressions on each component); the floor is 3 since `e103fc6b`.
 - `d75ec3c4`: on the parent, a `min_shared` beyond the integer range was not
   silent: R warned "NAs introduced by coercion to integer range" (twice per
   call), then used no minimum.
 
 ## Findings not fixed
 
-### Decision needed
+### Decisions taken
 
-- [ ] **Decision needed:** `loci_ld_prune()` prunes chromosome "0" like any
-  other. PLINK 1.9 ignores its loci, and writes them to neither `.prune.in`
-  nor `.prune.out` (so `--extract prune.in` drops them, and
-  `--exclude prune.out` keeps them). Options: (a) keep the current behaviour,
-  documented in `b32faa33` (recommended: unplaced loci are often many in
-  non-model data); (b) return `FALSE` for them, as `--extract`; (c) return
-  `TRUE` without pruning them, as `--exclude`. With `chromosomes_as_int`,
-  "0" is not coded as 0, so (b) and (c) need the names of the chromosomes.
-- [ ] **Decision needed:** `gt_pcadapt()` stops when the PCA is of complete
-  genotypes and `x` has missing genotypes, but tests the same `x` locus by
-  locus (now with `max_missing`) when the PCA is of missing genotypes. Allow
-  the per-locus test in both cases?
+- [x] `loci_ld_prune()` prunes chromosome "0" like any other, where PLINK
+  1.9 writes its loci to neither `.prune.in` nor `.prune.out`. Kept, as
+  documented in `b32faa33` (Andrea, 19 Nov: option (a); the others were
+  `FALSE` as `--extract prune.in`, or `TRUE` as `--exclude prune.out`).
+  AM
+- [x] `gt_pcadapt()` with a PCA of complete genotypes and missing genotypes
+  in `x`: test locus by locus, as with a PCA of missing genotypes (Andrea,
+  19 Nov; `b335d314`). AM
 
 ### Smaller points
 

@@ -33,6 +33,13 @@ Branch `ld_missing` (from `pca_missing_checks`), 19 Nov 2026, laptop.
 - Differences from PLINK, documented: all individuals are used (PLINK: only
   founders), and all chromosomes are treated as autosomes.
 
+- **Chromosome "0" is pruned as any other chromosome** (Andrea, 19 Nov
+  2026, as Claude recommended). PLINK 1.9 ignores its loci, and writes them
+  to neither `.prune.in` nor `.prune.out` (so `--extract prune.in` drops
+  them, and `--exclude prune.out` keeps them); unplaced loci are often many
+  in non-model data, and dropping them silently would surprise. Documented
+  under "Differences from PLINK" in `loci_ld_prune()`.
+
 ## How it works (`src/ld_bitpacked.cpp`)
 
 - `ld_pack()`: each locus becomes three bit planes over the individuals (64
@@ -127,7 +134,3 @@ on laptopX1 (`run_ld.R`, `driver_clump.sh`, `driver_prune.sh`,
   many individuals, a cache of packed blocks would bound the memory.
 - Pruning is single-threaded, as PLINK; chromosomes could run in parallel.
 - `--indep-pairphase` and `--indep` (VIF) are not implemented.
-- Chromosome "0": PLINK 1.9 leaves its loci out of both `.prune.in` and
-  `.prune.out`; `loci_ld_prune()` prunes them as any other chromosome
-  (documented). Keep, drop them (as `--extract prune.in`) or keep them all
-  (as `--exclude prune.out`)? For Andrea (see the review report).

@@ -4,6 +4,22 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-19 (manica01): last review decisions, n_cores, merged into `pca_missing`
+
+- **Done:** Andrea's decisions: chromosome "0" pruned as any other
+  (documented); `gt_pcadapt()` tests locus by locus also with a complete
+  PCA (`b335d314`); the randomised SVDs use at most `n_cores` cores
+  (`70f7f572`: threaded products, 15.1 s against 17.2 s on HGDP650 with 4
+  cores). A second verifier found the `k + 2` floor of pcadapt resting on a
+  wrong rationale: now 3 (`e103fc6b`). `codereview_missing` merged into
+  `pca_missing` and pushed, with roh_hgdp.
+- **Result:** 22 fix commits, each code fix's test fails on its parent; at
+  the tip (`20d45b9b`), 5,866 tests pass, check 0/0/2 NOTEs (machine).
+- **Decisions:** as above (Andrea); HG population names, never "Pygmies"
+  (Andrea).
+- **Notes changed:** `code_review_2026-11_pca_missing.md`, `gt_pca.md`,
+  `ld_missing.md`, `handover.md`, `summary.md`.
+
 ## 2026-11-19 (manica01): review fixes on `codereview_missing`, roh_hgdp re-timed
 
 - **Done:** `pca_missing` pushed (CI fix and articles); roh_hgdp re-timed

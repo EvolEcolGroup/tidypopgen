@@ -8,43 +8,29 @@ documents listed in `README.md`.
 
 | branch | purpose | base | pushed | merged |
 |---|---|---|---|---|
-| `pca_missing` | `gt_pca()` with missing genotypes as PLINK, projections; with #232 (checks, DAPC and pcadapt) and #233 (LD clumping and pruning); CI fix and re-rendered articles | `dev` | up to `e185047f`; `f3444917` (roh_hgdp re-timed) is local | no (PR #231) |
-| `codereview_missing` | fixes of the review of #232/#233 (17 commits, report in `code_review_2026-11_pca_missing.md`) and these notes | `pca_missing` at `e185047f` | no (local; worktree `~/claude_work/tidypopgen/codereview_missing` on manica01) | no |
+| `pca_missing` | `gt_pca()` with missing genotypes as PLINK, projections; with #232 (checks, DAPC and pcadapt) and #233 (LD clumping and pruning); CI fix, re-rendered articles, and the fixes of the review of #232/#233 (merged from `codereview_missing`, report in `code_review_2026-11_pca_missing.md`) | `dev` | yes | no (PR #231) |
 
 About 19 other local branches on the laptop look unmerged to git (`git branch
 --no-merged origin/dev`), but many were squash-merged; see the clean-up task.
 
 ## Next tasks
 
-### 1. **P1** [review] Review `codereview_missing`, merge it into `pca_missing`, then #231
+### 1. **P1** [review] Review the fixes and merge PR #231
 
 - **Read first:** `code_review_2026-11_pca_missing.md` ("Changes in
   behaviour to check before merging", "Fixes by area"; Andrea ticks the
   boxes).
-- **Then:** merge `codereview_missing` into `pca_missing` (after
-  `f3444917`; no conflict expected: the branches touch different files),
-  push, and merge #231 into `dev` once CI is green. Pushing and merging
-  need Andrea's go-ahead.
-- **Done when:** #231 is merged with the fixes.
+- **Then:** check that the CI of #231 is green (the fixes were merged into
+  `pca_missing` and pushed on 19 Nov), and merge #231 into `dev` (squash).
+- **Done when:** #231 is merged.
 
-### 2. **P1** [decide] Two findings of the review not fixed
-
-- Chromosome "0" in `loci_ld_prune()`: PLINK 1.9 writes its loci to neither
-  `.prune.in` nor `.prune.out`. Options: (a) keep pruning them as any
-  chromosome (documented; recommended); (b) `FALSE`, as `--extract
-  prune.in`; (c) `TRUE` without pruning, as `--exclude prune.out`.
-- `gt_pcadapt()` with a PCA of complete genotypes and `x` with missing
-  genotypes stops; test locus by locus instead, as with a PCA of missing
-  genotypes?
-- **Read first:** the review report, "Findings not fixed".
-
-### 3. **P2** [desktop] Re-time the HGDP650 benchmarks
+### 2. **P2** [desktop] Re-time the HGDP650 benchmarks
 
 - See the desktop queue.
 
-### 4. **P2** [claude] Keep optimising (Andrea)
+### 3. **P2** [claude] Keep optimising (Andrea)
 
-- **Branch:** a new branch from `pca_missing` (after the fixes are merged).
+- **Branch:** a new branch from `dev`, after #231 is merged.
 - **Read first:** `gt_pca.md` ("Breakdown by operation", "Open questions"),
   `ld_missing.md`.
 - **Candidates:** pcadapt's t-scores (bigsnpr's `multLinReg`, ~5 of 7 s on
@@ -59,22 +45,21 @@ About 19 other local branches on the laptop look unmerged to git (`git branch
   and `bench_ld/` on the laptop.
 - **Done when:** faster by more than 5%, with identical outputs.
 
-### 5. **P2** [review] Release 1.1.0 (from claude_jobs#5, 15 Nov; not rechecked)
+### 4. **P2** [review] Release 1.1.0 (from claude_jobs#5, 15 Nov; not rechecked)
 
 - After #231: set the version, merge `dev` into `main` (pkgdown then publishes
   `rad_seq.html`), re-run `urlchecker::url_check()` and submit;
   `cran-comments.md` gives the intermittent failures as the reason for the
   early resubmission.
 
-### 6. **P3** [cleanup] Branches and scratch files
+### 5. **P3** [cleanup] Branches and scratch files
 
-- Delete `pca_missing` and `codereview_missing` once merged (and the
-  worktree, `git worktree remove ~/claude_work/tidypopgen/codereview_missing`);
-  review the other local branches on the laptop (many squash-merged).
+- Delete `pca_missing` once #231 is merged; review the other local branches
+  on the laptop (many squash-merged).
 - When the optimisation is done: `/media/andrea/annex/tmp/claude/tidypopgen/bench_dapc/`
   (~3 GB) and `bench_ld/` (~0.5 GB) on the laptop.
-- On manica01: `~/claude_work/tidypopgen/` (the worktree, the -O2 library of
-  `e3b2b69c`, check output); the NearEast data in
+- On manica01: `~/claude_work/tidypopgen/` (the -O2 library of
+  `e3b2b69c`, logs); the NearEast data in
   `vignettes/articles/data/NearEastPublic/` (git-ignored, needed to
   re-render aDNA_pseudohaploids).
 
@@ -82,7 +67,7 @@ About 19 other local branches on the laptop look unmerged to git (`git branch
 
 ### HGDP650 timings of `gt_pca()`, DAPC, pcadapt, clumping and pruning
 
-- **Branch and set-up:** `pca_missing` with the fixes merged; the HGDP650
+- **Branch and set-up:** `pca_missing` (or `dev` after #231); the HGDP650
   files of `vignettes/articles/data/hgdp/`; the scripts are on the laptop in
   `bench_dapc/scripts/` and `bench_ld/scripts/` (paths to adapt); the masked
   data are made by `bench_dapc/scripts/mask_dev.R`; PLINK 1.9 is at
