@@ -490,6 +490,33 @@ imputation 2.68 s (2.65-2.71) + DAPC 1.21 s (1.20-1.21) = 3.88 s
 missing genotypes costs about 4 s more than that of complete genotypes
 (the count of loci genotyped in both individuals).
 
+Breakdown by operation (19 Nov, same data and laptop, 2 balanced runs per
+route, `scripts/breakdown.R`: the internal functions called by `gt_pca()`,
+`gt_dapc()` and `gt_pcadapt()`, from the checkout at `a5e07677` built at
+-O2; medians (min-max)). The laptop warmed up during the runs (the old
+route's GRM took 6.1 s in the first run, 9.0 s in the last), so the
+values are indicative; the ranking of the operations is not in doubt.
+
+| Operation | old (imputed) | new (missing genotypes) |
+|---|---|---|
+| imputation (mode) | 1.6 (1.6-1.6) | - |
+| PCA: allele frequencies | 0.10 | 0.14 |
+| PCA: GRM (with the count of loci genotyped in both, new only) | 7.5 (6.1-9.0) | 10.4 (8.1-12.7) |
+| PCA: eigenvectors (RSpectra, k = 10) | 0.01 | 0.01 |
+| PCA: loadings (`grm_loadings_cpp()`) | 1.7 (1.4-2.0) | 1.8 (1.5-2.0) |
+| DAPC: locus regression (`grm_loci_lsq_cpp()`) | - | 3.8 (3.4-4.2) |
+| DAPC: the rest (LDA, var.load, var.contr) | 1.0 | 0.9 |
+| pcadapt: t-scores (bigsnpr's `multLinReg`) | 4.8 (4.2-5.4) | 5.9 (5.8-5.9) |
+| pcadapt: robust distance (`bigutilsr::dist_ogk`) | 1.6 (1.4-1.7) | 1.6 (1.6-1.6) |
+
+The largest costs: the GRM (and its count of pairs genotyped, about 2-3 s
+of the new route's), pcadapt's t-scores, and the DAPC regression.
+`multLinReg` does 3K multiply-adds per genotyped individual per locus;
+the accumulation used by `grm_loci_lsq_cpp()` (sums of the scores by
+genotype, totals minus the missing ones) would need about K adds per
+genotype 1 or 2 and 2K per missing genotype, a candidate if pcadapt needs
+to be faster.
+
 Accuracy, against the same analysis (old route) on the original data
 (0.09% missing):
 
