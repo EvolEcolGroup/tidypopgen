@@ -494,9 +494,16 @@ also make sure that the two datasets were aligned to the same reference genome a
 
 # Imputation
 
-Some genetic analysis (e.g. LD clumping, or specific PCA methods) do not allow missing data. In many software implementations,
-missing genotypes are imputed on the fly, often in a simplistic manner. In `tidypopgen`, we
-encourage taking this step explicitly, when it is required. 
+Most analyses in `tidypopgen` deal with missing genotypes directly: for
+example, the default PCA (`gt_pca()`), DAPC, pcadapt, LD clumping and pruning,
+and the summary statistics. Imputation pulls individuals with many missing
+genotypes towards the centre of the data, so it is best avoided where it is not
+needed (see the article "Missing genotypes: impute only when you must"). A few
+methods do not allow missing data (e.g. the randomised PCA,
+`gt_pca(method = "random")`, or `gt_pca_autoSVD()`). In many software
+implementations, missing genotypes are imputed on the fly, often in a simplistic
+manner. In `tidypopgen`, we encourage taking this step explicitly, when it is
+required.
 
 Let us start with a dataset that has some missing genotypes:
 ```{r}
@@ -512,10 +519,10 @@ missing_gt %>%
   hist()
 ```
 
-If we attempt to run LD clumping on this dataset, with `loci_ld_clump()`, we get:
+If we attempt to run a randomised PCA on this dataset, with
+`gt_pca(method = "random")`, we get:
 ```{r, error = TRUE}
-missing_ld <- missing_gt %>%
-  select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, size = 10))
+missing_pca <- gt_pca(missing_gt, k = 2, method = "random")
 ```
 
 It is possible to obviate to this problem by filtering loci with missing data,
@@ -566,11 +573,11 @@ missing_gt %>%
   hist()
 ```
 
-And let functions that need imputation use it automatically (here, `loci_ld_clump()` will use the imputed genotypes):
+And let functions that need imputation use it automatically (here,
+`gt_pca(method = "random")` will use the imputed genotypes):
 ```{r}
-missing_ld <- missing_gt %>%
-  select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, size = 10))
-count_loci(missing_ld)
+missing_pca <- gt_pca(missing_gt, k = 2, method = "random")
+missing_pca
 ```
 
 Note that, when the function is finished, the `gen_tibble` is back to using

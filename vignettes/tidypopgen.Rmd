@@ -170,7 +170,7 @@ functions, including the PCA below, work directly on the remaining data.
 There are a number of PCA algorithms in tidypopgen. Here, we will use
 the default method of the `gt_pca` function, which does not need the remaining 
 missing genotypes to be imputed. Imputation (with `gt_impute_simple`) is
-required for some specific PCA methods and for LD clumping. See the vignettes
+required for some specific PCA methods. See the vignettes
 'The grammar of population genetics' and 'Quality Control' for further details
 on imputing a `gen_tibble`.
 
