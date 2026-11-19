@@ -48,6 +48,8 @@
   genotypes as PLINK 1.9's `--distance` without `flat-missing`
 * `qc_report_loci(hwe = FALSE)` gives the MAF and missingness of loci in a
   single pass
+* faster `pairwise_king()`, `pairwise_ibs()`, `pairwise_allele_sharing()`,
+  and `qc_report_indiv(kings_threshold = )` on grouped data (2-3 times)
 * faster VCF reading (in parallel with `n_cores`), and faster reading of
   *.ped* files straight into the backing file
 * faster `gt_as_vcf()`, `gt_update_backingfile()` and `gt_order_loci()` with

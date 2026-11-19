@@ -26,11 +26,12 @@
 // few bitwise operations and popcounts, as done by PLINK. Counts are exact
 // integers, so the results are identical to those of the matrix products.
 //
-// Loci are processed in chunks (CHUNK_WORDS * 64 loci at a time), small
-// enough that the planes of all individuals stay in cache while every pair
-// is visited. Each pair is visited once (the statistics are symmetric, or
-// computed for both directions at once), and per pair counts are accumulated
-// in the packed lower triangle (column-major, including the diagonal).
+// Loci are processed in chunks (up to 64 words of 64 loci at a time), small
+// enough that the planes of the individuals visited by each individual (all
+// of them, or those of its group) stay in cache while its pairs are visited.
+// Each pair is visited once (the statistics are symmetric, or computed for
+// both directions at once), and per pair counts are accumulated in the
+// packed lower triangle (column-major, including the diagonal).
 //
 // The bytes of the FBM are decoded through its code256, so that imputed
 // genotypes (bytes 4 to 6) are used if the gen_tibble is set to use them
@@ -236,6 +237,55 @@ void pw_row_popcnt(std::size_t i, std::size_t n, std::size_t n_words,
 
 /******************************************************************************/
 
+// Packing the genotypes into bit planes is a transposition: the FBM stores
+// the bytes of the individuals of a locus next to each other, whereas a word
+// of a plane holds 64 loci of one individual. Each byte is decoded with a
+// "spread" table, which gives the bits of all planes of its genotype at once,
+// plane p at bit 16 * p. Shifting the spread values of 16 consecutive loci by
+// their position (0 to 15) and or-ing them gathers 16 loci of every plane in
+// a single 64-bit accumulator (locus kk of plane p at bit 16 * p + kk), so
+// that each genotype costs a lookup, a shift and an or, whatever the number
+// of planes (at most 4).
+
+// fully unroll the next loop (gcc and clang; other compilers ignore it)
+#if defined(__GNUC__)
+#define PW_UNROLL_16 _Pragma("GCC unroll 16")
+#else
+#define PW_UNROLL_16
+#endif
+
+// Pack one word (64 loci) of one individual: col_ptr[k] points at the column
+// (in the FBM) of locus k of the word, r is the row of the individual in the
+// FBM, spread is the table above, and loci_mask clears the bits of the
+// loci past the end of the last word. The N_PLANES words are written to
+// p_word.
+template <class Stat>
+PW_ALWAYS_INLINE void pw_pack_word(const unsigned char* const* col_ptr,
+                                   std::size_t r, const uint64_t* spread,
+                                   uint64_t loci_mask, uint64_t* p_word) {
+  uint64_t acc[4];
+  for (int q = 0; q < 4; q++) {
+    const unsigned char* const* cp = col_ptr + 16 * q;
+    uint64_t a = 0;
+    PW_UNROLL_16
+    for (int kk = 0; kk < 16; kk++) {
+      a |= spread[cp[kk][r]] << kk;
+    }
+    acc[q] = a;
+  }
+  // the 16 bits of plane p of each accumulator are the q-th quarter of the
+  // word of that plane
+  for (int p = 0; p < Stat::N_PLANES; p++) {
+    uint64_t word = 0;
+    for (int q = 0; q < 4; q++) {
+      word |= ((acc[q] >> (16 * p)) & 0xFFFFull) << (16 * q);
+    }
+    p_word[p] = word & loci_mask;
+  }
+}
+
+/******************************************************************************/
+
 // Accumulate the counts of statistic Stat for all pairs of the selected
 // individuals (rowInd) over the selected loci (colInd).
 // Returns the counts for the packed lower triangle (pairs (j, i) with j >= i,
@@ -330,18 +380,44 @@ std::vector<uint32_t> pw_bitpacked_counts(Environment BM,
   if (code256.size() != 256) {
     Rcpp::stop("The FBM should have a code256 of 256 values.");
   }
-  uint8_t lut[256];
+  // (spread table: plane p of the genotype at bit 16 * p, see pw_pack_word())
+  static_assert(Stat::N_PLANES <= 4, "At most 4 planes can be packed.");
+  uint64_t spread[256];
   for (int b = 0; b < 256; b++) {
     double g = code256[b];
-    lut[b] = (g == 0 || g == 1 || g == 2) ?
+    uint64_t bits = (g == 0 || g == 1 || g == 2) ?
       Stat::planes(static_cast<int>(g)) : 0;
+    spread[b] = 0;
+    for (int p = 0; p < Stat::N_PLANES; p++) {
+      spread[b] |= ((bits >> p) & 1) << (16 * p);
+    }
   }
 
-  // number of 64-bit words per chunk: keep the planes of all individuals
-  // within ~256KB (so that they stay in cache whilst visiting all pairs),
-  // but use at least 4 and at most 64 words per chunk
-  std::size_t chunk_words = (256 * 1024) /
-    (8 * Stat::N_PLANES * std::max<std::size_t>(n, 1));
+  // individuals are packed in the order of their rows in the FBM, so that
+  // the bytes read for a block of individuals are close together in each
+  // column (rowInd is in the order of the groups, not of the FBM); their
+  // planes are stored at their position in rowInd
+  std::vector<std::size_t> pack_order(n);
+  for (std::size_t i = 0; i < n; i++) {
+    pack_order[i] = i;
+  }
+  std::sort(pack_order.begin(), pack_order.end(),
+            [&rows](std::size_t a, std::size_t b) {
+              return rows[a] < rows[b];
+            });
+
+  // number of 64-bit words per chunk: keep the planes of the individuals
+  // visited by each individual (all of them, or those of its group) within
+  // ~256KB, so that they stay in cache whilst visiting the pairs, and the
+  // planes of all individuals within ~64MB; but use at least 4 and at most
+  // 64 words per chunk
+  std::size_t max_span = 1;
+  for (std::size_t i = 0; i < n; i++) {
+    max_span = std::max(max_span, pair_end[i] - i);
+  }
+  std::size_t chunk_words = (256 * 1024) / (8 * Stat::N_PLANES * max_span);
+  chunk_words = std::min(chunk_words, (64 * 1024 * 1024) /
+    (8 * Stat::N_PLANES * std::max<std::size_t>(n, 1)));
   chunk_words =
     std::min<std::size_t>(64, std::max<std::size_t>(4, chunk_words));
   const std::size_t chunk_loci = chunk_words * 64;
@@ -363,37 +439,31 @@ std::vector<uint32_t> pw_bitpacked_counts(Environment BM,
       std::size_t n_words = (n_loci + 63) / 64;
       std::size_t stride = n_words * Stat::N_PLANES;
 
-      // pack the genotypes of this chunk into bit planes, by blocks of 64
-      // individuals and words of 64 loci: for each locus, the bytes of a
-      // block of individuals (contiguous in the column-major FBM) are read
-      // and their bits are set (without branches) in a small buffer, which
-      // is copied into the planes once the word is complete
+      // pack the genotypes of this chunk into bit planes, by words of 64
+      // loci and blocks of 64 individuals (in the order of the FBM); each
+      // word and block is a unit of work, and the blocks of a word follow
+      // one another, so that the 64 columns of a word are read from start
+      // to end (rather than jumping to other columns after 64 individuals)
+      std::size_t n_blocks = (n + 63) / 64;
       #pragma omp for schedule(static)
-      for (std::size_t i0 = 0; i0 < n; i0 += 64) {
+      for (std::size_t unit = 0; unit < n_blocks * n_words; unit++) {
+        std::size_t i0 = (unit % n_blocks) * 64;
+        std::size_t w = unit / n_blocks;
         std::size_t n_ind = std::min<std::size_t>(64, n - i0);
-        uint64_t word_buf[64 * Stat::N_PLANES];
-        for (std::size_t w = 0; w < n_words; w++) {
-          std::fill(word_buf, word_buf + 64 * Stat::N_PLANES, 0);
-          std::size_t n_bits = std::min<std::size_t>(64, n_loci - w * 64);
-          for (std::size_t k = 0; k < n_bits; k++) {
-            const unsigned char* p_col =
-              p_mat + cols[l0 + w * 64 + k] * nrow_fbm;
-            for (std::size_t ii = 0; ii < n_ind; ii++) {
-              uint64_t bits = lut[p_col[rows[i0 + ii]]];
-              uint64_t* p_buf = word_buf + ii * Stat::N_PLANES;
-              for (int p = 0; p < Stat::N_PLANES; p++) {
-                p_buf[p] |= ((bits >> p) & 1) << k;
-              }
-            }
-          }
-          // copy the words of this block of individuals into the planes
-          for (std::size_t ii = 0; ii < n_ind; ii++) {
-            uint64_t* p_word =
-              p_planes + (i0 + ii) * stride + w * Stat::N_PLANES;
-            for (int p = 0; p < Stat::N_PLANES; p++) {
-              p_word[p] = word_buf[ii * Stat::N_PLANES + p];
-            }
-          }
+        std::size_t n_bits = std::min<std::size_t>(64, n_loci - w * 64);
+        // the columns of the loci of this word (the loci past the end of the
+        // last word point at its first column, and are masked out)
+        const unsigned char* col_ptr[64];
+        for (std::size_t k = 0; k < 64; k++) {
+          std::size_t l = l0 + w * 64 + (k < n_bits ? k : 0);
+          col_ptr[k] = p_mat + cols[l] * nrow_fbm;
+        }
+        uint64_t loci_mask =
+          (n_bits == 64) ? ~0ull : ((1ull << n_bits) - 1);
+        for (std::size_t ii = 0; ii < n_ind; ii++) {
+          std::size_t idx = pack_order[i0 + ii];
+          pw_pack_word<Stat>(col_ptr, rows[idx], spread, loci_mask,
+                             p_planes + idx * stride + w * Stat::N_PLANES);
         }
       }
       // (implicit barrier: all planes are ready)
