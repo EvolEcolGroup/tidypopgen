@@ -525,6 +525,26 @@ test_that("gt_dapc gives NA loadings to loci with many missing genotypes", {
   tidy_load <- tidy(miss_dapc, matrix = "loadings")
   expect_equal(sum(is.na(tidy_load$value)), 3 * miss_dapc$n.da)
   expect_no_warning(ggplot2::ggplot_build(autoplot(miss_dapc, "loadings")))
+  # with a missing genotype at every locus, max_missing = 0 leaves no
+  # loadings: a warning, and no contributions (they were all 0)
+  every_missing <- geno
+  every_missing[cbind(
+    (seq_len(ncol(geno)) - 1) %% nrow(geno) + 1, seq_len(ncol(geno))
+  )] <- NA
+  every_gt <- gen_tibble(every_missing,
+    indiv_meta = sim_gt %>% select(id, population),
+    loci = show_loci(sim_gt) %>% select(-big_index),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  every_pca <- gt_pca(every_gt, k = 4, n_cores = 1)
+  expect_warning(
+    every_dapc <- gt_dapc(every_pca,
+      pop = pops, data = every_gt, max_missing = 0, n_cores = 1
+    ),
+    "all the loadings are NA"
+  )
+  expect_true(all(is.na(unclass(every_dapc$var.load))))
+  expect_true(all(is.na(unclass(every_dapc$var.contr))))
   # max_missing is checked
   for (bad in list(-0.1, 1.1, NA, "0.5", c(0.2, 0.5))) {
     expect_error(

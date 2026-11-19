@@ -310,7 +310,8 @@ gt_dapc <- function(
       # of the sum)
       temp <- sum(x * x, na.rm = TRUE)
       if (temp < 1e-12) {
-        return(rep(0, length(x)))
+        # (no contribution, except for the loci without loadings)
+        return(ifelse(is.na(x), NA_real_, 0))
       }
       return(x * x / temp)
     }
@@ -393,7 +394,13 @@ loci_lsq_loadings <- function(pca, data, n_pca, n_cores, max_missing = 1) {
   # individuals, or have a nearly singular system)
   n_na <- sum(is.na(coefs[, 1]) & !too_sparse)
   coefs[too_sparse, ] <- NA
-  if (n_na > 0) {
+  if (nrow(coefs) > 0 && all(is.na(coefs[, 1]))) {
+    warning(
+      "no locus is genotyped in enough individuals to estimate its loadings ",
+      "(at most a fraction 'max_missing' of missing genotypes, and at least ",
+      "n_pca + 1 individuals, are needed): all the loadings are NA"
+    )
+  } else if (n_na > 0) {
     warning(
       n_na, " loci are genotyped in too few individuals to estimate their ",
       "loadings (at least n_pca + 1 are needed, with varied scores): ",
