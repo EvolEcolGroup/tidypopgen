@@ -71,6 +71,8 @@ antivirus scan were running, so compare within rounds.
 | KING within populations, + SIMD (not merged) | 0.24-0.30 s | 0.080 s | `9853e055` | 2026-11-19 |
 | packing alone (groups of one), + prefetch | 0.24-0.28 s | 0.059 s | `c7c09c67` | 2026-11-19 |
 | full KING matrix, before / after | 9.1 / 7.6 s | 1.79 / 1.49 s | `8ade0b8d` / `c7c09c67` | 2026-11-19 |
+| HGDP650 after the QC and clumping of the benchmark article (1041 x 151,769, 8 cores): `pairwise_ibs()` / `pairwise_allele_sharing()` matrices, before / after | | 0.25 / 0.28 -> 0.19 / 0.22 s | `8ade0b8d` / `e39cdf49` | 2026-11-19 |
+| same data: `gt_pca()` (count of shared loci through this kernel), before / after | | 0.88 / 0.87-0.95 s (no change) | `8ade0b8d` / `e39cdf49` | 2026-11-19 |
 | ~350 random families of 3, matrices / tidy | | 0.081 / 0.09 s (tidy was 0.32 s) | `e39cdf49` | 2026-11-19 |
 
 Outputs were identical to `8ade0b8d` for KING within groups and full, IBS,
@@ -86,6 +88,9 @@ To reproduce: build the HGDP650 `gen_tibble` from
 (packing alone). The scripts of 19 Nov are in
 `~/claude_work/tidypopgen/king/scripts/` on manica01 (to be deleted with the
 clean-up).
+
+No precompiled article times the functions that changed (the HGDP
+benchmark's `gt_pca()` step is unchanged), so none needs re-knitting.
 
 ## Open questions
 
