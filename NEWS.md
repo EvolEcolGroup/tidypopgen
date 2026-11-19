@@ -20,7 +20,9 @@
   also with missing genotypes
 * `gt_dapc()` works on a PCA of missing genotypes: give the `gen_tibble` as
   `data`, and the loadings of the loci are estimated without counting missing
-  genotypes as 0 (new arguments `data` and `n_cores`)
+  genotypes as 0; loci with more than `max_missing` (by default half) of
+  their genotypes missing get `NA` loadings (new arguments `data`,
+  `max_missing` and `n_cores`)
 * errors on missing genotypes name the function and say how to impute them;
   `gt_pca(method = "random")` no longer reads the genotypes an extra time to
   look for them

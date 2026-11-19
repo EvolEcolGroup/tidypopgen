@@ -471,3 +471,65 @@ test_that("loadings of loci by least squares with missing genotypes", {
   expect_true(all(is.na(few[6, ])))
   expect_false(anyNA(few[1:5, ]))
 })
+
+test_that("gt_dapc gives NA loadings to loci with many missing genotypes", {
+  set.seed(2)
+  sim_gt <- gt_simulate_bn(n_indiv = c(10, 10, 10), n_loci = 200, fst = 0.2)
+  sim_gt <- select_loci_if(sim_gt, loci_maf(genotypes) > 0.05)
+  geno <- show_genotypes(sim_gt)
+  # loci genotyped in 4 of the 30 individuals, in 14 (more than half of the
+  # genotypes missing), in 15 (exactly half missing, kept) and in 2 (fewer
+  # than n_pca + 1 = 3), each spread over the three populations
+  geno[-c(1, 11, 21, 2), 1] <- NA
+  geno[-c(1:5, 11:15, 21:24), 2] <- NA
+  geno[-c(1:5, 11:15, 21:25), 3] <- NA
+  geno[-c(1, 11), 4] <- NA
+  miss_gt <- gen_tibble(geno,
+    indiv_meta = sim_gt %>% select(id, population),
+    loci = show_loci(sim_gt) %>% select(-big_index),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  miss_pca <- gt_pca(miss_gt, k = 4, n_cores = 1)
+  pops <- as.factor(miss_gt$population)
+  # by default, loci with more than half of their genotypes missing get NA
+  # loadings (the locus genotyped in 4, with noisy loadings, among them),
+  # without a warning
+  expect_no_warning(
+    miss_dapc <- gt_dapc(miss_pca, pop = pops, data = miss_gt, n_cores = 1)
+  )
+  sparse <- c(1L, 2L, 4L)
+  na_loci <- unname(which(is.na(unclass(miss_dapc$var.load)[, 1])))
+  expect_identical(na_loci, which(loci_missingness(miss_gt) > 0.5))
+  expect_identical(na_loci, sparse)
+  expect_true(all(is.na(unclass(miss_dapc$var.contr)[sparse, ])))
+  # the contributions of the other loci sum to 1
+  expect_equal(
+    unname(colSums(unclass(miss_dapc$var.contr), na.rm = TRUE)),
+    rep(1, miss_dapc$n.da)
+  )
+  # with max_missing = 1, only the locus genotyped in fewer than n_pca + 1
+  # individuals has NA loadings, with a warning; the other loci keep theirs
+  expect_warning(
+    all_dapc <- gt_dapc(miss_pca,
+      pop = pops, data = miss_gt, max_missing = 1, n_cores = 1
+    ),
+    "1 loci are genotyped in too few individuals"
+  )
+  expect_identical(unname(which(is.na(unclass(all_dapc$var.load)[, 1]))), 4L)
+  expect_identical(
+    unclass(miss_dapc$var.load)[-sparse, ],
+    unclass(all_dapc$var.load)[-sparse, ]
+  )
+  # the tidier and the plots of the loadings keep the NA loadings, or leave
+  # them out
+  tidy_load <- tidy(miss_dapc, matrix = "loadings")
+  expect_equal(sum(is.na(tidy_load$value)), 3 * miss_dapc$n.da)
+  expect_no_warning(ggplot2::ggplot_build(autoplot(miss_dapc, "loadings")))
+  # max_missing is checked
+  for (bad in list(-0.1, 1.1, NA, "0.5", c(0.2, 0.5))) {
+    expect_error(
+      gt_dapc(miss_pca, pop = pops, data = miss_gt, max_missing = bad),
+      "'max_missing' should be a number between 0 and 1"
+    )
+  }
+})

@@ -343,7 +343,9 @@ NumericMatrix grm_loadings_cpp(Environment BM,
 // Loci genotyped in fewer than q individuals, or whose system is nearly
 // singular (reciprocal condition number below 1e-10, as in the least squares
 // of predict.gt_pca()), get NA.
-// Returns the m x K coefficients of the columns of S (not of the intercept).
+// Returns the m x K coefficients of the columns of S (not of the intercept),
+// with the number of individuals genotyped at each locus as the attribute
+// "n_genotyped" (for the minimum that gt_dapc() asks for, see max_missing).
 // [[Rcpp::export]]
 NumericMatrix grm_loci_lsq_cpp(Environment BM,
                                const IntegerVector& rowInd,
@@ -399,6 +401,9 @@ NumericMatrix grm_loci_lsq_cpp(Environment BM,
 
   NumericMatrix B(m, K);
   double* p_B = B.begin();
+  // the number of individuals genotyped at each locus
+  IntegerVector n_genotyped(m);
+  int* p_n = n_genotyped.begin();
   // (NA_REAL is read once, outside the parallel loops)
   const double na = NA_REAL;
   // the loci are processed in chunks, to check for user interrupts
@@ -451,6 +456,8 @@ NumericMatrix grm_loci_lsq_cpp(Environment BM,
           }
         }
         // the number of individuals genotyped is the entry of the intercept
+        // (a sum of ones, so an exact integer)
+        p_n[l] = static_cast<int>(A(0, 0) + 0.5);
         bool ok = A(0, 0) > static_cast<double>(q) - 0.5;
         if (ok) {
           llt.compute(A);
@@ -464,5 +471,6 @@ NumericMatrix grm_loci_lsq_cpp(Environment BM,
     }
     Rcpp::checkUserInterrupt();
   }
+  B.attr("n_genotyped") = n_genotyped;
   return B;
 }

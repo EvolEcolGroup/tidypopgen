@@ -270,10 +270,12 @@ without counting the missing genotypes as zeros:
 ```{r}
 anole_dapc <- gt_dapc(anole_clusters, data = anole_gt)
 ```
-The warning tells us that a few loci are genotyped in too few individuals (here,
-in only one or two of them) to estimate their loadings, which are left as `NA`;
-we could remove such loci before the analysis, e.g. with
-`select_loci_if(anole_gt, loci_missingness(genotypes) < 0.5)`.
+Loci with more than half of their genotypes missing (here,
+`r sum(loci_missingness(anole_gt) > 0.5)` of the `r count_loci(anole_gt)` loci)
+get `NA` loadings: estimated from few individuals, their loadings would be
+noisy, and would top the rankings of the loci. The fraction can be changed with
+`max_missing`; we could also remove such loci before the analysis, with
+`select_loci_if(anole_gt, loci_missingness(genotypes) <= 0.5)`.
 
 Note that `gt_dapc()` takes automatically the number of clusters from the `anole_clusters` object,
 but can change that behaviour by setting some of its parameters (see the help
