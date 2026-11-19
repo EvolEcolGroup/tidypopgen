@@ -533,3 +533,97 @@ test_that("gt_dapc gives NA loadings to loci with many missing genotypes", {
     )
   }
 })
+
+test_that("loadings and pcadapt with filtered, reordered and imputed data", {
+  set.seed(3)
+  sim_gt <- gt_simulate_bn(
+    n_indiv = c(15, 15, 15), n_loci = 300, fst = 0.1,
+    missing = rep(seq(0, 0.5, length.out = 15), 3)
+  )
+  sim_gt <- select_loci_if(sim_gt, loci_maf(genotypes) > 0.05)
+  # imputed genotypes, not used for now
+  sim_gt <- gt_impute_simple(sim_gt, method = "mode")
+  # some individuals removed, and the loci in reverse order, without resaving
+  # the backing matrix
+  sub_gt <- sim_gt[-c(2, 20, 33), ]
+  sub_gt <- select_loci(sub_gt, rev(seq_len(count_loci(sub_gt))))
+  sub_pca <- gt_pca(sub_gt, k = 4, n_cores = 1)
+  expect_true(attr(sub_pca, "missing"))
+  # the loadings of the loci match the regression over the individuals
+  # genotyped at each locus, in the order of the loci of sub_gt
+  n_pca <- 3
+  lsq <- loci_lsq_loadings(sub_pca, sub_gt, n_pca = n_pca, n_cores = 2)
+  geno <- show_genotypes(sub_gt)
+  z <- sweep(sweep(geno, 2, sub_pca$center), 2, sub_pca$scale, "/")
+  scores <- sweep(sub_pca$u[, 1:n_pca], 2, sub_pca$d[1:n_pca], "*")
+  ref <- t(sapply(seq_len(ncol(z)), function(l) {
+    obs <- !is.na(z[, l])
+    stats::lm.fit(cbind(1, scores[obs, ]), z[obs, l])$coefficients[-1]
+  }))
+  expect_equal(unname(lsq), unname(ref), tolerance = 1e-8)
+  # data can have more loci than the PCA, in another order
+  half_gt <- select_loci(sub_gt, seq(1, count_loci(sub_gt), by = 2))
+  half_pca <- gt_pca(half_gt, k = 4, n_cores = 1)
+  expect_identical(
+    loci_lsq_loadings(half_pca, sub_gt, n_pca = n_pca, n_cores = 2),
+    loci_lsq_loadings(half_pca, half_gt, n_pca = n_pca, n_cores = 2)
+  )
+  # pcadapt (k = 1: the squared deviation from the median of the t-score of
+  # the regression of the genotypes on the scores)
+  sub_pcadapt <- gt_pcadapt(sub_gt, sub_pca, k = 1, max_missing = 1)
+  u <- sub_pca$u[, 1]
+  t_scores <- apply(geno, 2, function(g) {
+    obs <- !is.na(g)
+    r <- stats::cor(g[obs], u[obs])
+    r * sqrt((sum(obs) - 2) / (1 - r^2))
+  })
+  expect_equal(sub_pcadapt$score, (t_scores - stats::median(t_scores))^2)
+  # with the gen_tibble set to use its imputed genotypes, the analyses of a
+  # PCA of missing genotypes still use the genotypes with their missing
+  # values, and the gen_tibble is left set to use the imputed genotypes
+  pops <- as.factor(sub_gt$population)
+  sub_dapc <- gt_dapc(sub_pca, pop = pops, data = sub_gt, n_cores = 1)
+  gt_set_imputed(sub_gt, set = TRUE)
+  expect_identical(
+    loci_lsq_loadings(sub_pca, sub_gt, n_pca = n_pca, n_cores = 2), lsq
+  )
+  expect_identical(
+    gt_dapc(sub_pca, pop = pops, data = sub_gt, n_cores = 1)$var.load,
+    sub_dapc$var.load
+  )
+  expect_identical(
+    gt_pcadapt(sub_gt, sub_pca, k = 1, max_missing = 1)$score,
+    sub_pcadapt$score
+  )
+  expect_true(gt_uses_imputed(sub_gt))
+  gt_set_imputed(sub_gt, set = FALSE)
+})
+
+test_that("loadings of loci with a nearly singular regression are NA", {
+  # individuals 4 and 9 have the same genotypes, and so the same scores: the
+  # regression of locus 6, genotyped in individuals 4, 5 and 9 (as many as
+  # the n_pca + 1 = 3 coefficients), has only two distinct rows
+  dup_gt <- gen_tibble(
+    x = rbind(
+      c(2, 1, 0, 1, 1, NA), c(0, 1, 2, 0, 1, NA), c(1, 2, 0, 1, 0, NA),
+      c(2, 0, 1, 2, 1, 1), c(0, 2, 1, 0, 2, 0), c(1, 1, 2, 2, 0, NA),
+      c(2, 0, 0, 1, 2, NA), c(0, 1, 1, 0, 1, NA), c(2, 0, 1, 2, 1, 1)
+    ),
+    indiv_meta = data.frame(
+      id = paste0("ind", 1:9), population = rep(c("a", "b", "c"), each = 3)
+    ),
+    loci = data.frame(
+      name = paste0("rs", 1:6), chromosome = 1, position = 1:6 * 100,
+      genetic_dist = 0, allele_ref = "A", allele_alt = "T"
+    ),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  dup_pca <- gt_pca(dup_gt, k = 2, n_cores = 1)
+  expect_equal(dup_pca$u[4, ], dup_pca$u[9, ])
+  expect_warning(
+    dup <- loci_lsq_loadings(dup_pca, dup_gt, n_pca = 2, n_cores = 1),
+    "1 loci are genotyped in too few individuals"
+  )
+  expect_true(all(is.na(dup[6, ])))
+  expect_false(anyNA(dup[1:5, ]))
+})
