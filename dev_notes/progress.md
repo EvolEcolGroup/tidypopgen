@@ -4,6 +4,26 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-19 (manica01): CI fix, full checks, review of #232/#233, articles re-rendered
+
+- **Done:** found why every R-CMD-check job of #231 failed (a test ran the
+  parallel randomised SVD, 3 processes, under R CMD check's 2-core limit)
+  and fixed the test; full tests and `devtools::check()`; review of #232 and
+  #233 by two agents, main findings re-checked; the precomputed articles
+  without imputation and with `gt_pca()`, re-rendered (benchmark_hgdp,
+  big_data, rad_seq re-timed; interpolating, aDNA_pseudohaploids).
+- **Where:** `pca_missing`, `e3b2b69c` (test), `6b6cb929`..`51782efd`
+  (articles), local; roh_hgdp waits for PLINK 1.9 on the desktop.
+- **Result:** 5,773 tests pass; check 0/0/1 NOTE (machine flag). HGDP
+  benchmark 3.5 s against 8.4 s. Review: no bug in the LD kernel, but the
+  tests miss multi-word data; a hang in the randomised PCA with custom
+  scalings; DAPC and pcadapt rankings dominated by sparsely genotyped loci.
+- **Decisions:** big_data re-timed on the desktop, with the text adjusted;
+  the old laptop section of benchmark_hgdp kept; rad_seq and roh_hgdp
+  re-timed too (Andrea).
+- **Notes changed:** `code_review_2026-11_pca_missing.md` (new), `gt_pca.md`,
+  `ld_missing.md`, `README.md`, `handover.md`, `summary.md`.
+
 ## 2026-11-19 (laptopX1): #233 merged, local clean-up
 
 - **Done:** PR #233 squash-merged into `pca_missing` (`9272aab9`) by Andrea;

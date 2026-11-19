@@ -73,6 +73,15 @@ Branch `ld_missing` (from `pca_missing_checks`), 19 Nov 2026, laptop.
   3 thresholds x 2 windows, and with `S`, `exclude` and windows in loci;
   identical to a sequential R implementation with pairwise-complete r^2 on
   data with missing genotypes (also with `min_shared`, on 1-4 cores).
+- Clumping the complete SGDP data of the big_data article (50 individuals,
+  7,482,060 loci after the MAF filter; manica01, 19 Nov 2026, `e3b2b69c`):
+  511,656 loci kept against 511,652 with `bigsnpr::snp_clumping()`. The 10
+  loci that differ come from pairs with r^2 exactly 0.2 (rational with 50
+  individuals): the exact integer counts do not link them (r^2 > 0.2 is
+  required), while bigsnpr's floating point put some just above 0.2.
+- Test gaps found in the review (`code_review_2026-11_pca_missing.md`): the
+  PLINK fixture has 60 individuals (one 64-bit word), and four plausible
+  kernel bugs pass the tests.
 
 ## Numbers
 
@@ -113,6 +122,4 @@ on laptopX1 (`run_ld.R`, `driver_clump.sh`, `driver_prune.sh`,
 - Clumping packs a whole chromosome at once (3 bits per genotype): for very
   many individuals, a cache of packed blocks would bound the memory.
 - Pruning is single-threaded, as PLINK; chromosomes could run in parallel.
-- The precomputed articles (big_data, benchmark_hgdp) still impute before
-  clumping; to re-render on the desktop with missing-aware clumping.
 - `--indep-pairphase` and `--indep` (VIF) are not implemented.

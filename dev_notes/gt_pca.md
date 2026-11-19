@@ -558,11 +558,12 @@ on simulated data.
 - Least squares and `"plink"` were compared only with missingness random
   over loci; a simulation with missingness concentrated on loci with large
   loadings would show the expected advantage of least squares.
-- The precomputed articles (big_data, benchmark_hgdp, interpolating,
-  aDNA_pseudohaploids) still call the deprecated functions and need to be
-  re-rendered. Check that those running pcadapt or DAPC set the imputed
-  genotypes before the PCA. The clustering vignette (a03) imputes again,
-  so its numbers are back to those of dev.
+- With missing genotypes, DAPC loadings and pcadapt statistics of loci
+  genotyped in very few individuals (but at least `n_pca + 1`, or 3) are
+  large and noisy, and top the rankings (vignette a03: the top 20 DAPC
+  contributors are genotyped in 3-16 of 46 individuals). A minimum number
+  genotyped per locus is for Andrea to decide (see
+  `code_review_2026-11_pca_missing.md`).
 - `gt_pcadapt()` could drop the loci with the same genotype in every
   individual (with `NA` statistics, as the `pcadapt` package does) instead
   of stopping.
