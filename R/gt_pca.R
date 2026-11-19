@@ -100,7 +100,7 @@
 #'   internal matrix products; the BLAS uses its own threads (see the
 #'   `RhpcBLASctl` package to set them). With `"random"`, they run the
 #'   matrix products of [bigstatsr::big_prodVec()] and
-#'   [bigstatsr::big_cprodVec()] (in one process); with other `fun_prod` and
+#'   [bigstatsr::big_cprodVec()] (in one process); with other `fun_prod` or
 #'   `fun_cprod`, the parallel SVD of [bigstatsr::big_randomSVD()] runs on
 #'   `n_cores - 1` workers and one more process that coordinates them (or on
 #'   one core, with fewer than 3 cores).

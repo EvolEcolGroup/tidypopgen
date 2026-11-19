@@ -209,8 +209,8 @@ local_private_fbm_dir <- function(envir = parent.frame()) {
 
 # Missing genotypes ------------------------------------------------------------
 #
-# Some analyses (those of bigsnpr and bigstatsr: clumping, randomised and
-# partial SVD, pcadapt, matrix products) need complete genotypes. A full pass
+# Some analyses (those of bigsnpr and bigstatsr: randomised and partial SVD,
+# matrix products) need complete genotypes. A full pass
 # over the genotypes just to check them would cost as much as some of these
 # analyses, so the genotypes are checked on a sample, as bigsnpr does
 # (stopifnot_no_missing()), and, where an analysis makes a full pass anyway,

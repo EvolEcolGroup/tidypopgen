@@ -18,10 +18,9 @@ individuals of \code{x} (see Details for missing genotypes).}
 
 \item{max_missing}{the largest fraction of missing genotypes at a locus for
 it to be tested (see Details); loci with more get \code{NA} statistics.
-Default is \code{0.5}. The fraction is that of the genotypes tested: without
-imputation with a PCA of missing genotypes (as given by
-\code{\link[=loci_missingness]{loci_missingness()}} when \code{x} is not set to use imputed genotypes), and
-none if the imputed genotypes are used.}
+Default is \code{0.5}. The fraction is that given by \code{\link[=loci_missingness]{loci_missingness()}}
+without imputed genotypes; it is zero when the imputed genotypes are
+used (with a PCA of complete or imputed genotypes, see Details).}
 }
 \value{
 An object of subclass \code{gt_pcadapt}, a subclass of \code{mhtest}.

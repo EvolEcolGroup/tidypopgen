@@ -37,10 +37,9 @@
 #' @param n_cores Number of cores to use.
 #' @param max_missing the largest fraction of missing genotypes at a locus for
 #'   it to be tested (see Details); loci with more get `NA` statistics.
-#'   Default is `0.5`. The fraction is that of the genotypes tested: without
-#'   imputation with a PCA of missing genotypes (as given by
-#'   [loci_missingness()] when `x` is not set to use imputed genotypes), and
-#'   none if the imputed genotypes are used.
+#'   Default is `0.5`. The fraction is that given by [loci_missingness()]
+#'   without imputed genotypes; it is zero when the imputed genotypes are
+#'   used (with a PCA of complete or imputed genotypes, see Details).
 #' @returns An object of subclass `gt_pcadapt`, a subclass of `mhtest`.
 #' @export
 #' @seealso [bigsnpr::snp_pcadapt()] which this function wraps.

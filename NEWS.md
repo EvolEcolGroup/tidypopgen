@@ -10,9 +10,8 @@
   `method = "random"` is for very large numbers of individuals
 * `gt_pca` objects record whether they used imputed genotypes and whether
   their genotypes had missing values (attributes `imputed` and `missing`)
-* `gt_pcadapt()` works with missing genotypes, also on a PCA of missing
-  genotypes, testing each locus on its genotyped individuals as `pcadapt`
-  does, unless more than `max_missing` of its genotypes are missing
+* `gt_pcadapt()` works with missing genotypes, testing each locus on its
+  genotyped individuals as `pcadapt` does (new argument `max_missing`)
 * `loci_ld_clump()` works with missing genotypes, without imputation: r^2 is
   computed over the individuals genotyped at both loci, as in PLINK (new
   arguments `min_shared` and `insufficient`); it uses imputed genotypes only
@@ -90,8 +89,7 @@
   `fun_scaling`: fix hangs (with `n_cores > 1`) or cryptic errors on missing
   genotypes
 * `gt_pca(method = "random")` and `gt_pca_autoSVD()` use at most `n_cores`
-  cores (bigstatsr's parallel SVD started one more process); the former, with
-  the default products, runs on `n_cores` threads, which is also faster
+  cores (bigstatsr's parallel SVD started one more process)
 * functions using temporary backing files (PCA, LD clumping, KING, IBS and
   allele sharing) delete them, fixing occasional "File '...bk' already
   exists" errors

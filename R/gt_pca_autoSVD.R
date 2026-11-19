@@ -60,7 +60,8 @@
 #'   use [bigstatsr::nb_cores()]. As the randomised SVD of
 #'   [bigsnpr::snp_autoSVD()] runs one more process than its number of cores
 #'   (to coordinate the others), it is given `n_cores - 1` cores (or one,
-#'   with fewer than 3 cores), so that at most `n_cores` are used.
+#'   with fewer than 3 cores), so that at most `n_cores` are used; its
+#'   clumping also runs on these cores.
 #' @returns a `gt_pca` object, which is a subclass of `bigSVD`; this is an S3
 #'   list with elements: A named list (an S3 class "big_SVD") of
 #' - `d`, the eigenvalues (singular values, i.e. as variances),

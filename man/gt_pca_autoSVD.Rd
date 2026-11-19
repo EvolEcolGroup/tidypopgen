@@ -63,7 +63,8 @@ Default is \code{10}.}
 use \code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}. As the randomised SVD of
 \code{\link[bigsnpr:snp_autoSVD]{bigsnpr::snp_autoSVD()}} runs one more process than its number of cores
 (to coordinate the others), it is given \code{n_cores - 1} cores (or one,
-with fewer than 3 cores), so that at most \code{n_cores} are used.}
+with fewer than 3 cores), so that at most \code{n_cores} are used; its
+clumping also runs on these cores.}
 
 \item{verbose}{Output some information on the iterations? Default is \code{TRUE}.}
 

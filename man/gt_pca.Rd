@@ -34,7 +34,7 @@ genotypes, count the loci genotyped in both individuals and run the
 internal matrix products; the BLAS uses its own threads (see the
 \code{RhpcBLASctl} package to set them). With \code{"random"}, they run the
 matrix products of \code{\link[bigstatsr:big_prodVec]{bigstatsr::big_prodVec()}} and
-\code{\link[bigstatsr:big_cprodVec]{bigstatsr::big_cprodVec()}} (in one process); with other \code{fun_prod} and
+\code{\link[bigstatsr:big_cprodVec]{bigstatsr::big_cprodVec()}} (in one process); with other \code{fun_prod} or
 \code{fun_cprod}, the parallel SVD of \code{\link[bigstatsr:big_randomSVD]{bigstatsr::big_randomSVD()}} runs on
 \code{n_cores - 1} workers and one more process that coordinates them (or on
 one core, with fewer than 3 cores).}
