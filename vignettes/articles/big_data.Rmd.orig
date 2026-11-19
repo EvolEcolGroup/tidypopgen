@@ -70,7 +70,7 @@ library(tidypopgen)
 library(ggplot2)
 ```
 
-Because tidypopgen utilizes disk storage through file-backed matrices (FBM), we can run the following pipeline on a modern laptop without running out of RAM. Here, we use a machine with a `r benchmarkme::get_cpu()` CPU and `r as.character(print(benchmarkme::get_ram(), unit_system = "iec"))` of RAM.
+Because tidypopgen keeps the genotypes on disk, in file-backed matrices (FBM), the following pipeline needs little RAM (see the peak memory of each step in the summary at the end), and also runs on a modern laptop. Here, we use a desktop machine with a `r benchmarkme::get_cpu()` CPU and `r as.character(print(benchmarkme::get_ram(), unit_system = "iec"))` of RAM.
 
 Before we begin, we will limit the number of cores used by the parallelised BLAS library with `bigparallelr::set_blas_ncores()`, and by the package data.table with `data.table::setDTthreads()`. *Note* You may need to adjust `n_cores` according to your own hardware.
 
@@ -197,7 +197,7 @@ sgdp <- sgdp %>%
 cat("Loci remaining:", count_loci(sgdp))
 ```
 
-With other datasets, we would also remove loci with too many missing genotypes (e.g. with `select_loci_if(loci_missingness(genotypes) < 0.1)`), and then impute the remaining missing genotypes with `gt_impute_simple()`, as LD clumping and some PCA methods do not accept missing values. Our dataset has no missing genotypes, so we can skip both steps. There is no need to rewrite the backing file with `gt_update_backingfile()` after filtering: the following steps only use the loci that are left in the `gen_tibble`.
+With other datasets, we would also remove loci with too many missing genotypes (e.g. with `select_loci_if(loci_missingness(genotypes) < 0.1)`). There would be no need to impute the remaining missing genotypes: LD clumping, the PCA and the DAPC below use, for each locus (or pair of loci), the individuals genotyped at it (see the article on [missing genotypes](missing_data.html)). Our dataset has no missing genotypes anyway. There is no need to rewrite the backing file with `gt_update_backingfile()` after filtering: the following steps only use the loci that are left in the `gen_tibble`.
 
 ## LD clumping
 
@@ -221,7 +221,7 @@ cat("Loci remaining:", count_loci(sgdp))
 Now that we have a clean dataset, we can proceed with our analysis by plotting a PCA:
 
 ```{r pca, benchmark = TRUE}
-sgdp_pca <- sgdp %>% gt_pca_partialSVD()
+sgdp_pca <- sgdp %>% gt_pca(n_cores = n_cores)
 ```
 
 ```{r PCA}
