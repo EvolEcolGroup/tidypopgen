@@ -10,17 +10,17 @@
   `method = "random"` is for very large numbers of individuals
 * `gt_pca` objects record whether they used imputed genotypes and whether
   their genotypes had missing values (attributes `imputed` and `missing`)
-* `gt_pcadapt()` works on a PCA of missing genotypes, testing each locus on
-  the individuals genotyped at it, as the `pcadapt` package does
+* `gt_pcadapt()` works with missing genotypes, testing each locus on its
+  genotyped individuals as `pcadapt` does (new argument `max_missing`)
 * `loci_ld_clump()` works with missing genotypes, without imputation: r^2 is
   computed over the individuals genotyped at both loci, as in PLINK (new
   arguments `min_shared` and `insufficient`); it uses imputed genotypes only
   if the `gen_tibble` is set to use them
 * new `loci_ld_prune()` prunes loci as `plink --indep-pairwise` (PLINK 1.9),
   also with missing genotypes
-* `gt_dapc()` works on a PCA of missing genotypes: give the `gen_tibble` as
-  `data`, and the loadings of the loci are estimated without counting missing
-  genotypes as 0 (new arguments `data` and `n_cores`)
+* `gt_dapc()` works on a PCA of missing genotypes (new arguments `data`,
+  `max_missing` and `n_cores`): the loadings of each locus come from its
+  genotyped individuals, not imputed ones (`NA` above `max_missing`)
 * errors on missing genotypes name the function and say how to impute them;
   `gt_pca(method = "random")` no longer reads the genotypes an extra time to
   look for them
@@ -85,6 +85,11 @@
   `n_cores > 1`) in `loci_ld_clump()`, `gt_pcadapt()`, the PCA functions and
   `predict(project_method = "none")` after removing loci or individuals with
   missing genotypes: only the genotypes in use are checked
+* `gt_pca(method = "random")` and `gt_pca_autoSVD()` with a custom
+  `fun_scaling`: fix hangs (with `n_cores > 1`) or cryptic errors on missing
+  genotypes
+* `gt_pca(method = "random")` and `gt_pca_autoSVD()` use at most `n_cores`
+  cores (bigstatsr's parallel SVD started one more process)
 * functions using temporary backing files (PCA, LD clumping, KING, IBS and
   allele sharing) delete them, fixing occasional "File '...bk' already
   exists" errors
@@ -96,6 +101,9 @@
   genotypes (now an error), missing chromosomes (now `NA`), and backing files
   left behind on errors
 * `gt_as_vcf()`: fix loci with missing chromosomes (now written as ".")
+* `loci_ld_clump()`: `exclude` values that are not indices of loci (out of
+  range, negative, not whole numbers, or names) give an error, rather than
+  excluding nothing or the wrong loci
 
 # tidypopgen 1.0.0
 

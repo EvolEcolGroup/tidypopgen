@@ -53,7 +53,10 @@ as they provide a more sensible approach.}
 
 \item{exclude}{Vector of SNP indices to exclude anyway. For example, can be
 used to exclude long-range LD regions (see Price2008). Another use can be
-for thresholding with respect to p-values associated with \code{S}.}
+for thresholding with respect to p-values associated with \code{S}. The
+indices are those of the loci of \code{.x} (whole numbers between 1 and the
+number of loci); a logical vector with one value per locus (\code{TRUE} for
+the loci to exclude) also works. Other values are an error.}
 
 \item{use_positions}{boolean, if TRUE (the default), \code{size} is in kb, if
 FALSE size is the number of SNPs.}

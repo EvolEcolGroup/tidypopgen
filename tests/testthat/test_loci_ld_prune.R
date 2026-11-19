@@ -26,6 +26,37 @@ test_that("r2 over the individuals genotyped at both loci matches PLINK", {
   expect_identical(r2$n_shared[1], sum(shared))
 })
 
+test_that("r2 of complete and incomplete loci matches cor()", {
+  # example-missing (bigsnpr): 200 individuals and 500 loci, 133 of them
+  # complete; the r2 of two complete loci takes a shortcut (only the sum of
+  # the products is counted), which must not be taken when only one of the
+  # two loci is complete
+  bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
+  missing_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("missing_"),
+    quiet = TRUE
+  )
+  geno <- show_genotypes(missing_gt)
+  complete <- colSums(is.na(geno)) == 0
+  # each locus with the next five
+  pairs <- rbind(rep(1:495, each = 5), rep(1:495, each = 5) + 1:5)
+  # pairs of two complete loci, of a complete and an incomplete locus (in
+  # both orders), and of two incomplete loci are all tested
+  expect_true(all(table(complete[pairs[1, ]], complete[pairs[2, ]]) > 0))
+  r2 <- ld_r2_pairs_cpp(
+    .gt_get_fbm(missing_gt), .gt_fbm_rows(missing_gt),
+    .gt_fbm_cols(missing_gt), pairs
+  )
+  # the reference: cor() over the individuals genotyped at both loci
+  ref <- apply(pairs, 2, function(p) {
+    shared <- !is.na(geno[, p[1]]) & !is.na(geno[, p[2]])
+    c(sum(shared), stats::cor(geno[shared, p[1]], geno[shared, p[2]])^2)
+  })
+  expect_identical(r2$n_shared, as.integer(ref[1, ]))
+  expect_equal(r2$r2, ref[2, ])
+})
+
 test_that("loci_ld_prune matches plink --indep-pairwise", {
   # file name, then window_size, step_size, thr_r2 and window_in_kb
   settings <- list(
@@ -49,6 +80,43 @@ test_that("loci_ld_prune matches plink --indep-pairwise", {
     ),
     which(loci_ld_prune(ld_gt, window_size = 10, step_size = 1, thr_r2 = 0.5))
   )
+})
+
+test_that("r2 and pruning match PLINK with several words per locus", {
+  # the individuals of the PLINK fixture stacked three times: each bit plane
+  # of a locus then takes three 64-bit words (180 individuals, the last word
+  # partly filled), while r2, the minor allele frequencies, and so the loci
+  # kept, are those of the fixture
+  geno <- show_genotypes(ld_gt)
+  stacked_gt <- gen_tibble(
+    x = rbind(geno, geno, geno),
+    indiv_meta = data.frame(id = paste0("ind", 1:180), population = "pop"),
+    loci = show_loci(ld_gt) %>% select(-big_index),
+    backingfile = tempfile("ld_stacked_"),
+    quiet = TRUE
+  )
+  # r2 of the pairs written by plink --r2
+  plink_r2 <- utils::read.table(file.path(plink_dir, "ld.ld"), header = TRUE)
+  pairs <- rbind(
+    match(plink_r2$SNP_A, loci_names(stacked_gt)),
+    match(plink_r2$SNP_B, loci_names(stacked_gt))
+  )
+  r2 <- ld_r2_pairs_cpp(
+    .gt_get_fbm(stacked_gt), .gt_fbm_rows(stacked_gt),
+    .gt_fbm_cols(stacked_gt), pairs
+  )
+  expect_equal(r2$r2, plink_r2$R2, tolerance = 1e-5)
+  # the loci kept by plink --indep-pairwise, with windows in loci and in kb
+  keep <- loci_ld_prune(stacked_gt,
+    window_size = 20, step_size = 5, thr_r2 = 0.2
+  )
+  plink_in <- readLines(file.path(plink_dir, "w20_s5_r02.prune.in"))
+  expect_identical(loci_names(stacked_gt)[keep], plink_in)
+  keep <- loci_ld_prune(stacked_gt,
+    window_size = 50, step_size = 1, thr_r2 = 0.2, window_in_kb = TRUE
+  )
+  plink_in <- readLines(file.path(plink_dir, "w50kb_s1_r02.prune.in"))
+  expect_identical(loci_names(stacked_gt)[keep], plink_in)
 })
 
 test_that("loci_ld_prune checks its parameters as PLINK does", {
@@ -76,6 +144,13 @@ test_that("loci_ld_prune checks its parameters as PLINK does", {
     ),
     "'min_shared' should be an integer of at least 2"
   )
+  expect_error(
+    loci_ld_prune(ld_gt,
+      window_size = 10, step_size = 1, thr_r2 = 0.5, min_shared = 1e10
+    ),
+    "and at most .Machine$integer.max",
+    fixed = TRUE
+  )
 })
 
 test_that("loci_ld_prune treats pairs with few shared individuals as asked", {
@@ -95,6 +170,177 @@ test_that("loci_ld_prune treats pairs with few shared individuals as asked", {
     insufficient = "remove"
   )
   expect_lt(sum(remove_all), sum(keep_all) / 5)
+  # by hand: the first and third loci are genotyped in different individuals
+  # (none at both), and the other pairs have r2 = 0 and 0.25; the first
+  # locus has the lowest MAF (0.25, against 0.5 and 0.5)
+  hand_gt <- gen_tibble(
+    x = cbind(
+      c(0, 0, 1, 1, NA, NA, NA, NA),
+      c(0, 2, 1, 1, 0, 2, 1, 1),
+      c(NA, NA, NA, NA, 0, 1, 2, 1)
+    ),
+    indiv_meta = data.frame(id = letters[1:8], population = "pop1"),
+    loci = data.frame(
+      name = c("rs1", "rs2", "rs3"),
+      chromosome = 1,
+      position = c(1000, 2000, 3000),
+      genetic_dist = 0,
+      allele_ref = "A",
+      allele_alt = "T"
+    ),
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  # with "keep", no pair is linked, and every locus is kept (as plink
+  # --indep-pairwise 3 1 0.5); with "remove", the first and third loci are
+  # linked, and the first, with the lower MAF, is pruned
+  expect_identical(
+    loci_ld_prune(hand_gt, window_size = 3, step_size = 1, thr_r2 = 0.5),
+    c(TRUE, TRUE, TRUE)
+  )
+  expect_identical(
+    loci_ld_prune(hand_gt,
+      window_size = 3, step_size = 1, thr_r2 = 0.5, insufficient = "remove"
+    ),
+    c(FALSE, TRUE, TRUE)
+  )
+})
+
+test_that("loci_ld_prune uses pairs genotyped together in min_shared", {
+  # two loci with the same genotypes in the 4 individuals genotyped at both
+  # (r2 = 1); the first locus has the lower MAF (0.4, against 0.5)
+  pair_gt <- gen_tibble(
+    x = cbind(c(0, 1, 2, 0, NA, 1), c(0, 1, 2, 0, 2, NA)),
+    indiv_meta = data.frame(id = letters[1:6], population = "pop1"),
+    loci = data.frame(
+      name = c("rs1", "rs2"),
+      chromosome = 1,
+      position = c(1000, 2000),
+      genetic_dist = 0,
+      allele_ref = "A",
+      allele_alt = "T"
+    ),
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  # with min_shared equal to the number of individuals genotyped at both
+  # loci, their r2 is used, and the locus with the lower MAF is pruned
+  expect_identical(
+    loci_ld_prune(pair_gt,
+      window_size = 2, step_size = 1, thr_r2 = 0.5, min_shared = 4
+    ),
+    c(FALSE, TRUE)
+  )
+  # with one more, the pair has no reliable r2, and both loci are kept
+  expect_identical(
+    loci_ld_prune(pair_gt,
+      window_size = 2, step_size = 1, thr_r2 = 0.5, min_shared = 5
+    ),
+    c(TRUE, TRUE)
+  )
+})
+
+test_that("loci_ld_prune windows in kb include loci at their size", {
+  # three loci with the same genotypes (r2 = 1, and the same MAF, so that the
+  # later locus of a pair is pruned): the second is exactly 10 kb from the
+  # first, the third 10 kb and 1 bp from the second
+  window_gt <- gen_tibble(
+    x = matrix(c(0, 1, 2, 0, 1, 2), nrow = 6, ncol = 3),
+    indiv_meta = data.frame(id = letters[1:6], population = "pop1"),
+    loci = data.frame(
+      name = c("rs1", "rs2", "rs3"),
+      chromosome = 1,
+      position = c(1000, 11000, 21001),
+      genetic_dist = 0,
+      allele_ref = "A",
+      allele_alt = "T"
+    ),
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  # the window of 10 kb from the first locus includes the second, which is
+  # pruned; the third is alone in its window (as plink --indep-pairwise 10kb
+  # 1 0.2)
+  expect_identical(
+    loci_ld_prune(window_gt,
+      window_size = 10, step_size = 1, thr_r2 = 0.2, window_in_kb = TRUE
+    ),
+    c(TRUE, FALSE, TRUE)
+  )
+})
+
+test_that("loci_ld_prune windows in kb can be shorter than the gaps", {
+  # four loci with the same genotypes (r2 = 1, and the same MAF), 100 kb
+  # apart
+  far_gt <- gen_tibble(
+    x = matrix(c(0, 1, 2, 0, 1, 2), nrow = 6, ncol = 4),
+    indiv_meta = data.frame(id = letters[1:6], population = "pop1"),
+    loci = data.frame(
+      name = paste0("rs", 1:4),
+      chromosome = 1,
+      position = c(1, 2, 3, 4) * 100000,
+      genetic_dist = 0,
+      allele_ref = "A",
+      allele_alt = "T"
+    ),
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  # with windows of 50 kb, each locus is alone in its window, and all are
+  # kept; with windows of 100 kb, each pair of neighbours is compared, and
+  # the later locus is pruned (as plink --indep-pairwise 50kb 1 0.2, and
+  # 100kb 1 0.2)
+  expect_identical(
+    loci_ld_prune(far_gt,
+      window_size = 50, step_size = 1, thr_r2 = 0.2, window_in_kb = TRUE
+    ),
+    c(TRUE, TRUE, TRUE, TRUE)
+  )
+  expect_identical(
+    loci_ld_prune(far_gt,
+      window_size = 100, step_size = 1, thr_r2 = 0.2, window_in_kb = TRUE
+    ),
+    c(TRUE, FALSE, TRUE, FALSE)
+  )
+})
+
+test_that("loci_ld_prune keeps lone loci with no variance, as PLINK", {
+  # the first, third and fifth loci are monomorphic: the first and third on
+  # chromosome 1, far from the others; the fifth alone on chromosome 2
+  monomorphic <- rep(0, 6)
+  lone_gt <- gen_tibble(
+    x = cbind(
+      monomorphic, c(0, 1, 2, 0, 1, 2), monomorphic, c(1, 0, 2, 1, 0, 1),
+      monomorphic
+    ),
+    indiv_meta = data.frame(id = letters[1:6], population = "pop1"),
+    loci = data.frame(
+      name = paste0("rs", 1:5),
+      chromosome = c(1, 1, 1, 1, 2),
+      position = c(1, 200, 300, 400, 1) * 1000,
+      genetic_dist = 0,
+      allele_ref = "A",
+      allele_alt = "T"
+    ),
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  # with windows of 50 kb, the first locus is alone in the first window of
+  # its chromosome, and is kept, while the third is removed when it enters
+  # a later window (as plink --indep-pairwise 50kb 1 0.2)
+  expect_identical(
+    loci_ld_prune(lone_gt,
+      window_size = 50, step_size = 1, thr_r2 = 0.2, window_in_kb = TRUE
+    ),
+    c(TRUE, TRUE, FALSE, TRUE, TRUE)
+  )
+  # with windows of 2 loci, the first window holds the first two loci, and
+  # the first is removed; the locus alone on its chromosome is still kept
+  # (as plink --indep-pairwise 2 1 0.2)
+  expect_identical(
+    loci_ld_prune(lone_gt, window_size = 2, step_size = 1, thr_r2 = 0.2),
+    c(FALSE, TRUE, FALSE, TRUE, TRUE)
+  )
 })
 
 test_that("loci_ld_prune works with several cores and grouped gen_tibbles", {

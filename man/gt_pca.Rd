@@ -32,7 +32,12 @@ scaling function (see Scaling).}
 \item{n_cores}{the number of cores. With \code{"partial"}, they read the
 genotypes, count the loci genotyped in both individuals and run the
 internal matrix products; the BLAS uses its own threads (see the
-\code{RhpcBLASctl} package to set them).}
+\code{RhpcBLASctl} package to set them). With \code{"random"}, they run the
+matrix products of \code{\link[bigstatsr:big_prodVec]{bigstatsr::big_prodVec()}} and
+\code{\link[bigstatsr:big_cprodVec]{bigstatsr::big_cprodVec()}} (in one process); with other \code{fun_prod} or
+\code{fun_cprod}, the parallel SVD of \code{\link[bigstatsr:big_randomSVD]{bigstatsr::big_randomSVD()}} runs on
+\code{n_cores - 1} workers and one more process that coordinates them (or on
+one core, with fewer than 3 cores).}
 
 \item{block_size}{for \code{"partial"}, the number of loci decoded at a time
 (each block takes 8 bytes per individual and locus). By default, blocks
@@ -165,7 +170,11 @@ scaling above, as \code{\link[bigsnpr:snp_scaleBinom]{bigsnpr::snp_scaleBinom()}
 allele frequencies of the genotyped individuals. A function that returns
 a centre and a scale for each locus, such as
 \code{\link[bigsnpr:snp_scaleAlpha]{bigsnpr::snp_scaleAlpha()}} or \code{\link[bigstatsr:big_scale]{bigstatsr::big_scale()}}, can be used
-instead; it needs complete or imputed genotypes. With \code{"partial"}, loci
+instead. A scaling computed from the genotypes (such as these) needs
+complete or imputed genotypes, and so does any scaling with \code{"random"}
+(one that does not depend on the genotypes, e.g.
+\code{big_scale(center = FALSE, scale = FALSE)}, works with missing genotypes
+with \code{"partial"}). With \code{"partial"}, loci
 with a zero scale (monomorphic loci) add nothing to the GRM, but are
 counted in \eqn{n_{ij}}, as in PLINK (filter them out first); with
 \code{"random"}, they give an error.

@@ -11,6 +11,7 @@ gt_dapc(
   n_da = NULL,
   loadings_by_locus = TRUE,
   data = NULL,
+  max_missing = 0.5,
   n_cores = bigstatsr::nb_cores()
 )
 }
@@ -37,6 +38,13 @@ are a lot of loci and many dimensions.}
 \item{data}{the \code{gen_tibble} the PCA \code{x} was computed on (it can have more
 loci than the PCA). It is needed only for the loadings of the loci of a
 PCA with missing genotypes (see Details), and ignored otherwise.}
+
+\item{max_missing}{with a PCA of missing genotypes, the largest fraction of
+missing genotypes at a locus for its loadings to be estimated (see
+Details); loci with more get \code{NA} loadings. Default is \code{0.5}. The
+fraction is that of the genotypes without imputation, as given by
+\code{\link[=loci_missingness]{loci_missingness()}} when \code{data} is not set to use imputed genotypes.
+Ignored with a PCA of complete or imputed genotypes.}
 
 \item{n_cores}{the number of cores used to estimate the loadings of the
 loci of a PCA with missing genotypes. Default is
@@ -98,9 +106,13 @@ regression coefficients are the loadings of the PCA, so the results are
 the same as with the usual matrix product. With missing genotypes, the
 loadings of the PCA (which count missing genotypes as 0) would shrink loci
 with many missing genotypes, and hide them in the loadings plots. Loci
-genotyped in fewer than \code{n_pca + 1} individuals get \code{NA} loadings. The
-posterior probabilities of group membership do not account for the
-noisier scores of individuals with many missing genotypes.
+with more than a fraction \code{max_missing} of their genotypes missing (by
+default, more than half), or genotyped in fewer than \code{n_pca + 1}
+individuals, get \code{NA} loadings: estimated from few individuals, their
+loadings are noisy (the more so the fewer the individuals), and would top
+the rankings of the loci. The posterior probabilities of group membership
+do not account for the noisier scores of individuals with many missing
+genotypes.
 
 Note that there is no current method to predict scores for
 individuals not included in the original analysis. This is because we

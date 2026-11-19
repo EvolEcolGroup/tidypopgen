@@ -500,6 +500,50 @@ test_that("our stdevs are comparable to prcomp", {
   )
 })
 
+test_that("the randomised SVDs use at most n_cores cores", {
+  withr::local_options(lifecycle_verbosity = "quiet")
+  bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
+  missing_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("missing_"),
+    quiet = TRUE
+  )
+  complete_gt <- missing_gt %>%
+    select_loci_if(loci_missingness(genotypes) == 0)
+  # bigstatsr's parallel SVD runs 1 + ncores processes: it gets n_cores - 1
+  # cores (1 below 3)
+  expect_identical(vapply(1:4, svd_n_cores, numeric(1)), c(1, 1, 2, 3))
+  # R CMD check allows 2 processes (which parallel::makeCluster() checks with
+  # this variable): with n_cores = 2, bigstatsr's parallel SVD started 3
+  withr::local_envvar(c("_R_CHECK_LIMIT_CORES_" = "TRUE"))
+  set.seed(1)
+  one_core <- gt_pca(complete_gt, k = 2, method = "random", n_cores = 1)
+  # with bigstatsr's products, on n_cores threads, in one process
+  set.seed(1)
+  two_cores <- gt_pca(complete_gt, k = 2, method = "random", n_cores = 2)
+  expect_equal(two_cores$d, one_core$d)
+  expect_equal(abs(two_cores$u), abs(one_core$u), tolerance = 1e-6)
+  # with products given by the user, the parallel SVD on n_cores - 1
+  # workers, or the sequential SVD with fewer than 3 cores
+  my_prod <- function(X, x, ind.row, ind.col, center, scale) { # nolint
+    bigstatsr::big_prodVec(X, x, ind.row, ind.col,
+      center = center, scale = scale
+    )
+  }
+  environment(my_prod) <- baseenv()
+  set.seed(1)
+  my_prod_pca <- gt_pca(complete_gt,
+    k = 2, method = "random", fun_prod = my_prod, n_cores = 2
+  )
+  expect_equal(my_prod_pca$d, one_core$d)
+  expect_s3_class(
+    gt_pca_autoSVD(complete_gt,
+      k = 2, roll_size = 0, verbose = FALSE, n_cores = 2
+    ),
+    "gt_pca"
+  )
+})
+
 # The tests below require more than 2 cores, so we skip on CRAN
 skip_on_cran()
 
@@ -826,8 +870,9 @@ test_that("missing genotypes are looked for only where they are used", {
 })
 
 test_that("missing genotypes not used are ignored by the parallel SVD", {
-  # the parallel randomised SVD runs 1 + n_cores processes, more than the 2
-  # allowed by R CMD check
+  # bigstatsr's parallel randomised SVD (used with products given by the
+  # user, and by gt_pca_autoSVD()) runs on n_cores - 1 workers and one more
+  # process: 3 processes, more than the 2 allowed by R CMD check
   skip_if(
     Sys.getenv("_R_CHECK_LIMIT_CORES_", "") != "",
     "Skipping due to core limitation in R CMD check"
@@ -843,13 +888,22 @@ test_that("missing genotypes not used are ignored by the parallel SVD", {
     select_loci_if(loci_missingness(genotypes) == 0)
   # bigstatsr's check in the workers sampled the whole backing matrix, and
   # left the SVD waiting forever
+  my_prod <- function(X, x, ind.row, ind.col, center, scale) { # nolint
+    bigstatsr::big_prodVec(X, x, ind.row, ind.col,
+      center = center, scale = scale
+    )
+  }
+  environment(my_prod) <- baseenv()
   set.seed(1)
   expect_s3_class(
-    gt_pca(complete_gt, k = 2, method = "random", n_cores = 2), "gt_pca"
+    gt_pca(complete_gt,
+      k = 2, method = "random", fun_prod = my_prod, n_cores = 3
+    ),
+    "gt_pca"
   )
   expect_s3_class(
     gt_pca_autoSVD(complete_gt,
-      k = 2, roll_size = 0, verbose = FALSE, n_cores = 2
+      k = 2, roll_size = 0, verbose = FALSE, n_cores = 3
     ),
     "gt_pca"
   )
@@ -899,6 +953,52 @@ test_that("the SVDs check all the genotypes they use, also in parallel", {
   expect_error(
     gt_pca(mono_gt, k = 2, method = "random", n_cores = 2),
     "zero scaling"
+  )
+})
+
+test_that("a custom scaling gets all the genotypes checked", {
+  withr::local_options(lifecycle_verbosity = "quiet")
+  # with 10,000 individuals, the sampled check for missing genotypes looks at
+  # 100 evenly spaced loci (see any_missing_genotypes()), and so misses some
+  # of these 120 loci
+  set.seed(6)
+  sim_gt <- gt_simulate_bn(n_indiv = c(5000, 5000), n_loci = 120, fst = 0.1)
+  sim_gt <- select_loci_if(sim_gt, loci_maf(genotypes) > 0)
+  one_missing <- show_genotypes(sim_gt)
+  one_missing[3, 4] <- NA
+  one_missing_gt <- gen_tibble(one_missing,
+    indiv_meta = sim_gt %>% select(id, population),
+    loci = show_loci(sim_gt) %>% select(-big_index),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  # (the missing genotype is at a locus that the sample leaves out)
+  expect_false(any_missing_genotypes(one_missing_gt, max_genotypes = 1e6))
+  expect_true(any_missing_genotypes(one_missing_gt))
+  # a scaling that does not depend on the genotypes does not reveal the
+  # missing genotype either, which reached the SVD: it failed ("TridiagEigen:
+  # eigen decomposition failed"), or, with n_cores > 1, left the workers of
+  # the randomised SVD waiting forever
+  constant_scaling <- bigstatsr::big_scale(center = FALSE, scale = FALSE)
+  expect_error(
+    gt_pca(one_missing_gt,
+      k = 2, method = "random", fun_scaling = constant_scaling, n_cores = 1
+    ),
+    "gt_pca\\(method = \"random\"\\) needs complete or imputed genotypes"
+  )
+  expect_error(
+    gt_pca_autoSVD(one_missing_gt,
+      k = 2, fun_scaling = constant_scaling, roll_size = 0, verbose = FALSE,
+      n_cores = 1
+    ),
+    "gt_pca_autoSVD\\(\\) needs complete or imputed genotypes"
+  )
+  expect_error(
+    gt_pca_partialSVD(one_missing_gt, k = 2, fun_scaling = constant_scaling),
+    "gt_pca_partialSVD\\(\\) needs complete or imputed genotypes"
+  )
+  expect_error(
+    gt_pca_randomSVD(one_missing_gt, k = 2, fun_scaling = constant_scaling),
+    "gt_pca_randomSVD\\(\\) needs complete or imputed genotypes"
   )
 })
 

@@ -33,6 +33,13 @@ Branch `ld_missing` (from `pca_missing_checks`), 19 Nov 2026, laptop.
 - Differences from PLINK, documented: all individuals are used (PLINK: only
   founders), and all chromosomes are treated as autosomes.
 
+- **Chromosome "0" is pruned as any other chromosome** (Andrea, 19 Nov
+  2026, as Claude recommended). PLINK 1.9 ignores its loci, and writes them
+  to neither `.prune.in` nor `.prune.out` (so `--extract prune.in` drops
+  them, and `--exclude prune.out` keeps them); unplaced loci are often many
+  in non-model data, and dropping them silently would surprise. Documented
+  under "Differences from PLINK" in `loci_ld_prune()`.
+
 ## How it works (`src/ld_bitpacked.cpp`)
 
 - `ld_pack()`: each locus becomes three bit planes over the individuals (64
@@ -80,8 +87,12 @@ Branch `ld_missing` (from `pca_missing_checks`), 19 Nov 2026, laptop.
   individuals): the exact integer counts do not link them (r^2 > 0.2 is
   required), while bigsnpr's floating point put some just above 0.2.
 - Test gaps found in the review (`code_review_2026-11_pca_missing.md`): the
-  PLINK fixture has 60 individuals (one 64-bit word), and four plausible
-  kernel bugs pass the tests.
+  PLINK fixture had 60 individuals (one 64-bit word), and four plausible
+  kernel bugs passed the tests. Closed on `codereview_missing` (19 Nov
+  2026): the fixture stacked 3 times (180 individuals, 3 words), r^2 of
+  complete and incomplete loci against `cor()`, the `min_shared` and window
+  boundaries (checked against `plink1.9` and `bigsnpr::snp_clumping()`);
+  each of the four mutants now fails.
 
 ## Numbers
 

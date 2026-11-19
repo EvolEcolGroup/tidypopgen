@@ -209,8 +209,8 @@ local_private_fbm_dir <- function(envir = parent.frame()) {
 
 # Missing genotypes ------------------------------------------------------------
 #
-# Some analyses (those of bigsnpr and bigstatsr: clumping, randomised and
-# partial SVD, pcadapt, matrix products) need complete genotypes. A full pass
+# Some analyses (those of bigsnpr and bigstatsr: randomised and partial SVD,
+# matrix products) need complete genotypes. A full pass
 # over the genotypes just to check them would cost as much as some of these
 # analyses, so the genotypes are checked on a sample, as bigsnpr does
 # (stopifnot_no_missing()), and, where an analysis makes a full pass anyway,
@@ -335,12 +335,13 @@ local_no_bigstatsr_checks <- function(envir = parent.frame(), n_cores = NULL) {
 # The scaling of the SVDs of bigstatsr and bigsnpr (big_SVD(),
 # big_randomSVD() and snp_autoSVD()), computed once for all the loci of x and
 # then looked up, rather than computed by the SVD functions themselves:
-# - it checks that the genotypes used are complete: on a sample first (see
-#   stopifnot_no_missing()), then exactly, at no extra cost, for scalings
-#   that depend on the genotypes, such as the default snp_scaleBinom(), where
-#   a missing genotype gives a missing centre and scale (a scaling that does
-#   not depend on them, e.g. big_scale(center = FALSE, scale = FALSE), only
-#   gets the sampled check);
+# - it checks that the genotypes used are complete: for the default
+#   snp_scaleBinom(), on a sample first (see stopifnot_no_missing()), then
+#   exactly, at no extra cost, as a missing genotype gives a missing centre
+#   and scale; for a scaling given by the user, which need not depend on the
+#   genotypes (e.g. big_scale(center = FALSE, scale = FALSE)), by counting
+#   the missing genotypes at all the loci (one more pass over the genotypes):
+#   a missing genotype that the sample missed would otherwise reach the SVD;
 # - with n_cores > 1, big_randomSVD() computes the scaling of each block of
 #   loci in a worker of a PSOCK cluster, which waits forever for the others
 #   if one of them fails (on missing genotypes, or on bigstatsr's own check
@@ -360,15 +361,30 @@ local_no_bigstatsr_checks <- function(envir = parent.frame(), n_cores = NULL) {
 #   an error now (as the SVD would), or are left to the SVD function (e.g.
 #   snp_autoSVD() removes them before its SVD)
 # @param n_cores the number of cores (for a scaling with an `ncores`
-#   argument, such as snp_scaleBinom())
+#   argument, such as snp_scaleBinom(), and for counting missing genotypes)
+# @param custom_scaling whether fun_scaling was given by the user (rather
+#   than the default snp_scaleBinom()): the missing genotypes are then
+#   counted at all the loci, as the scaling need not reveal them
 # @returns a scaling function, with the arguments of fun_scaling
 # @keywords internal
 # @noRd
 scaling_lookup <- function(x, fun_scaling, what, hint = NULL,
-                           check_zero = TRUE, n_cores = 1) {
+                           check_zero = TRUE, n_cores = 1,
+                           custom_scaling = FALSE) {
   stopifnot_gen_tibble(x)
-  # a sampled check first, for scalings that do not depend on the genotypes
-  stopifnot_no_missing(x, what, hint = hint, n_cores = n_cores)
+  if (custom_scaling) {
+    # a scaling given by the user need not depend on the genotypes, so a
+    # missing genotype at a locus left out of a sample would go unnoticed,
+    # and make the SVD fail, or, with n_cores > 1, leave the workers of the
+    # randomised SVD waiting forever: count them at all the loci
+    if (any_missing_genotypes(x, n_cores = n_cores)) {
+      stop_missing_genotypes(what, hint = hint)
+    }
+  } else {
+    # a sampled check first; the default scaling then checks all the loci
+    # (a missing genotype gives a missing centre and scale, see below)
+    stopifnot_no_missing(x, what, hint = hint, n_cores = n_cores)
+  }
   ind_col <- .gt_fbm_cols(x)
   # the scaling of all the loci of x (in parallel, if the function can)
   args <- list(.gt_get_fbm(x), ind.row = .gt_fbm_rows(x), ind.col = ind_col)

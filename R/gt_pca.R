@@ -63,7 +63,11 @@
 #'   allele frequencies of the genotyped individuals. A function that returns
 #'   a centre and a scale for each locus, such as
 #'   [bigsnpr::snp_scaleAlpha()] or [bigstatsr::big_scale()], can be used
-#'   instead; it needs complete or imputed genotypes. With `"partial"`, loci
+#'   instead. A scaling computed from the genotypes (such as these) needs
+#'   complete or imputed genotypes, and so does any scaling with `"random"`
+#'   (one that does not depend on the genotypes, e.g.
+#'   `big_scale(center = FALSE, scale = FALSE)`, works with missing genotypes
+#'   with `"partial"`). With `"partial"`, loci
 #'   with a zero scale (monomorphic loci) add nothing to the GRM, but are
 #'   counted in \eqn{n_{ij}}, as in PLINK (filter them out first); with
 #'   `"random"`, they give an error.
@@ -94,7 +98,12 @@
 #' @param n_cores the number of cores. With `"partial"`, they read the
 #'   genotypes, count the loci genotyped in both individuals and run the
 #'   internal matrix products; the BLAS uses its own threads (see the
-#'   `RhpcBLASctl` package to set them).
+#'   `RhpcBLASctl` package to set them). With `"random"`, they run the
+#'   matrix products of [bigstatsr::big_prodVec()] and
+#'   [bigstatsr::big_cprodVec()] (in one process); with other `fun_prod` or
+#'   `fun_cprod`, the parallel SVD of [bigstatsr::big_randomSVD()] runs on
+#'   `n_cores - 1` workers and one more process that coordinates them (or on
+#'   one core, with fewer than 3 cores).
 #' @param block_size for `"partial"`, the number of loci decoded at a time
 #'   (each block takes 8 bytes per individual and locus). By default, blocks
 #'   of about 128 MB (between 1,024 and 16,384 loci).
@@ -202,7 +211,8 @@ gt_pca <- function(x, k = 10, method = c("partial", "random"),
       tol = tol, verbose = verbose, n_cores = n_cores, fun_prod = fun_prod,
       fun_cprod = fun_cprod, total_var = total_var,
       what = "gt_pca(method = \"random\")",
-      hint = "or use method = \"partial\""
+      hint = "or use method = \"partial\"",
+      custom_scaling = !is.null(fun_scaling)
     )
     this_pca$method <- "random"
     this_pca$call <- match.call()
@@ -349,10 +359,13 @@ grm_plink <- function(x, center, scale, n_cores, block_size, use_blas) {
 
 # Method "random": bigstatsr::big_randomSVD(), using imputed genotypes if they
 # exist (also used by the deprecated gt_pca_randomSVD()); `what` and `hint`
-# are for the error on missing genotypes (see stop_missing_genotypes())
+# are for the error on missing genotypes (see stop_missing_genotypes()), and
+# `custom_scaling` says whether the user gave fun_scaling (see
+# scaling_lookup())
 pca_random_svd <- function(x, k, fun_scaling, tol, verbose, n_cores,
                            fun_prod, fun_cprod, total_var,
-                           what = "gt_pca_randomSVD()", hint = NULL) {
+                           what = "gt_pca_randomSVD()", hint = NULL,
+                           custom_scaling = TRUE) {
   if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)
@@ -370,12 +383,39 @@ pca_random_svd <- function(x, k, fun_scaling, tol, verbose, n_cores,
   # (keeping bigstatsr's check of n_cores)
   local_no_bigstatsr_checks(n_cores = n_cores)
   fun_scaling <- scaling_lookup(x, fun_scaling,
-    what = what, hint = hint, n_cores = n_cores
+    what = what, hint = hint, n_cores = n_cores,
+    custom_scaling = custom_scaling
   )
 
   X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
+
+  # use at most n_cores cores: the parallel SVD of big_randomSVD() runs
+  # 1 + ncores processes (one runs RSpectra, ncores compute the products).
+  # With bigstatsr's own products (the default), run its sequential SVD,
+  # with the products on n_cores threads in one process (on HGDP650, 1,043
+  # individuals and 488,797 loci, 4 cores: 15.1 s, against 17.2 s for the
+  # parallel SVD on 1 + 4 processes and 20.9 s on 1 + 3); with products
+  # given by the user, run the parallel SVD on n_cores - 1 workers (n_cores
+  # processes in all), or the sequential one with fewer than 3 cores
+  svd_cores <- svd_n_cores(n_cores)
+  default_prods <- identical(fun_prod, bigstatsr::big_prodVec) &&
+    identical(fun_cprod, bigstatsr::big_cprodVec)
+  if (default_prods) {
+    svd_cores <- 1
+    prod_cores <- n_cores
+    fun_prod <- function(X, x, ind.row, ind.col, center, scale) { # nolint
+      bigstatsr::big_prodVec(X, x, ind.row, ind.col,
+        center = center, scale = scale, ncores = prod_cores
+      )
+    }
+    fun_cprod <- function(X, x, ind.row, ind.col, center, scale) { # nolint
+      bigstatsr::big_cprodVec(X, x, ind.row, ind.col,
+        center = center, scale = scale, ncores = prod_cores
+      )
+    }
+  }
 
   # big_randomSVD() makes a temporary FBM when run in parallel: keep it in a
   # private directory, deleted on exit (see with_private_fbm_dir())
@@ -388,7 +428,7 @@ pca_random_svd <- function(x, k, fun_scaling, tol, verbose, n_cores,
     fun.scaling = fun_scaling,
     tol = tol,
     verbose = verbose,
-    ncores = n_cores,
+    ncores = svd_cores,
     fun.prod = fun_prod,
     fun.cprod = fun_cprod
   ))
@@ -410,6 +450,19 @@ pca_random_svd <- function(x, k, fun_scaling, tol, verbose, n_cores,
   }
   # the genotypes were complete (or imputed, if x has imputed genotypes)
   pca_set_genotypes(this_svd, imputed = gt_has_imputed(x), missing = FALSE)
+}
+
+# The number of workers for the parallel randomised SVD of bigstatsr
+# (big_randomSVD(), also in bigsnpr's snp_autoSVD()) that uses at most n_cores
+# cores: it runs 1 + ncores processes (one runs RSpectra, ncores compute the
+# products), so n_cores - 1 workers; with fewer than 3 cores, 1 (its
+# sequential SVD, in one process)
+# @param n_cores the number of cores asked for
+# @returns the `ncores` to give to bigstatsr
+# @keywords internal
+# @noRd
+svd_n_cores <- function(n_cores) {
+  if (n_cores >= 3) n_cores - 1 else 1
 }
 
 # Whether the products of the PLINK relationship matrix use the BLAS (TRUE)

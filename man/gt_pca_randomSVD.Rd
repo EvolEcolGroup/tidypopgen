@@ -31,7 +31,7 @@ biallelic SNPs. Alternatively it is possible to use  custom function (see
 
 \item{verbose}{Should some progress be printed? Default is \code{FALSE}.}
 
-\item{n_cores}{Number of cores used.}
+\item{n_cores}{Number of cores used (see \code{\link[=gt_pca]{gt_pca()}}).}
 
 \item{fun_prod}{Function that takes 6 arguments (in this order):
 \itemize{

@@ -166,7 +166,9 @@ round(sapply(pcas[-1], pc_cor), 2)
 
 We run a DAPC on each PCA, with the populations as groups. With a PCA of
 missing genotypes, `gt_dapc()` needs the `gen_tibble` (`data`) to estimate
-the loadings of the loci over the individuals genotyped at each of them:
+the loadings of the loci over the individuals genotyped at each of them; loci
+with more than half of their genotypes missing (`max_missing`) get `NA`
+loadings, as, estimated from few individuals, they would be noisy:
 
 ```{r dapc}
 pops <- as.factor(missing_gt$population)
@@ -243,14 +245,17 @@ round(sapply(pcadapts, function(x) {
   c(
     "outliers in top 100 loci" = top_outliers(x$score),
     "correlation with complete" = stats::cor(x$score, pcadapt_complete$score,
-      method = "spearman"
+      method = "spearman", use = "complete.obs"
     )
   )
 }), 2)
 ```
 
 Without imputation, pcadapt finds almost as many outliers as with the
-complete data, and ranks the loci much as the complete data do. With
+complete data, and ranks the loci much as the complete data do (the
+`r sum(is.na(pcadapt_missing$score))` loci with more than half of their
+genotypes missing are not tested, as with `gt_dapc()`, and are left out of
+the correlation). With
 imputation, one of the components that pcadapt uses reflects missingness
 rather than populations, and fewer outliers are found.
 

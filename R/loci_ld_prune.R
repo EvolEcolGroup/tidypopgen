@@ -7,8 +7,11 @@
 #' correlation (r^2) is above `thr_r2` are found in order, and the locus with
 #' the lower minor allele frequency of each pair is removed (the later one
 #' when their frequencies are equal), until no such pair remains. Loci with
-#' no variance (e.g. monomorphic loci) are removed, as in PLINK. Clumping
-#' ([loci_ld_clump()]) gives a better spread of loci along the chromosomes.
+#' no variance (e.g. monomorphic loci) are removed, as in PLINK; but, also as
+#' in PLINK, a locus alone on its chromosome, or alone in the first window of
+#' its chromosome (with a window in kb), is kept even if it has no variance.
+#' Clumping ([loci_ld_clump()]) gives a better spread of loci along the
+#' chromosomes.
 #'
 #' Missing genotypes do not need to be imputed: as in PLINK, r^2 is the
 #' squared correlation of the allele counts of two loci over the individuals
@@ -20,8 +23,12 @@
 #' only if the `gen_tibble` is set to use them (see [gt_set_imputed()]).
 #'
 #' Differences from PLINK: all individuals are used (PLINK uses only
-#' founders), and all chromosomes are treated as autosomes (PLINK treats the
-#' sex chromosomes of males as haploid).
+#' founders); all chromosomes are treated as autosomes (PLINK treats the
+#' sex chromosomes of males as haploid); and loci on chromosome "0"
+#' (unplaced) are pruned as those of any other chromosome, whereas PLINK
+#' ignores them and lists them in neither its *.prune.in* nor its
+#' *.prune.out* file (so that `--extract` with *.prune.in* drops them, but
+#' `--exclude` with *.prune.out* keeps them).
 #'
 #' @param .x a [`gen_tibble`] object
 #' @param .col the column to be used when a tibble (or grouped tibble is passed
