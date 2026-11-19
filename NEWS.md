@@ -103,6 +103,8 @@
   genotypes (now an error), missing chromosomes (now `NA`), and backing files
   left behind on errors
 * `gt_as_vcf()`: fix loci with missing chromosomes (now written as ".")
+* `loci_ld_clump()`: fix `exclude` values that are not indices of loci (out
+  of range, not whole numbers, or names), now an error instead of ignored
 
 # tidypopgen 1.0.0
 

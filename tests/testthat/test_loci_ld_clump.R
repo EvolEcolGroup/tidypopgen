@@ -232,6 +232,26 @@ test_that("loci_ld_clump excludes loci and checks the cores", {
     loci_names(missing_gt)[keep_excluded],
     loci_names(complete_gt)[keep_complete]
   )
+  # (or a logical vector with one value per locus)
+  expect_identical(
+    loci_ld_clump(missing_gt,
+      thr_r2 = 0.2, size = 10,
+      exclude = loci_missingness(missing_gt) > 0
+    ),
+    keep_excluded
+  )
+  # values that are not indices of loci are an error (they used to exclude
+  # nothing, or other loci, silently)
+  for (bad_exclude in list(501, 2.5, -1, c(1, NA), c("snp_1", "snp_2"))) {
+    expect_error(
+      loci_ld_clump(missing_gt, thr_r2 = 0.2, exclude = bad_exclude),
+      "'exclude' should be a vector of indices of loci"
+    )
+  }
+  expect_error(
+    loci_ld_clump(missing_gt, thr_r2 = 0.2, exclude = c(TRUE, FALSE)),
+    "or a logical vector with one value per locus"
+  )
 })
 
 test_that("ld clumping leaves no temporary FBMs in tempdir()", {

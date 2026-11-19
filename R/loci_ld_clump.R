@@ -50,7 +50,10 @@
 #'   FALSE size is the number of SNPs.
 #' @param exclude Vector of SNP indices to exclude anyway. For example, can be
 #'   used to exclude long-range LD regions (see Price2008). Another use can be
-#'   for thresholding with respect to p-values associated with `S`.
+#'   for thresholding with respect to p-values associated with `S`. The
+#'   indices are those of the loci of `.x` (whole numbers between 1 and the
+#'   number of loci); a logical vector with one value per locus (`TRUE` for
+#'   the loci to exclude) also works. Other values are an error.
 #' @param min_shared the minimum number of individuals genotyped at both loci
 #'   for their r^2 to be used. Default is `2`, as in PLINK (with fewer, r^2 is
 #'   undefined).
@@ -141,6 +144,24 @@ loci_ld_clump.vctrs_bigSNP <- function(
 
   loci <- show_loci(.x)
   n_loci <- nrow(loci)
+  # the loci to exclude: indices of loci (a logical vector with one value
+  # per locus, which earlier versions accepted, is turned into indices);
+  # other values (out of range, not whole numbers, names) would otherwise
+  # exclude nothing, or other loci, without an error
+  if (is.logical(exclude) && length(exclude) == n_loci && !anyNA(exclude)) {
+    exclude <- which(exclude)
+  }
+  if (length(exclude) > 0) {
+    valid_exclude <- is.numeric(exclude) && !anyNA(exclude) &&
+      all(exclude >= 1 & exclude <= n_loci & exclude == round(exclude))
+    if (!valid_exclude) {
+      stop(
+        "'exclude' should be a vector of indices of loci (whole numbers ",
+        "between 1 and ", n_loci, "), or a logical vector with one value ",
+        "per locus"
+      )
+    }
+  }
   # the statistic to prioritise loci: by default, the minor allele
   # frequencies (of the genotyped individuals)
   if (is.null(S)) {
