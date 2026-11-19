@@ -165,6 +165,40 @@ test_that("loci_ld_prune treats pairs with few shared individuals as asked", {
   expect_lt(sum(remove_all), sum(keep_all) / 5)
 })
 
+test_that("loci_ld_prune uses pairs genotyped together in min_shared", {
+  # two loci with the same genotypes in the 4 individuals genotyped at both
+  # (r2 = 1); the first locus has the lower MAF (0.4, against 0.5)
+  pair_gt <- gen_tibble(
+    x = cbind(c(0, 1, 2, 0, NA, 1), c(0, 1, 2, 0, 2, NA)),
+    indiv_meta = data.frame(id = letters[1:6], population = "pop1"),
+    loci = data.frame(
+      name = c("rs1", "rs2"),
+      chromosome = 1,
+      position = c(1000, 2000),
+      genetic_dist = 0,
+      allele_ref = "A",
+      allele_alt = "T"
+    ),
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  # with min_shared equal to the number of individuals genotyped at both
+  # loci, their r2 is used, and the locus with the lower MAF is pruned
+  expect_identical(
+    loci_ld_prune(pair_gt,
+      window_size = 2, step_size = 1, thr_r2 = 0.5, min_shared = 4
+    ),
+    c(FALSE, TRUE)
+  )
+  # with one more, the pair has no reliable r2, and both loci are kept
+  expect_identical(
+    loci_ld_prune(pair_gt,
+      window_size = 2, step_size = 1, thr_r2 = 0.5, min_shared = 5
+    ),
+    c(TRUE, TRUE)
+  )
+})
+
 test_that("loci_ld_prune works with several cores and grouped gen_tibbles", {
   one_core <- loci_ld_prune(ld_gt,
     window_size = 10, step_size = 1, thr_r2 = 0.5, n_cores = 1
