@@ -27,6 +27,16 @@ tidy_dist_matrix <- function(mat) {
   if (!inherits(mat, "matrix")) {
     stop("mat should be a matrix")
   }
+  xy <- tibble::as_tibble(dist_matrix_pairs(mat))
+  # add a class to indicate this is a pairwise tibble
+  class(xy) <- c("pairwise_tbl", class(xy))
+  return(xy)
+}
+
+# the pairs of items of a matrix (i < j), as a list of vectors item1, item2
+# and value (the columns of tidy_dist_matrix()), so that the pairs of several
+# matrices can be combined without making a tibble for each
+dist_matrix_pairs <- function(mat) {
   n <- ncol(mat)
   # indices of all pairs (i < j), in the same order as utils::combn(n, 2),
   # i.e. (1,2), (1,3), ..., (1,n), (2,3), ...; using integer indices avoids
@@ -37,14 +47,11 @@ tidy_dist_matrix <- function(mat) {
   index2 <- sequence(rev(seq_len(n_first)), from = seq_len(n_first) + 1)
   # (the names of an empty matrix are NULL, which would drop the columns)
   item_names <- if (n == 0) character(0) else colnames(mat)
-  xy <- tibble::tibble(
+  list(
     item1 = item_names[index1],
     item2 = item_names[index2],
     value = mat[cbind(index1, index2)]
   )
-  # add a class to indicate this is a pairwise tibble
-  class(xy) <- c("pairwise_tbl", class(xy))
-  return(xy)
 }
 
 # stop if not diploid

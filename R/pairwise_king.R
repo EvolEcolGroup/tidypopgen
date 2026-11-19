@@ -160,13 +160,22 @@ pairwise_king.grouped_df <- function(
   if (as_matrix) {
     return(king)
   }
-  # tidy each matrix, and bind the pairs of all groups, with the group
-  # columns first
-  king_tidy <- lapply(king, function(king_g) {
-    class(king_g) <- NULL
-    tidy_dist_matrix(king_g)
-  })
-  .bind_group_rows(king_tidy, .group_info(x))
+  # the pairs of all groups (combined as vectors: a tibble for each group
+  # is slow with many small groups, e.g. families), with the group columns
+  # first
+  pairs <- lapply(king, dist_matrix_pairs)
+  n_pairs <- vapply(pairs, function(p) length(p$value), integer(1))
+  king_tidy <- tibble::new_tibble(
+    list(
+      item1 = as.character(unlist(lapply(pairs, `[[`, "item1"))),
+      item2 = as.character(unlist(lapply(pairs, `[[`, "item2"))),
+      value = as.numeric(unlist(lapply(pairs, `[[`, "value")))
+    ),
+    nrow = sum(n_pairs)
+  )
+  group_cols <- .group_columns(.group_info(x), rep(seq_along(king), n_pairs))
+  .check_group_col_names(names(group_cols), names(king_tidy))
+  dplyr::bind_cols(group_cols, king_tidy)
 }
 
 
