@@ -51,6 +51,43 @@ test_that("loci_ld_prune matches plink --indep-pairwise", {
   )
 })
 
+test_that("r2 and pruning match PLINK with several words per locus", {
+  # the individuals of the PLINK fixture stacked three times: each bit plane
+  # of a locus then takes three 64-bit words (180 individuals, the last word
+  # partly filled), while r2, the minor allele frequencies, and so the loci
+  # kept, are those of the fixture
+  geno <- show_genotypes(ld_gt)
+  stacked_gt <- gen_tibble(
+    x = rbind(geno, geno, geno),
+    indiv_meta = data.frame(id = paste0("ind", 1:180), population = "pop"),
+    loci = show_loci(ld_gt) %>% select(-big_index),
+    backingfile = tempfile("ld_stacked_"),
+    quiet = TRUE
+  )
+  # r2 of the pairs written by plink --r2
+  plink_r2 <- utils::read.table(file.path(plink_dir, "ld.ld"), header = TRUE)
+  pairs <- rbind(
+    match(plink_r2$SNP_A, loci_names(stacked_gt)),
+    match(plink_r2$SNP_B, loci_names(stacked_gt))
+  )
+  r2 <- ld_r2_pairs_cpp(
+    .gt_get_fbm(stacked_gt), .gt_fbm_rows(stacked_gt),
+    .gt_fbm_cols(stacked_gt), pairs
+  )
+  expect_equal(r2$r2, plink_r2$R2, tolerance = 1e-5)
+  # the loci kept by plink --indep-pairwise, with windows in loci and in kb
+  keep <- loci_ld_prune(stacked_gt,
+    window_size = 20, step_size = 5, thr_r2 = 0.2
+  )
+  plink_in <- readLines(file.path(plink_dir, "w20_s5_r02.prune.in"))
+  expect_identical(loci_names(stacked_gt)[keep], plink_in)
+  keep <- loci_ld_prune(stacked_gt,
+    window_size = 50, step_size = 1, thr_r2 = 0.2, window_in_kb = TRUE
+  )
+  plink_in <- readLines(file.path(plink_dir, "w50kb_s1_r02.prune.in"))
+  expect_identical(loci_names(stacked_gt)[keep], plink_in)
+})
+
 test_that("loci_ld_prune checks its parameters as PLINK does", {
   expect_error(
     loci_ld_prune(ld_gt, window_size = 1, step_size = 1, thr_r2 = 0.5),
