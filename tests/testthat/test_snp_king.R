@@ -159,6 +159,29 @@ test_that("snp_king is correct across bit-packing boundaries", {
   expect_equal(test_king, king_r(geno_mat[rows, cols]), tolerance = 1e-12)
 })
 
+test_that("snp_king decodes all bytes of the FBM through its code256", {
+  # bytes decoded as genotypes (0 to 2, imputed 4 to 6, dosages 7, 107 and
+  # 207), and as missing (3, and the dosage 0.09 of byte 16), in blocks of
+  # individuals with and without bytes above 15
+  # (the code of bigsnpr's dosages, CODE_DOSAGE)
+  code <- c(0, 1, 2, NA, 0, 1, 2, seq(0, 2, by = 0.01), rep(NA, 48))
+  set.seed(7)
+  byte_vals <- sample(c(0:7, 16, 107, 207), 40 * 150,
+    replace = TRUE, prob = c(rep(0.12, 8), 0.02, 0.01, 0.01)
+  )
+  bytes <- matrix(byte_vals, nrow = 40)
+  # the first 16 individuals only have bytes below 16
+  bytes[1:16, ][bytes[1:16, ] > 15] <- 1
+  test_fbm <- bigstatsr::FBM.code256(40, 150,
+    code = code, init = bytes, backingfile = tempfile()
+  )
+  geno_mat <- test_fbm[]
+  geno_mat[!geno_mat %in% 0:2] <- NA
+  expect_equal(snp_king(test_fbm, n_cores = 2), king_r(geno_mat),
+    tolerance = 1e-12
+  )
+})
+
 test_that("pairwise_king uses imputed genotypes only if set to", {
   geno_na <- test_genotypes
   geno_na[2, 4] <- NA

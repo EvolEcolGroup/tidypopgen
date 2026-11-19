@@ -48,8 +48,9 @@
   genotypes as PLINK 1.9's `--distance` without `flat-missing`
 * `qc_report_loci(hwe = FALSE)` gives the MAF and missingness of loci in a
   single pass
-* faster `pairwise_king()`, `pairwise_ibs()`, `pairwise_allele_sharing()`,
-  and `qc_report_indiv(kings_threshold = )` on grouped data (2-3 times)
+* faster `pairwise_king()`, `pairwise_ibs()` and `pairwise_allele_sharing()`
+  (about 20%), and `qc_report_indiv(kings_threshold = )` on grouped data
+  (4-5 times)
 * `pairwise_king()` on a grouped `gen_tibble` computes kinship within each
   group (it used to ignore the groups), 10-30 times faster than `group_map()`
 * faster VCF reading (in parallel with `n_cores`), and faster reading of

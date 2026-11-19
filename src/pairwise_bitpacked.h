@@ -275,8 +275,10 @@ PW_ALWAYS_INLINE void pw_pack_word(const unsigned char* const* col_ptr,
   }
   // the 16 bits of plane p of each accumulator are the q-th quarter of the
   // word of that plane
+  PW_UNROLL_16
   for (int p = 0; p < Stat::N_PLANES; p++) {
     uint64_t word = 0;
+    PW_UNROLL_16
     for (int q = 0; q < 4; q++) {
       word |= ((acc[q] >> (16 * p)) & 0xFFFFull) << (16 * q);
     }
@@ -460,6 +462,26 @@ std::vector<uint32_t> pw_bitpacked_counts(Environment BM,
         }
         uint64_t loci_mask =
           (n_bits == 64) ? ~0ull : ((1ull << n_bits) - 1);
+        // prefetch the bytes of the next block of individuals (the next
+        // unit of this thread) in these columns: the bytes of a block are
+        // fetched from memory column by column, a cache line from each of 64
+        // columns, which the hardware does not prefetch well; the first and
+        // last rows of the block cover it if its rows are consecutive. They
+        // are prefetched into L2 (locality 1), which allows more misses in
+        // flight than L1 (prefetching into L1, or two blocks ahead, was
+        // slower)
+#if defined(__GNUC__)
+        if (i0 + 64 < n) {
+          std::size_t r_first = rows[pack_order[i0 + 64]];
+          std::size_t r_last =
+            rows[pack_order[std::min<std::size_t>(i0 + 127, n - 1)]];
+          for (std::size_t k = 0; k < n_bits; k++) {
+            __builtin_prefetch(col_ptr[k] + r_first, 0, 1);
+            __builtin_prefetch(col_ptr[k] + r_last, 0, 1);
+          }
+        }
+#endif
+        // pack each individual of the block
         for (std::size_t ii = 0; ii < n_ind; ii++) {
           std::size_t idx = pack_order[i0 + ii];
           pw_pack_word<Stat>(col_ptr, rows[idx], spread, loci_mask,
