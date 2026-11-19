@@ -199,6 +199,35 @@ test_that("loci_ld_prune uses pairs genotyped together in min_shared", {
   )
 })
 
+test_that("loci_ld_prune windows in kb include loci at their size", {
+  # three loci with the same genotypes (r2 = 1, and the same MAF, so that the
+  # later locus of a pair is pruned): the second is exactly 10 kb from the
+  # first, the third 10 kb and 1 bp from the second
+  window_gt <- gen_tibble(
+    x = matrix(c(0, 1, 2, 0, 1, 2), nrow = 6, ncol = 3),
+    indiv_meta = data.frame(id = letters[1:6], population = "pop1"),
+    loci = data.frame(
+      name = c("rs1", "rs2", "rs3"),
+      chromosome = 1,
+      position = c(1000, 11000, 21001),
+      genetic_dist = 0,
+      allele_ref = "A",
+      allele_alt = "T"
+    ),
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  # the window of 10 kb from the first locus includes the second, which is
+  # pruned; the third is alone in its window (as plink --indep-pairwise 10kb
+  # 1 0.2)
+  expect_identical(
+    loci_ld_prune(window_gt,
+      window_size = 10, step_size = 1, thr_r2 = 0.2, window_in_kb = TRUE
+    ),
+    c(TRUE, FALSE, TRUE)
+  )
+})
+
 test_that("loci_ld_prune works with several cores and grouped gen_tibbles", {
   one_core <- loci_ld_prune(ld_gt,
     window_size = 10, step_size = 1, thr_r2 = 0.5, n_cores = 1

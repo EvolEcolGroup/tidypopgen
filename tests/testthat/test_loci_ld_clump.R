@@ -123,6 +123,32 @@ test_that("loci_ld_clump uses pairs genotyped together in min_shared", {
   )
 })
 
+test_that("loci_ld_clump windows include loci at their size", {
+  # three loci with the same genotypes (r2 = 1, and the same MAF, so that
+  # they are visited in order): the second is exactly 10 kb from the first,
+  # the third 10 kb and 1 bp from the second
+  window_gt <- gen_tibble(
+    x = matrix(c(0, 1, 2, 0, 1, 2), nrow = 6, ncol = 3),
+    indiv_meta = data.frame(id = letters[1:6], population = "pop1"),
+    loci = data.frame(
+      name = c("rs1", "rs2", "rs3"),
+      chromosome = 1,
+      position = c(1000, 11000, 21001),
+      genetic_dist = 0,
+      allele_ref = "A",
+      allele_alt = "T"
+    ),
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  # with a window of 10 kb, the second locus is linked to the first, but the
+  # third is outside the window of both (as bigsnpr::snp_clumping())
+  expect_identical(
+    loci_ld_clump(window_gt, thr_r2 = 0.2, size = 10),
+    c(TRUE, FALSE, TRUE)
+  )
+})
+
 test_that("loci_ld_clump excludes loci and checks the cores", {
   # example-missing has missing genotypes at 367 of its 500 loci: keep the
   # 133 complete loci, without resaving the backing matrix
