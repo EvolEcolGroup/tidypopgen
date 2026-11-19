@@ -91,9 +91,10 @@
 #'   PCA with missing genotypes (see Details), and ignored otherwise.
 #' @param max_missing with a PCA of missing genotypes, the largest fraction of
 #'   missing genotypes at a locus for its loadings to be estimated (see
-#'   Details); loci with more get `NA` loadings. Default is `0.5`, which
-#'   keeps the loci that `select_loci_if(data, loci_missingness(genotypes) <=
-#'   0.5)` would keep. Ignored with a PCA of complete or imputed genotypes.
+#'   Details); loci with more get `NA` loadings. Default is `0.5`. The
+#'   fraction is that of the genotypes without imputation, as given by
+#'   [loci_missingness()] when `data` is not set to use imputed genotypes.
+#'   Ignored with a PCA of complete or imputed genotypes.
 #' @param n_cores the number of cores used to estimate the loadings of the
 #'   loci of a PCA with missing genotypes. Default is
 #'   [bigstatsr::nb_cores()].

@@ -165,7 +165,11 @@ scaling above, as \code{\link[bigsnpr:snp_scaleBinom]{bigsnpr::snp_scaleBinom()}
 allele frequencies of the genotyped individuals. A function that returns
 a centre and a scale for each locus, such as
 \code{\link[bigsnpr:snp_scaleAlpha]{bigsnpr::snp_scaleAlpha()}} or \code{\link[bigstatsr:big_scale]{bigstatsr::big_scale()}}, can be used
-instead; it needs complete or imputed genotypes. With \code{"partial"}, loci
+instead. A scaling computed from the genotypes (such as these) needs
+complete or imputed genotypes, and so does any scaling with \code{"random"}
+(one that does not depend on the genotypes, e.g.
+\code{big_scale(center = FALSE, scale = FALSE)}, works with missing genotypes
+with \code{"partial"}). With \code{"partial"}, loci
 with a zero scale (monomorphic loci) add nothing to the GRM, but are
 counted in \eqn{n_{ij}}, as in PLINK (filter them out first); with
 \code{"random"}, they give an error.
