@@ -128,10 +128,10 @@ which is held in memory and saved in the `.gt` file:
 
 |options            | time_s| peak_memory_mb| loci_table_mb| bk_mb| gt_mb| sidecars_mb|
 |:------------------|------:|--------------:|-------------:|-----:|-----:|-----------:|
-|default            |   37.7|           3708|          2846|   924|   165|           0|
-|names_as_int       |   19.9|           2552|          1756|   924|   108|         748|
-|chromosomes_as_int |   19.9|           2410|          1751|   924|   125|         407|
-|both               |   12.7|           1188|           660|   924|    68|        1155|
+|default            |   41.5|           3708|          2846|   924|   165|           0|
+|names_as_int       |   19.2|           2552|          1756|   924|   108|         748|
+|chromosomes_as_int |   19.3|           2410|          1751|   924|   125|         407|
+|both               |   12.9|           1188|           660|   924|    68|        1155|
 
 
 
@@ -420,18 +420,18 @@ show_loci(rad_hits)
 
 |step                    | time_s| peak_memory_mb|
 |:-----------------------|------:|--------------:|
-|read_default            |  37.73|           3708|
-|read_names_as_int       |  19.89|           2552|
-|read_chromosomes_as_int |  19.93|           2410|
-|read_both_as_int        |  12.70|           1188|
-|load_default            |  18.00|           3755|
-|load_both_as_int        |   3.10|           1272|
-|loci_qc                 |   0.44|           1786|
-|scan                    |   0.08|            811|
-|lookup_first            |   0.65|            798|
+|read_default            |  41.49|           3708|
+|read_names_as_int       |  19.19|           2552|
+|read_chromosomes_as_int |  19.28|           2410|
+|read_both_as_int        |  12.87|           1188|
+|load_default            |  18.01|           3755|
+|load_both_as_int        |   3.06|           1273|
+|loci_qc                 |   0.43|           1786|
+|scan                    |   0.07|            811|
+|lookup_first            |   0.66|            799|
 |lookup_again            |   0.11|            800|
 |lookup_chromosomes      |   0.02|            865|
-|restore                 |   0.37|            879|
+|restore                 |   0.37|            880|
 
 
 
