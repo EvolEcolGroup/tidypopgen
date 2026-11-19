@@ -200,8 +200,7 @@ test_that("pairwise_king is a generic with methods for gen_tibbles", {
   # arguments are matched by the methods, also by position
   expect_identical(pairwise_king(test_gt, TRUE, 2, 1), king_mat)
   expect_error(pairwise_king(test_gt, foo = 1), "must be empty")
-  # grouping is ignored, and tibbles that lost their class work
-  expect_identical(pairwise_king(test_gt %>% group_by(population)), king_tidy)
+  # tibbles that lost their class work
   expect_identical(pairwise_king(as_tibble(test_gt)), king_tidy)
   # other packages can add methods for their own classes of genotypes
   registerS3method(
@@ -226,4 +225,85 @@ test_that("pairwise_king is a generic with methods for gen_tibbles", {
   expect_s3_class(dummy_king, "pairwise_tbl")
   expect_identical(dummy_king$item2, c("b", "c", "c"))
   expect_identical(dummy_king$value, c(0, 0, 0))
+  # grouped tibbles of other classes of genotypes are computed group by group
+  dummy_grouped <- dummy_tbl %>%
+    mutate(pop = c("p1", "p2", "p1")) %>%
+    group_by(pop)
+  dummy_king <- pairwise_king(dummy_grouped)
+  expect_identical(dummy_king$group, "p1")
+  expect_identical(dummy_king$item2, "c")
+  expect_length(pairwise_king(dummy_grouped, as_matrix = TRUE), 2)
+})
+
+test_that("pairwise_king on a grouped gen_tibble works within groups", {
+  # more than 64 individuals and loci, with missing data, in interleaved
+  # groups, so that genotypes are packed into several words and blocks of
+  # individuals; one group of a single individual, and an empty group
+  set.seed(42)
+  geno_vals <- sample(c(0:2, NA), 140 * 150,
+    replace = TRUE,
+    prob = c(0.4, 0.3, 0.25, 0.05)
+  )
+  pops <- sample(c("A", "B", "C"), 140, replace = TRUE, prob = c(0.6, 0.2, 0.2))
+  pops[17] <- "D"
+  big_gt <- gen_tibble(
+    x = matrix(geno_vals, nrow = 140),
+    loci = data.frame(
+      name = paste0("rs", 1:150), chromosome = 1L, position = 1:150,
+      genetic_dist = 0, allele_ref = "A", allele_alt = "T"
+    ),
+    indiv_meta = data.frame(
+      id = paste0("i", 1:140),
+      population = factor(pops, levels = c("C", "A", "E", "D", "B")),
+      sex = rep(c("F", "M"), 70)
+    ),
+    quiet = TRUE
+  )
+  # a subset of the loci, in reversed order
+  big_gt <- big_gt %>% select_loci(c(150:80, 2:60))
+  grouped <- big_gt %>% group_by(population, .drop = FALSE)
+  expected <- group_map(grouped, ~ pairwise_king(.x, as_matrix = TRUE))
+  # a list of matrices, one per group (empty for the empty group), with one
+  # block of loci or several, and several cores
+  expect_identical(pairwise_king(grouped, as_matrix = TRUE), expected)
+  expect_identical(
+    pairwise_king(grouped, as_matrix = TRUE, block_size = 70, n_cores = 2),
+    expected
+  )
+  expect_identical(dim(expected[[3]]), c(0L, 0L))
+  # the tidy version has the pairs of all groups, after a group column that
+  # keeps the type of the grouping variable
+  king_tidy <- pairwise_king(grouped)
+  expect_named(king_tidy, c("group", "item1", "item2", "value"))
+  expect_identical(levels(king_tidy$group), levels(big_gt$population))
+  # (a plain tibble: a pairwise_tbl holds all the pairs of a set of items)
+  expect_identical(
+    king_tidy[-1],
+    tibble::as_tibble(dplyr::bind_rows(lapply(expected, function(king_g) {
+      class(king_g) <- NULL
+      tidypopgen:::tidy_dist_matrix(king_g)
+    })))
+  )
+  group_sizes <- vapply(expected, nrow, integer(1))
+  expect_identical(
+    as.character(king_tidy$group),
+    rep(levels(big_gt$population), group_sizes * (group_sizes - 1) / 2)
+  )
+  # several grouping variables give one column each
+  grouped_2 <- big_gt %>% group_by(population, sex)
+  king_tidy_2 <- pairwise_king(grouped_2)
+  expect_named(king_tidy_2, c("population", "sex", "item1", "item2", "value"))
+  expect_identical(
+    pairwise_king(grouped_2, as_matrix = TRUE),
+    group_map(grouped_2, ~ pairwise_king(.x, as_matrix = TRUE))
+  )
+  # a grouped tibble that has lost the class of its gen_tibble
+  expect_identical(
+    pairwise_king(as_tibble(big_gt) %>% group_by(population), as_matrix = TRUE),
+    group_map(
+      big_gt %>% group_by(population),
+      ~ pairwise_king(.x, as_matrix = TRUE)
+    )
+  )
+  expect_error(pairwise_king(grouped, foo = 1), "must be empty")
 })
