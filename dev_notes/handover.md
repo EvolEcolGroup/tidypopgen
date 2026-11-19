@@ -8,7 +8,8 @@ documents listed in `README.md`.
 
 | branch | purpose | base | pushed | merged |
 |---|---|---|---|---|
-| `pca_missing` | `gt_pca()` with missing genotypes as PLINK, projections; with #232 (checks, DAPC and pcadapt) and #233 (LD clumping and pruning); CI fix, re-rendered articles, and the fixes of the review of #232/#233 (merged from `codereview_missing`, report in `code_review_2026-11_pca_missing.md`) | `dev` | yes | no (PR #231) |
+| `pca_missing` | `gt_pca()` with missing genotypes as PLINK, projections; with #232 (checks, DAPC and pcadapt) and #233 (LD clumping and pruning); CI fix, re-rendered articles, and the fixes of the review of #232/#233 (merged from `codereview_missing`, report in `code_review_2026-11_pca_missing.md`); then grouped `pairwise_king()` and the faster bit-packed kernel (4 commits from `53843683` to `e39cdf49`, see `pairwise_bitpacked.md`) | `dev` | up to `8ade0b8d`; the KING commits are local | no (PR #231) |
+| `king_simd_packing` | SIMD packing of the bit-packed kernel (`9853e055`), not merged: below the 1.5x bar (`pairwise_bitpacked.md`) | `pca_missing` at `c7c09c67` | no | no |
 
 About 19 other local branches on the laptop look unmerged to git (`git branch
 --no-merged origin/dev`), but many were squash-merged; see the clean-up task.
@@ -20,8 +21,10 @@ About 19 other local branches on the laptop look unmerged to git (`git branch
 - **Read first:** `code_review_2026-11_pca_missing.md` ("Changes in
   behaviour to check before merging", "Fixes by area"; Andrea ticks the
   boxes).
-- **Then:** check that the CI of #231 is green (the fixes were merged into
-  `pca_missing` and pushed on 19 Nov), and merge #231 into `dev` (squash).
+- **Then:** push the 4 local KING commits of `pca_missing` (with Andrea's
+  OK: they change what `pairwise_king()` returns on grouped tibbles; see
+  `pairwise_bitpacked.md`), check that the CI of #231 is green, and merge
+  #231 into `dev` (squash).
 - **Done when:** #231 is merged.
 
 ### 2. **P2** [desktop] Re-time the HGDP650 benchmarks
@@ -37,7 +40,9 @@ About 19 other local branches on the laptop look unmerged to git (`git branch
   HGDP650 with 44% missing genotypes), which would also give the counts of
   missing genotypes that `max_missing` now reads in an extra pass (+4%);
   the GRM's count of loci genotyped in both individuals (~2-3 s with
-  missing genotypes); the DAPC regression (3.8 s).
+  missing genotypes); the DAPC regression (3.8 s); the pair comparisons
+  of the bit-packed kernel (vectorised popcount; ~30% of grouped KING on
+  one core and most of the full KING matrix, `pairwise_bitpacked.md`).
 - **Check:** -O2 builds only (`pkgbuild::clean_dll()`,
   `compile_dll(debug = FALSE)`, `load_all(compile = FALSE)`, or
   `R CMD INSTALL` into a separate library); the benchmarking skill; the
@@ -54,12 +59,14 @@ About 19 other local branches on the laptop look unmerged to git (`git branch
 
 ### 5. **P3** [cleanup] Branches and scratch files
 
-- Delete `pca_missing` once #231 is merged; review the other local branches
-  on the laptop (many squash-merged).
+- Delete `pca_missing` once #231 is merged, and `king_simd_packing` once
+  decided; review the other local branches on the laptop (many
+  squash-merged).
 - When the optimisation is done: `/media/andrea/annex/tmp/claude/tidypopgen/bench_dapc/`
   (~3 GB) and `bench_ld/` (~0.5 GB) on the laptop.
 - On manica01: `~/claude_work/tidypopgen/` (the -O2 library of
-  `e3b2b69c`, logs); the NearEast data in
+  `e3b2b69c`, logs; `king/` holds the HGDP650 `gen_tibble` (~0.7 GB), the
+  libraries and scripts of the KING timings of 19 Nov); the NearEast data in
   `vignettes/articles/data/NearEastPublic/` (git-ignored, needed to
   re-render aDNA_pseudohaploids).
 
@@ -80,6 +87,9 @@ About 19 other local branches on the laptop look unmerged to git (`git branch
 
 ## Backlog
 
+- [decide] Merge `king_simd_packing` (SIMD packing: 1.35-1.5x on grouped
+  KING on one core, 1.04x on 8; ~170 lines of x86-only code)? Recommended
+  no, unless single-core grouped KING matters (`pairwise_bitpacked.md`).
 - [decide] The regression of loci on the LD axes (structure coefficients) as
   an output of `gt_dapc()`: no, or `tidy(matrix = "structure")`; recommended
   no, until a user needs it (`gt_pca.md`, "Possible extra output").
