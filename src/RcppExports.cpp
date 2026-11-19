@@ -463,6 +463,28 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// ld_prune_cpp
+IntegerVector ld_prune_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const NumericVector& pos, int window_size, bool window_kb, int step, double thr, const NumericVector& maf, int min_shared, bool remove_insufficient, int ncores);
+RcppExport SEXP _tidypopgen_ld_prune_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP posSEXP, SEXP window_sizeSEXP, SEXP window_kbSEXP, SEXP stepSEXP, SEXP thrSEXP, SEXP mafSEXP, SEXP min_sharedSEXP, SEXP remove_insufficientSEXP, SEXP ncoresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type pos(posSEXP);
+    Rcpp::traits::input_parameter< int >::type window_size(window_sizeSEXP);
+    Rcpp::traits::input_parameter< bool >::type window_kb(window_kbSEXP);
+    Rcpp::traits::input_parameter< int >::type step(stepSEXP);
+    Rcpp::traits::input_parameter< double >::type thr(thrSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type maf(mafSEXP);
+    Rcpp::traits::input_parameter< int >::type min_shared(min_sharedSEXP);
+    Rcpp::traits::input_parameter< bool >::type remove_insufficient(remove_insufficientSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    rcpp_result_gen = Rcpp::wrap(ld_prune_cpp(BM, rowInd, colInd, pos, window_size, window_kb, step, thr, maf, min_shared, remove_insufficient, ncores));
+    return rcpp_result_gen;
+END_RCPP
+}
 // unsorted_by_chromosome_cpp
 LogicalVector unsorted_by_chromosome_cpp(SEXP x, const IntegerVector& chromosome, const IntegerVector& level_group);
 RcppExport SEXP _tidypopgen_unsorted_by_chromosome_cpp(SEXP xSEXP, SEXP chromosomeSEXP, SEXP level_groupSEXP) {
@@ -1093,6 +1115,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_gt_grouped_hwe", (DL_FUNC) &_tidypopgen_gt_grouped_hwe, 8},
     {"_tidypopgen_ld_r2_pairs_cpp", (DL_FUNC) &_tidypopgen_ld_r2_pairs_cpp, 4},
     {"_tidypopgen_ld_clump_cpp", (DL_FUNC) &_tidypopgen_ld_clump_cpp, 11},
+    {"_tidypopgen_ld_prune_cpp", (DL_FUNC) &_tidypopgen_ld_prune_cpp, 12},
     {"_tidypopgen_unsorted_by_chromosome_cpp", (DL_FUNC) &_tidypopgen_unsorted_by_chromosome_cpp, 3},
     {"_tidypopgen_chromosomes_not_adjacent_cpp", (DL_FUNC) &_tidypopgen_chromosomes_not_adjacent_cpp, 2},
     {"_tidypopgen_loci_qc_cpp", (DL_FUNC) &_tidypopgen_loci_qc_cpp, 10},

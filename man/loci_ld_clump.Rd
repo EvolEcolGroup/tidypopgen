@@ -81,8 +81,8 @@ a boolean vector indicating whether the SNP should be kept (if
 This function uses clumping to remove SNPs at high LD. When used with its
 default options, clumping based on MAF is similar to standard pruning (as
 done by PLINK with "--indep-pairwise (size+1) 1 thr.r2", but it results in a
-better spread of SNPs over the chromosome. The algorithm is that of
-\code{\link[bigsnpr:snp_clumping]{bigsnpr::snp_clumping()}}:
+better spread of SNPs over the chromosome; see \code{\link[=loci_ld_prune]{loci_ld_prune()}} for
+pruning as in PLINK. The algorithm is that of \code{\link[bigsnpr:snp_clumping]{bigsnpr::snp_clumping()}}:
 the loci of each chromosome are visited in order of importance (\code{S}), and a
 locus is kept unless its squared correlation with a more important locus
 that is kept, within the window, is above \code{thr_r2}. See
@@ -124,5 +124,5 @@ example_gt \%>\% loci_ld_clump(return_id = TRUE)
 }
 \seealso{
 \code{\link[bigsnpr:snp_clumping]{bigsnpr::snp_clumping()}}, whose algorithm this function
-follows.
+follows; \code{\link[=loci_ld_prune]{loci_ld_prune()}} for pruning as in PLINK.
 }

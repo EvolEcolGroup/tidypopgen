@@ -1,7 +1,8 @@
 /******************************************************************************/
 
 // Linkage disequilibrium (r^2) between pairs of loci with missing genotypes,
-// for loci_ld_clump() (bigsnpr's clumping).
+// for loci_ld_clump() (bigsnpr's clumping) and loci_ld_prune() (PLINK 1.9's
+// --indep-pairwise).
 //
 // r^2 is the squared correlation of the allele counts (0, 1, 2) of two loci
 // over the individuals genotyped at both, as in PLINK 1.9 (--r2,
@@ -371,4 +372,169 @@ IntegerVector ld_clump_cpp(Environment BM,
     }
   }
   return IntegerVector(keep.begin(), keep.end());
+}
+
+/******************************************************************************/
+
+// Pruning of the loci of one chromosome, as PLINK 1.9's --indep-pairwise
+// (ld_prune() in plink_ld.c, GPL-3, Christopher Chang, pairwise mode), with
+// r^2 over the individuals genotyped at both loci. The loci of colInd are in
+// increasing position (pos, in bp), all of them used (PLINK's
+// marker_exclude is empty). The window holds `window_size` loci, or, with
+// window_kb, the loci within window_size kb of its first locus; it moves by
+// `step` loci. Within a window, each locus that is not pruned is compared,
+// in order, with the following ones (skipping pairs already compared) until
+// the first that is linked (see ld_linked(); PLINK's threshold is
+// thr * (1 + 2^-44)); the one with the lower MAF (maf, from the genotyped
+// individuals) is then pruned, the later one on a tie, and the comparisons
+// move on to the next locus; the window is scanned again until no locus is
+// pruned. Loci with no variance over their genotyped individuals are pruned
+// when they enter a window, as in PLINK (a chromosome with a single locus
+// keeps it). The bookkeeping of the window (live loci, the first locus that
+// each still has to be compared with) follows PLINK's code.
+// Returns 1 for the loci kept, 0 for the others.
+// [[Rcpp::export]]
+IntegerVector ld_prune_cpp(Environment BM,
+                           const IntegerVector& rowInd,
+                           const IntegerVector& colInd,
+                           const NumericVector& pos,
+                           int window_size,
+                           bool window_kb,
+                           int step,
+                           double thr,
+                           const NumericVector& maf,
+                           int min_shared,
+                           bool remove_insufficient,
+                           int ncores) {
+  const std::size_t m = colInd.size();
+  if (static_cast<std::size_t>(pos.size()) != m ||
+      static_cast<std::size_t>(maf.size()) != m) {
+    Rcpp::stop("pos and maf should have one value per locus.");
+  }
+  if (window_size < 1 || step < 1) {
+    Rcpp::stop("window_size and step should be positive.");
+  }
+  if (m == 0) return IntegerVector(0);
+  LdPlanes lp = ld_pack(BM, rowInd, colInd, ncores);
+  const int64_t n = rowInd.size();
+  LdR2Fun r2_fun = ld_r2_fun();
+  // PLINK's SMALL_EPSILON
+  const double eps = 0.00000000000005684341886080801486968994140625;
+  const double prune_thr = thr * (1 + eps);
+  const double kb = 1000.0 * window_size;
+  std::vector<char> pruned(m, 0);
+  // a locus with no variance over its genotyped individuals is pruned when it
+  // is loaded (PLINK's ld_process_load())
+  auto load = [&](std::size_t l) {
+    if (lp.n_valid[l] * lp.ssq[l] - lp.sum[l] * lp.sum[l] == 0) pruned[l] = 1;
+  };
+
+  // the first window (PLINK's ld_prune_start_chrom())
+  std::size_t window_start = 0;
+  std::size_t window_end = 1;
+  std::size_t n_window;
+  if (window_kb) {
+    n_window = 1;
+    std::size_t l = window_end;
+    while (l < m && pos[l] <= pos[window_start] + kb) {
+      n_window++;
+      l++;
+    }
+  } else {
+    n_window = window_size;
+  }
+  // live: the loci of the window; start_arr[u]: the first locus (index on the
+  // chromosome) that live[u] still has to be compared with
+  std::vector<std::size_t> live(m + 1), start_arr(m + 1);
+  live[0] = window_start;
+  std::size_t cur = 1;
+  for (; cur < n_window; cur++) {
+    if (window_end == m) break;
+    start_arr[cur - 1] = window_end;
+    live[cur] = window_end;
+    window_end++;
+  }
+  start_arr[cur - 1] = window_end;
+  if (cur > 1) {
+    for (std::size_t u = 0; u < cur; u++) load(live[u]);
+  }
+
+  while (window_start < m || cur > 1) {
+    if (cur > 1) {
+      bool at_least_one_prune;
+      do {
+        at_least_one_prune = false;
+        for (std::size_t u = 0; u < cur - 1; u++) {
+          if (pruned[live[u]]) continue;
+          std::size_t v = u + 1;
+          while (live[v] < start_arr[u]) {
+            if (++v == cur) break;
+          }
+          for (; v < cur; v++) {
+            if (pruned[live[v]]) continue;
+            LdR2 r = r2_fun(lp, live[u], live[v], n);
+            if (ld_linked(r, prune_thr, min_shared, remove_insufficient)) {
+              at_least_one_prune = true;
+              // prune the locus with the lower MAF (the later one on a tie)
+              if (maf[live[u]] < (1 - eps) * maf[live[v]]) {
+                pruned[live[u]] = 1;
+              } else {
+                pruned[live[v]] = 1;
+                v++;
+                while (v < cur && pruned[live[v]]) v++;
+                if (v < cur) start_arr[u] = live[v];
+              }
+              break;
+            }
+          }
+          if (v == cur) start_arr[u] = window_end;
+        }
+      } while (at_least_one_prune);
+    }
+    // move the window by `step` loci
+    for (int s = 0; s < step; s++) {
+      if (window_start == m) break;
+      window_start++;
+    }
+    if (window_start == m) break;
+    if (window_end < window_start) window_end = window_start;
+    // keep the loci of the window that are still in it and not pruned (with a
+    // bound on v, which PLINK's loop lacks when no locus is left)
+    std::size_t v = 0;
+    while (v < cur && live[v] < window_start) v++;
+    std::size_t u = 0;
+    for (; v < cur; v++) {
+      if (pruned[live[v]]) continue;
+      live[u] = live[v];
+      start_arr[u] = start_arr[v];
+      u++;
+    }
+    const std::size_t prev_end = u;
+    cur = u;
+    // the loci entering the window
+    std::size_t n_new;
+    if (window_kb) {
+      n_new = 0;
+      std::size_t l = window_end;
+      while (l < m && pos[l] <= pos[window_start] + kb) {
+        n_new++;
+        l++;
+      }
+    } else {
+      n_new = step;
+    }
+    for (std::size_t s = 0; s < n_new; s++) {
+      if (window_end == m) break;
+      live[cur] = window_end;
+      if (cur > prev_end) start_arr[cur - 1] = window_end;
+      load(window_end);
+      cur++;
+      window_end++;
+    }
+    if (cur > prev_end) start_arr[cur - 1] = window_end;
+    Rcpp::checkUserInterrupt();
+  }
+  IntegerVector keep(m);
+  for (std::size_t l = 0; l < m; l++) keep[l] = !pruned[l];
+  return keep;
 }

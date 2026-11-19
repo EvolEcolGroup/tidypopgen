@@ -3,8 +3,8 @@
 #' This function uses clumping to remove SNPs at high LD. When used with its
 #' default options, clumping based on MAF is similar to standard pruning (as
 #' done by PLINK with "--indep-pairwise (size+1) 1 thr.r2", but it results in a
-#' better spread of SNPs over the chromosome. The algorithm is that of
-#' [bigsnpr::snp_clumping()]:
+#' better spread of SNPs over the chromosome; see [loci_ld_prune()] for
+#' pruning as in PLINK. The algorithm is that of [bigsnpr::snp_clumping()]:
 #' the loci of each chromosome are visited in order of importance (`S`), and a
 #' locus is kept unless its squared correlation with a more important locus
 #' that is kept, within the window, is above `thr_r2`. See
@@ -68,7 +68,7 @@
 #' @rdname loci_ld_clump
 #' @export
 #' @seealso [bigsnpr::snp_clumping()], whose algorithm this function
-#'   follows.
+#'   follows; [loci_ld_prune()] for pruning as in PLINK.
 #' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
 #' \dontshow{
 #' data.table::setDTthreads(2)
@@ -195,7 +195,7 @@ loci_ld_clump.vctrs_bigSNP <- function(
 }
 
 # Check `min_shared`, the minimum number of individuals genotyped at both loci
-# for their r^2 to be used
+# for their r^2 to be used (in loci_ld_clump() and loci_ld_prune())
 stopifnot_min_shared <- function(min_shared) {
   valid <- is.numeric(min_shared) && length(min_shared) == 1 &&
     !is.na(min_shared) && min_shared >= 2 && min_shared == round(min_shared)

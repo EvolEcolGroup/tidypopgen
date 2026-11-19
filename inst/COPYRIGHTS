@@ -17,6 +17,9 @@ PLINK 1.90
   - src/roh_sliding_cpp.cpp (windows_indiv_roh()) follows the algorithm of
     calc_homozyg() and roh_update() in plink_homozyg.c, and
     tests/testthat/helper_plink_homozyg.R transcribes it in R.
+  - src/ld_bitpacked.cpp: ld_prune_cpp() (loci_ld_prune()) follows ld_prune()
+    in plink_ld.c (--indep-pairwise), and r^2 over the individuals genotyped
+    at both loci is computed from bit planes, as PLINK does.
 
 bigsnpr and bigstatsr
   Copyright (C) Florian Privé.

@@ -33,8 +33,8 @@ Other contributors:
 \itemize{
   \item Max Carter-Brown [contributor]
   \item Jason Hodgson [contributor]
-  \item Christopher Chang (Author of PLINK 1.90: Hardy-Weinberg exact test code used in loci_hwe() and qc_report_loci(); runs of homozygosity algorithm followed by windows_indiv_roh()) [contributor, copyright holder]
-  \item Shaun Purcell (Author of PLINK 1.90: Hardy-Weinberg exact test code used in loci_hwe() and qc_report_loci(); runs of homozygosity algorithm followed by windows_indiv_roh()) [contributor, copyright holder]
+  \item Christopher Chang (Author of PLINK 1.90: Hardy-Weinberg exact test code used in loci_hwe() and qc_report_loci(); runs of homozygosity algorithm followed by windows_indiv_roh(); LD pruning algorithm followed by loci_ld_prune()) [contributor, copyright holder]
+  \item Shaun Purcell (Author of PLINK 1.90: Hardy-Weinberg exact test code used in loci_hwe() and qc_report_loci(); runs of homozygosity algorithm followed by windows_indiv_roh(); LD pruning algorithm followed by loci_ld_prune()) [contributor, copyright holder]
   \item Henrik Bengtsson (Author of countLines() in R.utils, modified for .vcf in count_vcf_variants()) [contributor, copyright holder]
   \item Jan Wigginton (Author of the original Hardy-Weinberg exact test code (SNPHWE), on which the PLINK 1.90 code used in loci_hwe() is based) [contributor]
   \item Florian Privé (Author of bigsnpr and bigstatsr, code from which is adapted in read_packedancestry(), gt_as_plink(), predict.gt_pca(), autoplot.gt_dapc() and loci_ld_clump()) [contributor, copyright holder]

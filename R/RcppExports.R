@@ -109,6 +109,10 @@ ld_clump_cpp <- function(BM, rowInd, colInd, ordInd, rankInd, pos, size, thr, mi
     .Call(`_tidypopgen_ld_clump_cpp`, BM, rowInd, colInd, ordInd, rankInd, pos, size, thr, min_shared, remove_insufficient, ncores)
 }
 
+ld_prune_cpp <- function(BM, rowInd, colInd, pos, window_size, window_kb, step, thr, maf, min_shared, remove_insufficient, ncores) {
+    .Call(`_tidypopgen_ld_prune_cpp`, BM, rowInd, colInd, pos, window_size, window_kb, step, thr, maf, min_shared, remove_insufficient, ncores)
+}
+
 unsorted_by_chromosome_cpp <- function(x, chromosome, level_group) {
     .Call(`_tidypopgen_unsorted_by_chromosome_cpp`, x, chromosome, level_group)
 }

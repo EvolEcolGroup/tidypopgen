@@ -16,6 +16,8 @@
   computed over the individuals genotyped at both loci, as in PLINK (new
   arguments `min_shared` and `insufficient`); it uses imputed genotypes only
   if the `gen_tibble` is set to use them
+* new `loci_ld_prune()` prunes loci as `plink --indep-pairwise` (PLINK 1.9),
+  also with missing genotypes
 * `gt_dapc()` works on a PCA of missing genotypes: give the `gen_tibble` as
   `data`, and the loadings of the loci are estimated without counting missing
   genotypes as 0 (new arguments `data` and `n_cores`)
