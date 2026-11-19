@@ -12,6 +12,12 @@
   their genotypes had missing values (attributes `imputed` and `missing`)
 * `gt_pcadapt()` works on a PCA of missing genotypes, testing each locus on
   the individuals genotyped at it, as the `pcadapt` package does
+* `loci_ld_clump()` works with missing genotypes, without imputation: r^2 is
+  computed over the individuals genotyped at both loci, as in PLINK (new
+  arguments `min_shared` and `insufficient`); it uses imputed genotypes only
+  if the `gen_tibble` is set to use them
+* new `loci_ld_prune()` prunes loci as `plink --indep-pairwise` (PLINK 1.9),
+  also with missing genotypes
 * `gt_dapc()` works on a PCA of missing genotypes: give the `gen_tibble` as
   `data`, and the loadings of the loci are estimated without counting missing
   genotypes as 0 (new arguments `data` and `n_cores`)

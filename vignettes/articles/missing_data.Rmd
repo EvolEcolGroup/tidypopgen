@@ -24,10 +24,12 @@ data look alike. Missingness then becomes a signal of its own.
 each pair of individuals over the loci genotyped in both, as `plink --pca`
 does. `gt_dapc()` and `gt_pcadapt()` work on that PCA: DAPC estimates the
 loadings of each locus over the individuals genotyped at it, and pcadapt
-tests each locus on the individuals genotyped at it. Imputation is only
-needed by the methods that require complete genotypes, such as
-`gt_pca(method = "random")` (for very large numbers of individuals),
-`gt_pca_autoSVD()` and `loci_ld_clump()`.
+tests each locus on the individuals genotyped at it. LD clumping
+(`loci_ld_clump()`) and pruning (`loci_ld_prune()`) compute the correlation
+between two loci over the individuals genotyped at both, as PLINK does.
+Imputation is only needed by the methods that require complete genotypes,
+such as `gt_pca(method = "random")` (for very large numbers of individuals)
+and `gt_pca_autoSVD()`.
 
 This article compares the two approaches on simulated data, where we know
 the truth.
@@ -256,9 +258,10 @@ rather than populations, and fewer outliers are found.
 
 Use the genotypes with their missing values whenever the analysis can: the
 default `gt_pca()` (and `pairwise_grm(method = "plink")`), `gt_dapc()`,
-`gt_pcadapt()`, `predict()` of a PCA (least squares projection), and the
-`pairwise_*()`, `indiv_*()`, `loci_*()` and `pop_*()` statistics. Impute
-(e.g. with `gt_impute_simple()`, and `gt_set_imputed()` to use the imputed
-genotypes) only for the methods that need complete data, such as
-`gt_pca(method = "random")`, `gt_pca_autoSVD()` and `loci_ld_clump()`;
-those functions say so if they find missing genotypes.
+`gt_pcadapt()`, `predict()` of a PCA (least squares projection),
+`loci_ld_clump()` and `loci_ld_prune()`, and the `pairwise_*()`,
+`indiv_*()`, `loci_*()` and `pop_*()` statistics. Impute (e.g. with
+`gt_impute_simple()`, and `gt_set_imputed()` to use the imputed genotypes)
+only for the methods that need complete data, such as
+`gt_pca(method = "random")` and `gt_pca_autoSVD()`; those functions say so if
+they find missing genotypes.

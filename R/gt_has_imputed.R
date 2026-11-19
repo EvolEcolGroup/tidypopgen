@@ -64,10 +64,11 @@ gt_uses_imputed <- function(x) {
 #' Sets a `gen_tibble` to use imputed data
 #'
 #' This function sets or unsets the use of imputed data. For some analysis
-#' that does not allow for missing data (e.g. LD clumping, or PCA with
-#' `gt_pca(method = "random")`), we have to use imputation, but for other
-#' analysis it might be preferable to allow for missing data (e.g. [gt_pca()]
-#' handles missing genotypes, and uses imputed ones only if they are set).
+#' that does not allow for missing data (e.g. PCA with
+#' `gt_pca(method = "random")`, or [gt_pca_autoSVD()]), we have to use
+#' imputation, but for other analysis it might be preferable to allow for
+#' missing data (e.g. [gt_pca()], [loci_ld_clump()] and [loci_ld_prune()]
+#' handle missing genotypes, and use imputed ones only if they are set).
 #'
 #' @param x a `gen_tibble`
 #' @param set a boolean defining whether imputed data should be used

@@ -30,10 +30,68 @@ test_that("ld clumping runs", {
   expect_true(all.equal(keep, c(1, 2, 3, 4, 6)) == TRUE)
 })
 
-test_that("missing genotypes are looked for only in the loci used", {
+test_that("loci_ld_clump with missing genotypes", {
+  # the PLINK fixture: 60 individuals, two chromosomes of 100 loci in LD, with
+  # missing genotypes (see data-raw/validate/create_plink_ld_test_data.R)
+  ld_gt <- gen_tibble(test_path("testdata", "plink_ld", "ld.bed"),
+    backingfile = tempfile("ld_"), quiet = TRUE
+  )
+  geno <- show_genotypes(ld_gt)
+  loci <- show_loci(ld_gt)
+  # the reference: bigsnpr's algorithm, sequentially, with r2 over the
+  # individuals genotyped at both loci (loci in order of decreasing MAF; a
+  # locus is kept unless linked to a kept locus within 50 kb)
+  maf <- loci_maf(ld_gt)
+  ref <- rep(FALSE, ncol(geno))
+  for (chrom in unique(loci$chromosome)) {
+    idx <- which(loci$chromosome == chrom)
+    kept <- integer(0)
+    for (j in idx[order(maf[idx], decreasing = TRUE)]) {
+      linked <- FALSE
+      for (k in kept[abs(loci$position[kept] - loci$position[j]) <= 50000]) {
+        shared <- !is.na(geno[, j]) & !is.na(geno[, k])
+        r2 <- suppressWarnings(stats::cor(geno[shared, j], geno[shared, k])^2)
+        if (sum(shared) >= 2 && !is.na(r2) && r2 > 0.2) {
+          linked <- TRUE
+          break
+        }
+      }
+      if (!linked) kept <- c(kept, j)
+    }
+    ref[kept] <- TRUE
+  }
+  expect_identical(loci_ld_clump(ld_gt, thr_r2 = 0.2, size = 50), ref)
+  expect_identical(
+    loci_ld_clump(ld_gt, thr_r2 = 0.2, size = 50, n_cores = 2),
+    ref
+  )
+  # with a minimum above the number of individuals, no pair has an r2: with
+  # "keep", every locus is kept; with "remove", every pair is linked, so that
+  # no two loci kept on a chromosome are within 50 kb
+  keep_all <- loci_ld_clump(ld_gt, thr_r2 = 0.2, size = 50, min_shared = 61)
+  expect_true(all(keep_all))
+  keep_few <- loci_ld_clump(ld_gt,
+    thr_r2 = 0.2, size = 50, min_shared = 61, insufficient = "remove"
+  )
+  kept <- loci[keep_few, ]
+  gaps <- tapply(kept$position, kept$chromosome, function(p) min(diff(p)))
+  expect_true(all(gaps > 50000))
+  expect_error(
+    loci_ld_clump(ld_gt, thr_r2 = 0.2, min_shared = 1),
+    "'min_shared' should be an integer of at least 2"
+  )
+  # imputed genotypes are used only if the gen_tibble is set to use them
+  ld_gt <- gt_impute_simple(ld_gt, method = "mode")
+  expect_identical(loci_ld_clump(ld_gt, thr_r2 = 0.2, size = 50), ref)
+  gt_set_imputed(ld_gt, set = TRUE)
+  imputed <- loci_ld_clump(ld_gt, thr_r2 = 0.2, size = 50)
+  gt_set_imputed(ld_gt, set = FALSE)
+  expect_false(identical(imputed, ref))
+})
+
+test_that("loci_ld_clump excludes loci and checks the cores", {
   # example-missing has missing genotypes at 367 of its 500 loci: keep the
-  # 133 complete loci, without resaving the backing matrix (where the other
-  # loci keep their missing genotypes)
+  # 133 complete loci, without resaving the backing matrix
   bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
   missing_gt <- gen_tibble(
     bed_file,
@@ -42,22 +100,13 @@ test_that("missing genotypes are looked for only in the loci used", {
   )
   complete_gt <- missing_gt %>%
     select_loci_if(loci_missingness(genotypes) == 0)
-  # bigsnpr's check sampled the whole backing matrix, and stopped with
-  # "You can't have missing values"
-  set.seed(1)
   keep_complete <- loci_ld_clump(complete_gt, thr_r2 = 0.2, size = 10)
   expect_length(keep_complete, 133)
-  # the number of cores is still checked
   expect_error(
     loci_ld_clump(complete_gt, thr_r2 = 0.2, size = 10, n_cores = 0),
     "'ncores' should be at least 1"
   )
-  # missing genotypes in the loci used are still found
-  expect_error(
-    loci_ld_clump(missing_gt, thr_r2 = 0.2, size = 10),
-    "loci_ld_clump\\(\\) needs complete or imputed genotypes"
-  )
-  # but not in the loci excluded from clumping, which give the same clumps
+  # excluding the loci with missing genotypes gives the same clumps
   keep_excluded <- loci_ld_clump(missing_gt,
     thr_r2 = 0.2, size = 10,
     exclude = which(loci_missingness(missing_gt) > 0)
@@ -211,8 +260,9 @@ test_that("loci_ld_clump error unsorted loci", {
     select_loci(all_of(random_order)) %>%
     show_loci()
 
-  # impute
+  # impute (and use the imputed genotypes)
   pop_b_imputed <- gt_impute_simple(pop_b, method = "mode")
+  gt_set_imputed(pop_b_imputed, set = TRUE)
 
   # ld
   expect_error(

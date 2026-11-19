@@ -17,6 +17,9 @@ PLINK 1.90
   - src/roh_sliding_cpp.cpp (windows_indiv_roh()) follows the algorithm of
     calc_homozyg() and roh_update() in plink_homozyg.c, and
     tests/testthat/helper_plink_homozyg.R transcribes it in R.
+  - src/ld_bitpacked.cpp: ld_prune_cpp() (loci_ld_prune()) follows ld_prune()
+    in plink_ld.c (--indep-pairwise), and r^2 over the individuals genotyped
+    at both loci is computed from bit planes, as PLINK does.
 
 bigsnpr and bigstatsr
   Copyright (C) Florian Privé.
@@ -29,6 +32,10 @@ bigsnpr and bigstatsr
     bigstatsr::predict.big_SVD().
   - R/autoplot_gt_dapc.R: the plot of the loadings is modified from bigstatsr.
   - R/local_reimplementations.R: CutBySize() and seq2(), from bigstatsr.
+  - src/ld_bitpacked.cpp: ld_clump_cpp() (loci_ld_clump()) is adapted from
+    clumping_chr() (src/clumping.cpp) and which_to_check()
+    (src/clumping-utils.h) of bigsnpr, and R/loci_ld_clump.R follows
+    clumpingChr() (R/clumping.R).
 
 hierfstat
   Copyright (C) Jérôme Goudet.
