@@ -481,8 +481,12 @@ writes into them). Indicative only (laptop).
 
 With the first version of the kernel, the DAPC took 10.1 s (9.5-10.1) and
 the new route 29.6 s. After `f26da1f7`, the paired adds (`16445878`) took
-the regression alone from 4.28 to 3.35 s (minimum of 3), so the DAPC
-should now take about 4.3 s (not re-timed in the whole route). The PCA of
+the regression alone from 4.28 to 3.35 s (minimum of 3). The DAPC step
+alone, re-timed on 19 Nov (same data and laptop, 3 balanced runs; old: an
+install of `d00d726b`, imputation and DAPC timed, PCA of the imputed
+genotypes in between; new: the checkout at `dd165da5` built at -O2): old
+imputation 2.68 s (2.65-2.71) + DAPC 1.21 s (1.20-1.21) = 3.88 s
+(3.86-3.91), new DAPC 3.92 s (3.88-3.92): the same. The PCA of
 missing genotypes costs about 4 s more than that of complete genotypes
 (the count of loci genotyped in both individuals).
 
