@@ -245,12 +245,14 @@ enum GenotypeStatus {
  *   match another file, the REF allele becomes the alternate allele)
  * @param max_alleles the largest number of alleles of a genotype so far
  *   (updated)
+ * @param min_alleles the smallest number of alleles of a genotype that is
+ *   not missing so far (updated)
  * @return a GenotypeStatus (GENOTYPES_OK if the genotypes are valid)
  */
 inline int count_alt_alleles(const char* line, size_t len,
                              unsigned char* alt_counts, size_t n,
                              unsigned char missing_value, char alt_allele,
-                             size_t &max_alleles) {
+                             size_t &max_alleles, size_t &min_alleles) {
   if (n == 0) {
     return GENOTYPES_OK;
   }
@@ -297,6 +299,9 @@ inline int count_alt_alleles(const char* line, size_t len,
     invalid |= (p + 1 < field_end) && (p[1] != ':');
     if (n_alleles > max_alleles) {
       max_alleles = n_alleles;
+    }
+    if (!is_missing && (n_alleles < min_alleles)) {
+      min_alleles = n_alleles;
     }
     alt_counts[i] = is_missing ? missing_value : n_alt;
     // move to the next field
@@ -616,9 +621,12 @@ private:
  * that the names do not depend on how the chromosomes are returned.
  *
  * @return a list with the loci table (`loci_tbl`), `chromosome_names`,
- *   `sample_names`, the `ploidy` of each individual, and `ploidy_guessed`,
+ *   `sample_names`, the `ploidy` of each individual, `ploidy_guessed`,
  *   whether its ploidy was guessed (its genotypes were all missing in the
- *   first variants)
+ *   first variants), and the smallest number of alleles of a genotype that
+ *   is not missing (`min_alleles`, NA if none) and the largest number of
+ *   alleles of a genotype (`max_alleles`), if the genotypes were read
+ *   (unphased)
  */
 // [[Rcpp::export]]
 List vcf_to_bk(std::string filename, std::string bk_file,
@@ -682,6 +690,11 @@ List vcf_to_bk(std::string filename, std::string bk_file,
   size_t max_ploidy = 0;
   // largest number of alleles of a genotype, which can not exceed max_ploidy
   size_t max_alleles = 0;
+  // smallest number of alleles of a genotype that is not missing (SIZE_MAX if
+  // none): with max_alleles, it tells whether all the genotypes have as many
+  // alleles as the ploidy of their individual (see gt_merge_vcfs(), whose
+  // first pass keeps the genotypes of each file to swap them later)
+  size_t min_alleles = SIZE_MAX;
 
   // genotypes not yet written to the backing file
   std::vector<unsigned char> genotypes;
@@ -862,6 +875,7 @@ List vcf_to_bk(std::string filename, std::string bk_file,
       provisional_missing;
     long n_snp_lines = snp_lines.size();
     size_t chunk_max_alleles = 0;
+    size_t chunk_min_alleles = SIZE_MAX;
     int status = GENOTYPES_OK;
     if (phased) {
       // (phased genotypes are diploid, so they never have more alleles than
@@ -882,12 +896,14 @@ List vcf_to_bk(std::string filename, std::string bk_file,
       }
     } else {
 #pragma omp parallel for num_threads(n_threads) schedule(static) \
-      reduction(max:chunk_max_alleles) reduction(max:status)
+      reduction(max:chunk_max_alleles) reduction(min:chunk_min_alleles) \
+      reduction(max:status)
       for (long k = 0; k < n_snp_lines; k++) {
         size_t l = snp_lines[k];
         int line_status = count_alt_alleles(
           line_start[l], line_len[l], &genotypes[offset + k * n_individuals],
-          n_individuals, this_missing, '1', chunk_max_alleles);
+          n_individuals, this_missing, '1', chunk_max_alleles,
+          chunk_min_alleles);
         status = std::max(status, line_status);
       }
     }
@@ -895,6 +911,7 @@ List vcf_to_bk(std::string filename, std::string bk_file,
       stop_genotype_status(status, "the VCF");
     }
     max_alleles = std::max(max_alleles, chunk_max_alleles);
+    min_alleles = std::min(min_alleles, chunk_min_alleles);
     check_alleles();
     // write the genotypes to the backing file (once the value for missing
     // genotypes is known)
@@ -961,7 +978,10 @@ List vcf_to_bk(std::string filename, std::string bk_file,
                        Named("sample_names") = sample_names,
                        Named("ploidy") = ploidy,
                        Named("ploidy_guessed") = LogicalVector(
-                         ploidy_guessed.begin(), ploidy_guessed.end())));
+                         ploidy_guessed.begin(), ploidy_guessed.end()),
+                       Named("min_alleles") = (min_alleles == SIZE_MAX) ?
+                         NA_INTEGER : (int) min_alleles,
+                       Named("max_alleles") = (int) max_alleles));
 }
 
 /******************************************************************************
@@ -1132,9 +1152,11 @@ void vcf_merge_genotypes(std::string filename, Environment BM, int row_offset,
       scratch.resize((size_t) n_snp_lines * n_individuals);
     }
     size_t chunk_max_alleles = 0;
+    size_t chunk_min_alleles = SIZE_MAX; // (not used here)
     int status = GENOTYPES_OK;
 #pragma omp parallel for num_threads(n_threads) schedule(static) \
-    reduction(max:chunk_max_alleles) reduction(max:status)
+    reduction(max:chunk_max_alleles) reduction(min:chunk_min_alleles) \
+    reduction(max:status)
     for (long s = 0; s < n_snp_lines; s++) {
       size_t l = snp_lines[s];
       long snp = snp_number[s];
@@ -1153,7 +1175,7 @@ void vcf_merge_genotypes(std::string filename, Environment BM, int row_offset,
                               bad_indiv) :
         count_alt_alleles(line_start[l], line_len[l], dest, n_individuals,
                           missing, swap_vec[snp] ? '0' : '1',
-                          chunk_max_alleles);
+                          chunk_max_alleles, chunk_min_alleles);
       if (line_status != GENOTYPES_OK) {
         status = std::max(status, line_status);
         continue;
@@ -1182,5 +1204,159 @@ void vcf_merge_genotypes(std::string filename, Environment BM, int row_offset,
   if (k != n_snps) {
     stop("the VCF " + filename + " has fewer biallelic SNPs than when its " +
          "loci were read (it changed while being merged)");
+  }
+}
+
+/******************************************************************************
+ * Copy the genotypes of a VCF, kept in a backing file, into the FBM of
+ * several merged VCFs
+ *
+ * This is the second pass of gt_merge_vcfs() when its first pass kept the
+ * genotypes of each VCF in a temporary backing file (as vcf_to_bk() writes
+ * it, one byte per genotype, the genotypes of a biallelic snp one after the
+ * other): as vcf_merge_genotypes(), but the genotypes of each snp are copied
+ * from that file instead of being read again from the VCF. The file is read a
+ * chunk of snps at a time, and the snps of a chunk (which go to different
+ * columns of the merged FBM) are copied in parallel.
+ *
+ * Swapped alleles are only possible when every genotype that is not missing
+ * has as many alleles as the ploidy of its individual (which gt_merge_vcfs()
+ * checks), so that the number of REF alleles is the ploidy minus the number
+ * of ALT alleles.
+ *
+ * @param cache_file The backing file with the genotypes of the VCF
+ * @param BM,row_offset,row,col,swap,ploidy,missing_value,n_threads As in
+ *   vcf_merge_genotypes()
+ * @param cache_missing The value of missing genotypes in cache_file
+ */
+// [[Rcpp::export]]
+void bk_merge_genotypes(std::string cache_file, Environment BM, int row_offset,
+                        const IntegerVector& row, const IntegerVector& col,
+                        const LogicalVector& swap,
+                        const IntegerVector& ploidy, int cache_missing,
+                        int missing_value, int n_threads = 1) {
+  XPtr<FBM_RW> xp_bm = BM["address_rw"];
+  unsigned char* bm = static_cast<unsigned char*>(xp_bm->matrix());
+  size_t n_rows = xp_bm->nrow(); // number of rows of the merged FBM
+  size_t n_cols = xp_bm->ncol(); // number of columns of the merged FBM
+  size_t n_individuals = ploidy.size();
+  long n_snps = col.size();
+  bool any_swap = swap.size() > 0;
+  bool reorder = row.size() > 0;
+  if (n_threads < 1) {
+    stop("'n_threads' should be a positive integer");
+  }
+  // check that the rows and columns of this file are within the FBM
+  std::vector<size_t> row_vec;
+  if (reorder) {
+    if ((size_t) row.size() != n_individuals) {
+      stop("'row' should have one value per individual");
+    }
+    row_vec.resize(n_individuals);
+    for (size_t i = 0; i < n_individuals; i++) {
+      if ((row[i] == NA_INTEGER) || (row[i] < 0) ||
+          ((size_t) row[i] >= n_rows)) {
+        stop("'row' is out of the bounds of the merged FBM");
+      }
+      row_vec[i] = row[i];
+    }
+  } else if ((row_offset < 0) ||
+             ((size_t) row_offset + n_individuals > n_rows)) {
+    stop("the merged FBM does not have enough rows for this file");
+  }
+  for (long k = 0; k < n_snps; k++) {
+    if ((col[k] != NA_INTEGER) && (col[k] >= 0) &&
+        ((size_t) col[k] >= n_cols)) {
+      stop("'col' is out of the bounds of the merged FBM");
+    }
+  }
+  if (any_swap && (swap.size() != n_snps)) {
+    stop("'swap' should have one value per biallelic snp");
+  }
+  if ((missing_value < 1) || (missing_value > 255) || (cache_missing < 1) ||
+      (cache_missing > 255)) {
+    stop("'missing_value' and 'cache_missing' should be between 1 and 255");
+  }
+  if (n_individuals == 0) {
+    return;
+  }
+  // (copies, so that the parallel loop does not touch R objects)
+  std::vector<int> col_vec(col.begin(), col.end());
+  std::vector<char> swap_vec(n_snps, 0);
+  if (any_swap) {
+    for (long k = 0; k < n_snps; k++) {
+      swap_vec[k] = (swap[k] == TRUE);
+    }
+  }
+  std::vector<int> ploidy_vec(ploidy.begin(), ploidy.end());
+  const unsigned char missing = (unsigned char) missing_value;
+  const unsigned char c_missing = (unsigned char) cache_missing;
+  // genotypes are copied as they are when the missing values are the same
+  const bool plain_copy = (missing == c_missing) && !reorder;
+
+  // (closed when we return or stop)
+  std::unique_ptr<std::FILE, int (*)(std::FILE*)> file(
+    std::fopen(cache_file.c_str(), "rb"), std::fclose);
+  std::FILE* fp = file.get();
+  if (fp == NULL) {
+    stop("could not open the genotypes of a VCF (" + cache_file + ")");
+  }
+  // a chunk of about 16 MB of genotypes
+  long chunk_snps = std::max((long) 1,
+                             (long) ((1 << 24) / n_individuals));
+  std::vector<unsigned char> buffer;
+  bool bad_swap = false;
+  for (long k0 = 0; k0 < n_snps; k0 += chunk_snps) {
+    long n_chunk = std::min(chunk_snps, n_snps - k0);
+    size_t n_bytes = (size_t) n_chunk * n_individuals;
+    buffer.resize(n_bytes);
+    if (std::fread(buffer.data(), 1, n_bytes, fp) != n_bytes) {
+      stop("the genotypes of a VCF (" + cache_file + ") are truncated");
+    }
+    int chunk_bad_swap = 0;
+#pragma omp parallel for num_threads(n_threads) schedule(static) \
+    reduction(max:chunk_bad_swap)
+    for (long s = 0; s < n_chunk; s++) {
+      long k = k0 + s;
+      if ((col_vec[k] == NA_INTEGER) || (col_vec[k] < 0)) {
+        continue;
+      }
+      const unsigned char* src = buffer.data() + (size_t) s * n_individuals;
+      unsigned char* col_start = bm + n_rows * (size_t) col_vec[k];
+      if (plain_copy && !swap_vec[k]) {
+        std::memcpy(col_start + row_offset, src, n_individuals);
+        continue;
+      }
+      for (size_t i = 0; i < n_individuals; i++) {
+        unsigned char v = src[i];
+        unsigned char out;
+        if (v == c_missing) {
+          out = missing;
+        } else if (swap_vec[k]) {
+          // the number of REF alleles
+          int ref = ploidy_vec[i] - (int) v;
+          chunk_bad_swap = std::max(chunk_bad_swap, (int) (ref < 0));
+          out = (unsigned char) std::max(ref, 0);
+        } else {
+          out = v;
+        }
+        if (reorder) {
+          col_start[row_vec[i]] = out;
+        } else {
+          col_start[row_offset + i] = out;
+        }
+      }
+    }
+    bad_swap = bad_swap || (chunk_bad_swap > 0);
+    Rcpp::checkUserInterrupt();
+  }
+  // the file should hold the genotypes of n_snps snps, and no more
+  if (std::fgetc(fp) != EOF) {
+    stop("the genotypes of a VCF (" + cache_file + ") have more snps than " +
+         "its loci");
+  }
+  if (bad_swap) {
+    stop("a genotype has more alleles than the ploidy of its individual, " +
+         std::string("so its alleles can not be swapped"));
   }
 }

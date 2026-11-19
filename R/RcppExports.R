@@ -265,6 +265,10 @@ vcf_merge_genotypes <- function(filename, BM, row_offset, row, col, swap, ploidy
     invisible(.Call(`_tidypopgen_vcf_merge_genotypes`, filename, BM, row_offset, row, col, swap, ploidy, missing_value, n_threads, phased_lut, sample_names))
 }
 
+bk_merge_genotypes <- function(cache_file, BM, row_offset, row, col, swap, ploidy, cache_missing, missing_value, n_threads = 1L) {
+    invisible(.Call(`_tidypopgen_bk_merge_genotypes`, cache_file, BM, row_offset, row, col, swap, ploidy, cache_missing, missing_value, n_threads))
+}
+
 window_sums_cpp <- function(x, loci, lo, hi, long_double) {
     .Call(`_tidypopgen_window_sums_cpp`, x, loci, lo, hi, long_double)
 }

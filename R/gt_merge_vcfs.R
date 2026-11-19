@@ -197,6 +197,21 @@ gt_merge_vcfs <- function(
     add = TRUE
   )
   n_sites <- 0
+  # the first pass also keeps the genotypes of each file, in a temporary
+  # backing file next to the merged one, which the second pass copies into
+  # the merged backing file, rather than reading the VCF again (which is
+  # slower, as it decompresses and parses the whole VCF again); this needs
+  # as much space on disk as the genotypes of the files (one byte each)
+  cache_files <- if (getOption("tidypopgen.merge_cache", TRUE)) {
+    paste0(backingfile, "_cache", seq_len(n_files), ".bk")
+  } else {
+    character(0)
+  }
+  on.exit(unlink(cache_files), add = TRUE)
+  # the value of missing genotypes in the temporary backing file of each
+  # file, and whether its genotypes can be swapped (see below)
+  cache_missing <- integer(n_files)
+  cache_swap_ok <- logical(n_files)
 
   # first pass: the loci of each file (no genotypes), with its samples and
   # their ploidy, matched into sites one file at a time (so that only the
@@ -215,10 +230,22 @@ gt_merge_vcfs <- function(
   chromosome_names <- character(0)
   for (f in seq_len(n_files)) {
     scan <- scan_vcf_file(files[f], names_as_int, n_cores, quiet,
-      loci_file = if (names_as_int) sidecars$scan else ""
+      loci_file = if (names_as_int) sidecars$scan else "",
+      bk_file = if (length(cache_files) > 0) cache_files[f] else "",
+      phased = phased
     )
     sample_names[[f]] <- scan$sample_names
     file_ploidy[[f]] <- scan$ploidy
+    if (length(cache_files) > 0) {
+      cache_missing[f] <- max(scan$ploidy) + 1L
+      # the genotypes of swapped loci are the number of REF alleles, which
+      # is the ploidy minus the number of ALT alleles if every genotype that
+      # is not missing has as many alleles as the ploidy of its individual
+      # (otherwise, they are read again from the VCF)
+      cache_swap_ok[f] <- is.na(scan$min_alleles) ||
+        (scan$min_alleles == scan$max_alleles &&
+          all(scan$ploidy == scan$max_alleles))
+    }
     # check the samples as soon as possible
     merge_vcfs_sample_names(sample_names[seq_len(f)], force_samples)
     chromosome_names <- vctrs::vec_unique(
@@ -370,7 +397,10 @@ gt_merge_vcfs <- function(
     n_cores = n_cores,
     quiet = quiet,
     phased = phased,
-    file_samples = sample_names
+    file_samples = sample_names,
+    cache_files = cache_files,
+    cache_missing = cache_missing,
+    cache_swap_ok = cache_swap_ok
   )
   sidecars_done <- TRUE
   x_gt
@@ -521,16 +551,22 @@ default_vcfs_backingfile <- function(backingfile, files, suffix) {
 
 # the first pass: the loci of a file (no genotypes), with its samples and
 # their ploidy (locus names are not read if we use integers: they are written
-# to the sidecar loci_file instead, if it is not "")
+# to the sidecar loci_file instead, if it is not ""). If bk_file is not "",
+# the genotypes are also written to it (phased, with phased = TRUE)
 scan_vcf_file <- function(file, names_as_int, n_cores, quiet,
-                          loci_file = "") {
+                          loci_file = "", bk_file = "", phased = FALSE) {
   if (!quiet) {
     message("reading the loci of ", file)
   }
   scan <- vcf_to_bk(file,
-    bk_file = "", read_names = !names_as_int,
-    n_threads = n_cores, read_genotypes = FALSE,
-    loci_file = loci_file
+    bk_file = bk_file, read_names = !names_as_int,
+    n_threads = n_cores, read_genotypes = bk_file != "",
+    loci_file = loci_file,
+    phased_lut = if (phased && bk_file != "") {
+      phased_genotype_byte
+    } else {
+      integer(0)
+    }
   )
   if (length(scan$sample_names) == 0) {
     stop("the VCF ", file, " has no samples (or no variants)")
@@ -591,10 +627,17 @@ vcfs_sidecar_paths <- function(backingfile) {
 # ploidy of the individuals of the gen_tibble. With phased = TRUE, phased
 # genotypes are stored (see gen_tibble()), and file_samples gives the
 # names of the samples of each file (in the order of the file, for errors).
+# If cache_files is not empty, the genotypes of each file are copied from its
+# backing file written by the first pass (with missing genotypes
+# cache_missing), rather than read again from the VCF, unless its loci are
+# swapped and cache_swap_ok is FALSE.
 write_vcfs_gen_tibble <- function(files, loci, sample_id, ploidy, row_offset,
                                   row_map, file_cols, file_ploidy,
                                   fill_missing, backingfile, n_cores, quiet,
-                                  phased = FALSE, file_samples = NULL) {
+                                  phased = FALSE, file_samples = NULL,
+                                  cache_files = character(0),
+                                  cache_missing = integer(0),
+                                  cache_swap_ok = logical(0)) {
   if (anyNA(ploidy) || any(ploidy <= 0)) {
     stop("the ploidy of each individual should be a positive integer")
   }
@@ -638,18 +681,37 @@ write_vcfs_gen_tibble <- function(files, loci, sample_id, ploidy, row_offset,
       message("reading the genotypes of ", files[f])
     }
     this_file <- file_cols(f)
-    vcf_merge_genotypes(files[f],
-      BM = file_backed_matrix,
-      row_offset = row_offset[f],
-      row = row_map[[f]],
-      col = this_file$col,
-      swap = this_file$swap,
-      ploidy = file_ploidy[[f]],
-      missing_value = missing_value,
-      n_threads = n_cores,
-      phased_lut = if (phased) phased_genotype_byte else integer(0),
-      sample_names = if (phased) file_samples[[f]] else character(0)
-    )
+    use_cache <- length(cache_files) > 0 &&
+      (!any(this_file$swap) || cache_swap_ok[f])
+    if (use_cache) {
+      bk_merge_genotypes(cache_files[f],
+        BM = file_backed_matrix,
+        row_offset = row_offset[f],
+        row = row_map[[f]],
+        col = this_file$col,
+        swap = this_file$swap,
+        ploidy = file_ploidy[[f]],
+        cache_missing = cache_missing[f],
+        missing_value = missing_value,
+        n_threads = n_cores
+      )
+    } else {
+      vcf_merge_genotypes(files[f],
+        BM = file_backed_matrix,
+        row_offset = row_offset[f],
+        row = row_map[[f]],
+        col = this_file$col,
+        swap = this_file$swap,
+        ploidy = file_ploidy[[f]],
+        missing_value = missing_value,
+        n_threads = n_cores,
+        phased_lut = if (phased) phased_genotype_byte else integer(0),
+        sample_names = if (phased) file_samples[[f]] else character(0)
+      )
+    }
+    if (length(cache_files) > 0) {
+      unlink(cache_files[f])
+    }
   }
   # save the FBM (before its md5 sum is taken by new_vctrs_bigsnp())
   fbm_path <- bigstatsr::sub_bk(bk_file, ".rds")
