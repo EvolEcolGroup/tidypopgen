@@ -1007,7 +1007,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // merge_sites_add_file
-IntegerVector merge_sites_add_file(SEXP sites, const IntegerVector& chromosome, const IntegerVector& position, const CharacterVector& allele_ref, const CharacterVector& allele_alt);
+IntegerVector merge_sites_add_file(SEXP sites, const IntegerVector& chromosome, const IntegerVector& position, SEXP allele_ref, SEXP allele_alt);
 RcppExport SEXP _tidypopgen_merge_sites_add_file(SEXP sitesSEXP, SEXP chromosomeSEXP, SEXP positionSEXP, SEXP allele_refSEXP, SEXP allele_altSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -1015,8 +1015,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< SEXP >::type sites(sitesSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type chromosome(chromosomeSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type position(positionSEXP);
-    Rcpp::traits::input_parameter< const CharacterVector& >::type allele_ref(allele_refSEXP);
-    Rcpp::traits::input_parameter< const CharacterVector& >::type allele_alt(allele_altSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type allele_ref(allele_refSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type allele_alt(allele_altSEXP);
     rcpp_result_gen = Rcpp::wrap(merge_sites_add_file(sites, chromosome, position, allele_ref, allele_alt));
     return rcpp_result_gen;
 END_RCPP
@@ -1046,8 +1046,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // vcf_to_bk
-List vcf_to_bk(std::string filename, std::string bk_file, bool read_names, int n_threads, bool read_genotypes, std::string loci_file, bool chromosomes_as_int, std::string chromosomes_file, IntegerVector phased_lut);
-RcppExport SEXP _tidypopgen_vcf_to_bk(SEXP filenameSEXP, SEXP bk_fileSEXP, SEXP read_namesSEXP, SEXP n_threadsSEXP, SEXP read_genotypesSEXP, SEXP loci_fileSEXP, SEXP chromosomes_as_intSEXP, SEXP chromosomes_fileSEXP, SEXP phased_lutSEXP) {
+List vcf_to_bk(std::string filename, std::string bk_file, bool read_names, int n_threads, bool read_genotypes, std::string loci_file, bool chromosomes_as_int, std::string chromosomes_file, IntegerVector phased_lut, bool alleles_as_raw);
+RcppExport SEXP _tidypopgen_vcf_to_bk(SEXP filenameSEXP, SEXP bk_fileSEXP, SEXP read_namesSEXP, SEXP n_threadsSEXP, SEXP read_genotypesSEXP, SEXP loci_fileSEXP, SEXP chromosomes_as_intSEXP, SEXP chromosomes_fileSEXP, SEXP phased_lutSEXP, SEXP alleles_as_rawSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -1060,7 +1060,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type chromosomes_as_int(chromosomes_as_intSEXP);
     Rcpp::traits::input_parameter< std::string >::type chromosomes_file(chromosomes_fileSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type phased_lut(phased_lutSEXP);
-    rcpp_result_gen = Rcpp::wrap(vcf_to_bk(filename, bk_file, read_names, n_threads, read_genotypes, loci_file, chromosomes_as_int, chromosomes_file, phased_lut));
+    Rcpp::traits::input_parameter< bool >::type alleles_as_raw(alleles_as_rawSEXP);
+    rcpp_result_gen = Rcpp::wrap(vcf_to_bk(filename, bk_file, read_names, n_threads, read_genotypes, loci_file, chromosomes_as_int, chromosomes_file, phased_lut, alleles_as_raw));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1198,7 +1199,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_merge_sites_add_file", (DL_FUNC) &_tidypopgen_merge_sites_add_file, 5},
     {"_tidypopgen_merge_sites_result", (DL_FUNC) &_tidypopgen_merge_sites_result, 1},
     {"_tidypopgen_merge_sites_file_cols", (DL_FUNC) &_tidypopgen_merge_sites_file_cols, 3},
-    {"_tidypopgen_vcf_to_bk", (DL_FUNC) &_tidypopgen_vcf_to_bk, 9},
+    {"_tidypopgen_vcf_to_bk", (DL_FUNC) &_tidypopgen_vcf_to_bk, 10},
     {"_tidypopgen_vcf_merge_genotypes", (DL_FUNC) &_tidypopgen_vcf_merge_genotypes, 11},
     {"_tidypopgen_bk_merge_genotypes", (DL_FUNC) &_tidypopgen_bk_merge_genotypes, 10},
     {"_tidypopgen_window_sums_cpp", (DL_FUNC) &_tidypopgen_window_sums_cpp, 5},

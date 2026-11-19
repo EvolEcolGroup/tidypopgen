@@ -75,14 +75,17 @@ public:
   // returns the (1-based) loci of the file that created new sites (in the
   // order of the sites)
   IntegerVector add_file(const IntegerVector& chr, const IntegerVector& pos,
-                         const CharacterVector& ref,
-                         const CharacterVector& alt) {
+                         SEXP ref_r, SEXP alt_r) {
     R_xlen_t n_loci = chr.size();
-    if ((pos.size() != n_loci) || (ref.size() != n_loci) ||
-        (alt.size() != n_loci)) {
+    if ((Rf_xlength(pos) != n_loci) || (Rf_xlength(ref_r) != n_loci) ||
+        (Rf_xlength(alt_r) != n_loci)) {
       stop("the loci of each file should have a chromosome, a position and "
            "two alleles");
     }
+    // the alleles as characters (0 if missing), from character vectors (of
+    // single characters) or raw vectors (of the characters)
+    std::vector<char> ref = allele_codes(ref_r);
+    std::vector<char> alt = allele_codes(alt_r);
     int f = site_of_locus.size();
     std::vector<int> site(n_loci, -1);
     std::vector<char> swap(n_loci, 0);
@@ -167,15 +170,27 @@ private:
   std::vector<int> slots; // the first site at each position (-1 if empty)
   size_t n_positions; // the number of positions in the table
 
-  // the allele of a character vector (of single characters) as a character,
-  // 0 if it is missing (NA or a missing allele)
-  char allele_code(const CharacterVector& x, R_xlen_t i) const {
-    SEXP a = STRING_ELT(x, i);
-    if (a == NA_STRING) {
-      return 0;
+  // the alleles of a character vector (of single characters) or of a raw
+  // vector (of characters) as characters, 0 if missing (NA or a missing
+  // allele)
+  std::vector<char> allele_codes(SEXP x) const {
+    R_xlen_t n = Rf_xlength(x);
+    std::vector<char> codes(n);
+    if (TYPEOF(x) == RAWSXP) {
+      const Rbyte* bytes = RAW(x);
+      for (R_xlen_t i = 0; i < n; i++) {
+        codes[i] = missing[bytes[i]] ? 0 : (char) bytes[i];
+      }
+    } else if (TYPEOF(x) == STRSXP) {
+      for (R_xlen_t i = 0; i < n; i++) {
+        SEXP a = STRING_ELT(x, i);
+        unsigned char c = (a == NA_STRING) ? 0 : CHAR(a)[0];
+        codes[i] = missing[c] ? 0 : (char) c;
+      }
+    } else {
+      stop("the alleles should be a character or a raw vector");
     }
-    unsigned char c = CHAR(a)[0];
-    return missing[c] ? 0 : (char) c;
+    return codes;
   }
 
   // whether two alleles agree: they are the same, or either is missing (an
@@ -193,10 +208,10 @@ private:
   // some are missing (e.g. a monomorphic A/.), and, if exact, only a site
   // with the same alleles (or swapped) is used
   bool match_locus(R_xlen_t k, int f, int head, bool exact,
-                   const CharacterVector& ref, const CharacterVector& alt,
+                   const std::vector<char>& ref, const std::vector<char>& alt,
                    std::vector<int>& site, std::vector<char>& swap) {
-    char this_ref = allele_code(ref, k);
-    char this_alt = allele_code(alt, k);
+    char this_ref = ref[k];
+    char this_alt = alt[k];
     // the best site so far, and its rank (0 is the best)
     int match = -1;
     int match_rank = 4;
@@ -255,10 +270,10 @@ private:
   // -1 if none) that has no locus of this file (if any), or becomes a new
   // site
   void place_locus(R_xlen_t k, int f, int chr, int pos, int head,
-                   const CharacterVector& ref, const CharacterVector& alt,
+                   const std::vector<char>& ref, const std::vector<char>& alt,
                    std::vector<int>& site, std::vector<int>& new_loci) {
-    char this_ref = allele_code(ref, k);
-    char this_alt = allele_code(alt, k);
+    char this_ref = ref[k];
+    char this_alt = alt[k];
     int conflict = -1;
     for (int s = head; s >= 0; s = sites[s].next_at_pos) {
       if (sites[s].last_file != f) {
@@ -486,7 +501,7 @@ SEXP merge_sites_new(bool split_alt, int ref_rule,
  *   of each biallelic SNP of the file
  * @param position the position of each SNP
  * @param allele_ref the REF allele of each SNP (a character vector of single
- *   characters)
+ *   characters, or a raw vector of the characters)
  * @param allele_alt as allele_ref, for the ALT allele
  * @return the (1-based) SNPs of the file that created new sites, in the order
  *   of the sites (so that the sites can take the names of these SNPs)
@@ -494,8 +509,7 @@ SEXP merge_sites_new(bool split_alt, int ref_rule,
 // [[Rcpp::export]]
 IntegerVector merge_sites_add_file(SEXP sites, const IntegerVector& chromosome,
                                    const IntegerVector& position,
-                                   const CharacterVector& allele_ref,
-                                   const CharacterVector& allele_alt) {
+                                   SEXP allele_ref, SEXP allele_alt) {
   return get_merged_sites(sites)->add_file(chromosome, position, allele_ref,
                                            allele_alt);
 }

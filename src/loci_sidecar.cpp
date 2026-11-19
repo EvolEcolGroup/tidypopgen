@@ -648,7 +648,8 @@ void write_chromosome_sidecar_cpp(std::string path, IntegerVector codes,
  * @param path_in the sidecar to read
  * @param header its expected first line
  * @param index_keys,index_offsets the sparse index of path_in (from
- *   sidecar_index()); ignored if keys is empty
+ *   sidecar_index()); ignored if keys is empty. Keys in increasing order
+ *   need no index (empty vectors): the file is then read once, in order
  * @param keys the keys to gather, in the order of the output (it stops if a
  *   key is not in path_in); empty for all the lines of path_in, in order
  * @param path_out the sidecar to write
@@ -711,11 +712,48 @@ double sidecar_gather(std::string path_in, std::string header,
   }
 
   size_t n = keys.size();
+  bool increasing = true;
   for (size_t i = 0; i < n; i++) {
     if ((keys[i] == NA_INTEGER) || (keys[i] < 1)) {
       stop("keys must be positive integers");
     }
+    increasing = increasing && ((i == 0) || (keys[i] > keys[i - 1]));
   }
+
+  // keys in increasing order, without an index (e.g. the loci of a VCF that
+  // create new sites, see gt_merge_vcfs()): the file is read once, in order
+  if (increasing && (index_keys.size() == 0)) {
+    size_t i = 0;
+    int previous = 0;
+    while ((i < n) && reader.next_line(line, len, offset)) {
+      int key = parse_key(line, len, path_in);
+      if (key <= previous) {
+        stop("the keys of the file " + path_in + " are not strictly " +
+             "increasing");
+      }
+      previous = key;
+      if (key > keys[i]) {
+        break;
+      }
+      if (key == keys[i]) {
+        const char* start;
+        size_t rest_len;
+        rest_of_line(start, rest_len);
+        writer.add_int(new_key++);
+        writer.tab();
+        writer.add(start, rest_len);
+        writer.end_line();
+        i++;
+      }
+    }
+    if (i < n) {
+      stop("the file " + path_in + " has no line for the key " +
+           std::to_string(keys[i]));
+    }
+    writer.finish();
+    return (double) n;
+  }
+
   std::vector<std::pair<int, size_t> > chunk_keys;
   std::string arena; // the lines of the chunk (after their keys)
   std::vector<size_t> line_start;

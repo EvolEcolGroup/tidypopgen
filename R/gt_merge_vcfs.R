@@ -232,7 +232,7 @@ gt_merge_vcfs <- function(
     scan <- scan_vcf_file(files[f], names_as_int, n_cores, quiet,
       loci_file = if (names_as_int) sidecars$scan else "",
       bk_file = if (length(cache_files) > 0) cache_files[f] else "",
-      phased = phased
+      phased = phased, alleles_as_raw = TRUE
     )
     sample_names[[f]] <- scan$sample_names
     file_ploidy[[f]] <- scan$ploidy
@@ -263,11 +263,10 @@ gt_merge_vcfs <- function(
       site_names[[f]] <- scan$loci_tbl$marker.ID[new_loci]
     } else if (length(new_loci) > 0) {
       # the sidecar lines of the loci that created new sites, keyed by site
-      scan_index <- sidecar_index(
-        sidecars$scan, loci_sidecar_header, sidecar_block()
-      )
+      # (new_loci are in increasing order, so they are gathered in a single
+      # reading of the file, without an index)
       sidecar_gather(sidecars$scan, loci_sidecar_header,
-        index_keys = scan_index$keys, index_offsets = scan_index$offsets,
+        index_keys = integer(0), index_offsets = numeric(0),
         keys = new_loci, path_out = sidecars$sites,
         first_new_key = n_sites + 1, append = file.exists(sidecars$sites)
       )
@@ -552,9 +551,11 @@ default_vcfs_backingfile <- function(backingfile, files, suffix) {
 # the first pass: the loci of a file (no genotypes), with its samples and
 # their ploidy (locus names are not read if we use integers: they are written
 # to the sidecar loci_file instead, if it is not ""). If bk_file is not "",
-# the genotypes are also written to it (phased, with phased = TRUE)
+# the genotypes are also written to it (phased, with phased = TRUE). With
+# alleles_as_raw, the alleles are raw vectors (see vcf_to_bk())
 scan_vcf_file <- function(file, names_as_int, n_cores, quiet,
-                          loci_file = "", bk_file = "", phased = FALSE) {
+                          loci_file = "", bk_file = "", phased = FALSE,
+                          alleles_as_raw = FALSE) {
   if (!quiet) {
     message("reading the loci of ", file)
   }
@@ -566,7 +567,8 @@ scan_vcf_file <- function(file, names_as_int, n_cores, quiet,
       phased_genotype_byte
     } else {
       integer(0)
-    }
+    },
+    alleles_as_raw = alleles_as_raw
   )
   if (length(scan$sample_names) == 0) {
     stop("the VCF ", file, " has no samples (or no variants)")

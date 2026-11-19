@@ -685,6 +685,8 @@ private:
  *   them), but written to chromosomes_file, if it is not ""
  * @param chromosomes_file The chromosome sidecar to write (with the code and
  *   name of each chromosome), or "" for none (only with chromosomes_as_int)
+ * @param alleles_as_raw Whether to return the alleles as raw vectors (of
+ *   their characters) rather than character vectors
  * @param phased_lut An empty vector to store the number of alternate alleles
  *   of each genotype, or, to store phased diploid genotypes (see
  *   gen_tibble(phased = TRUE) in R), the bytes of the genotypes 0|0, 0|1,
@@ -710,7 +712,8 @@ List vcf_to_bk(std::string filename, std::string bk_file,
                bool read_genotypes = true, std::string loci_file = "",
                bool chromosomes_as_int = false,
                std::string chromosomes_file = "",
-               IntegerVector phased_lut = IntegerVector::create()) {
+               IntegerVector phased_lut = IntegerVector::create(),
+               bool alleles_as_raw = false) {
   // are we storing phased genotypes? (as bytes of phased_lut)
   unsigned char phased_bytes[4] = {0, 0, 0, 0};
   const bool phased = read_phased_lut(phased_lut, phased_bytes);
@@ -1164,10 +1167,18 @@ List vcf_to_bk(std::string filename, std::string bk_file,
   std::vector<int>().swap(chromosome_index);
   IntegerVector physical_pos_r(physical_pos.begin(), physical_pos.end());
   std::vector<int32_t>().swap(physical_pos);
-  CharacterVector allele1_r = chars_to_strings(allele1);
+  // (as raw vectors, with alleles_as_raw, for gt_merge_vcfs(), which matches
+  // them in C++: this avoids a string for each allele)
+  SEXP allele1_r = alleles_as_raw ?
+    (SEXP) RawVector(allele1.begin(), allele1.end()) :
+    (SEXP) chars_to_strings(allele1);
   std::vector<char>().swap(allele1);
-  CharacterVector allele2_r = chars_to_strings(allele2);
+  Shield<SEXP> allele1_protect(allele1_r);
+  SEXP allele2_r = alleles_as_raw ?
+    (SEXP) RawVector(allele2.begin(), allele2.end()) :
+    (SEXP) chars_to_strings(allele2);
   std::vector<char>().swap(allele2);
+  Shield<SEXP> allele2_protect(allele2_r);
   List loci_table = List::create(Named("chromosome") = chromosome_r,
                                  _["physical.pos"] = physical_pos_r,
                                  _["allele1"] = allele1_r,
@@ -1229,6 +1240,8 @@ List vcf_to_bk(std::string filename, std::string bk_file,
  * @param missing_value The value of missing genotypes in the merged FBM
  *   (its largest ploidy + 1)
  * @param n_threads The number of threads
+ * @param alleles_as_raw Whether to return the alleles as raw vectors (of
+ *   their characters) rather than character vectors
  * @param phased_lut An empty vector to store the number of alternate alleles
  *   of each genotype, or the bytes of phased genotypes (see vcf_to_bk(); the
  *   alleles of phased genotypes are never swapped)
