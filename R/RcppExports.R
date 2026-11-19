@@ -197,6 +197,10 @@ increment_as_counts <- function(k, k2, BM, rowInd, colInd, ncores) {
     invisible(.Call(`_tidypopgen_increment_as_counts`, k, k2, BM, rowInd, colInd, ncores))
 }
 
+as_counts_within_groups <- function(BM, rowInd, colInd, groupEnd, ncores) {
+    .Call(`_tidypopgen_as_counts_within_groups`, BM, rowInd, colInd, groupEnd, ncores)
+}
+
 increment_ibs_counts <- function(k, k2, BM, rowInd, colInd, ncores) {
     invisible(.Call(`_tidypopgen_increment_ibs_counts`, k, k2, BM, rowInd, colInd, ncores))
 }

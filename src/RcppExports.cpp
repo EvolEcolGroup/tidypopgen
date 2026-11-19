@@ -835,6 +835,21 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// as_counts_within_groups
+NumericMatrix as_counts_within_groups(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupEnd, int ncores);
+RcppExport SEXP _tidypopgen_as_counts_within_groups(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupEndSEXP, SEXP ncoresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type groupEnd(groupEndSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    rcpp_result_gen = Rcpp::wrap(as_counts_within_groups(BM, rowInd, colInd, groupEnd, ncores));
+    return rcpp_result_gen;
+END_RCPP
+}
 // increment_ibs_counts
 void increment_ibs_counts(Environment k, Environment k2, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, int ncores);
 RcppExport SEXP _tidypopgen_increment_ibs_counts(SEXP kSEXP, SEXP k2SEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP ncoresSEXP) {
@@ -1137,6 +1152,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_sfs_project_cpp", (DL_FUNC) &_tidypopgen_sfs_project_cpp, 5},
     {"_tidypopgen_sfs_preview_cpp", (DL_FUNC) &_tidypopgen_sfs_preview_cpp, 4},
     {"_tidypopgen_increment_as_counts", (DL_FUNC) &_tidypopgen_increment_as_counts, 6},
+    {"_tidypopgen_as_counts_within_groups", (DL_FUNC) &_tidypopgen_as_counts_within_groups, 5},
     {"_tidypopgen_increment_ibs_counts", (DL_FUNC) &_tidypopgen_increment_ibs_counts, 6},
     {"_tidypopgen_increment_ibs_counts_weighted", (DL_FUNC) &_tidypopgen_increment_ibs_counts_weighted, 8},
     {"_tidypopgen_increment_king_numerator", (DL_FUNC) &_tidypopgen_increment_king_numerator, 6},

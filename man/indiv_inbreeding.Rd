@@ -32,8 +32,9 @@ It is not possible to use this with grouped tibbles.}
 }
 \value{
 a numeric vector of inbreeding coefficients. For a grouped
-\code{\link{gen_tibble}}, a list of such vectors, one per group (the coefficients
-are computed within each group).
+\code{\link{gen_tibble}}, a list of such vectors, one per group in the order of
+\code{\link[dplyr:group_keys]{dplyr::group_keys()}} (the coefficients are computed within each group;
+an empty group gives an empty vector).
 }
 \description{
 This function calculates the inbreeding coefficient for each individual based
@@ -44,6 +45,12 @@ on the beta estimate from Weir and Goudet (2017).
 objects (grouped or not) and for their \code{genotypes} column. Other packages
 can add methods for their own classes (e.g. tibbles of genotype
 likelihoods).
+
+For a grouped \code{\link{gen_tibble}}, the coefficients are computed within each
+group, giving the same results as
+\code{group_map(.x, ~ indiv_inbreeding(.x))}, but much faster: the genotypes are
+read only once, and only the pairs of individuals within each group are
+compared.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

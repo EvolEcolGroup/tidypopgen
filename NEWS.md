@@ -53,6 +53,8 @@
   (4-5 times)
 * `pairwise_king()` on a grouped `gen_tibble` computes kinship within each
   group (it used to ignore the groups), 10-30 times faster than `group_map()`
+* faster `indiv_inbreeding()` on a grouped `gen_tibble` (about 10 times with
+  many groups), reading the genotypes once for all groups
 * faster VCF reading (in parallel with `n_cores`), and faster reading of
   *.ped* files straight into the backing file
 * faster `gt_as_vcf()`, `gt_update_backingfile()` and `gt_order_loci()` with
