@@ -12,7 +12,7 @@ files, SFS, CRAN checks) is described in the topic documents listed in
   table, prefetch into L2), which also speeds up IBS, allele sharing and
   `qc_report_indiv(kings_threshold = )`; one tibble for the tidy output.
 - **Where:** `pca_missing`, `53843683`, `80d7e577`, `c7c09c67`, `e39cdf49`
-  (local, not pushed); SIMD packing on branch `king_simd_packing`
+  (pushed 19 Nov, with Andrea's OK); SIMD packing on branch `king_simd_packing`
   (`9853e055`, local, not merged).
 - **Result:** HGDP650, KING within populations 1.85 -> 0.41 s on 1 core,
   0.44 -> 0.081 s on 8 (`group_map()` took 8.7 / 10.3 s); full matrix ~20%

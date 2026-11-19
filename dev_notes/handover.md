@@ -8,7 +8,7 @@ documents listed in `README.md`.
 
 | branch | purpose | base | pushed | merged |
 |---|---|---|---|---|
-| `pca_missing` | `gt_pca()` with missing genotypes as PLINK, projections; with #232 (checks, DAPC and pcadapt) and #233 (LD clumping and pruning); CI fix, re-rendered articles, and the fixes of the review of #232/#233 (merged from `codereview_missing`, report in `code_review_2026-11_pca_missing.md`); then grouped `pairwise_king()` and the faster bit-packed kernel (4 commits from `53843683` to `e39cdf49`, see `pairwise_bitpacked.md`) | `dev` | up to `8ade0b8d`; the KING commits are local | no (PR #231) |
+| `pca_missing` | `gt_pca()` with missing genotypes as PLINK, projections; with #232 (checks, DAPC and pcadapt) and #233 (LD clumping and pruning); CI fix, re-rendered articles, and the fixes of the review of #232/#233 (merged from `codereview_missing`, report in `code_review_2026-11_pca_missing.md`); then grouped `pairwise_king()` and the faster bit-packed kernel (4 commits from `53843683` to `e39cdf49`, see `pairwise_bitpacked.md`) | `dev` | yes | no (PR #231) |
 | `king_simd_packing` | SIMD packing of the bit-packed kernel (`9853e055`), not merged: below the 1.5x bar (`pairwise_bitpacked.md`) | `pca_missing` at `c7c09c67` | no | no |
 
 About 19 other local branches on the laptop look unmerged to git (`git branch
@@ -21,10 +21,9 @@ About 19 other local branches on the laptop look unmerged to git (`git branch
 - **Read first:** `code_review_2026-11_pca_missing.md` ("Changes in
   behaviour to check before merging", "Fixes by area"; Andrea ticks the
   boxes).
-- **Then:** push the 4 local KING commits of `pca_missing` (with Andrea's
-  OK: they change what `pairwise_king()` returns on grouped tibbles; see
-  `pairwise_bitpacked.md`), check that the CI of #231 is green, and merge
-  #231 into `dev` (squash).
+- **Then:** check that the CI of #231 is green (the KING commits, which
+  change what `pairwise_king()` returns on grouped tibbles, were pushed on
+  19 Nov; see `pairwise_bitpacked.md`), and merge #231 into `dev` (squash).
 - **Done when:** #231 is merged.
 
 ### 2. **P2** [desktop] Re-time the HGDP650 benchmarks
