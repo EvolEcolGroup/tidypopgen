@@ -9,10 +9,9 @@ documents listed in `README.md`.
 | branch | purpose | base | pushed | merged |
 |---|---|---|---|---|
 | `pca_missing` | `gt_pca()` with missing genotypes as PLINK, projections; with #232 (checks, DAPC and pcadapt) and #233 (LD clumping and pruning) | `dev` | yes | no (PR #231) |
-| `ld_missing` | LD clumping and pruning with missing genotypes | `pca_missing` | yes (to delete on GitHub) | yes (#233, squash `9272aab9`); deleted locally |
 
-`pca_missing_checks` was merged as #232 (squash `e4b5a46a`) and deleted, on
-GitHub and on the laptop.
+`pca_missing_checks` (#232, squash `e4b5a46a`) and `ld_missing` (#233,
+squash `9272aab9`) were merged and deleted, on GitHub and on the laptop.
 
 About 19 other local branches look unmerged to git (`git branch --no-merged
 origin/dev`), but many were squash-merged; see the clean-up task.
@@ -72,9 +71,8 @@ See the desktop queue.
 
 ### 8. **P3** [cleanup] Branches and scratch files
 
-- Delete the branch `ld_missing` on GitHub (merged as #233), and
-  `pca_missing` once merged; review the other local branches on the laptop
-  (many squash-merged).
+- Delete `pca_missing` once merged; review the other local branches on the
+  laptop (many squash-merged).
 - When the optimisation is done: `/media/andrea/annex/tmp/claude/tidypopgen/bench_dapc/`
   (~3 GB) and `bench_ld/` (~0.5 GB).
 

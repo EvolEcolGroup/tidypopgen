@@ -31,7 +31,7 @@ the VCF work) is not released yet.
 - [ ] **P3** [decide] Add the regression of loci on the LD axes (structure coefficients) to `gt_dapc()`? Options: no; yes, as `tidy(matrix = "structure")`. Recommended: no, until a user needs it.
 - [ ] **P3** [decide] `skip_on_cran()` for the `gt_snmf()` tests? Under valgrind, LEA's `R_sNMF` has an invalid write.
 - [ ] **P3** [claude] Redraft and post the bigsnpr issue on the temporary FBMs left in `tempdir()`.
-- [ ] **P3** [cleanup] Delete the branch `ld_missing` on GitHub (merged as #233), and `pca_missing` once merged; review the other local branches on the laptop; the benchmark data on the laptop's annex (`bench_dapc/`, `bench_ld/`) when the optimisation is done.
+- [ ] **P3** [cleanup] Delete `pca_missing` once merged; review the other local branches on the laptop; the benchmark data on the laptop's annex (`bench_dapc/`, `bench_ld/`) when the optimisation is done.
 
 **Done**
 - Missing-genotype checks; `gt_dapc()` and `gt_pcadapt()` on the PCA of missing genotypes: PR #232, merged 19 Nov.
