@@ -29,6 +29,10 @@ bigsnpr and bigstatsr
     bigstatsr::predict.big_SVD().
   - R/autoplot_gt_dapc.R: the plot of the loadings is modified from bigstatsr.
   - R/local_reimplementations.R: CutBySize() and seq2(), from bigstatsr.
+  - src/ld_bitpacked.cpp: ld_clump_cpp() (loci_ld_clump()) is adapted from
+    clumping_chr() (src/clumping.cpp) and which_to_check()
+    (src/clumping-utils.h) of bigsnpr, and R/loci_ld_clump.R follows
+    clumpingChr() (R/clumping.R).
 
 hierfstat
   Copyright (C) Jérôme Goudet.

@@ -101,6 +101,14 @@ gt_grouped_hwe <- function(BM, rowInd, colInd, groupIds, ngroups, midp, ncores =
     .Call(`_tidypopgen_gt_grouped_hwe`, BM, rowInd, colInd, groupIds, ngroups, midp, ncores, block_size)
 }
 
+ld_r2_pairs_cpp <- function(BM, rowInd, colInd, pairs) {
+    .Call(`_tidypopgen_ld_r2_pairs_cpp`, BM, rowInd, colInd, pairs)
+}
+
+ld_clump_cpp <- function(BM, rowInd, colInd, ordInd, rankInd, pos, size, thr, min_shared, remove_insufficient, ncores) {
+    .Call(`_tidypopgen_ld_clump_cpp`, BM, rowInd, colInd, ordInd, rankInd, pos, size, thr, min_shared, remove_insufficient, ncores)
+}
+
 unsorted_by_chromosome_cpp <- function(x, chromosome, level_group) {
     .Call(`_tidypopgen_unsorted_by_chromosome_cpp`, x, chromosome, level_group)
 }
