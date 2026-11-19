@@ -99,7 +99,7 @@ for (names_as_int in c(TRUE, FALSE)) {
   ), {
     anole_gt <- make_int_gt(names_as_int)
     anole_gt <- gt_impute_simple(anole_gt, method = "mode")
-    # (DAPC needs a PCA of the imputed genotypes)
+    # (a PCA of the imputed genotypes, whose DAPC needs no 'data')
     gt_set_imputed(anole_gt, set = TRUE)
     anole_pca <- gt_pca(anole_gt, k = 5, n_cores = 2)
     expect_identical(row_names(anole_pca$v), loci_names(anole_gt))
