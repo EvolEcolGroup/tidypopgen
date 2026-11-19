@@ -4,6 +4,26 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-19 (manica01): review fixes on `codereview_missing`, roh_hgdp re-timed
+
+- **Done:** `pca_missing` pushed (CI fix and articles); roh_hgdp re-timed
+  with PLINK 1.9 (`f3444917`, local); the review's findings fixed on the new
+  branch `codereview_missing` (17 commits): the randomised-PCA hang with
+  custom scalings, `max_missing` in `gt_dapc()` and `gt_pcadapt()`, the LD
+  and #232 test gaps (by an agent), `exclude` and `min_shared` validation,
+  docs; an independent agent verified every fix against its parent.
+- **Where:** `codereview_missing` (worktree
+  `~/claude_work/tidypopgen/codereview_missing`), from `e185047f`, local.
+- **Result:** every code fix's test fails on its parent; each LD test
+  commit kills its mutant; 5,856 tests pass; check 0/0/2 NOTEs (machine).
+  Anolis: top DAPC loci genotyped in 42-46 of 46 (were 3-16). pcadapt +4%
+  on HGDP650 (one more pass); outputs identical.
+- **Decisions:** `max_missing`, a fraction, default 0.5 (Andrea; options:
+  a count, or both); no minimum for the PCA itself (Claude, on Andrea's
+  question); HG population names, never "Pygmies" (Andrea).
+- **Notes changed:** `code_review_2026-11_pca_missing.md`, `gt_pca.md`,
+  `ld_missing.md`, `handover.md`, `summary.md`.
+
 ## 2026-11-19 (manica01): CI fix, full checks, review of #232/#233, articles re-rendered
 
 - **Done:** found why every R-CMD-check job of #231 failed (a test ran the

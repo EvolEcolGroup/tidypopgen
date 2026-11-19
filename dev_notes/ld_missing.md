@@ -80,8 +80,12 @@ Branch `ld_missing` (from `pca_missing_checks`), 19 Nov 2026, laptop.
   individuals): the exact integer counts do not link them (r^2 > 0.2 is
   required), while bigsnpr's floating point put some just above 0.2.
 - Test gaps found in the review (`code_review_2026-11_pca_missing.md`): the
-  PLINK fixture has 60 individuals (one 64-bit word), and four plausible
-  kernel bugs pass the tests.
+  PLINK fixture had 60 individuals (one 64-bit word), and four plausible
+  kernel bugs passed the tests. Closed on `codereview_missing` (19 Nov
+  2026): the fixture stacked 3 times (180 individuals, 3 words), r^2 of
+  complete and incomplete loci against `cor()`, the `min_shared` and window
+  boundaries (checked against `plink1.9` and `bigsnpr::snp_clumping()`);
+  each of the four mutants now fails.
 
 ## Numbers
 
@@ -123,3 +127,7 @@ on laptopX1 (`run_ld.R`, `driver_clump.sh`, `driver_prune.sh`,
   many individuals, a cache of packed blocks would bound the memory.
 - Pruning is single-threaded, as PLINK; chromosomes could run in parallel.
 - `--indep-pairphase` and `--indep` (VIF) are not implemented.
+- Chromosome "0": PLINK 1.9 leaves its loci out of both `.prune.in` and
+  `.prune.out`; `loci_ld_prune()` prunes them as any other chromosome
+  (documented). Keep, drop them (as `--extract prune.in`) or keep them all
+  (as `--exclude prune.out`)? For Andrea (see the review report).

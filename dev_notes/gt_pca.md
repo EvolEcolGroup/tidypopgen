@@ -369,7 +369,9 @@ population 1.
   skipping the locus loadings or falling back on the biased ones.
 - **Examples and vignette a03 without imputation** (Andrea). In a03, 44 of
   3,249 anole loci are genotyped in only 1 or 2 of 46 individuals and get
-  `NA` loadings, with a warning that the vignette explains.
+  `NA` loadings, with a warning that the vignette explains (since 19 Nov,
+  with `max_missing`: 84 loci, with more than half their genotypes missing,
+  get `NA` loadings without a warning).
 - **pcadapt in this branch** (Andrea). bigsnpr's simple-regression t-scores
   are kept (Claude): they match the pcadapt package, a multiple regression
   was no better in the simulations, and it would change results on complete
@@ -377,6 +379,27 @@ population 1.
 - **Only the DAPC loadings** (Andrea): the regression on the LD axes is
   recorded below as a possible extra output.
 - `stopifnot_complete_pca()` had no caller left and was removed.
+- **A minimum of genotyped individuals per locus, as a fraction:
+  `max_missing`** (Andrea, 19 Nov 2026, from Claude's options after the
+  review). In `gt_dapc()` and `gt_pcadapt()`, loci with more than a fraction
+  `max_missing` (default 0.5) of their genotypes missing get `NA` loadings
+  or statistics; pcadapt also needs `k + 2` genotyped individuals (with
+  `k + 1` the fit is exact). Alternatives: a count (`min_genotyped = 20`),
+  or both. Why a fraction: the noise of a locus's loading, relative to a
+  complete locus, grows as sqrt(n / n_genotyped), so which loci dominate
+  depends on the fraction genotyped; a count of 20 is too weak on 1,000
+  individuals and, below 20 individuals, makes every incomplete locus `NA`.
+  On the anolis data (46 individuals), a count of 10 left loci genotyped in
+  16-19 at the top of LD1 (11 times the 99th percentile); `max_missing = 0.5`
+  gives `NA` to 84 of 3,249 loci, and the top loci are genotyped in 42-46
+  (largest loading 1.02 times the 99th percentile); pcadapt's top loci are
+  genotyped in 24-46 (largest -log10 p 9.2, against 1,539 before). Commits
+  `e5ad3272`, `e7976d6b`, `af55bd5a` on `codereview_missing`.
+- **No minimum for the PCA itself** (Claude, 19 Nov 2026; Andrea asked):
+  each pair of individuals is compared over the loci genotyped in both, and
+  removing the anolis loci genotyped in fewer than 10, 20 or 30 individuals
+  leaves PC1-5 unchanged (|r| >= 0.9999); the PCA's loadings (missing as 0,
+  as PLINK) shrink sparse loci rather than inflate them.
 
 ### Possible extra output: coefficients on the LD axes
 
@@ -558,15 +581,16 @@ on simulated data.
 - Least squares and `"plink"` were compared only with missingness random
   over loci; a simulation with missingness concentrated on loci with large
   loadings would show the expected advantage of least squares.
-- With missing genotypes, DAPC loadings and pcadapt statistics of loci
-  genotyped in very few individuals (but at least `n_pca + 1`, or 3) are
-  large and noisy, and top the rankings (vignette a03: the top 20 DAPC
-  contributors are genotyped in 3-16 of 46 individuals). A minimum number
-  genotyped per locus is for Andrea to decide (see
-  `code_review_2026-11_pca_missing.md`).
 - `gt_pcadapt()` could drop the loci with the same genotype in every
   individual (with `NA` statistics, as the `pcadapt` package does) instead
-  of stopping.
+  of stopping, now that loci above `max_missing` get `NA` statistics.
+- `gt_pcadapt()` with a PCA of complete genotypes and `x` with missing
+  genotypes stops; it could test locus by locus, as with a PCA of missing
+  genotypes (for Andrea to decide; see the review report).
+- `gt_pcadapt()` with a PCA of missing genotypes counts the missing
+  genotypes in one more pass: +4% on HGDP650 (2.88 s to 3.00 s, k = 5,
+  4 P-cores, 19 Nov 2026, manica01); bigsnpr's `multLinReg()` could return
+  the counts if it is replaced by our own t-scores.
 - DAPC and pcadapt with missing genotypes: re-time the whole routes on the
   desktop (manica01), with the paired adds (`16445878`), and on data with
   more typical missingness (a few %), where the regression mostly sums the
