@@ -240,15 +240,15 @@ ancient_modern <- rbind(ho_modern, ancient)
 
 ```
 ## 
-## gen_tibble saved to /tmp/RtmpZVnTbR/gt_merged_1fc0c76e247.gt
+## gen_tibble saved to /tmp/Rtmpwuej7f/gt_merged_12f19d34078b68.gt
 ```
 
 ```
-## using FBM RDS: /tmp/RtmpZVnTbR/gt_merged_1fc0c76e247.rds
+## using FBM RDS: /tmp/Rtmpwuej7f/gt_merged_12f19d34078b68.rds
 ```
 
 ```
-## with FBM backing file: /tmp/RtmpZVnTbR/gt_merged_1fc0c76e247.bk
+## with FBM backing file: /tmp/Rtmpwuej7f/gt_merged_12f19d34078b68.bk
 ```
 
 ```
@@ -260,7 +260,7 @@ ancient_modern <- rbind(ho_modern, ancient)
 ```
 
 ```
-## gt_load('/tmp/RtmpZVnTbR/gt_merged_1fc0c76e247.gt')
+## gt_load('/tmp/Rtmpwuej7f/gt_merged_12f19d34078b68.gt')
 ```
 
 Then, we group the ancient and modern data by population:
