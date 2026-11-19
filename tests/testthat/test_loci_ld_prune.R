@@ -163,6 +163,40 @@ test_that("loci_ld_prune treats pairs with few shared individuals as asked", {
     insufficient = "remove"
   )
   expect_lt(sum(remove_all), sum(keep_all) / 5)
+  # by hand: the first and third loci are genotyped in different individuals
+  # (none at both), and the other pairs have r2 = 0 and 0.25; the first
+  # locus has the lowest MAF (0.25, against 0.5 and 0.5)
+  hand_gt <- gen_tibble(
+    x = cbind(
+      c(0, 0, 1, 1, NA, NA, NA, NA),
+      c(0, 2, 1, 1, 0, 2, 1, 1),
+      c(NA, NA, NA, NA, 0, 1, 2, 1)
+    ),
+    indiv_meta = data.frame(id = letters[1:8], population = "pop1"),
+    loci = data.frame(
+      name = c("rs1", "rs2", "rs3"),
+      chromosome = 1,
+      position = c(1000, 2000, 3000),
+      genetic_dist = 0,
+      allele_ref = "A",
+      allele_alt = "T"
+    ),
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  # with "keep", no pair is linked, and every locus is kept (as plink
+  # --indep-pairwise 3 1 0.5); with "remove", the first and third loci are
+  # linked, and the first, with the lower MAF, is pruned
+  expect_identical(
+    loci_ld_prune(hand_gt, window_size = 3, step_size = 1, thr_r2 = 0.5),
+    c(TRUE, TRUE, TRUE)
+  )
+  expect_identical(
+    loci_ld_prune(hand_gt,
+      window_size = 3, step_size = 1, thr_r2 = 0.5, insufficient = "remove"
+    ),
+    c(FALSE, TRUE, TRUE)
+  )
 })
 
 test_that("loci_ld_prune uses pairs genotyped together in min_shared", {
@@ -225,6 +259,41 @@ test_that("loci_ld_prune windows in kb include loci at their size", {
       window_size = 10, step_size = 1, thr_r2 = 0.2, window_in_kb = TRUE
     ),
     c(TRUE, FALSE, TRUE)
+  )
+})
+
+test_that("loci_ld_prune windows in kb can be shorter than the gaps", {
+  # four loci with the same genotypes (r2 = 1, and the same MAF), 100 kb
+  # apart
+  far_gt <- gen_tibble(
+    x = matrix(c(0, 1, 2, 0, 1, 2), nrow = 6, ncol = 4),
+    indiv_meta = data.frame(id = letters[1:6], population = "pop1"),
+    loci = data.frame(
+      name = paste0("rs", 1:4),
+      chromosome = 1,
+      position = c(1, 2, 3, 4) * 100000,
+      genetic_dist = 0,
+      allele_ref = "A",
+      allele_alt = "T"
+    ),
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  # with windows of 50 kb, each locus is alone in its window, and all are
+  # kept; with windows of 100 kb, each pair of neighbours is compared, and
+  # the later locus is pruned (as plink --indep-pairwise 50kb 1 0.2, and
+  # 100kb 1 0.2)
+  expect_identical(
+    loci_ld_prune(far_gt,
+      window_size = 50, step_size = 1, thr_r2 = 0.2, window_in_kb = TRUE
+    ),
+    c(TRUE, TRUE, TRUE, TRUE)
+  )
+  expect_identical(
+    loci_ld_prune(far_gt,
+      window_size = 100, step_size = 1, thr_r2 = 0.2, window_in_kb = TRUE
+    ),
+    c(TRUE, FALSE, TRUE, FALSE)
   )
 })
 
