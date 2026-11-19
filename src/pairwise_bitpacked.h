@@ -191,18 +191,19 @@ struct PwValid {
 
 /******************************************************************************/
 
-// Counts for individual i against all individuals j with i <= j < n, over
-// n_words words of the current chunk; cnt_i points at the counts of pair
-// (i, i) in the packed lower triangle; wts points at the weights of the loci
-// of the chunk (only used by PwIbsWeighted, nullptr otherwise).
+// Counts for individual i against the individuals j with j0 <= j < j1 (and
+// j >= i), over n_words words of the current chunk; cnt_i points at the
+// counts of pair (i, i) in the packed lower triangle; wts points at the
+// weights of the loci of the chunk (only used by PwIbsWeighted, nullptr
+// otherwise).
 template <class Stat>
-PW_ALWAYS_INLINE void pw_row_body(std::size_t i, std::size_t n,
-                                  std::size_t n_words,
+PW_ALWAYS_INLINE void pw_row_body(std::size_t i, std::size_t j0,
+                                  std::size_t j1, std::size_t n_words,
                                   const uint64_t* planes, uint32_t* cnt_i,
                                   const uint32_t* wts) {
   const std::size_t stride = n_words * Stat::N_PLANES;
   const uint64_t* pi = planes + i * stride;
-  for (std::size_t j = i; j < n; j++) {
+  for (std::size_t j = j0; j < j1; j++) {
     const uint64_t* pj = planes + j * stride;
     uint32_t c[Stat::N_COUNTS] = {0};
     for (std::size_t w = 0; w < n_words; w++) {
@@ -218,20 +219,20 @@ PW_ALWAYS_INLINE void pw_row_body(std::size_t i, std::size_t n,
 
 // generic version (software popcount on x86 without POPCNT)
 template <class Stat>
-void pw_row_generic(std::size_t i, std::size_t n, std::size_t n_words,
-                    const uint64_t* planes, uint32_t* cnt_i,
-                    const uint32_t* wts) {
-  pw_row_body<Stat>(i, n, n_words, planes, cnt_i, wts);
+void pw_row_generic(std::size_t i, std::size_t j0, std::size_t j1,
+                    std::size_t n_words, const uint64_t* planes,
+                    uint32_t* cnt_i, const uint32_t* wts) {
+  pw_row_body<Stat>(i, j0, j1, n_words, planes, cnt_i, wts);
 }
 
 #ifdef PW_X86_POPCNT
 // the same code, compiled to use the POPCNT instruction
 template <class Stat>
 __attribute__((target("popcnt")))
-void pw_row_popcnt(std::size_t i, std::size_t n, std::size_t n_words,
-                   const uint64_t* planes, uint32_t* cnt_i,
-                   const uint32_t* wts) {
-  pw_row_body<Stat>(i, n, n_words, planes, cnt_i, wts);
+void pw_row_popcnt(std::size_t i, std::size_t j0, std::size_t j1,
+                   std::size_t n_words, const uint64_t* planes,
+                   uint32_t* cnt_i, const uint32_t* wts) {
+  pw_row_body<Stat>(i, j0, j1, n_words, planes, cnt_i, wts);
 }
 #endif
 
@@ -408,18 +409,14 @@ std::vector<uint32_t> pw_bitpacked_counts(Environment BM,
               return rows[a] < rows[b];
             });
 
-  // number of 64-bit words per chunk: keep the planes of the individuals
-  // visited by each individual (all of them, or those of its group) within
-  // ~256KB, so that they stay in cache whilst visiting the pairs, and the
-  // planes of all individuals within ~64MB; but use at least 4 and at most
-  // 64 words per chunk
-  std::size_t max_span = 1;
-  for (std::size_t i = 0; i < n; i++) {
-    max_span = std::max(max_span, pair_end[i] - i);
-  }
-  std::size_t chunk_words = (256 * 1024) / (8 * Stat::N_PLANES * max_span);
-  chunk_words = std::min(chunk_words, (64 * 1024 * 1024) /
-    (8 * Stat::N_PLANES * std::max<std::size_t>(n, 1)));
+  // number of 64-bit words per chunk: 64 (4096 loci), unless the planes of
+  // all individuals would exceed ~64MB; but at least 4 words. The pairs are
+  // visited by tiles (below), so that the planes of the individuals visited
+  // stay in cache whatever the size of the chunk; long chunks amortise the
+  // update of the counts of each pair (which, for many individuals, do not
+  // fit in cache)
+  std::size_t chunk_words = (64 * 1024 * 1024) /
+    (8 * Stat::N_PLANES * std::max<std::size_t>(n, 1));
   chunk_words =
     std::min<std::size_t>(64, std::max<std::size_t>(4, chunk_words));
   const std::size_t chunk_loci = chunk_words * 64;
@@ -427,6 +424,29 @@ std::vector<uint32_t> pw_bitpacked_counts(Environment BM,
   std::vector<uint64_t> planes(n * chunk_words * Stat::N_PLANES);
   uint64_t* p_planes = planes.data();
   uint32_t* p_counts = counts.data();
+
+  // the pairs are visited by tiles of individuals: a unit of work is the
+  // pairs (i, j) with i in tile ti and j in tile tj (ti <= tj, j >= i), so
+  // that the planes of the individuals of tile tj (~128KB) stay in cache
+  // whilst the individuals of tile ti are compared with them; units
+  // without pairs (e.g. across groups) are skipped
+  const std::size_t tile = std::min<std::size_t>(256, std::max<std::size_t>(
+    16, (128 * 1024) / (8 * chunk_words * Stat::N_PLANES)));
+  const std::size_t n_tiles = (n + tile - 1) / tile;
+  std::vector<std::size_t> tile_max_end(n_tiles, 0);
+  for (std::size_t i = 0; i < n; i++) {
+    tile_max_end[i / tile] = std::max(tile_max_end[i / tile], pair_end[i]);
+  }
+  std::vector<std::size_t> unit_ti, unit_tj;
+  for (std::size_t tj = 0; tj < n_tiles; tj++) {
+    for (std::size_t ti = 0; ti <= tj; ti++) {
+      if (tile_max_end[ti] > tj * tile) {
+        unit_ti.push_back(ti);
+        unit_tj.push_back(tj);
+      }
+    }
+  }
+  const std::size_t n_units = unit_ti.size();
 
   // use the hardware popcount when available
   bool use_popcnt = false;
@@ -490,22 +510,35 @@ std::vector<uint32_t> pw_bitpacked_counts(Environment BM,
       }
       // (implicit barrier: all planes are ready)
 
-      // visit all pairs (j >= i); rows of the triangle have different
-      // lengths, so use a dynamic schedule
-      #pragma omp for schedule(dynamic, 8)
-      for (std::size_t i = 0; i < n; i++) {
-        uint32_t* cnt_i = p_counts + tri_start[i] * Stat::N_COUNTS;
-        std::size_t end_i = pair_end[i];
-        const uint32_t* wts_chunk = p_wts ? p_wts + l0 : nullptr;
+      // visit all pairs (j >= i), tile by tile; tiles on the diagonal have
+      // half the pairs, so use a dynamic schedule
+      const uint32_t* wts_chunk = p_wts ? p_wts + l0 : nullptr;
+      #pragma omp for schedule(dynamic, 1)
+      for (std::size_t u = 0; u < n_units; u++) {
+        std::size_t i0 = unit_ti[u] * tile;
+        std::size_t i1 = std::min(n, i0 + tile);
+        std::size_t j0 = unit_tj[u] * tile;
+        std::size_t j1 = std::min(n, j0 + tile);
+        for (std::size_t i = i0; i < i1; i++) {
+          std::size_t start = std::max(i, j0);
+          std::size_t end = std::min(pair_end[i], j1);
+          if (start >= end) {
+            continue;
+          }
+          uint32_t* cnt_i = p_counts + tri_start[i] * Stat::N_COUNTS;
 #ifdef PW_X86_POPCNT
-        if (use_popcnt) {
-          pw_row_popcnt<Stat>(i, end_i, n_words, p_planes, cnt_i, wts_chunk);
-        } else {
-          pw_row_generic<Stat>(i, end_i, n_words, p_planes, cnt_i, wts_chunk);
-        }
+          if (use_popcnt) {
+            pw_row_popcnt<Stat>(i, start, end, n_words, p_planes, cnt_i,
+                                wts_chunk);
+          } else {
+            pw_row_generic<Stat>(i, start, end, n_words, p_planes, cnt_i,
+                                 wts_chunk);
+          }
 #else
-        pw_row_generic<Stat>(i, end_i, n_words, p_planes, cnt_i, wts_chunk);
+          pw_row_generic<Stat>(i, start, end, n_words, p_planes, cnt_i,
+                               wts_chunk);
 #endif
+        }
       }
       // (implicit barrier: the planes can be overwritten by the next chunk)
     }
