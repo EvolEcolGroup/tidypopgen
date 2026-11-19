@@ -20,6 +20,14 @@ gt_set_imputed(missing_gt, set = FALSE)
 test_that("gt_pcadapt works on gt_pca object", {
   missing_pcadapt <- gt_pcadapt(missing_gt, missing_pca, k = 3)
   expect_true((inherits(missing_pcadapt, "gt_pcadapt")))
+  # with a PCA of imputed genotypes, the imputed genotypes are used (none is
+  # missing, so every locus is tested, even with max_missing = 0), and the
+  # gen_tibble is left as it was (not set to use them)
+  expect_false(gt_uses_imputed(missing_gt))
+  imputed_pcadapt <- gt_pcadapt(missing_gt, missing_pca, k = 3, max_missing = 0)
+  expect_false(anyNA(imputed_pcadapt$score))
+  expect_identical(imputed_pcadapt$score, missing_pcadapt$score)
+  expect_false(gt_uses_imputed(missing_gt))
 })
 
 test_that("gt_pcadapt with a PCA of missing genotypes", {

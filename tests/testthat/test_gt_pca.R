@@ -510,6 +510,9 @@ test_that("the randomised SVDs use at most n_cores cores", {
   )
   complete_gt <- missing_gt %>%
     select_loci_if(loci_missingness(genotypes) == 0)
+  # bigstatsr's parallel SVD runs 1 + ncores processes: it gets n_cores - 1
+  # cores (1 below 3)
+  expect_identical(vapply(1:4, svd_n_cores, numeric(1)), c(1, 1, 2, 3))
   # R CMD check allows 2 processes (which parallel::makeCluster() checks with
   # this variable): with n_cores = 2, bigstatsr's parallel SVD started 3
   withr::local_envvar(c("_R_CHECK_LIMIT_CORES_" = "TRUE"))
