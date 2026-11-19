@@ -639,7 +639,9 @@ test_that("loadings of loci with a nearly singular regression are NA", {
     backingfile = tempfile(), quiet = TRUE
   )
   dup_pca <- gt_pca(dup_gt, k = 2, n_cores = 1)
-  expect_equal(dup_pca$u[4, ], dup_pca$u[9, ])
+  # (equal to the precision of the eigensolver, which differs between
+  # platforms: about 1e-8 on macOS and Windows)
+  expect_equal(dup_pca$u[4, ], dup_pca$u[9, ], tolerance = 1e-6)
   expect_warning(
     dup <- loci_lsq_loadings(dup_pca, dup_gt, n_pca = 2, n_cores = 1),
     "1 loci are genotyped in too few individuals"
