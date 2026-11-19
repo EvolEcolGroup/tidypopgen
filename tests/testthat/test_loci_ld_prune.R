@@ -144,6 +144,13 @@ test_that("loci_ld_prune checks its parameters as PLINK does", {
     ),
     "'min_shared' should be an integer of at least 2"
   )
+  expect_error(
+    loci_ld_prune(ld_gt,
+      window_size = 10, step_size = 1, thr_r2 = 0.5, min_shared = 1e10
+    ),
+    "and at most .Machine$integer.max",
+    fixed = TRUE
+  )
 })
 
 test_that("loci_ld_prune treats pairs with few shared individuals as asked", {

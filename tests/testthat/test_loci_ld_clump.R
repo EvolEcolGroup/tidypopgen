@@ -118,6 +118,15 @@ test_that("loci_ld_clump with missing genotypes", {
     loci_ld_clump(ld_gt, thr_r2 = 0.2, min_shared = 1),
     "'min_shared' should be an integer of at least 2"
   )
+  # (values above the largest integer would become NA in C++, and set no
+  # minimum)
+  for (too_large in c(1e10, Inf)) {
+    expect_error(
+      loci_ld_clump(ld_gt, thr_r2 = 0.2, min_shared = too_large),
+      "and at most .Machine$integer.max",
+      fixed = TRUE
+    )
+  }
   # imputed genotypes are used only if the gen_tibble is set to use them
   ld_gt <- gt_impute_simple(ld_gt, method = "mode")
   expect_identical(loci_ld_clump(ld_gt, thr_r2 = 0.2, size = 50), ref)

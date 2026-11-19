@@ -216,11 +216,17 @@ loci_ld_clump.vctrs_bigSNP <- function(
 }
 
 # Check `min_shared`, the minimum number of individuals genotyped at both loci
-# for their r^2 to be used (in loci_ld_clump() and loci_ld_prune())
+# for their r^2 to be used (in loci_ld_clump() and loci_ld_prune()). It is
+# passed to C++ as an integer, so it can be at most .Machine$integer.max: a
+# larger value (or Inf) would become NA there, which sets no minimum at all
 stopifnot_min_shared <- function(min_shared) {
   valid <- is.numeric(min_shared) && length(min_shared) == 1 &&
-    !is.na(min_shared) && min_shared >= 2 && min_shared == round(min_shared)
+    !is.na(min_shared) && min_shared >= 2 &&
+    min_shared <= .Machine$integer.max && min_shared == round(min_shared)
   if (!valid) {
-    stop("'min_shared' should be an integer of at least 2")
+    stop(
+      "'min_shared' should be an integer of at least 2 (and at most ",
+      ".Machine$integer.max)"
+    )
   }
 }
