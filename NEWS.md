@@ -11,9 +11,9 @@
 * `gt_pca` objects record whether they used imputed genotypes and whether
   their genotypes had missing values (attributes `imputed` and `missing`)
 * `gt_pcadapt()` works on a PCA of missing genotypes, testing each locus on
-  the individuals genotyped at it, as the `pcadapt` package does; loci with
-  more than `max_missing` (by default half) of their genotypes missing are not
-  tested (`NA`)
+  the individuals genotyped at it, as the `pcadapt` package does (ignoring
+  imputed genotypes); loci with more than `max_missing` (by default half) of
+  their genotypes missing are not tested (`NA`)
 * `loci_ld_clump()` works with missing genotypes, without imputation: r^2 is
   computed over the individuals genotyped at both loci, as in PLINK (new
   arguments `min_shared` and `insufficient`); it uses imputed genotypes only
@@ -22,9 +22,9 @@
   also with missing genotypes
 * `gt_dapc()` works on a PCA of missing genotypes: give the `gen_tibble` as
   `data`, and the loadings of the loci are estimated without counting missing
-  genotypes as 0; loci with more than `max_missing` (by default half) of
-  their genotypes missing get `NA` loadings (new arguments `data`,
-  `max_missing` and `n_cores`)
+  genotypes as 0 (ignoring imputed genotypes); loci with more than
+  `max_missing` (by default half) of their genotypes missing get `NA`
+  loadings (new arguments `data`, `max_missing` and `n_cores`)
 * errors on missing genotypes name the function and say how to impute them;
   `gt_pca(method = "random")` no longer reads the genotypes an extra time to
   look for them
