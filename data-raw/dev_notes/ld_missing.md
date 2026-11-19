@@ -78,7 +78,7 @@ Branch `ld_missing` (from `pca_missing_checks`), 19 Nov 2026, laptop.
 
 HGDP650 with 44% missing genotypes (643,591 loci, 1,043 individuals; the
 masked data of `gt_pca.md`, "DAPC and pcadapt on HGDP650"), laptopX1, 4
-cores, -O2 installs (old: `d00d726b`; new: `8cbed569` of `ld_missing`), 19
+cores, -O2 installs (old: `d00d726b`; new: `0a38453b` of `ld_missing`, benchmarked as `8cbed569`, the same tree before the rebase onto `pca_missing`), 19
 Nov 2026; medians (min-max) of 3 balanced runs; indicative (laptop).
 
 | Clumping (`thr_r2 = 0.2`, 500 kb) | imputation | clumping | loci kept |

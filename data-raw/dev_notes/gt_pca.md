@@ -136,6 +136,10 @@ PLINK to 5e-7 (`data-raw/validate/create_plink_pca_test_data.R`, test
 
 ## Analyses that need complete genotypes (18 Nov 2026, laptop)
 
+(The commits cited in this section and the next were on `pca_missing_checks`,
+squash-merged into `pca_missing` as `e4b5a46a` (#232); their hashes are only
+in the local branch `pca_missing_checks` on laptopX1.)
+
 CodeRabbit (PR #231) found that the `gt_pcadapt()` example ran pcadapt on
 the scores of a PCA with missing genotypes. That PCA was `"partial"`, which
 uses imputed genotypes only if the `gen_tibble` is set to use them.
