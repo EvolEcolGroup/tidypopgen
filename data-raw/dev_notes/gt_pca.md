@@ -152,7 +152,7 @@ uses imputed genotypes only if the `gen_tibble` is set to use them.
 
   | Function | Engine | Check |
   |---|---|---|
-  | `loci_ld_clump()` | `snp_clumping` | sampled, `stopifnot_no_missing()` |
+  | `loci_ld_clump()` (until 19 Nov: it now handles missing genotypes, see `ld_missing.md`) | `snp_clumping` | sampled, `stopifnot_no_missing()` |
   | `gt_pcadapt()` (its `x`) | `snp_pcadapt` | sampled |
   | `gt_pca(method = "random")`, `gt_pca_randomSVD()` | `big_randomSVD` | sampled, then exact through the scaling (`scaling_lookup()`) for scalings that depend on the genotypes (the default) |
   | `gt_pca_partialSVD()` | `big_SVD` | the same |
@@ -164,7 +164,8 @@ uses imputed genotypes only if the `gen_tibble` is set to use them.
   `indiv_*()`, `loci_*()`, `pop_*()`, `windows_*()` and `jackknife_*()`
   functions, `gt_pca(method = "partial")`, the ROH functions, and
   `gt_admixture()`, `gt_snmf()` and `gt_extract_f2()` (through the external
-  tools).
+  tools). Since 19 Nov, also `gt_dapc()`, `gt_pcadapt()` (see below),
+  `loci_ld_clump()` and the new `loci_ld_prune()` (see `ld_missing.md`).
 
 ### What was wrong with bigsnpr's check
 
