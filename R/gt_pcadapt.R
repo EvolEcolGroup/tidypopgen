@@ -20,10 +20,10 @@
 #' With missing genotypes, each locus is tested on the individuals genotyped
 #' at it, as in the `pcadapt` package. Loci with more than a fraction
 #' `max_missing` of their genotypes missing (by default, more than half), or
-#' genotyped in fewer than `k + 2` individuals, are not tested, and get `NA`
-#' statistics: their t-scores, from few individuals, are noisy (and infinite
-#' with `k + 1` individuals, an exact fit), and would top the rankings of
-#' the loci.
+#' genotyped in fewer than 3 individuals (the minimum for a t-score), are not
+#' tested, and get `NA` statistics: with few individuals genotyped, their
+#' t-scores have heavy tails, which the normal approximation of `bigsnpr`
+#' turns into tiny p-values at the top of the rankings of the loci.
 #'
 #' Loci with the same genotype in every individual genotyped can not be
 #' tested, and give an error.
@@ -123,19 +123,20 @@ gt_pcadapt <- function(x, pca, k, n_cores = 1, max_missing = 0.5) {
   # snp_pcadapt() tests each locus on the individuals genotyped at it (as
   # the pcadapt package does); test only the loci genotyped in enough
   # individuals: with at most a fraction max_missing of missing genotypes (as
-  # loci_missingness() computes it), and at least k + 2 individuals (with
-  # k + 1, the fit is exact, and the t-scores infinite); the others get NA.
+  # loci_missingness() computes it), and at least 3 individuals (the
+  # t-scores are of simple regressions on each component, with n - 2
+  # degrees of freedom); the others get NA.
   # (With complete or imputed genotypes, all the loci are tested.)
   n_ind <- length(x_ind_row)
   n_missing <- missingness_cpp(
     BM = .gt_get_fbm(x), rowInd = x_ind_row, colInd = x_ind_col,
     ncores = n_cores
   )
-  tested <- n_missing / n_ind <= max_missing & n_ind - n_missing >= k + 2
+  tested <- n_missing / n_ind <= max_missing & n_ind - n_missing >= 3
   if (!any(tested)) {
     stop(
       "no locus is genotyped in enough individuals to be tested: at most ",
-      "a fraction 'max_missing' of missing genotypes, and at least k + 2 ",
+      "a fraction 'max_missing' of missing genotypes, and at least 3 ",
       "individuals, are needed"
     )
   }

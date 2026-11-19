@@ -77,13 +77,13 @@ test_that("gt_pcadapt does not test loci with many missing genotypes", {
   sim_gt <- gt_simulate_bn(n_indiv = c(10, 10, 10), n_loci = 200, fst = 0.2)
   sim_gt <- select_loci_if(sim_gt, loci_maf(genotypes) > 0.05)
   geno <- show_genotypes(sim_gt)
-  # loci genotyped in 3 of the 30 individuals (fewer than k + 2 = 4, an exact
-  # fit), in 14 (more than half of the genotypes missing), in 15 (exactly
-  # half missing, tested) and in 4, each spread over the three populations
-  geno[-c(1, 11, 21), 1] <- NA
+  # loci genotyped in 2 of the 30 individuals (fewer than 3, no t-score), in
+  # 14 (more than half of the genotypes missing), in 15 (exactly half
+  # missing, tested) and in 3, spread over the populations
+  geno[-c(1, 11), 1] <- NA
   geno[-c(1:5, 11:15, 21:24), 2] <- NA
   geno[-c(1:5, 11:15, 21:25), 3] <- NA
-  geno[-c(1, 2, 11, 21), 4] <- NA
+  geno[-c(1, 11, 21), 4] <- NA
   # (all four are polymorphic among the individuals genotyped)
   geno[c(1, 11), 1:4] <- matrix(c(0, 2), nrow = 2, ncol = 4)
   miss_gt <- gen_tibble(geno,
@@ -110,9 +110,9 @@ test_that("gt_pcadapt does not test loci with many missing genotypes", {
     stats::predict(miss_pcadapt)[-sparse], stats::predict(tested_pcadapt)
   )
   expect_true(all(is.na(stats::predict(miss_pcadapt)[sparse])))
-  # with max_missing = 1, only the locus genotyped in fewer than k + 2
-  # individuals is not tested (its fit would be exact, with an infinite
-  # t-score)
+  # with max_missing = 1, only the locus genotyped in fewer than 3
+  # individuals is not tested (the t-scores are of simple regressions on each
+  # component: 3 individuals are enough, whatever k)
   all_pcadapt <- gt_pcadapt(miss_gt, miss_pca, k = 2, max_missing = 1)
   expect_identical(which(is.na(all_pcadapt$score)), 1L)
   # the plots leave the loci not tested out

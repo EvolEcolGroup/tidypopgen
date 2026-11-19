@@ -50,10 +50,10 @@ automatically), and otherwise its genotypes with their missing values.
 With missing genotypes, each locus is tested on the individuals genotyped
 at it, as in the \code{pcadapt} package. Loci with more than a fraction
 \code{max_missing} of their genotypes missing (by default, more than half), or
-genotyped in fewer than \code{k + 2} individuals, are not tested, and get \code{NA}
-statistics: their t-scores, from few individuals, are noisy (and infinite
-with \code{k + 1} individuals, an exact fit), and would top the rankings of
-the loci.
+genotyped in fewer than 3 individuals (the minimum for a t-score), are not
+tested, and get \code{NA} statistics: with few individuals genotyped, their
+t-scores have heavy tails, which the normal approximation of \code{bigsnpr}
+turns into tiny p-values at the top of the rankings of the loci.
 
 Loci with the same genotype in every individual genotyped can not be
 tested, and give an error.
