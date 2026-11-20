@@ -1,6 +1,6 @@
 # tidypopgen: summary
 
-Updated 2026-11-20 (manica01). One section: the package's issue in
+Updated 2026-11-20 (manica01, bed reader session). One section: the package's issue in
 dramanica/claude_jobs, with the single list of its tasks. Its first
 paragraph, status and next steps are copied into the issue
 (`scripts/sync_issue.py`).
@@ -9,7 +9,7 @@ paragraph, status and next steps are copied into the issue
 
 Population genetics with `gen_tibble`s: faster input (VCF reading in `dev`, merging of VCFs prototyped), analyses with missing genotypes without imputation (PCA, DAPC, pcadapt, LD clumping and pruning), and fast kinship and inbreeding within groups.
 
-**Status.** PR #231 (`pca_missing` into `dev`, with #232 and #233, the review fixes, and grouped `pairwise_king()` and `indiv_inbreeding()` in one pass) passes CI except codecov (patch coverage 94.7%, target 95.5%), and waits for Andrea's review. Prototypes on `merge_vcf_speed` make `gt_merge_vcfs()` 1.6x faster on many single-sample files with identical outputs (balanced laptop runs, sgdp-like 54.9 -> 33.0 s), and on `king_plink_ideas` a two-path KING kernel makes the full matrix 2.3x faster with AVX2 (13.8 -> 6.1 s on 1 thread, ~1.9x faster than PLINK 2) and 1.5x faster without, outputs identical; desktop timings of both are scheduled for 20 Nov, 19:20. Handover: `dev_notes/handover.md` on `pca_missing`; `vcf_merge.md`, `pairwise_bitpacked.md`.
+**Status.** PR #231 (`pca_missing` into `dev`, with #232 and #233, the review fixes, and grouped `pairwise_king()` and `indiv_inbreeding()` in one pass) passes CI except codecov (patch coverage 94.7%, target 95.5%), and waits for Andrea's review. Prototypes on `merge_vcf_speed` make `gt_merge_vcfs()` 1.6x faster on many single-sample files with identical outputs (balanced laptop runs, sgdp-like 54.9 -> 33.0 s), and on `king_plink_ideas` a two-path KING kernel makes the full matrix 2.3x faster with AVX2 (13.8 -> 6.1 s on 1 thread, ~1.9x faster than PLINK 2) and 1.5x faster without, outputs identical; desktop timings of both are scheduled for 20 Nov, 19:20; for large PLINK files, PR #234 (into `pca_missing`) reads `.bed` files in parallel and checks their size, and `gt_save_speed` makes `gt_load()` 4x faster on 91M loci. Handover: `dev_notes/handover.md` on `bed_reader` and `pca_missing`; `vcf_merge.md`, `pairwise_bitpacked.md`, `bed_reader.md`, `gt_save_speed.md`.
 
 With missing genotypes, imputation pulls individuals with many missing
 genotypes together and makes missingness an axis of the PCA (on HGDP650, PC1
@@ -31,8 +31,18 @@ elsewhere) are implemented and tested. One unattended desktop job, set up on
 and plink2, and KING against PLINK 2 and the prototypes at 1 and 8 threads;
 KING then needs a decision.
 
+On the baboon data (486 x 166M SNPs; its `.bim` is truncated at 91M loci,
+which `gen_tibble()` now reports as an error), reading the `.bed` from the
+hard disk is bound by the disk; from the SSD the parallel reader takes the
+`.bed` step from 43.7 to 28.3 s on 8 cores (the SSD's write speed). Saving
+and loading the `.gt` then cost most: with the alleles saved as codes,
+`gt_load()` takes 4.1 s instead of 17.2 s on 91M loci, but older versions
+can not load the new files.
+
 **Next steps**
 - [ ] **P1** [review] Review the fixes (boxes of the review report) and the grouped `pairwise_king()` and `indiv_inbreeding()`, and merge PR #231: done when #231 is in `dev`.
+- [ ] **P2** [review] Review PR #234 (parallel `.bed` reader; a `.bed` that does not match its `.bim` and `.fam` is an error): done when merged (retarget to `dev` once #231 is merged).
+- [ ] **P2** [decide] Save the alleles of `.gt` files as codes (`gt_save_speed`: `gt_load()` 4.2x, saving 2.9x faster on 91M loci)? Older versions could not load the new files; recommended yes, before 1.1.0. Then NEWS, version and a PR.
 - [ ] **P2** [desktop] Re-time on the P-cores: the `gt_merge_vcfs()` prototypes against bcftools and plink2, and KING against PLINK 2 (1 and 8 threads; job `vcf_merge_king` scheduled 20 Nov 19:20, ~3 h), then the HGDP650 PCA/DAPC/pcadapt/LD benchmarks (not set up): medians in `vcf_merge.md`, `pairwise_bitpacked.md`, `gt_pca.md`, `ld_missing.md`.
 - [ ] **P2** [claude] Make `merge_vcf_speed` ready for a PR (file names in pass-1 errors, a cache-vs-reread test, full suite, `gen_tibble()` timing): done when a PR into `dev` is open, after #231.
 - [ ] **P2** [claude] Keep optimising: pcadapt's t-scores, the GRM's count of shared loci, the DAPC regression, KING: after the desktop timings of the two-path kernel (`king_plink_ideas` `e2692136`), check a build without AVX2, then a PR if Andrea agrees: done when >5% faster with identical outputs.
@@ -40,6 +50,7 @@ KING then needs a decision.
 - [ ] **P3** [cleanup] Delete merged branches (`pca_missing`, then `merge_vcf_speed`, `king_*` once decided); review the other local branches on the laptop; ask before deleting the benchmark data on the laptop's annex and in `~/claude_work/tidypopgen/` on the desktop.
 
 **Done**
+- Parallel `.bed` reader with size and magic checks (PR #234; `.bed` step 1.5x on 8 cores from an SSD, none from a hard disk), and `.gt` alleles as codes (`gt_save_speed`), on the baboon data: 20 Nov.
 - Desktop set-up of the VCF merge and KING timings (builds identical, md5s as on the laptop); job scheduled for 20 Nov, 19:20: 20 Nov.
 - Balanced laptop timings of the VCF merge prototypes (4 threads) and of the KING prototypes against PLINK 2 (1 and 4 threads), written up: 20 Nov.
 - VCF merge prototypes and PLINK 2 KING comparison written up, both branches pushed after the annex failure (`git fsck` clean): 20 Nov.
