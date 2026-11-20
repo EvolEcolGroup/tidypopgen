@@ -65,11 +65,13 @@ download.file(download_url, download_path, method = "wget")
 
 In the following vignette, we place these files into the subdirectory
 `data/hgdp/`, and we will use the paths to the bed file `hgdp650.qc.hg19.bed`
-and the metadata file `hgdp650_id_pop.txt` to read in our data.
+and the metadata file `hgdp650_id_pop.txt` to read in our data. We make the
+column names of the metadata lower case, as are those of the `gen_tibble`:
 
 ```{r}
 bed_path <- "./data/hgdp/hgdp650.qc.hg19.bed"
-meta_info <- readr::read_tsv("./data/hgdp/hgdp650_id_pop.txt")
+meta_info <- readr::read_tsv("./data/hgdp/hgdp650_id_pop.txt") %>%
+  rename_with(tolower)
 ```
 
 # Create gen_tibble object
@@ -89,8 +91,8 @@ Add metadata
 
 ```{r}
 hgdp <- hgdp %>% mutate(
-  population = meta_info$population[match(hgdp$id, meta_info$Id)],
-  region = meta_info$Region[match(hgdp$id, meta_info$Id)]
+  population = meta_info$population[match(hgdp$id, meta_info$id)],
+  region = meta_info$region[match(hgdp$id, meta_info$id)]
 )
 ```
 

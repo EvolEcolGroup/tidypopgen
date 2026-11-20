@@ -119,11 +119,12 @@ metadata <-
     sep = ";"
   )
 metadata <- metadata %>%
-  rename(id = Illumina_ID) %>%
-  rename(population = Population_ID)
+  rename_with(tolower) %>%
+  rename(id = illumina_id) %>%
+  rename(population = population_id)
 sgdp <- left_join(sgdp, metadata, by = "id")
-sgdp$Region[sgdp$Region == "WestEurasia"] <- "West Eurasia"
-sgdp$Region[sgdp$Region == "EastAsia"] <- "East Asia"
+sgdp$region[sgdp$region == "WestEurasia"] <- "West Eurasia"
+sgdp$region[sgdp$region == "EastAsia"] <- "East Asia"
 ```
 
 When we now call our loci tibble with `show_loci()`, we can see that the loci names are now integers:
@@ -149,7 +150,7 @@ sgdp_indiv_rep <- qc_report_indiv(sgdp)
 ```
 
 ```{r loci_report, benchmark = TRUE}
-sgdp <- sgdp %>% group_by(Region)
+sgdp <- sgdp %>% group_by(region)
 sgdp_loci_rep <- qc_report_loci(sgdp)
 sgdp <- sgdp %>% ungroup()
 ```
@@ -226,7 +227,7 @@ sgdp_pca <- sgdp %>% gt_pca(n_cores = n_cores)
 
 ```{r PCA}
 autoplot(sgdp_pca, type = "scores") +
-  aes(colour = sgdp$Region) +
+  aes(colour = sgdp$region) +
   labs(color = "Region")
 ```
 
@@ -238,7 +239,7 @@ We can also perform a discriminant analysis of principal components (DAPC) using
 
 ```{r dapc, benchmark = TRUE}
 sgdp_dapc <- gt_dapc(sgdp_pca,
-  pop = as.factor(sgdp$Region)
+  pop = as.factor(sgdp$region)
 )
 ```
 
@@ -253,7 +254,7 @@ Our DAPC autoplot shows that most individuals are assigned to their own region's
 Finally, to examine the differentiation between regions, we can calculate pairwise F~ST~.
 
 ```{r pairwise_fst, benchmark = TRUE}
-grouped_sgdp <- sgdp %>% group_by(Region)
+grouped_sgdp <- sgdp %>% group_by(region)
 pairwise_fst <- grouped_sgdp %>% pairwise_pop_fst(
   n_cores = n_cores,
   type = "pairwise"
