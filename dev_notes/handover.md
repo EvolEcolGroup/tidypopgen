@@ -9,7 +9,7 @@ documents listed in `README.md`.
 | branch | purpose | base | pushed | merged |
 |---|---|---|---|---|
 | `pca_missing` | `gt_pca()` with missing genotypes as PLINK, projections; with #232 (checks, DAPC and pcadapt) and #233 (LD clumping and pruning); CI fix, re-rendered articles, the fixes of the review of #232/#233 (`code_review_2026-11_pca_missing.md`); grouped `pairwise_king()` and the faster bit-packed kernel (`53843683` to `e39cdf49`), grouped `indiv_inbreeding()` in one pass and the KING fallback removed (`f6110412`, `5718c15c`; `pairwise_bitpacked.md`) | `dev` | yes | no (PR #231) |
-| `vignette_grouping` | vignettes and articles group by population early; lower-case metadata columns; grouped `rbind()` and `gt_add_sf()` fixed; `select_loci_if()` documents that groups are ignored; precompiled articles re-rendered (`84417a3b`..`87c75ea4`); worktree `~/claude_work/tidypopgen/wt_vignette_grouping`. Andrea's uncommitted edits of `a02_qc.Rmd` and `benchmark_hgdp.Rmd.orig` (and the lower-case edits) are also still uncommitted in `~/git/tidypopgen`: discard them there before merging this branch into `pca_missing` | `pca_missing` at `dd7a251d` | no | no |
+| `grouping` | vignettes and articles group by population early; lower-case metadata columns; grouped `rbind()` and `gt_add_sf()` fixed; `select_loci_if()` documents that groups are ignored; precompiled articles re-rendered (`84417a3b`..`87c75ea4`); worktree `~/claude_work/tidypopgen/wt_grouping`. Andrea's uncommitted edits of `a02_qc.Rmd` and `benchmark_hgdp.Rmd.orig` (and the lower-case edits) are also still uncommitted in `~/git/tidypopgen`: discard them there before merging this branch into `pca_missing` | `pca_missing` at `dd7a251d` | no | no |
 | `merge_vcf_speed` | three prototypes speeding up `gt_merge_vcfs()` (`d3b982d0` keep the genotypes of pass 1, `bc6856b6` parallel line parsing, `6982994c` raw alleles), outputs identical; balanced 4-thread laptop runs: 1.6x on sgdp and many, 1.2x on pops; worktree `/media/andrea/Elements1/tmp/claude/tidypopgen/merge_vcf/wt` (`vcf_merge.md`) | `pca_missing` at `5e207d78` | yes (20 Nov) | no PR |
 | `king_plink_ideas` | KING ideas from PLINK 2: `72377615` tiles + 64-word chunks (1.35x), `ef1c0b4c` AVX2 KING kernel, `e2692136` two paths (AVX2 2.3x on the full matrix, scalar 1.5x); outputs identical, tests pass with and without AVX2; worktree `/media/andrea/Elements1/tmp/claude/tidypopgen/plink_king/wt` (`pairwise_bitpacked.md`) | `pca_missing` at `b8255226` | yes (20 Nov) | no |
 | `king_simd_packing` | SIMD packing of the bit-packed kernel (`9853e055`), not merged: below the 1.5x bar (`pairwise_bitpacked.md`) | `pca_missing` at `c7c09c67` | no | no |
@@ -34,7 +34,7 @@ once the branches are no longer needed).
 - **State:** CI at `b8255226` passes on all R-CMD-check jobs, lint, pkgdown
   and test-coverage; codecov fails on coverage only (patch 94.68% against a
   95.50% target, project -0.08%). Later commits touch only `dev_notes/`.
-- **Before merging:** review branch `vignette_grouping` (vignettes grouped
+- **Before merging:** review branch `grouping` (vignettes grouped
   early, lower-case metadata, grouped `rbind()` and `gt_add_sf()` fixes,
   `select_loci_if()` docs; full test suite passes on an -O2 build) and merge
   it into `pca_missing` once the desktop job of 20 Nov has pushed (~22:30).
