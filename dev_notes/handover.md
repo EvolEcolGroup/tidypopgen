@@ -11,7 +11,7 @@ documents listed in `README.md`.
 | `pca_missing` | `gt_pca()` with missing genotypes as PLINK, projections; with #232 (checks, DAPC and pcadapt) and #233 (LD clumping and pruning); CI fix, re-rendered articles, the fixes of the review of #232/#233 (`code_review_2026-11_pca_missing.md`); grouped `pairwise_king()` and the faster bit-packed kernel (`53843683` to `e39cdf49`), grouped `indiv_inbreeding()` in one pass and the KING fallback removed (`f6110412`, `5718c15c`; `pairwise_bitpacked.md`); the parallel `.bed` reader with its size checks (PR #234, `58821fab`; `bed_reader.md`) | `dev` | yes | no (PR #231) |
 | `merge_vcf_speed` | three prototypes speeding up `gt_merge_vcfs()` (`d3b982d0` keep the genotypes of pass 1, `bc6856b6` parallel line parsing, `6982994c` raw alleles), outputs identical; balanced 4-thread laptop runs: 1.6x on sgdp and many, 1.2x on pops; worktree `/media/andrea/Elements1/tmp/claude/tidypopgen/merge_vcf/wt` (`vcf_merge.md`) | `pca_missing` at `5e207d78` | yes (20 Nov) | no PR |
 | `king_plink_ideas` | KING ideas from PLINK 2: `72377615` tiles + 64-word chunks (1.35x), `ef1c0b4c` AVX2 KING kernel, `e2692136` two paths (AVX2 2.3x on the full matrix, scalar 1.5x); outputs identical, tests pass with and without AVX2; worktree `/media/andrea/Elements1/tmp/claude/tidypopgen/plink_king/wt` (`pairwise_bitpacked.md`) | `pca_missing` at `b8255226` | yes (20 Nov) | no |
-| `bed_reader` | the parallel `.bed` reader; squash-merged into `pca_missing` (PR #234, `58821fab`), its last notes commit cherry-picked there; delete it (local and on origin) with its worktree `~/claude_work/tidypopgen/bed_reader/wt` (clean-up task) | `pca_missing` | yes | yes (20 Nov) |
+| `bed_reader` | the parallel `.bed` reader; squash-merged into `pca_missing` (PR #234, `58821fab`), its last notes commit cherry-picked there; deleted locally with its work folder (20 Nov, Andrea); still on origin | `pca_missing` | yes | yes (20 Nov) |
 | `king_simd_packing` | SIMD packing of the bit-packed kernel (`9853e055`), not merged: below the 1.5x bar (`pairwise_bitpacked.md`) | `pca_missing` at `c7c09c67` | no | no |
 
 About 19 other local branches on the laptop look unmerged to git (`git branch
@@ -89,12 +89,11 @@ once the branches are no longer needed).
 - Delete `pca_missing` once #231 is merged, `king_simd_packing` and
   `king_plink_ideas` once decided, `merge_vcf_speed` once its PR is merged;
   review the other local branches on the laptop (many squash-merged).
-- `bed_reader` is merged (PR #234): delete it, locally and on origin, and
-  `~/claude_work/tidypopgen/bed_reader/` on manica01 (14 GB: the baboon
-  subset of 91M loci, the -O2 libraries of the timings, the worktree); asked
-  Andrea on 20 Nov. The baboon fileset in
-  `/media/andrea/data1/baboon_consortium/phase2_plink/` is now complete
-  (`bed_reader.md`), so the subset is not needed to re-time.
+- `bed_reader` is merged (PR #234); the local branch and
+  `~/claude_work/tidypopgen/bed_reader/` were deleted on 20 Nov (Andrea);
+  the branch is still on origin. To re-time the `.bed` reader, use the full
+  baboon fileset in `/media/andrea/data1/baboon_consortium/phase2_plink/`
+  (`bed_reader.md`).
 - Ask Andrea before deleting benchmark files (he may keep optimising with
   them). On the laptop's annex, under `/media/andrea/annex/tmp/claude/tidypopgen/`:
   `bench_dapc/` (~3 GB), `bench_ld/` (~0.5 GB), `bench_inb/`; on the
@@ -215,9 +214,6 @@ sessions first (the benchmarking skill, "Unattended desktop jobs").
 - [claude] Saving `.gt` files with tens of millions of loci: alleles as
   codes, 4x faster loading, not adopted (Andrea); patch and numbers in
   `gt_save_speed.md`.
-- On manica01, `~/claude_work/tidypopgen/bed_reader/` holds the worktree of
-  `bed_reader`, -O2 libraries, and the 91M-SNP baboon subset (14 GB in
-  `data/`); delete once #234 is merged.
 - [decide] Merge `king_simd_packing` (SIMD packing: 1.35-1.5x on grouped
   KING on one core, 1.04x on 8; ~170 lines of x86-only code)? Recommended
   no, unless single-core grouped KING matters (`pairwise_bitpacked.md`).

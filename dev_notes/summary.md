@@ -46,10 +46,10 @@ but Andrea judged it not worth the complexity (with that many loci
 - [ ] **P2** [claude] Make `merge_vcf_speed` ready for a PR (file names in pass-1 errors, a cache-vs-reread test, full suite, `gen_tibble()` timing): done when a PR into `dev` is open, after #231.
 - [ ] **P2** [claude] Keep optimising: pcadapt's t-scores, the GRM's count of shared loci, the DAPC regression, KING: after the desktop timings of the two-path kernel (`king_plink_ideas` `e2692136`), check a build without AVX2, then a PR if Andrea agrees: done when >5% faster with identical outputs.
 - [ ] **P2** [review] Release 1.1.0 after #231: set the version, merge `dev` into `main`, re-run `urlchecker::url_check()` and submit (from 15 Nov; not rechecked).
-- [ ] **P3** [cleanup] Delete merged branches (`bed_reader` now, `pca_missing`, then `merge_vcf_speed`, `king_*` once decided); review the other local branches on the laptop; ask before deleting the benchmark data on the laptop's annex and in `~/claude_work/tidypopgen/` on the desktop.
+- [ ] **P3** [cleanup] Delete merged branches (`bed_reader` on origin, `pca_missing`, then `merge_vcf_speed`, `king_*` once decided); review the other local branches on the laptop; ask before deleting the benchmark data on the laptop's annex and in `~/claude_work/tidypopgen/` on the desktop.
 
 **Done**
-- PR #234 (parallel `.bed` reader) merged into `pca_missing` (`58821fab`); the redownloaded baboon `.bim` and `.fam` checked against the `.bed` (all 166M loci) and put in place: 20 Nov.
+- PR #234 (parallel `.bed` reader) merged into `pca_missing` (`58821fab`); the redownloaded baboon `.bim` and `.fam` checked against the `.bed` (all 166M loci) and put in place; local `bed_reader` branch and its work folder (14 GB) deleted: 20 Nov.
 - Parallel `.bed` reader with size and magic checks (PR #234; `.bed` step 1.5x on 8 cores from an SSD, none from a hard disk), on the baboon data; `.gt` alleles as codes prototyped and not adopted (Andrea; patch in `dev_notes/gt_save_speed/`): 20 Nov.
 - Desktop set-up of the VCF merge and KING timings (builds identical, md5s as on the laptop); job scheduled for 20 Nov, 19:20: 20 Nov.
 - Balanced laptop timings of the VCF merge prototypes (4 threads) and of the KING prototypes against PLINK 2 (1 and 4 threads), written up: 20 Nov.

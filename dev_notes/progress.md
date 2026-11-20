@@ -14,6 +14,9 @@ files, SFS, CRAN checks) is described in the topic documents listed in
   locus ending where 486 individuals say, A1 the minor allele at every locus
   (so the rows match). At Andrea's request they replaced the old files in
   `phase2_plink/` (the old `.bim` kept as `plink.biallelic.bim.truncated`).
+- **Clean-up (Andrea):** the local branch `bed_reader` and
+  `~/claude_work/tidypopgen/bed_reader/` (14 GB) deleted; the branch is
+  still on origin.
 - **Notes changed:** `bed_reader.md` ("The baboon fileset"), `handover.md`,
   `summary.md`.
 
