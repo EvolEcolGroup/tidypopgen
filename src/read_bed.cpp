@@ -50,10 +50,12 @@ static inline void decode_bed_loci(const unsigned char* chunk,
 
 // Read a PLINK .bed file (SNP-major) into an FBM.code256 (with as many rows
 // as individuals and as many columns as loci), using n_threads threads.
-// Returns true if the end of the file was reached (i.e. the file holds no
-// more bytes than the loci of the FBM need), false otherwise (the caller
-// gives a warning, as for bigsnpr). A file with fewer bytes than needed is an
-// error.
+// The file must hold exactly the bytes of the magic number and of the loci
+// (as PLINK requires): a smaller file is truncated, and a larger one does not
+// match the .bim and .fam files (e.g. one of them is truncated). The caller
+// (fbm_read_bed()) checks this before creating the FBM, so that a bad file
+// leaves no backing file behind; the checks are repeated here in case the
+// file changed in between.
 //
 // The file is read in chunks of loci (of ~64MB); while the threads decode a
 // chunk into the FBM, one of them reads the next chunk into a second buffer
@@ -62,7 +64,7 @@ static inline void decode_bed_loci(const unsigned char* chunk,
 // handed out to the threads in order, so that the FBM is written roughly
 // from start to end.
 // [[Rcpp::export]]
-bool read_bed_to_fbm(std::string filename, Environment BM,
+void read_bed_to_fbm(std::string filename, Environment BM,
                      const RawMatrix& tab, int n_threads) {
 
   XPtr<FBM_RW> xpBM = BM["address_rw"];
@@ -82,8 +84,7 @@ bool read_bed_to_fbm(std::string filename, Environment BM,
   if (!bed) {
     stop("could not open the .bed file " + filename);
   }
-  // the size of the file must be at least that of the magic number and of
-  // the loci (a smaller file would be truncated or corrupted)
+  // the size of the file must be that of the magic number and of the loci
   bed.seekg(0, std::ios::end);
   const unsigned long long file_size =
     static_cast<unsigned long long>(bed.tellg());
@@ -93,6 +94,12 @@ bool read_bed_to_fbm(std::string filename, Environment BM,
     stop("the .bed file " + filename + " is smaller than expected for the " +
          "number of individuals in the .fam file and of loci in the .bim " +
          "file; it might be truncated or corrupted");
+  }
+  if (file_size > needed) {
+    stop("the .bed file " + filename + " is larger than expected for the " +
+         "number of individuals in the .fam file and of loci in the .bim " +
+         "file; the .bim or .fam file might be truncated, or the files " +
+         "might not belong together");
   }
   bed.seekg(0, std::ios::beg);
   // magic number: 0x6C 0x1B, then 0x01 for a SNP-major file
@@ -171,8 +178,6 @@ bool read_bed_to_fbm(std::string filename, Environment BM,
     }
     Rcpp::checkUserInterrupt();
   }
-
-  return file_size == needed;
 }
 
 /******************************************************************************/

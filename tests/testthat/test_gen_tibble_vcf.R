@@ -856,30 +856,25 @@ test_that("bed files are read on several cores, and bad bed files are caught", {
   file.copy(file.path(ext_dir, "pop_a.bim"), bed_dir)
   file.copy(file.path(ext_dir, "pop_a.fam"), bed_dir)
   bad_path <- file.path(bed_dir, "pop_a.bed")
-  # truncated (a byte missing, or only the magic number)
-  for (n_bytes in c(length(bed_bytes) - 1, 3)) {
-    writeBin(bed_bytes[seq_len(n_bytes)], bad_path)
+  # each bad file gives an error, and leaves no backing file behind
+  expect_bad_bed <- function(bytes, message) {
+    writeBin(bytes, bad_path)
+    bk <- tempfile()
     expect_error(
-      gen_tibble(bad_path, backingfile = tempfile(), quiet = TRUE),
-      "truncated or corrupted"
+      gen_tibble(bad_path, backingfile = bk, quiet = TRUE),
+      message
     )
+    expect_false(file.exists(paste0(bk, ".bk")))
   }
+  # truncated (a byte missing, or only the magic number)
+  expect_bad_bed(bed_bytes[-length(bed_bytes)], "truncated or corrupted")
+  expect_bad_bed(bed_bytes[1:3], "truncated or corrupted")
+  # extra bytes at the end (e.g. the .bim file is truncated)
+  expect_bad_bed(c(bed_bytes, as.raw(0)), "the .bim or .fam file might be")
   # not a bed file, or an individual-major one
-  writeBin(c(as.raw(0), bed_bytes[-1]), bad_path)
-  expect_error(
-    gen_tibble(bad_path, backingfile = tempfile(), quiet = TRUE),
-    "wrong magic number"
-  )
-  writeBin(c(bed_bytes[1:2], as.raw(0), bed_bytes[-(1:3)]), bad_path)
-  expect_error(
-    gen_tibble(bad_path, backingfile = tempfile(), quiet = TRUE),
-    "individual-major"
-  )
-  # extra bytes at the end give a warning
-  writeBin(c(bed_bytes, as.raw(0)), bad_path)
-  expect_warning(
-    gen_tibble(bad_path, backingfile = tempfile(), quiet = TRUE),
-    "EOF of bedfile has not been reached"
+  expect_bad_bed(c(as.raw(0), bed_bytes[-1]), "wrong magic number")
+  expect_bad_bed(
+    c(bed_bytes[1:2], as.raw(0), bed_bytes[-(1:3)]), "individual-major"
   )
 })
 

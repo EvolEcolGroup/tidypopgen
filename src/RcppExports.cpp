@@ -728,17 +728,16 @@ BEGIN_RCPP
 END_RCPP
 }
 // read_bed_to_fbm
-bool read_bed_to_fbm(std::string filename, Environment BM, const RawMatrix& tab, int n_threads);
+void read_bed_to_fbm(std::string filename, Environment BM, const RawMatrix& tab, int n_threads);
 RcppExport SEXP _tidypopgen_read_bed_to_fbm(SEXP filenameSEXP, SEXP BMSEXP, SEXP tabSEXP, SEXP n_threadsSEXP) {
 BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
     Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
     Rcpp::traits::input_parameter< const RawMatrix& >::type tab(tabSEXP);
     Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(read_bed_to_fbm(filename, BM, tab, n_threads));
-    return rcpp_result_gen;
+    read_bed_to_fbm(filename, BM, tab, n_threads);
+    return R_NilValue;
 END_RCPP
 }
 // read_packedancestry

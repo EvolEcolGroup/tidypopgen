@@ -174,7 +174,7 @@ pop_stats_dip_pseudo_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploi
 }
 
 read_bed_to_fbm <- function(filename, BM, tab, n_threads) {
-    .Call(`_tidypopgen_read_bed_to_fbm`, filename, BM, tab, n_threads)
+    invisible(.Call(`_tidypopgen_read_bed_to_fbm`, filename, BM, tab, n_threads))
 }
 
 read_packedancestry <- function(filename, BM, tab) {

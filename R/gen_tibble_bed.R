@@ -132,6 +132,7 @@ fbm_read_bed <- function(bedfile,
                          backingfile = bigsnpr::sub_bed(bedfile),
                          n_cores = 1) {
   backingfile <- path.expand(backingfile)
+  bedfile <- path.expand(bedfile)
   # check that file exists
   if (file.exists(paste0(backingfile, ".bk"))) {
     stop("the backing file ", paste0(backingfile, ".bk"), " already exists")
@@ -139,20 +140,59 @@ fbm_read_bed <- function(bedfile,
   if (file.exists(paste0(backingfile, ".rds"))) {
     stop("the backing file ", paste0(backingfile, ".rds"), " already exists")
   }
+  # check the .bed file before creating the backing file (which can be very
+  # large), so that a bad file leaves nothing behind
+  check_bed_file(bedfile, n_indiv = n_indiv, n_snp = n_snp)
   big_geno <- bigstatsr::FBM.code256(
     nrow = n_indiv, ncol = n_snp,
     code = bigsnpr::CODE_012, backingfile = backingfile, init = NULL,
     create_bk = TRUE
   )
-  reach_eof <- read_bed_to_fbm(
-    path.expand(bedfile), big_geno, getCode(), n_cores
-  )
-  if (!reach_eof) {
-    warning("EOF of bedfile has not been reached.")
-  }
+  read_bed_to_fbm(bedfile, big_geno, getCode(), n_cores)
   rds <- bigstatsr::sub_bk(big_geno$backingfile, ".rds")
   saveRDS(big_geno, rds)
   rds
+}
+
+# Check that a PLINK .bed file starts with the magic number of a SNP-major
+# file, and that its size is exactly that of the magic number (3 bytes) and of
+# n_snp loci of ceiling(n_indiv / 4) bytes each, as PLINK requires. A larger
+# file is an error too: the .bim or .fam file does not match it (e.g. it was
+# truncated).
+check_bed_file <- function(bedfile, n_indiv, n_snp) {
+  magic <- readBin(bedfile, what = "raw", n = 3)
+  if (length(magic) < 3 || magic[1] != as.raw(0x6c) ||
+        magic[2] != as.raw(0x1b)) {
+    stop(
+      "the file ", bedfile, " is not a PLINK .bed file (wrong magic number)"
+    )
+  }
+  if (magic[3] != as.raw(0x01)) {
+    stop(
+      "the .bed file ", bedfile, " is in individual-major mode, which is ",
+      "not supported; convert it to SNP-major mode with PLINK (e.g. plink ",
+      "--bfile <prefix> --make-bed --out <new prefix>)"
+    )
+  }
+  # (sizes as doubles, which are exact up to 2^53 bytes)
+  expected_size <- 3 + as.numeric(n_snp) * ceiling(n_indiv / 4)
+  bed_size <- file.size(bedfile)
+  if (bed_size < expected_size) {
+    stop(
+      "the .bed file ", bedfile, " is smaller than expected for the number ",
+      "of individuals in the .fam file (", n_indiv, ") and of loci in the ",
+      ".bim file (", n_snp, "); it might be truncated or corrupted"
+    )
+  }
+  if (bed_size > expected_size) {
+    stop(
+      "the .bed file ", bedfile, " is larger than expected for the number ",
+      "of individuals in the .fam file (", n_indiv, ") and of loci in the ",
+      ".bim file (", n_snp, "); the .bim or .fam file might be truncated, ",
+      "or the files might not belong together"
+    )
+  }
+  invisible(TRUE)
 }
 
 
