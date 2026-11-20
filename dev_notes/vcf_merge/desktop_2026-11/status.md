@@ -1,0 +1,18 @@
+- Fri 20 Nov 19:20: scheduled run started; waiting for the machine to be idle (5-min load < 1.0)
+- Fri 20 Nov 19:30: machine idle (load 0.34 0.25 0.18)
+- Fri 20 Nov 19:30: start vcf_t1 (load 0.34 0.25 0.18)
+- Fri 20 Nov 19:45: done vcf_t1 (15 min)
+- Fri 20 Nov 19:46: start vcf_t8 (load 0.37 0.79 0.63)
+- Fri 20 Nov 19:56: done vcf_t8 (9 min)
+- Fri 20 Nov 19:57: start tools_t8 (load 0.69 1.33 1.06)
+- Fri 20 Nov 20:12: FAILED tools_t8 (15 min), see logs/phase_tools_t8.log
+- Fri 20 Nov 20:13: start king_bench_t1 (load 0.57 1.05 1.11)
+- Fri 20 Nov 20:21: done king_bench_t1 (8 min)
+- Fri 20 Nov 20:21: start king_bench_t8 (load 0.73 0.76 0.91)
+- Fri 20 Nov 20:27: done king_bench_t8 (5 min)
+- Fri 20 Nov 20:27: start king_proto_t1 (load 0.48 0.87 0.94)
+- Fri 20 Nov 20:35: done king_proto_t1 (7 min)
+- Fri 20 Nov 20:35: start king_proto_t8 (load 0.83 0.81 0.89)
+- Fri 20 Nov 20:38: done king_proto_t8 (3 min)
+- Fri 20 Nov 20:38: all phases run
+- Fri 20 Nov 20:38: reporting
