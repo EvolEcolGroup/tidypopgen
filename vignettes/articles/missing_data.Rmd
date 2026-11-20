@@ -72,11 +72,12 @@ simulate_data <- function(missing) {
       allele_ref = "A", allele_alt = "G"
     ),
     backingfile = tempfile(), quiet = TRUE
-  ) %>%
-    group_by(population)
+  )
 }
-complete_gt <- simulate_data(missing = 0)
-missing_gt <- simulate_data(missing = missing_rate)
+complete_gt <- simulate_data(missing = 0) %>%
+  group_by(population)
+missing_gt <- simulate_data(missing = missing_rate) %>%
+  group_by(population)
 
 # keep the loci that are polymorphic in the data with missing genotypes
 polymorphic <- loci_names(missing_gt)[loci_maf(missing_gt$genotypes) > 0]
