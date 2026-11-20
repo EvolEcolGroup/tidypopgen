@@ -153,6 +153,10 @@ on manica01, 20 Nov 2026, they match the `.bed`:
 - chromosomes 1-20 and 23 (X), each contiguous, positions strictly
   increasing, single-base alleles, all cM 0.
 
+At Andrea's request, the new `.bim` and `.fam` replaced the old ones in
+`phase2_plink/` (20 Nov 2026); the old `.bim` is kept there as
+`plink.biallelic.bim.truncated`.
+
 ## Open questions
 
 - **Saving and loading the `.gt`** is now the largest step after the `.bed`
