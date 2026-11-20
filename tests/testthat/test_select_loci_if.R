@@ -47,6 +47,15 @@ test_that("select_loci_if subsets correctly", {
     test_gt %>% select_loci_if(criterion_na)
   )
 
+  # groups are ignored: loci_maf(genotypes) is computed over all individuals,
+  # so rs1 (monomorphic in pop2, but not over all individuals) is kept
+  grouped_sub <- test_gt %>%
+    group_by(population) %>%
+    select_loci_if(loci_maf(genotypes) != 0)
+  expect_identical(show_loci(grouped_sub), show_loci(test_gen_sub))
+  expect_true("rs1" %in% loci_names(grouped_sub))
+  expect_identical(dplyr::group_vars(grouped_sub), "population")
+
   # Test error warnings: boolean criteria too short
   criterion_na <- c(TRUE, TRUE, NA, TRUE, TRUE)
   expect_error(
