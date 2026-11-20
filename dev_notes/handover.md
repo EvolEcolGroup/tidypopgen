@@ -53,9 +53,8 @@ once the branches are no longer needed).
 - **If yes:** on `gt_save_speed` (rebase onto `bed_reader` or `dev` as
   needed), NEWS (update the item "`gen_tibble()` and `gt_save()` save the
   *.gt* file twice as fast": now also `gt_load()` ~4x, and the files can not
-  be loaded by older versions), bump the version, full suite (it was
-  running at the end of the session: `test_full_gt.log` in the work folder),
-  push and PR.
+  be loaded by older versions), bump the version, push and PR (the full
+  suite passed on `332f5405`: 740 tests, on an -O2 install).
 
 ### 4. **P2** [desktop] Re-time on the P-cores
 
