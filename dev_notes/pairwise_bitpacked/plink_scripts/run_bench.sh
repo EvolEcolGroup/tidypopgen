@@ -12,13 +12,15 @@ DATA=$P/data/hgdp650_pop
 T=$1
 shift
 ROUNDS="$*"
-if [ "$T" = 1 ]; then CPUS=2; else CPUS=0-$((T - 1)); fi
+# CPUS and OUTDIR can be set (e.g. for a smoke test on the E-cores)
+if [ "$T" = 1 ]; then CPUS=${CPUS:-2}; else CPUS=${CPUS:-0-$((T - 1))}; fi
+OD=${OUTDIR:-$P/out}
 export TMPDIR=$P/rtmp OMP_NUM_THREADS=$T OPENBLAS_NUM_THREADS=1
-OUT=$P/out/run_$T
+OUT=$OD/run_$T
 mkdir -p $OUT
-LOG=$P/out/bench_log.txt
-PLTSV=$P/out/bench_plink_$T.tsv
-TPGTSV=$P/out/bench_tpg_$T.tsv
+LOG=$OD/bench_log.txt
+PLTSV=$OD/bench_plink_$T.tsv
+TPGTSV=$OD/bench_tpg_$T.tsv
 PLOPT="--threads $T --memory 2000"
 POPS=$(ls $P/data/keep | sed 's/\.txt$//')
 

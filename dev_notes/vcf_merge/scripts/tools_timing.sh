@@ -14,6 +14,9 @@ REP=$3
 STEPS=${4:-.}
 want() { [[ "$1" =~ $STEPS ]]; }
 CORES=${CORES:-"0-$((T - 1))"}
+# a counter from perf stat -x, summed over the core types of a hybrid CPU
+# (the desktop prints one line for cpu_atom and one for cpu_core)
+perf_sum() { awk -F, -v e="$1" '$3 ~ e && $1 ~ /^[0-9]+$/ { s += $1 } END { print s + 0 }' "$2"; }
 RES=$W/results/tools.tsv
 [ -f "$RES" ] || echo -e "date\ttool\tversion\tscenario\tthreads\trep\tstep\twall_s\tpeak_rss_mb\tload1\tcycles_u\tinstr_u\tout_mb" > "$RES"
 OUT=$W/out/tools/$SC
@@ -34,8 +37,8 @@ timed() { # tool version step outfile command...
     /usr/bin/time -f "%e %M" -o "$OUT/time" "$@" > "$OUT/$step.log" 2>&1
   local wall rss cyc ins size=NA
   read -r wall rss < "$OUT/time"
-  cyc=$(grep "cycles:u" "$OUT/perf" | cut -d, -f1)
-  ins=$(grep "instructions:u" "$OUT/perf" | cut -d, -f1)
+  cyc=$(perf_sum cycles:u "$OUT/perf")
+  ins=$(perf_sum instructions:u "$OUT/perf")
   if [ -n "$outf" ]; then size=$(du -cm $outf | tail -1 | cut -f1); fi
   echo -e "$(date +%FT%T)\t$tool\t$ver\t$SC\t$T\t$REP\t$step\t$wall\t$((rss / 1024))\t$load1\t$cyc\t$ins\t$size" >> "$RES"
   echo "$tool $step $SC T=$T rep=$REP: ${wall}s $((rss / 1024))MB load=$load1"

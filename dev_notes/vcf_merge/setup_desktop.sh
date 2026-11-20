@@ -23,6 +23,17 @@ if [ ! -x "$W/tools/bcftools/bin/bcftools" ]; then
   taskset -c "$CPUS" make -j8 > ../make.log && make install >> ../make.log
 fi
 B=$W/tools/bcftools/bin/bcftools
+# bgzip and tabix: from the htslib 1.25 bundled with bcftools when they are not
+# installed (manica01 had neither in Nov 2026; `sudo apt install tabix` would
+# give htslib 1.19)
+if ! command -v bgzip > /dev/null || ! command -v tabix > /dev/null; then
+  if [ ! -x "$W/tools/bcftools/bin/bgzip" ]; then
+    taskset -c "$CPUS" make -C "$W/tools/src/bcftools-1.25/htslib-1.25" -j8 bgzip tabix \
+      >> "$W/tools/src/make.log"
+    cp "$W"/tools/src/bcftools-1.25/htslib-1.25/{bgzip,tabix} "$W/tools/bcftools/bin/"
+  fi
+  export PATH=$W/tools/bcftools/bin:$PATH
+fi
 
 # 2. plink2: the AVX2 Linux build (the laptop used v2.0.0-b.1.4LM of 7 Nov 2026)
 if [ ! -x "$TPG_WORK/plink_king/bin/plink2" ]; then
@@ -43,6 +54,9 @@ INFO=$(for x in "DP Integer" "MQ Float" "FS Float" "QD Float" "CpG Integer" \
   "ANN String"; do set -- $x
   printf '##INFO=<ID=%s,Number=1,Type=%s,Description="annotation">\\n' "$1" "$2"; done)
 mkdir -p rtmp/hdr
+# zcat | head ends zcat with SIGPIPE: without this, pipefail makes the check
+# below always false and set -e stops the script
+set +o pipefail
 for f in data/sgdp/*.vcf.gz; do
   zcat "$f" | head -40 | grep -q '^##INFO' && continue
   b=$(basename "$f" .vcf.gz)
@@ -50,6 +64,7 @@ for f in data/sgdp/*.vcf.gz; do
     awk -v info="$INFO" '/^##contig/ && !done {printf "%s", info; done=1} {print}' > rtmp/hdr/$b.txt
   "$B" reheader -h rtmp/hdr/$b.txt -o rtmp/hdr/$b.vcf.gz "$f" && mv rtmp/hdr/$b.vcf.gz "$f"
 done
+set -o pipefail
 for f in data/*/*.vcf.gz; do [ -e "$f.tbi" ] || tabix -f -p vcf "$f"; done
 du -sh data/*
 
