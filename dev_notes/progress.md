@@ -14,7 +14,8 @@ files, SFS, CRAN checks) is described in the topic documents listed in
   (it went to dplyr's method); `gt_add_sf()` no longer messages on grouped
   data; `select_loci_if()` documents that groups are ignored.
 - **Where:** branch `vignette_grouping` (from `pca_missing` at `dd7a251d`),
-  `84417a3b`..`5301d5cc`, not pushed; worktree
+  `84417a3b`..`87c75ea4` (with the re-rendered precompiled articles,
+  indicative timings), not pushed; worktree
   `~/claude_work/tidypopgen/wt_vignette_grouping`.
 - **Result:** on HGDP650, grouping changes only the HWE p-values (loci with
   p < 0.01: 405,493 ungrouped, 2,744 within populations); all articles knit
