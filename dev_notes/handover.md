@@ -1,6 +1,6 @@
 # tidypopgen: handover
 
-Updated 2026-11-20 (manica01). For the next session: read this and
+Updated 2026-11-20 (laptopX1). For the next session: read this and
 `summary.md` first. History is in `progress.md`; designs are in the topic
 documents listed in `README.md`.
 
@@ -9,7 +9,7 @@ documents listed in `README.md`.
 | branch | purpose | base | pushed | merged |
 |---|---|---|---|---|
 | `pca_missing` | `gt_pca()` with missing genotypes as PLINK, projections; with #232 (checks, DAPC and pcadapt) and #233 (LD clumping and pruning); CI fix, re-rendered articles, the fixes of the review of #232/#233 (`code_review_2026-11_pca_missing.md`); grouped `pairwise_king()` and the faster bit-packed kernel (`53843683` to `e39cdf49`), grouped `indiv_inbreeding()` in one pass and the KING fallback removed (`f6110412`, `5718c15c`; `pairwise_bitpacked.md`) | `dev` | yes | no (PR #231) |
-| `grouping` | vignettes and articles group by population early; lower-case metadata columns; grouped `rbind()` and `gt_add_sf()` fixed; `select_loci_if()` documents that groups are ignored; precompiled articles re-rendered (`84417a3b`..`87c75ea4`); worktree `~/claude_work/tidypopgen/wt_grouping`. Andrea's uncommitted edits of `a02_qc.Rmd` and `benchmark_hgdp.Rmd.orig` (and the lower-case edits) are also still uncommitted in `~/git/tidypopgen`: discard them there before merging this branch into `pca_missing` | `pca_missing` at `dd7a251d` | yes (20 Nov) | no |
+| `grouping` | vignettes and articles group by population early; lower-case metadata columns; grouped `rbind()` and `gt_add_sf()` fixed; `select_loci_if()` documents that groups are ignored; precompiled articles re-rendered (`84417a3b`..`87c75ea4`); readable a03 figures and tidy HGDP filters (`7a543b59`..`afbaf023`, laptop); worktree `~/claude_work/tidypopgen/wt_grouping`. Andrea's uncommitted edits of `a02_qc.Rmd` and `benchmark_hgdp.Rmd.orig` (and the lower-case edits) are also still uncommitted in `~/git/tidypopgen`: discard them there before merging this branch into `pca_missing` | `pca_missing` at `dd7a251d` | yes (20 Nov) | no (PR #235 into `pca_missing`) |
 | `merge_vcf_speed` | three prototypes speeding up `gt_merge_vcfs()` (`d3b982d0` keep the genotypes of pass 1, `bc6856b6` parallel line parsing, `6982994c` raw alleles), outputs identical; balanced 4-thread laptop runs: 1.6x on sgdp and many, 1.2x on pops; worktree `/media/andrea/Elements1/tmp/claude/tidypopgen/merge_vcf/wt` (`vcf_merge.md`) | `pca_missing` at `5e207d78` | yes (20 Nov) | no PR |
 | `king_plink_ideas` | KING ideas from PLINK 2: `72377615` tiles + 64-word chunks (1.35x), `ef1c0b4c` AVX2 KING kernel, `e2692136` two paths (AVX2 2.3x on the full matrix, scalar 1.5x); outputs identical, tests pass with and without AVX2; worktree `/media/andrea/Elements1/tmp/claude/tidypopgen/plink_king/wt` (`pairwise_bitpacked.md`) | `pca_missing` at `b8255226` | yes (20 Nov) | no |
 | `king_simd_packing` | SIMD packing of the bit-packed kernel (`9853e055`), not merged: below the 1.5x bar (`pairwise_bitpacked.md`) | `pca_missing` at `c7c09c67` | no | no |
@@ -34,7 +34,7 @@ once the branches are no longer needed).
 - **State:** CI at `b8255226` passes on all R-CMD-check jobs, lint, pkgdown
   and test-coverage; codecov fails on coverage only (patch 94.68% against a
   95.50% target, project -0.08%). Later commits touch only `dev_notes/`.
-- **Before merging:** review branch `grouping` (vignettes grouped
+- **Before merging:** review PR #235, branch `grouping` (vignettes grouped
   early, lower-case metadata, grouped `rbind()` and `gt_add_sf()` fixes,
   `select_loci_if()` docs; full test suite passes on an -O2 build) and merge
   it into `pca_missing` once the desktop job of 20 Nov has pushed (~22:30).
@@ -44,6 +44,12 @@ once the branches are no longer needed).
   (`87c75ea4`, 20 Nov) with indicative timings: re-time them on a quiet
   machine before a release (the laptop section of the HGDP benchmark is
   older still, with an "impute" step).
+- **HGDP benchmark, hand-patched:** on `grouping`, the `filter_loci` and
+  `filter_indiv` chunks of `benchmark_hgdp.Rmd` were patched by hand on the
+  laptop (new code, counts computed there; HTML comments mark them) and are
+  not timed; the summary table keeps the old times. Re-run
+  `vignettes/articles/precompile_hgdp_benchmark.R` on the desktop (needs
+  `chunkhooks`, n_cores = 20; ~1 min) and commit the re-rendered article.
 - **Done when:** #231 is merged into `dev` (squash).
 
 ### 2. **P2** [desktop] Re-time on the P-cores
@@ -118,6 +124,14 @@ once the branches are no longer needed).
 
 All on the P-cores (`taskset -c 0-7`), timing-sensitive: tell the other
 sessions first (the benchmarking skill, "Unattended desktop jobs").
+
+### Re-render the HGDP benchmark article (grouping)
+
+- **Branch:** `grouping` (PR #235). **Run:** in `vignettes/articles/`,
+  `Rscript precompile_hgdp_benchmark.R` with an -O2 install of the branch
+  (20 threads, ~1 min of compute). **Done when:** the article has timings for
+  `filter_loci` and `filter_indiv`, the HTML comments are gone, and the
+  re-rendered article is pushed. Not a quiet benchmark run: indicative timings.
 
 ### HGDP650 timings of `gt_pca()`, DAPC, pcadapt, clumping and pruning
 

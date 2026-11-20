@@ -4,6 +4,23 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-20 (laptopX1): vignette fixes on grouping, PR #235 into pca_missing
+
+- **Done:** a03: the coloured PCA scores plot and the map of DAPC clusters get
+  6 x 4.5 in figures (at the `html_vignette` default of 3 x 3 in, bigstatsr's
+  `coord_fixed()` and the legend squashed the panel; already so in v0.4.4);
+  legend at the bottom; Andrea's tidier DAPC and ADMIXTURE code. HGDP
+  benchmark: tidy filters (`select_loci_if(loci_maf() & loci_missingness())`,
+  `filter(indiv_missingness(genotypes) < 0.01)`), and a count of the
+  individuals kept and lost (1041 kept, 2 lost).
+- **Where:** `grouping`, `7a543b59`..`afbaf023`, pushed; PR #235 into
+  `pca_missing`.
+- **Result:** same loci (570,257, same order) and individuals as before. The
+  rendered HGDP article was patched by hand (Andrea's choice): `filter_loci`
+  and `filter_indiv` are not timed (HTML comments; the summary table keeps
+  the old times) until `precompile_hgdp_benchmark.R` is re-run on the desktop.
+- **Notes changed:** `handover.md`, `summary.md`.
+
 ## 2026-11-20 (manica01): vignettes group by population early; grouped rbind() and gt_add_sf() fixed
 
 - **Done:** every vignette and article with several populations groups the
