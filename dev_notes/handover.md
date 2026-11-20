@@ -136,11 +136,15 @@ sessions first (the benchmarking skill, "Unattended desktop jobs").
   each). Expected ~3 h once the machine is idle (at least 10 min of idle
   checks, VCF ~1 h 50, KING ~45 min), so results by ~22:30. Script: a copy of `dev_notes/vcf_merge/run_desktop.sh` at
   `~/claude_work/tidypopgen/run_desktop.sh` (rerunning it skips the phases
-  with a marker in `merge_vcf/desktop/done/`).
+  with a marker in `merge_vcf/desktop/done/`). A reboot at 18:57 removed the
+  transient timer before it fired; it was re-created at 19:03 with the same
+  name and deadline.
 - **Set-up done (20 Nov, manica01):** both set-ups below; plink2
   v2.0.0-b.1.4LM AVX2 (7 Nov 2026, as the laptop); bgzip and tabix built
   from the htslib 1.25 bundled with bcftools (they were not installed); perf
-  counts cycles (`perf_event_paranoid` 1). The three KING builds and p3
+  counts cycles (`perf_event_paranoid` 1, set again by Andrea after the
+  reboot, not saved in `/etc/sysctl.d/`: a reboot resets it to 4, and the
+  VCF scripts then record NA for the counters). The three KING builds and p3
   without AVX2 give `identical()` outputs (`check_proto.R`); one smoke run of
   each VCF version on the E-cores gave the laptop's md5s on all three
   datasets (moved to `merge_vcf/results_smoke/`).
