@@ -136,6 +136,23 @@ truncated: 91,162,139 lines, the last one cut at `9 chr9:80258168:G:A 0
 loci and only gives a warning ("EOF of bedfile has not been reached");
 fread drops the cut line. Found 20 Nov 2026; the file was not changed.
 
+Andrea downloaded the `.bim` and `.fam` again the same day
+(`/media/andrea/data1/baboon_consortium/OneDrive_1_20-11-2026.zip`); checked
+on manica01, 20 Nov 2026, they match the `.bed`:
+
+- the new `.bim` has 166,099,533 lines (as the `.bed` needs), all well
+  formed, and ends with a newline; the old `.bim` is an exact byte prefix of
+  it. The `.fam` is identical to the old one (486 lines).
+- all 166M loci of the `.bed` end where 486 individuals say (the padding
+  bits of the last byte of each locus are 0), and none is monomorphic or all
+  missing (missing rate 0.3% in the first 91M loci, 0.35% in the rest).
+- A1 is the minor allele (PLINK 1.9's default): its frequency is at most
+  0.5 at every locus, so the rows of the `.bim` match those of the `.bed`. So
+  the IDs (`chr<chrom>:<pos>:<REF>:<ALT>`) give the alleles in the opposite
+  order to the columns at 16,229,546 loci (where REF is the minor allele).
+- chromosomes 1-20 and 23 (X), each contiguous, positions strictly
+  increasing, single-base alleles, all cM 0.
+
 ## Open questions
 
 - **Saving and loading the `.gt`** is now the largest step after the `.bed`
