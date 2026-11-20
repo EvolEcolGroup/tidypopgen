@@ -364,7 +364,7 @@ add the DAPC cluster of each individual by ungrouping temporarily
 (we could have also used the `$` operator: `anole_gt$dapc <- anole_dapc$grp`
 directly on the grouped object):
 
-```{r}
+```{r, fig.width = 6, fig.height = 4.5}
 anole_gt <- anole_gt %>%
   ungroup() %>%
   mutate(dapc = anole_dapc$grp) %>%
