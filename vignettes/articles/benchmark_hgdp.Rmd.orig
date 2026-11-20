@@ -158,11 +158,15 @@ autoplot(indiv_report, type = "scatter")
 # Filter individuals
 
 And we can filter individuals down to only include those with less than 1% of
-their genotypes missing.
+their genotypes missing. The individual report tells us how many individuals
+we would keep and lose with this threshold:
+
+```{r n_indiv_lost}
+indiv_report %>% count(lost = missingness >= 0.01)
+```
 
 ```{r filter_indiv, benchmark = TRUE}
-to_keep_indiv <- which(indiv_report$missingness < 0.01)
-hgdp <- hgdp[to_keep_indiv, ]
+hgdp <- hgdp %>% filter(indiv_missingness(genotypes) < 0.01)
 ```
 
 A few missing genotypes remain after filtering. We do not need to impute

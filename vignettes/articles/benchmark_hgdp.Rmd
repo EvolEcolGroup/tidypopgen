@@ -205,15 +205,27 @@ autoplot(indiv_report, type = "scatter")
 # Filter individuals
 
 And we can filter individuals down to only include those with less than 1% of
-their genotypes missing.
+their genotypes missing. The individual report tells us how many individuals
+we would keep and lose with this threshold:
 
 
 ``` r
-to_keep_indiv <- which(indiv_report$missingness < 0.01)
-hgdp <- hgdp[to_keep_indiv, ]
+indiv_report %>% count(lost = missingness >= 0.01)
+#> # A tibble: 2 × 2
+#>   lost      n
+#>   <lgl> <int>
+#> 1 FALSE  1041
+#> 2 TRUE      2
 ```
 
-filter_indiv: 4ms
+
+``` r
+hgdp <- hgdp %>% filter(indiv_missingness(genotypes) < 0.01)
+```
+
+<!-- filter_indiv: timing pending. This section was patched by hand on the
+laptop; re-run precompile_hgdp_benchmark.R on the desktop to time it (the
+summary below still has the time of the previous code). -->
 
 A few missing genotypes remain after filtering. We do not need to impute
 them: LD clumping, the PCA and the DAPC below use, for each locus (or pair of
