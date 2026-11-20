@@ -139,14 +139,15 @@ fread drops the cut line. Found 20 Nov 2026; the file was not changed.
 ## Open questions
 
 - **Saving and loading the `.gt`** is now the largest step after the `.bed`
-  with `names_as_int` (22 s on 91M loci, ~40 s expected on 166M); see
-  `gt_save_speed.md`.
+  with `names_as_int` (22 s on 91M loci, ~40 s expected on 166M): a faster
+  format was prototyped and not adopted (`gt_save_speed.md`).
 - The *packedancestry* reader (`read_packedancestry()`) still only warns
   when its `.geno` file is longer than expected.
 - **Locus names at this scale:** 116 s for 91M names (vs 17.5 s without).
   A C++ `.bim` reader would save fread's work but not the cost of the R
-  strings themselves; `names_as_int = TRUE` is the answer, and the docs
-  could recommend it for tens of millions of loci.
+  strings themselves. `names_as_int = TRUE` is the answer (Andrea, 20 Nov:
+  that many strings would slow down everything else too); its docs already
+  recommend it for very large datasets.
 - **The `.bk` is 4x the `.bed`** (a byte per genotype): writing it sets the
   floor (~28 s for 44 GB on this SSD; ~5 min for 80 GB on the HDD, estimated from its speed, if the
   backing file is put next to the `.bed` on `data1`, the default).

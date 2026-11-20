@@ -12,7 +12,6 @@ documents listed in `README.md`.
 | `merge_vcf_speed` | three prototypes speeding up `gt_merge_vcfs()` (`d3b982d0` keep the genotypes of pass 1, `bc6856b6` parallel line parsing, `6982994c` raw alleles), outputs identical; balanced 4-thread laptop runs: 1.6x on sgdp and many, 1.2x on pops; worktree `/media/andrea/Elements1/tmp/claude/tidypopgen/merge_vcf/wt` (`vcf_merge.md`) | `pca_missing` at `5e207d78` | yes (20 Nov) | no PR |
 | `king_plink_ideas` | KING ideas from PLINK 2: `72377615` tiles + 64-word chunks (1.35x), `ef1c0b4c` AVX2 KING kernel, `e2692136` two paths (AVX2 2.3x on the full matrix, scalar 1.5x); outputs identical, tests pass with and without AVX2; worktree `/media/andrea/Elements1/tmp/claude/tidypopgen/plink_king/wt` (`pairwise_bitpacked.md`) | `pca_missing` at `b8255226` | yes (20 Nov) | no |
 | `bed_reader` | `.bed` files read in parallel (`read_bed_to_fbm()`, `0b1265c2`), a `.bed` that does not match its `.bim` and `.fam` is an error (`4c7cbdeb`), NEWS, version 1.0.0.9012; full suite passes; worktree `~/claude_work/tidypopgen/bed_reader/wt` on manica01 (`bed_reader.md`) | `pca_missing` (merged up to `dd7a251d`) | yes | no (PR #234 into `pca_missing`) |
-| `gt_save_speed` | the alleles of `.gt` files saved as codes (`332f5405`): `gt_load()` 4.2x, saving 2.9x faster on 91M loci; not NEWS nor version yet (format change to decide); worktree `~/claude_work/tidypopgen/bed_reader/wt_gt` (`gt_save_speed.md`) | `bed_reader` at `f1a06ad0` | no | no |
 | `king_simd_packing` | SIMD packing of the bit-packed kernel (`9853e055`), not merged: below the 1.5x bar (`pairwise_bitpacked.md`) | `pca_missing` at `c7c09c67` | no | no |
 
 About 19 other local branches on the laptop look unmerged to git (`git branch
@@ -47,16 +46,7 @@ once the branches are no longer needed).
   on the branch, see the memory on squash merges) and retarget #234 to
   `dev`.
 
-### 3. **P2** [decide] Save `.gt` alleles as codes?
-
-- **Read first:** `gt_save_speed.md`.
-- **If yes:** on `gt_save_speed` (rebase onto `bed_reader` or `dev` as
-  needed), NEWS (update the item "`gen_tibble()` and `gt_save()` save the
-  *.gt* file twice as fast": now also `gt_load()` ~4x, and the files can not
-  be loaded by older versions), bump the version, push and PR (the full
-  suite passed on `332f5405`: 740 tests, on an -O2 install).
-
-### 4. **P2** [desktop] Re-time on the P-cores
+### 3. **P2** [desktop] Re-time on the P-cores
 
 - See the desktop queue: HGDP650 PCA/DAPC/pcadapt/LD, the VCF merge, KING
   against PLINK 2. The VCF merge and KING are set up and scheduled for
@@ -64,7 +54,7 @@ once the branches are no longer needed).
   and put the medians into `vcf_merge.md` and `pairwise_bitpacked.md`.
   HGDP650 PCA/DAPC/pcadapt/LD is not set up yet.
 
-### 5. **P2** [claude] Make `merge_vcf_speed` ready for a PR
+### 4. **P2** [claude] Make `merge_vcf_speed` ready for a PR
 
 - **Branch:** `merge_vcf_speed` (rebase or merge onto `dev` after #231).
 - **Read first:** `vcf_merge.md` ("How it works", "Open questions").
@@ -74,7 +64,7 @@ once the branches are no longer needed).
   `gen_tibble()` on one large VCF for P3 (-O2 builds only); NEWS.
 - **Done when:** a PR into `dev`, with the desktop timings (task 2) in it.
 
-### 6. **P2** [claude] Keep optimising (Andrea)
+### 5. **P2** [claude] Keep optimising (Andrea)
 
 - **Branch:** a new branch from `dev`, after #231 is merged; for KING,
   `king_plink_ideas`.
@@ -97,14 +87,14 @@ once the branches are no longer needed).
   (with `build/lib_{base,p1,p2}` and `run_proto.sh`) on the laptop.
 - **Done when:** faster by more than 5%, with identical outputs.
 
-### 7. **P2** [review] Release 1.1.0 (from claude_jobs#5, 15 Nov; not rechecked)
+### 6. **P2** [review] Release 1.1.0 (from claude_jobs#5, 15 Nov; not rechecked)
 
 - After #231: set the version, merge `dev` into `main` (pkgdown then publishes
   `rad_seq.html`), re-run `urlchecker::url_check()` and submit;
   `cran-comments.md` gives the intermittent failures as the reason for the
   early resubmission.
 
-### 8. **P3** [cleanup] Branches and scratch files
+### 7. **P3** [cleanup] Branches and scratch files
 
 - Delete `pca_missing` once #231 is merged, `king_simd_packing` and
   `king_plink_ideas` once decided, `merge_vcf_speed` once its PR is merged;
@@ -226,9 +216,12 @@ sessions first (the benchmarking skill, "Unattended desktop jobs").
   for tens of millions of loci (`bed_reader.md`).
 - [claude] `read_packedancestry()` still only warns when its `.geno` file is
   longer than expected (as the `.bed` reader did).
-- On manica01, `~/claude_work/tidypopgen/bed_reader/` holds the two
-  worktrees, -O2 libraries, and the 91M-SNP baboon subset (14 GB in
-  `data/`); delete once #234 and `gt_save_speed` are settled.
+- [claude] Saving `.gt` files with tens of millions of loci: alleles as
+  codes, 4x faster loading, not adopted (Andrea); patch and numbers in
+  `gt_save_speed.md`.
+- On manica01, `~/claude_work/tidypopgen/bed_reader/` holds the worktree of
+  `bed_reader`, -O2 libraries, and the 91M-SNP baboon subset (14 GB in
+  `data/`); delete once #234 is merged.
 - [decide] Merge `king_simd_packing` (SIMD packing: 1.35-1.5x on grouped
   KING on one core, 1.04x on 8; ~170 lines of x86-only code)? Recommended
   no, unless single-core grouped KING matters (`pairwise_bitpacked.md`).
