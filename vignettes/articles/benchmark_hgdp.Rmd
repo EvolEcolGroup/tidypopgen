@@ -68,12 +68,14 @@ download.file(download_url, download_path, method = "wget")
 
 In the following vignette, we place these files into the subdirectory
 `data/hgdp/`, and we will use the paths to the bed file `hgdp650.qc.hg19.bed`
-and the metadata file `hgdp650_id_pop.txt` to read in our data.
+and the metadata file `hgdp650_id_pop.txt` to read in our data. We make the
+column names of the metadata lower case, as are those of the `gen_tibble`:
 
 
 ``` r
 bed_path <- "./data/hgdp/hgdp650.qc.hg19.bed"
-meta_info <- readr::read_tsv("./data/hgdp/hgdp650_id_pop.txt")
+meta_info <- readr::read_tsv("./data/hgdp/hgdp650_id_pop.txt") %>%
+  rename_with(tolower)
 #> Rows: 1064 Columns: 6
 #> ── Column specification ────────────────────────────────────────────────────────
 #> Delimiter: "\t"
@@ -97,15 +99,15 @@ hgdp <- gen_tibble(bed_path,
 )
 ```
 
-read_plink: 1.4s
+read_plink: 1.2s
 
 Add metadata
 
 
 ``` r
 hgdp <- hgdp %>% mutate(
-  population = meta_info$population[match(hgdp$id, meta_info$Id)],
-  region = meta_info$Region[match(hgdp$id, meta_info$Id)]
+  population = meta_info$population[match(hgdp$id, meta_info$id)],
+  region = meta_info$region[match(hgdp$id, meta_info$id)]
 )
 ```
 
@@ -131,18 +133,31 @@ hgdp
 #> # ℹ 1,033 more rows
 ```
 
+As this dataset includes information from multiple populations, we want to
+group the gen_tibble, so that quality control and the population statistics
+below work within populations:
+
+
+``` r
+hgdp <- hgdp %>%
+  group_by(population)
+```
+
+
 # Loci Report
 
 We can then call `qc_report_loci`. This function supplies minor allele
 frequency, rate of missingness, and a Hardy-Weinberg exact p-value for each SNP.
+As `hgdp` is grouped, Hardy-Weinberg equilibrium is tested within each
+population (with a Bonferroni correction across populations), while the minor
+allele frequency and the missingness are computed over all individuals.
 
 
 ``` r
 loci_report <- qc_report_loci(hgdp)
-#> This gen_tibble is not grouped. For Hardy-Weinberg equilibrium, `qc_report_loci()` will assume individuals are part of the same population and HWE test p-values will be calculated across all individuals. If you wish to calculate HWE p-values within populations or groups, please use`group_by()` before calling `qc_report_loci()`.
 ```
 
-loci_report: 105ms
+loci_report: 130ms
 The resulting report can be observed using `autoplot`.
 
 
@@ -155,7 +170,7 @@ autoplot(loci_report, type = "all")
 # Filter Loci
 
 Following this, we filter the loci to only including those with a minor allele
-frequency over 0.05, and a missingness rate below 0.05.
+frequency over 0.05, and a missingness rate below 0.05 (over all individuals).
 
 
 ``` r
@@ -164,7 +179,7 @@ to_keep_loci <-
 hgdp <- hgdp %>% select_loci(to_keep_loci$snp_id)
 ```
 
-filter_loci: 125ms
+filter_loci: 240ms
 
 
 # Individual Report
@@ -178,7 +193,7 @@ individual, and rate of missingness per individual.
 indiv_report <- qc_report_indiv(hgdp)
 ```
 
-indiv_report: 220ms
+indiv_report: 190ms
 
 
 ``` r
@@ -217,7 +232,7 @@ hgdp <- hgdp %>%
   select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, n_cores = n_cores))
 ```
 
-ld_clumping: 335ms
+ld_clumping: 327ms
 
 # PCA
 
@@ -229,7 +244,7 @@ and LD clumped dataset.
 test_pca <- hgdp %>% gt_pca(n_cores = n_cores)
 ```
 
-pca: 978ms
+pca: 1s
 
 Plot PCA:
 
@@ -257,7 +272,7 @@ test_dapc <- gt_dapc(test_pca,
 )
 ```
 
-dapc: 111ms
+dapc: 131ms
 
 Plot DAPC:
 
@@ -271,26 +286,25 @@ autoplot(test_dapc, type = "scores")
 # Calculate Fst
 
 To examine the differentiation between populations in the global HGDP set, we
-calculate pairwise Fst.
+calculate pairwise Fst between the populations that `hgdp` is grouped by.
 
 
 ``` r
-grouped_hgdp <- hgdp %>% group_by(population)
-pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(
+pairwise_fsts <- hgdp %>% pairwise_pop_fst(
   n_cores = n_cores,
   type = "pairwise"
 )
 ```
 
-pairwise_fst: 52ms
+pairwise_fst: 50ms
 
 Plot pairwise Fst:
 
 
 ``` r
 # Order by continents
-grouped_hgdp_order <- grouped_hgdp %>% arrange(region, population)
-regional_order <- unique(grouped_hgdp_order$population)
+hgdp_order <- hgdp %>% arrange(region, population)
+regional_order <- unique(hgdp_order$population)
 
 autoplot(pairwise_fsts, order = regional_order) +
   scale_fill_viridis_c() +
@@ -318,10 +332,10 @@ gt_as_plink(hgdp,
   type = "bed",
   overwrite = TRUE
 )
-#> [1] "/tmp/RtmpZRIBCX/file1340fa3eba018d.bed"
+#> [1] "/tmp/Rtmp4T8e7i/file2a4499610fe0db.bed"
 ```
 
-plink_save: 175ms
+plink_save: 159ms
 
 # Summary
 
@@ -330,17 +344,17 @@ Here is a summary of the time taken (in seconds) to perform each step of the ana
 
 ```
 #>            step time
-#> 1    read_plink 1.41
-#> 2   loci_report  0.1
-#> 3   filter_loci 0.12
-#> 4  indiv_report 0.22
+#> 1    read_plink 1.19
+#> 2   loci_report 0.13
+#> 3   filter_loci 0.24
+#> 4  indiv_report 0.19
 #> 5  filter_indiv    0
 #> 6   ld_clumping 0.33
-#> 7           pca 0.98
-#> 8          dapc 0.11
+#> 7           pca    1
+#> 8          dapc 0.13
 #> 9  pairwise_fst 0.05
-#> 10   plink_save 0.17
-#> 11        Total 3.49
+#> 10   plink_save 0.16
+#> 11        Total 3.42
 ```
 # Running the benchmark on a laptop
 We will now run this benchmark on a laptop 
