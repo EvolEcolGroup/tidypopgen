@@ -12,6 +12,9 @@ SC=$1
 T=$2
 REP=$3
 STEPS=${4:-.}
+# workspace of the plink2 merge (--memory, MiB): 4000 runs out of memory on sgdp
+# (5 GB peak with 32000 on manica01), so run_desktop.sh gives sgdp 32000
+PLINK_MEM=${PLINK_MEM:-4000}
 want() { [[ "$1" =~ $STEPS ]]; }
 CORES=${CORES:-"0-$((T - 1))"}
 # a counter from perf stat -x, summed over the core types of a hybrid CPU
@@ -89,12 +92,13 @@ EOF
     timed plink2 "$PV" plink_import "$PD/*.pgen $PD/*.pvar" taskset -c "$CORES" "$PD/import.sh"
   fi
   if want plink_merge; then
+    rm -f "$PD"/merged*  # left by an earlier merge (or a failed one)
     ls "$PD"/*.pgen | sed 's/\.pgen$//' > "$PD/list.txt"
     FILL=()
     if [ "$SC" != "pops" ]; then FILL=(--fill-missing-with-ref); fi
     timed plink2 "$PV" plink_merge "$PD/merged.pgen $PD/merged.pvar" taskset -c "$CORES" \
       "$P" --pmerge-list "$PD/list.txt" --make-pgen --out "$PD/merged" \
-      --threads "$T" --memory 4000 --indiv-sort none "${FILL[@]}" --silent
+      --threads "$T" --memory "$PLINK_MEM" --indiv-sort none "${FILL[@]}" --silent
   fi
 fi
 exit 0

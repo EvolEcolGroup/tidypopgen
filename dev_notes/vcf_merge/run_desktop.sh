@@ -90,10 +90,15 @@ vcf() {  # vcf <threads> <cores>
     CORES=$c MERGE_MODE=real scripts/run_timing.sh "$sc" "$t" 3 $V || return 1
   done
 }
-tools() {  # tools <threads> <cores>
-  local t=$1 c=$2 sc r
-  for sc in pops many sgdp; do
-    for r in 1 2 3; do CORES=$c scripts/tools_timing.sh "$sc" "$t" "$r" || return 1; done
+tools() {  # tools <threads> <cores> <scenario>...
+  local t=$1 c=$2 sc r mem
+  shift 2
+  for sc in "$@"; do
+    mem=4000  # plink2's workspace (MiB); the sgdp merge runs out of memory with it
+    [ "$sc" = sgdp ] && mem=32000
+    for r in 1 2 3; do
+      CORES=$c PLINK_MEM=$mem scripts/tools_timing.sh "$sc" "$t" "$r" || return 1
+    done
   done
 }
 
@@ -151,7 +156,8 @@ say "machine idle (load $(load))"
 # (the laptop has 4-thread runs of 20 Nov; 1 thread and the tools are missing)
 phase vcf_t1   vcf 1 2                  # ~30-40 min
 phase vcf_t8   vcf 8 0-7                # ~20 min
-phase tools_t8 tools 8 0-7              # ~1 h (bcftools on sgdp ~4 min a run)
+phase tools_t8 tools 8 0-7 pops many    # ~12 min
+phase tools_t8_sgdp tools 8 0-7 sgdp    # ~12 min (bcftools ~2.5 min a run)
 phase king_bench_t1 king_bench 1        # core 2; ~15 min
 phase king_bench_t8 king_bench 8        # P-cores; ~10 min
 phase king_proto_t1 king_proto 1        # core 2; ~15 min
