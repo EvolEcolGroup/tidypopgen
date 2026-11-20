@@ -35,8 +35,8 @@ They were in `data-raw/dev_notes/` until 19 Nov 2026. Start with
 |---|---|
 | `speed_review_2026-11.md` | The November 2026 speed work (`speed`, `speed_extra`, `roh`): each commit, its timings and the further ideas. |
 | `speed_accessors_guide.md` | A developer guide to the fast C++ accessors of the genotypes and how to write new kernels. |
-| `pairwise_bitpacked.md` | The bit-packed pairwise kernel (KING, IBS, allele sharing, GRM counts) and `pairwise_king()` within groups: packing, prefetch, the SIMD branch not merged, HGDP650 timings; how PLINK 2 computes KING, and ranked ideas (branch `king_plink_ideas`). Scripts of the PLINK comparison in `pairwise_bitpacked/`. |
-| `vcf_merge.md` | Where `gt_merge_vcfs()` spends its time, three prototypes up to ~1.9x faster (branch `merge_vcf_speed`), and `bcftools merge` and plink2 compared. Scripts and result tables in `vcf_merge/`. |
+| `pairwise_bitpacked.md` | The bit-packed pairwise kernel (KING, IBS, allele sharing, GRM counts) and `pairwise_king()` within groups: packing, prefetch, the SIMD branch not merged, HGDP650 timings; how PLINK 2 computes KING, ranked ideas and their timings (AVX2: 2x on the full matrix; branch `king_plink_ideas`). Scripts and result tables in `pairwise_bitpacked/`. |
+| `vcf_merge.md` | Where `gt_merge_vcfs()` spends its time, three prototypes up to 1.66x faster (branch `merge_vcf_speed`), and `bcftools merge` and plink2 compared. Scripts and result tables in `vcf_merge/`. |
 | `article_timings_speed_vs_big_data_article.md` | Timings of the big data article before and after the speed work. |
 
 ## Features and releases

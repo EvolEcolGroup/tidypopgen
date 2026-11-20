@@ -86,6 +86,35 @@ files). The full test suite was not run.
 
 ## Numbers
 
+**Balanced runs, 20 Nov 2026** (laptop laptopX1, 4 threads, `taskset -c 0-3`,
+3 runs per version in A B C D, D C B A, A B C D order, `MERGE_MODE=real`, i.e. the
+installed `gt_merge_vcfs()`; -O2 installs of each commit; data on the WD
+Elements HDD; load 0.7-2.9). Median wall time in seconds including R
+start-up (range in brackets):
+
+| version | pops | sgdp | many |
+|---|---|---|---|
+| base `5e207d78` | 9.17 (9.15-9.19) | 54.93 (54.54-64.45) | 53.52 (52.96-53.56) |
+| P1 `d3b982d0` | 8.34 (8.32-8.61) | 42.51 | 43.97 |
+| P3 `bc6856b6` | 7.71 (7.50-8.05) | 36.54 | 37.47 |
+| P4 `6982994c` | 7.67 (7.11-8.08) | 33.04 (32.95-33.34) | 33.52 (33.10-33.98) |
+| base / P4 | 1.20x | 1.66x | 1.60x |
+
+- User cycles (G), base / P1 / P3 / P4: pops 65 / 57 / 50 / 48; sgdp 403 /
+  294 / 229 / 214; many 330 / 246 / 238 / 211. Instructions (G): pops 114 /
+  95 / 93 / 91; sgdp 499 / 349 / 323 / 303; many 424 / 334 / 297 / 274.
+- Outputs identical in every run (`.bk` and loci checksums: pops
+  `87fe0252_1cb5b27f`, sgdp `2e2fdeae_e4f9c90e`, many `f286411f_d33f758d`).
+- Each step pays on files with few samples (P1 -18 to -23%, P3 a further
+  -12 to -14%, P4 a further -10%). On pops the gain is only 1.2x and P4 adds
+  nothing: its genotype pass was already parallel and only 4 files are read
+  twice. The 1.9x of the single runs below came from a base run slowed by
+  other load.
+- The 1-thread runs and bcftools/plink2 were not run (stopped for the 06:00
+  deadline); they are in the desktop job (`run_desktop.sh`).
+- Tables: `vcf_merge/results/2026-11-20/` (`runs.tsv`, `status.log`).
+
+**Single runs, 19 Nov 2026** (superseded by the above for base/P1/P3/P4).
 Laptop (laptopX1), 4 threads (`taskset -c 0-3`), single runs, 19 Nov 2026,
 -O2 installs of each commit (`libs/{base,p1,p3,p4}` on the annex). Seconds
 inside the call (wall time with R start-up in brackets):
@@ -135,21 +164,25 @@ with `bcftools reheader` to declare the INFO fields):
   `missing_to_ref = TRUE`; 999,934 loci.
 
 To reproduce: the scripts are in `dev_notes/vcf_merge/scripts/` (paths
-hard-coded to `/media/andrea/annex/tmp/claude/tidypopgen/merge_vcf`: set `W`
-and `MERGE_DATA`); `make_merge_data.R <out_dir> <scenario>` makes the data;
+from `TPG_WORK`, default `/media/andrea/Elements1/tmp/claude/tidypopgen`,
+and `TPG_REPO`; `setup_desktop.sh` does all the set-up on another machine); `make_merge_data.R <out_dir> <scenario>` makes the data;
 install each commit into its own library; `run_timing.sh <scenario>
 <n_cores> <reps> <version:lib>...` runs fresh R processes alternating the
-versions (A B B A A B) through `merge_phases.R` (a copy of the function with
+versions (A B B A A B; `MERGE_MODE=real` times the installed function
+instead) through `merge_phases.R` (a copy of the function with
 timers, giving the same `.bk` and loci) and appends to `results/runs.tsv`
 and `results/phases_<version>.tsv`; `tools_timing.sh <scenario> <threads>
 <rep> [steps]` times bcftools and plink2. The data, installs, bcftools build
-and outputs are on the laptop in `/media/andrea/annex/tmp/claude/tidypopgen/merge_vcf/`.
+and outputs are on the laptop in
+`/media/andrea/Elements1/tmp/claude/tidypopgen/merge_vcf/` (moved from the
+annex on 20 Nov).
 
 ## Open questions
 
-- **Balanced timings:** base, P1, P3 and P4 at 1 and 4 threads, 3 runs each
-  in alternating order, on the desktop's P-cores, and plink2 on sgdp and
-  many. Until then, the gains are indicative.
+- **Desktop timings:** the laptop's balanced 4-thread runs (20 Nov) give
+  1.6x on sgdp and many, 1.2x on pops. Still missing: 1 and 8 threads on the
+  desktop's P-cores, and bcftools and plink2 on all three datasets
+  (`setup_desktop.sh`, then `run_desktop.sh`).
 - **Make a PR of `merge_vcf_speed`?** P1 and P3 carry most of the gain.
   Before a PR: name the file in P1's genotype errors, a test that the cache
   and the re-read give the same result (swapped loci with haploid calls),

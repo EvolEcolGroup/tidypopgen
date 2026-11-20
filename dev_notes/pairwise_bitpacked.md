@@ -144,14 +144,15 @@ annex failure before its benchmarks, so there are no proper timings.
 1. Tiles of pairs plus 64-word chunks for the full matrix: the 8.7 MB pair
    counts (more than L3) are now updated ~1,438 times on HGDP650, against
    ~629 in PLINK; perhaps 1.3-1.5x, more on several cores; ~60 portable
-   lines. Prototype `72377615` on `king_plink_ideas`, not compiled.
+   lines. Prototype `72377615` on `king_plink_ideas`: 1.35x on 1 thread (20 Nov, below).
 2. An AVX2 vector popcount (Muła's nibble lookup) chosen at run time
    (`target("avx2")`, `__builtin_cpu_supports()`, as the popcnt dispatch;
    no compiler flags, fine for CRAN): ~2x on comparing (most of the full
    matrix, ~30% of grouped KING on 1 core); ~120 lines of x86-only code with
    the scalar fallback. Not in PLINK. Work in progress `ef1c0b4c` on
    `king_plink_ideas` (4-word plane blocks, `pw_row_king_avx2`,
-   `PwAvx2<PwKing>`, off with `TIDYPOPGEN_NO_AVX2`), never compiled.
+   `PwAvx2<PwKing>`, off with `TIDYPOPGEN_NO_AVX2`): 2.1x on 1 thread
+   with the tiles (20 Nov, below).
 3. Two popcounts per word instead of four when few genotypes are missing
    (HGDP650: 0.086% missing, ~5% of words with one), correcting only the
    words with missing genotypes: ~1.6x on comparing, with a fallback for
@@ -162,20 +163,66 @@ annex failure before its benchmarks, so there are no proper timings.
 6. Skipping each individual's pair with itself: 7% of grouped comparing on
    HGDP650, up to 50% for families of 3.
 
-The agent's scripts (agreement checks, PLINK timings, prototype timings,
-never run for timings) are in `dev_notes/pairwise_bitpacked/plink_scripts/`
-(paths hard-coded to the laptop's annex). PLINK 2, its source, the HGDP650
-`.pgen` with FID set to the population and the check outputs are on the
-laptop in `/media/andrea/annex/tmp/claude/tidypopgen/plink_king/`.
+The scripts (agreement checks, PLINK timings, prototype timings) are in
+`dev_notes/pairwise_bitpacked/plink_scripts/` (paths from `TPG_WORK`, default
+`/media/andrea/Elements1/tmp/claude/tidypopgen`). PLINK 2, its source, the
+HGDP650 `.pgen` with FID set to the population, the three builds
+(`build/lib_{base,p1,p2}`) and the outputs are on the laptop in
+`/media/andrea/Elements1/tmp/claude/tidypopgen/plink_king/` (moved from the
+annex on 20 Nov).
+
+## Timings of the PLINK 2 ideas (20 Nov 2026)
+
+Laptop laptopX1, HGDP650, -O2 installs of `b8255226` (base), `72377615`
+(p1, tiles + 64-word chunks) and `ef1c0b4c` (p2, p1 + the AVX2 popcount),
+and p2 with `TIDYPOPGEN_NO_AVX2=1` (p2s); data on the WD Elements HDD.
+`run_proto.sh` and `run_bench.sh`, 3 runs per version in F R F order,
+`taskset` on 1 core then cores 0-3; the time is the faster of the two calls
+in each R process (gt already loaded). An agent checked first that all
+outputs are `identical()` to base, GRM counts included, and that the tests
+pass with and without `TIDYPOPGEN_NO_AVX2`. Medians in seconds (range):
+
+| | full matrix, 1 thread | full, 4 threads | within groups, 1 thread | within, 4 threads |
+|---|---|---|---|---|
+| base `b8255226` | 12.86 (12.85-13.86) | 3.94 (3.77-5.41) | 0.60 | 0.20 |
+| p1 `72377615` | 9.52 (9.52-9.62) | 3.65 (2.90-3.80) | 0.62 | 0.20 |
+| p2 `ef1c0b4c` | **6.11** (6.09-6.25) | **2.31** (2.30-2.45) | 0.57 | 0.18 |
+| p2s (p2, AVX2 off) | 20.73 (20.35-20.79) | 8.59 (7.20-8.61) | 0.88 | 0.27 |
+| PLINK 2 `.pgen` / `.bed` | 11.73 / 11.36 | 5.01 / 5.10 | 0.60 / 0.50 | 0.57 / 0.25 (noisy) |
+
+- **p2 doubles the speed of the full matrix:** 2.1x over base on 1 thread,
+  1.7x on 4 (user CPU 14.5 -> 7.7 s), and ~1.9x faster than PLINK 2 on 1
+  thread, ~2.2x on 4. Base is already on a par with PLINK 2 on 1 thread.
+- **The tiles alone (p1)** give 1.35x on 1 thread and little on 4.
+- **Within groups nothing changes** (packing, 0.40 s of the 0.60 s, dominates).
+- **p2's scalar path is much slower than base** (20.7 against 12.9 s):
+  p2 lays the planes out in blocks of 4 words (`pw_word_offset()`), and the
+  scalar `pw_row_popcnt()` now strides through them. Not profiled. This is
+  the path of CPUs without AVX2 and of non-x86 builds, so p2 cannot be merged
+  as it is.
+- The 4-thread block ran at load 1-2.6 and base and p1 were bimodal
+  (3.8 or 5.4 s; `bench_tpg` gave 5.5 s for base): indicative only. PLINK 2's
+  `--keep` loop over populations took 16.4 s on 1 thread.
+- Tables and logs: `pairwise_bitpacked/king_2026-11-20/` (`proto_<T>.tsv`:
+  time, version, task, threads, load s, call 1, call 2, user s of call 1,
+  load average; `bench_tpg_<T>.tsv` the same for base; `bench_plink_<T>.tsv`:
+  time, step, threads, elapsed, user, system, load).
+
+**Proposal (Andrea, 20 Nov): two paths.** Keep the AVX2 kernel for the CPUs
+that have it, and the tiles (p1) or the current layout (base) for the rest,
+since 2x is worth ~120 lines of x86-only code. Not decided. To do it, the
+scalar path must not lose: either give it p1's word-major layout (two plane
+layouts, chosen with `use_avx2` before packing), or make the scalar loop read
+the 4-word blocks efficiently; then time p2 with and without AVX2 against
+base and p1 on the desktop (1 and 8 threads), and check a non-AVX2 build
+(e.g. `-march=x86-64` with the dispatch off, and an arm64 CI job).
 
 ## Open questions
 
-- Comparing the pairs (4 popcounts per word and pair) is now ~30% of grouped
-  KING on one core and most of the full matrix (7.6 s): a vectorised
-  popcount with run-time dispatch could halve it. An AVX2 version is in
-  progress on `king_plink_ideas` (idea 2 above), with the tiles (idea 1);
-  compile, test against `b8255226`, and time on the desktop against PLINK 2
-  at 1 and 8 threads.
+- **AVX2 and tiles (`king_plink_ideas`):** 2.1x on the full matrix on the
+  laptop (20 Nov, above), but the scalar fallback is 1.6x slower than base.
+  Two paths (Andrea's proposal)? Fix the scalar path first, then time on the
+  desktop against PLINK 2 at 1 and 8 threads.
 - Merge `king_simd_packing`? Only if single-core grouped KING matters (it is
   memory-bound on 8 cores).
 - Packing blocks whose rows are not consecutive (e.g. after `filter()`) reads

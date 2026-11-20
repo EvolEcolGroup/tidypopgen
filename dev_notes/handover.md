@@ -9,8 +9,8 @@ documents listed in `README.md`.
 | branch | purpose | base | pushed | merged |
 |---|---|---|---|---|
 | `pca_missing` | `gt_pca()` with missing genotypes as PLINK, projections; with #232 (checks, DAPC and pcadapt) and #233 (LD clumping and pruning); CI fix, re-rendered articles, the fixes of the review of #232/#233 (`code_review_2026-11_pca_missing.md`); grouped `pairwise_king()` and the faster bit-packed kernel (`53843683` to `e39cdf49`), grouped `indiv_inbreeding()` in one pass and the KING fallback removed (`f6110412`, `5718c15c`; `pairwise_bitpacked.md`) | `dev` | yes | no (PR #231) |
-| `merge_vcf_speed` | three prototypes speeding up `gt_merge_vcfs()` (`d3b982d0` keep the genotypes of pass 1, `bc6856b6` parallel line parsing, `6982994c` raw alleles), outputs identical; worktree `/media/andrea/annex/tmp/claude/tidypopgen/merge_vcf/wt` (`vcf_merge.md`) | `pca_missing` at `5e207d78` | yes (20 Nov) | no PR |
-| `king_plink_ideas` | KING ideas from PLINK 2: `72377615` tiles + 64-word chunks, `ef1c0b4c` AVX2 KING kernel (work in progress); neither compiled; worktree `/media/andrea/annex/tmp/claude/tidypopgen/plink_king/wt` (`pairwise_bitpacked.md`) | `pca_missing` at `b8255226` | yes (20 Nov) | no |
+| `merge_vcf_speed` | three prototypes speeding up `gt_merge_vcfs()` (`d3b982d0` keep the genotypes of pass 1, `bc6856b6` parallel line parsing, `6982994c` raw alleles), outputs identical; balanced 4-thread laptop runs: 1.6x on sgdp and many, 1.2x on pops; worktree `/media/andrea/Elements1/tmp/claude/tidypopgen/merge_vcf/wt` (`vcf_merge.md`) | `pca_missing` at `5e207d78` | yes (20 Nov) | no PR |
+| `king_plink_ideas` | KING ideas from PLINK 2: `72377615` tiles + 64-word chunks (1.35x), `ef1c0b4c` AVX2 KING kernel (2.1x on the full matrix, but its scalar fallback is 1.6x slower than base); both compiled and tested, outputs identical; worktree `/media/andrea/Elements1/tmp/claude/tidypopgen/plink_king/wt` (`pairwise_bitpacked.md`) | `pca_missing` at `b8255226` | yes (20 Nov) | no |
 | `king_simd_packing` | SIMD packing of the bit-packed kernel (`9853e055`), not merged: below the 1.5x bar (`pairwise_bitpacked.md`) | `pca_missing` at `c7c09c67` | no | no |
 
 About 19 other local branches on the laptop look unmerged to git (`git branch
@@ -60,14 +60,19 @@ once the branches are no longer needed).
   HGDP650 with 44% missing genotypes), which would also give the counts of
   missing genotypes that `max_missing` now reads in an extra pass (+4%);
   the GRM's count of loci genotyped in both individuals (~2-3 s with
-  missing genotypes); the DAPC regression (3.8 s); KING: compile and test
-  the tiles and the AVX2 popcount of `king_plink_ideas` against `b8255226`
-  (identical outputs), then the ideas ranked in `pairwise_bitpacked.md`.
+  missing genotypes); the DAPC regression (3.8 s); KING: two paths, as
+  Andrea proposed (20 Nov): the AVX2 kernel of `ef1c0b4c` where the CPU has
+  it (2.1x on the full matrix), and the tiles or the current layout
+  otherwise. First make the scalar path no slower than base (p2 with
+  `TIDYPOPGEN_NO_AVX2=1` takes 20.7 s against 12.9 s; the 4-word plane
+  blocks are the suspect: see "Timings of the PLINK 2 ideas" in
+  `pairwise_bitpacked.md`); then the other ideas ranked there.
 - **Check:** -O2 builds only (`pkgbuild::clean_dll()`,
   `compile_dll(debug = FALSE)`, `load_all(compile = FALSE)`, or
   `R CMD INSTALL` into a separate library); the benchmarking skill; the
-  scripts and data are in `/media/andrea/annex/tmp/claude/tidypopgen/bench_dapc/`,
-  `bench_ld/` and `plink_king/` on the laptop.
+  scripts and data are in `/media/andrea/annex/tmp/claude/tidypopgen/bench_dapc/`
+  and `bench_ld/`, and in `/media/andrea/Elements1/tmp/claude/tidypopgen/plink_king/`
+  (with `build/lib_{base,p1,p2}` and `run_proto.sh`) on the laptop.
 - **Done when:** faster by more than 5%, with identical outputs.
 
 ### 5. **P2** [review] Release 1.1.0 (from claude_jobs#5, 15 Nov; not rechecked)
@@ -84,9 +89,10 @@ once the branches are no longer needed).
   review the other local branches on the laptop (many squash-merged).
 - Ask Andrea before deleting benchmark files (he may keep optimising with
   them). On the laptop's annex, under `/media/andrea/annex/tmp/claude/tidypopgen/`:
-  `bench_dapc/` (~3 GB), `bench_ld/` (~0.5 GB), `bench_inb/`, `merge_vcf/`
-  (data, builds, bcftools, outputs) and `plink_king/` (PLINK 2, its source,
-  HGDP650 `.pgen`); `~/claude_work/tidypopgen_rescue/` on the root drive.
+  `bench_dapc/` (~3 GB), `bench_ld/` (~0.5 GB), `bench_inb/`; on the
+  Elements HDD, under `/media/andrea/Elements1/tmp/claude/tidypopgen/`:
+  `merge_vcf/` (data, builds, bcftools, outputs, worktree) and `plink_king/`
+  (PLINK 2, its source, HGDP650 `.pgen`, builds, worktree); `~/claude_work/tidypopgen_rescue/` on the root drive.
 - On manica01: `~/claude_work/tidypopgen/` (the -O2 library of
   `e3b2b69c`, logs; `king/` holds the HGDP650 `gen_tibble` (~0.7 GB), the
   libraries and scripts of the KING timings of 19 Nov); the NearEast data in
@@ -112,7 +118,7 @@ sessions first (the benchmarking skill, "Unattended desktop jobs").
 ### Balanced timings of the `gt_merge_vcfs()` prototypes
 
 - **State:** the laptop ran the 4-thread matrix on 20 Nov (3 balanced runs,
-  `real` mode; results on the Elements drive, `merge_vcf/results/runs.tsv`);
+  `real` mode; tables in `dev_notes/vcf_merge/results/2026-11-20/`);
   the 1-thread runs and bcftools/plink2 are left for the desktop.
 - **Set-up (untimed, E-cores):** `bash dev_notes/vcf_merge/setup_desktop.sh`
   (builds bcftools 1.25, regenerates the seeded datasets, installs the four
@@ -132,10 +138,12 @@ sessions first (the benchmarking skill, "Unattended desktop jobs").
   the scripts in `dev_notes/pairwise_bitpacked/plink_scripts/` (paths to
   adapt); PLINK 2 (AVX2 build) and a `.pgen` of HGDP650 with FID set to the
   population.
+- **State:** the laptop ran both scripts at 1 and 4 threads on 20 Nov
+  (`dev_notes/pairwise_bitpacked/king_2026-11-20/`).
 - **Run:** `run_bench.sh`: full matrix and within populations
   (`--make-king-table rel-check`), 1 and 8 threads, against
-  `pairwise_king()` from an -O2 install of `b8255226`; once compiled and
-  tested, the prototypes of `king_plink_ideas` with `run_proto.sh`.
+  `pairwise_king()` from an -O2 install of `b8255226`; `run_proto.sh` for
+  base, p1, p2 and p2s, and the two-path version once it exists.
 - **Results:** into `pairwise_bitpacked.md` ("Comparison with PLINK 2").
 - **Report:** a progress entry, and a log comment in claude_jobs#5.
 

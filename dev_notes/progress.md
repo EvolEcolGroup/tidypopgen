@@ -4,6 +4,22 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-20 (laptopX1): balanced laptop timings of the VCF merge and KING prototypes
+
+- **Done:** moved the job files to the WD Elements HDD (the annex stick drops
+  out under heavy I/O); balanced runs on the laptop until the 06:00 deadline:
+  VCF merge at 4 threads, KING prototypes and PLINK 2 at 1 and 4 threads;
+  desktop set-up and job for the rest (`vcf_merge/setup_desktop.sh`,
+  `run_desktop.sh`).
+- **Result:** merge base -> P4 1.66x (sgdp), 1.60x (many), 1.20x (pops),
+  outputs identical; KING full matrix 12.9 -> 6.1 s with AVX2 (p2), PLINK 2
+  11.7 s, but p2 without AVX2 20.7 s; within groups unchanged.
+- **Decisions:** none; Andrea proposed two KING paths (AVX2 / scalar), to
+  pursue once the scalar path is no slower than base.
+- **Notes changed:** `vcf_merge.md`, `pairwise_bitpacked.md` (with tables in
+  `vcf_merge/results/2026-11-20/`, `pairwise_bitpacked/king_2026-11-20/`),
+  `handover.md`, `summary.md`.
+
 ## 2026-11-20 (laptopX1): VCF merge and PLINK 2 KING findings, after the annex failure
 
 - **Done:** two agents of 19 Nov (Andrea's requests): where `gt_merge_vcfs()`
