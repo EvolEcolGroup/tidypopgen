@@ -132,17 +132,26 @@ sessions first (the benchmarking skill, "Unattended desktop jobs").
 
 ### KING against PLINK 2
 
-- **Set-up:** the HGDP650 `gen_tibble` of `~/claude_work/tidypopgen/king/`;
-  the scripts in `dev_notes/pairwise_bitpacked/plink_scripts/` (paths to
-  adapt); PLINK 2 (AVX2 build) and a `.pgen` of HGDP650 with FID set to the
-  population.
+- **Set-up (untimed, E-cores):** copy the scripts of
+  `dev_notes/pairwise_bitpacked/plink_scripts/` to
+  `$TPG_WORK/plink_king/scripts/` (`TPG_WORK=~/claude_work/tidypopgen`,
+  `TPG_REPO=~/git/tidypopgen`); -O2 installs (`git archive` + `R CMD
+  INSTALL`) of `b8255226`, `72377615` and `e2692136` into
+  `plink_king/build/lib_{base,p1,p3}`, each with a `COMMIT` file; the HGDP650
+  `.gt` at `bench_inb/data/hgdp650.gt` (the one in
+  `~/claude_work/tidypopgen/king/` will do: adapt the path in
+  `time_tpg.R`/`check_proto.R`); the plink2 AVX2 binary at
+  `plink_king/bin/plink2` (shared with the VCF job) and a `.pgen` of
+  HGDP650 with FID set to the population (`run_bench.sh` shows how). Check
+  first that the three builds give `identical()` outputs (`check_proto.R`).
 - **State:** the laptop ran both scripts at 1 and 4 threads on 20 Nov
   (`dev_notes/pairwise_bitpacked/king_2026-11-20/`).
 - **Run:** `run_bench.sh`: full matrix and within populations
   (`--make-king-table rel-check`), 1 and 8 threads, against
   `pairwise_king()` from an -O2 install of `b8255226`; `run_proto.sh` with
   `VERS="base p1 p3 p3s"` (p3: an -O2 install of `e2692136`).
-- **Results:** into `pairwise_bitpacked.md` ("Comparison with PLINK 2").
+- **Results:** into `pairwise_bitpacked.md` ("Timings of the PLINK 2
+  ideas", the two-path table), with the 8-thread column.
 - **Report:** a progress entry, and a log comment in claude_jobs#5.
 
 ## Backlog
