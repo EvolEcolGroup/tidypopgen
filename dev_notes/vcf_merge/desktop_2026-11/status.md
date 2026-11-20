@@ -16,3 +16,10 @@
 - Fri 20 Nov 20:38: done king_proto_t8 (3 min)
 - Fri 20 Nov 20:38: all phases run
 - Fri 20 Nov 20:38: reporting
+- Fri 20 Nov 22:03: tools_t8 split: pops and many complete (12 rows each); the sgdp plink2 merge ran out of memory with --memory 4000, so its 3 rows of rep 1 are removed and sgdp re-run as tools_t8_sgdp with 32000
+- Fri 20 Nov 22:04: scheduled run started; waiting for the machine to be idle (5-min load < 1.0)
+- Fri 20 Nov 22:14: machine idle (load 0.03 0.18 0.25)
+- Fri 20 Nov 22:14: start tools_t8_sgdp (load 0.03 0.18 0.25)
+- Fri 20 Nov 22:24: done tools_t8_sgdp (10 min)
+- Fri 20 Nov 22:24: all phases run
+- Fri 20 Nov 22:24: reporting
