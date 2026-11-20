@@ -1,6 +1,6 @@
 # tidypopgen: summary
 
-Updated 2026-11-20 (laptopX1). One section: the package's issue in
+Updated 2026-11-20 (manica01). One section: the package's issue in
 dramanica/claude_jobs, with the single list of its tasks. Its first
 paragraph, status and next steps are copied into the issue
 (`scripts/sync_issue.py`).
@@ -33,7 +33,7 @@ KING then needs a decision.
 
 **Next steps**
 - [ ] **P1** [review] Review and merge PR #235 (`grouping` into `pca_missing`), then review the fixes (boxes of the review report) and the grouped `pairwise_king()` and `indiv_inbreeding()`, and merge PR #231: done when #231 is in `dev`.
-- [ ] **P2** [desktop] Re-time on the P-cores: the `gt_merge_vcfs()` prototypes against bcftools and plink2, and KING against PLINK 2 (1 and 8 threads; job `vcf_merge_king` scheduled 20 Nov 19:20, ~3 h), then re-render the HGDP benchmark article on `grouping` (two filter chunks patched by hand, untimed), then the HGDP650 PCA/DAPC/pcadapt/LD benchmarks (not set up): medians in `vcf_merge.md`, `pairwise_bitpacked.md`, `gt_pca.md`, `ld_missing.md`.
+- [ ] **P2** [desktop] Re-time on the P-cores: the `gt_merge_vcfs()` prototypes against bcftools and plink2, and KING against PLINK 2 (1 and 8 threads; job `vcf_merge_king` scheduled 20 Nov 19:20, ~3 h), then the HGDP650 PCA/DAPC/pcadapt/LD benchmarks (not set up): medians in `vcf_merge.md`, `pairwise_bitpacked.md`, `gt_pca.md`, `ld_missing.md`.
 - [ ] **P2** [claude] Make `merge_vcf_speed` ready for a PR (file names in pass-1 errors, a cache-vs-reread test, full suite, `gen_tibble()` timing): done when a PR into `dev` is open, after #231.
 - [ ] **P2** [claude] Keep optimising: pcadapt's t-scores, the GRM's count of shared loci, the DAPC regression, KING: after the desktop timings of the two-path kernel (`king_plink_ideas` `e2692136`), check a build without AVX2, then a PR if Andrea agrees: done when >5% faster with identical outputs.
 - [ ] **P2** [review] Release 1.1.0 after #231: set the version, merge `dev` into `main`, re-run `urlchecker::url_check()` and submit (from 15 Nov; not rechecked).

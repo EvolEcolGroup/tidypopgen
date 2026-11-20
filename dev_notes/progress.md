@@ -4,6 +4,18 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-20 (manica01): HGDP benchmark article re-rendered on grouping
+
+- **Done:** pulled `grouping` (`88eaed6e`) and re-knitted
+  `benchmark_hgdp.Rmd` with `precompile_hgdp_benchmark.R` (-O2 install of the
+  branch, 20 threads, quiet machine; laptop section re-appended unchanged).
+- **Where:** `grouping`, `f364012d`.
+- **Result:** printed results unchanged; total 4.91 s (was 3.42 s), as
+  `filter_indiv` went from 4 ms to 1.66 s: the grouped `filter()` calls
+  `indiv_missingness()` once per population (1.9 s grouped, 0.23 s
+  ungrouped, same individuals). Left for Andrea to decide.
+- **Notes changed:** `handover.md`, `summary.md`.
+
 ## 2026-11-20 (laptopX1): vignette fixes on grouping, PR #235 into pca_missing
 
 - **Done:** a03: the coloured PCA scores plot and the map of DAPC clusters get

@@ -1,6 +1,6 @@
 # tidypopgen: handover
 
-Updated 2026-11-20 (laptopX1). For the next session: read this and
+Updated 2026-11-20 (manica01). For the next session: read this and
 `summary.md` first. History is in `progress.md`; designs are in the topic
 documents listed in `README.md`.
 
@@ -44,12 +44,12 @@ once the branches are no longer needed).
   (`87c75ea4`, 20 Nov) with indicative timings: re-time them on a quiet
   machine before a release (the laptop section of the HGDP benchmark is
   older still, with an "impute" step).
-- **HGDP benchmark, hand-patched:** on `grouping`, the `filter_loci` and
-  `filter_indiv` chunks of `benchmark_hgdp.Rmd` were patched by hand on the
-  laptop (new code, counts computed there; HTML comments mark them) and are
-  not timed; the summary table keeps the old times. Re-run
-  `vignettes/articles/precompile_hgdp_benchmark.R` on the desktop (needs
-  `chunkhooks`, n_cores = 20; ~1 min) and commit the re-rendered article.
+- **HGDP benchmark:** re-rendered on the desktop (`f364012d`, quiet
+  machine, 20 threads), timing the new filters. `filter_indiv` now takes
+  1.7 s (4 ms with the old `hgdp[to_keep_indiv, ]`): on the grouped
+  `gen_tibble`, `filter()` calls `indiv_missingness()` once per population
+  (51 scans); ungrouped it takes 0.23 s, same 1041 individuals. Andrea's
+  call whether to keep it.
 - **Done when:** #231 is merged into `dev` (squash).
 
 ### 2. **P2** [desktop] Re-time on the P-cores
@@ -124,14 +124,6 @@ once the branches are no longer needed).
 
 All on the P-cores (`taskset -c 0-7`), timing-sensitive: tell the other
 sessions first (the benchmarking skill, "Unattended desktop jobs").
-
-### Re-render the HGDP benchmark article (grouping)
-
-- **Branch:** `grouping` (PR #235). **Run:** in `vignettes/articles/`,
-  `Rscript precompile_hgdp_benchmark.R` with an -O2 install of the branch
-  (20 threads, ~1 min of compute). **Done when:** the article has timings for
-  `filter_loci` and `filter_indiv`, the HTML comments are gone, and the
-  re-rendered article is pushed. Not a quiet benchmark run: indicative timings.
 
 ### HGDP650 timings of `gt_pca()`, DAPC, pcadapt, clumping and pruning
 
