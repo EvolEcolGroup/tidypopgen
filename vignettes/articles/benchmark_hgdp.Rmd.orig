@@ -131,14 +131,14 @@ autoplot(loci_report, type = "all")
 
 # Filter Loci
 
-Following this, we filter the loci to only including those with a minor allele
+Following this, we filter the loci to only include those with a minor allele
 frequency over 0.05, and a missingness rate below 0.05 (over all individuals).
+We do not need to compute them again: the loci report has one row per locus,
+in the same order as the loci of `hgdp`, so we can filter on its columns:
 
 ```{r filter_loci, benchmark = TRUE}
 hgdp <- hgdp %>%
-  select_loci_if(
-    loci_maf(genotypes) > 0.05 & loci_missingness(genotypes) < 0.05
-  )
+  select_loci_if(loci_report$maf > 0.05 & loci_report$missingness < 0.05)
 ```
 
 
@@ -166,8 +166,16 @@ we would keep and lose with this threshold:
 indiv_report %>% count(lost = missingness >= 0.01)
 ```
 
+The missingness of an individual does not depend on its group, but `filter()`
+on a grouped `gen_tibble` evaluates its condition one group at a time (here,
+one pass over the genotypes for each of the 51 populations). We thus ungroup
+to filter, and group again afterwards:
+
 ```{r filter_indiv, benchmark = TRUE}
-hgdp <- hgdp %>% filter(indiv_missingness(genotypes) < 0.01)
+hgdp <- hgdp %>%
+  ungroup() %>%
+  filter(indiv_missingness(genotypes) < 0.01) %>%
+  group_by(population)
 ```
 
 A few missing genotypes remain after filtering. We do not need to impute
