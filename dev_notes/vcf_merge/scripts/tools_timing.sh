@@ -16,7 +16,16 @@ want() { [[ "$1" =~ $STEPS ]]; }
 CORES=${CORES:-"0-$((T - 1))"}
 # a counter from perf stat -x, summed over the core types of a hybrid CPU
 # (the desktop prints one line for cpu_atom and one for cpu_core)
-perf_sum() { awk -F, -v e="$1" '$3 ~ e && $1 ~ /^[0-9]+$/ { s += $1 } END { print s + 0 }' "$2"; }
+perf_sum() { awk -F, -v e="$1" '$3 ~ e && $1 ~ /^[0-9]+$/ { s += $1; n++ } END { if (n) print s; else print "NA" }' "$2"; }
+# count cycles only if perf can (kernel.perf_event_paranoid <= 2; a reboot
+# resets it): otherwise time without perf, and record NA for the counters
+if perf stat -e cycles:u true > /dev/null 2>&1; then PERF_OK=1; else PERF_OK=0
+  echo "perf cannot count cycles: counters recorded as NA" >&2; fi
+counted() {  # counted <perf output file> <command...>
+  local o=$1; shift
+  if [ "$PERF_OK" = 1 ]; then perf stat -x, -e cycles:u,instructions:u -o "$o" "$@"
+  else : > "$o"; "$@"; fi
+}
 RES=$W/results/tools.tsv
 [ -f "$RES" ] || echo -e "date\ttool\tversion\tscenario\tthreads\trep\tstep\twall_s\tpeak_rss_mb\tload1\tcycles_u\tinstr_u\tout_mb" > "$RES"
 OUT=$W/out/tools/$SC
@@ -33,7 +42,7 @@ timed() { # tool version step outfile command...
   shift 4
   local load1
   load1=$(cut -d' ' -f1 /proc/loadavg)
-  perf stat -x, -e cycles:u,instructions:u -o "$OUT/perf" \
+  counted "$OUT/perf" \
     /usr/bin/time -f "%e %M" -o "$OUT/time" "$@" > "$OUT/$step.log" 2>&1
   local wall rss cyc ins size=NA
   read -r wall rss < "$OUT/time"

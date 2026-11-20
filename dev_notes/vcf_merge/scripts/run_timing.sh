@@ -17,7 +17,16 @@ export OMP_NUM_THREADS=$T
 CORES=${CORES:-"0-$((T - 1))"}
 # a counter from perf stat -x, summed over the core types of a hybrid CPU
 # (the desktop prints one line for cpu_atom and one for cpu_core)
-perf_sum() { awk -F, -v e="$1" '$3 ~ e && $1 ~ /^[0-9]+$/ { s += $1 } END { print s + 0 }' "$2"; }
+perf_sum() { awk -F, -v e="$1" '$3 ~ e && $1 ~ /^[0-9]+$/ { s += $1; n++ } END { if (n) print s; else print "NA" }' "$2"; }
+# count cycles only if perf can (kernel.perf_event_paranoid <= 2; a reboot
+# resets it): otherwise time without perf, and record NA for the counters
+if perf stat -e cycles:u true > /dev/null 2>&1; then PERF_OK=1; else PERF_OK=0
+  echo "perf cannot count cycles: counters recorded as NA" >&2; fi
+counted() {  # counted <perf output file> <command...>
+  local o=$1; shift
+  if [ "$PERF_OK" = 1 ]; then perf stat -x, -e cycles:u,instructions:u -o "$o" "$@"
+  else : > "$o"; "$@"; fi
+}
 RUNS=$W/results/runs.tsv
 [ -f "$RUNS" ] || echo -e "date\tversion\tscenario\tn_cores\trep\twall_s\tpeak_rss_mb\tload1\tbk_md5\tmode\tcycles_u\tinstr_u\tcommit" > "$RUNS"
 MODE=${MERGE_MODE:-phases}
@@ -29,7 +38,7 @@ run_one() { # version:lib rep
   load1=$(cut -d' ' -f1 /proc/loadavg)
   local extra=""
   [ "$MODE" == "real" ] && extra="real"
-  MERGE_REP=$rep perf stat -x, -e cycles:u,instructions:u -o "$out/perf" \
+  MERGE_REP=$rep counted "$out/perf" \
     /usr/bin/time -f "%e %M" -o "$out/time" taskset -c "$CORES" \
     Rscript $W/scripts/merge_phases.R "$lib" "$SC" "$T" "$out/merged" \
     "$W/results/phases_${v}.tsv" $extra > "$out/log" 2>&1 || { cat "$out/log"; exit 1; }
