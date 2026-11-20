@@ -4,6 +4,19 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-20 (manica01): PR #234 merged; baboon `.bim` and `.fam` redownloaded
+
+- **Done:** Andrea merged PR #234 (the parallel `.bed` reader) into
+  `pca_missing` (`58821fab`); the last notes commit of `bed_reader` was
+  cherry-picked onto `pca_missing`.
+- **Checked:** the redownloaded baboon `.bim` and `.fam` match the `.bed`:
+  166,099,533 loci, the old `.bim` an exact prefix of the new one, every
+  locus ending where 486 individuals say, A1 the minor allele at every locus
+  (so the rows match). At Andrea's request they replaced the old files in
+  `phase2_plink/` (the old `.bim` kept as `plink.biallelic.bim.truncated`).
+- **Notes changed:** `bed_reader.md` ("The baboon fileset"), `handover.md`,
+  `summary.md`.
+
 ## 2026-11-20 (manica01): `.gt` alleles as codes not adopted
 
 - **Decision (Andrea):** the faster `.gt` format (alleles as codes:
