@@ -113,6 +113,8 @@
   excluding nothing or the wrong loci
 * `rbind()`: fix grouped `gen_tibble`s (an error from `bind_rows()`); the
   merged `gen_tibble` keeps the grouping of the first one
+* `gt_add_sf()`: no "Adding missing grouping variables" message on grouped
+  `gen_tibble`s
 
 # tidypopgen 1.0.0
 
