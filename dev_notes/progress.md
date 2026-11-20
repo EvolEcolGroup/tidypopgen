@@ -4,6 +4,22 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-20 (manica01): desktop timings of the VCF merge and KING prototypes
+
+- **Done:** the unattended job `vcf_merge_king` (19:30-20:38) timed the
+  four `gt_merge_vcfs()` versions at 1 and 8 threads, bcftools and plink2
+  at 8, and KING (base, p1, p3, p3s, PLINK 2) at 1 and 8 threads; outputs
+  identical to the laptop's. plink2's sgdp merge ran out of memory with
+  `--memory 4000`: re-run with 32000 as a new phase (`9819a0f9`).
+- **Results:** VCF base -> P4 1.6x on sgdp (1 and 8 threads) and many
+  (8 threads), 1.1-1.25x on pops; P4 3.4-7.1x faster than bcftools, on a
+  par with plink2 on pops and 3.5-4.4x faster on single-sample files. KING
+  full matrix: p3 1.76x over base on 1 thread (3.72 s), 1.53x on 8, 1.4x
+  faster than PLINK 2 on 1 thread; scalar p3s 1.3x.
+- **Notes changed:** `vcf_merge.md`, `pairwise_bitpacked.md` (desktop
+  tables; the KING set-up moved there from the handover), `handover.md`,
+  `summary.md`.
+
 ## 2026-11-20 (manica01): PR #234 merged; baboon `.bim` and `.fam` redownloaded
 
 - **Done:** Andrea merged PR #234 (the parallel `.bed` reader) into

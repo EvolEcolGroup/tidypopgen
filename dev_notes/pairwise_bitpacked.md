@@ -169,7 +169,17 @@ The scripts (agreement checks, PLINK timings, prototype timings) are in
 HGDP650 `.pgen` with FID set to the population, the three builds
 (`build/lib_{base,p1,p2}`) and the outputs are on the laptop in
 `/media/andrea/Elements1/tmp/claude/tidypopgen/plink_king/` (moved from the
-annex on 20 Nov).
+annex on 20 Nov); on manica01 in `~/claude_work/tidypopgen/plink_king/`
+(`build/lib_{base,p1,p3}`). The PLINK input: in `plink_king/data/`,
+`hgdp650_pop.{bed,bim,fam}` are `vignettes/articles/data/hgdp/hgdp650.qc.hg19.*`
+with the FID (column 1 of the `.fam`) replaced by the population of
+`hgdp650_id_pop.txt`, then `plink2 --bfile hgdp650_pop --make-pgen --out
+hgdp650_pop`, and `keep/<population>.txt` (FID IID, one file per
+population) for the `--keep` loop. The scripts read the HGDP650 `.gt` at
+`bench_inb/data/hgdp650.gt`, and take `CPUS` and `OUTDIR` from the
+environment; `check_proto.R` checks that the builds give `identical()`
+outputs. On the desktop `run_desktop.sh` (in `dev_notes/vcf_merge/`) runs
+them as phases of an unattended job.
 
 ## Timings of the PLINK 2 ideas (20 Nov 2026)
 
@@ -227,16 +237,48 @@ Laptop, same protocol as above (06:04-06:14, load 0.8-1.1; p3s is p3 with
 
 - With AVX2, p3 is as fast as p2 (2.3x over base on 1 thread); without, it is
   as fast as p1 (1.5x over base), instead of 1.6x slower.
-- Not merged: still needs the desktop timings (1 and 8 threads, against
-  PLINK 2), a build without AVX2 (non-x86 or the dispatch compiled out),
-  and a decision to carry ~120 lines of x86-only code.
+- Not merged: still needs a build without AVX2 (non-x86 or the dispatch
+  compiled out), and a decision to carry ~120 lines of x86-only code. The
+  desktop timings are below.
+
+**Desktop, 20 Nov 2026** (manica01, i9-13900, P-cores; the unattended job
+`vcf_merge_king`, 20:13-20:38). Same builds (-O2 installs of `b8255226`,
+`72377615`, `e2692136`; p3s is p3 with `TIDYPOPGEN_NO_AVX2=1`) and PLINK 2
+v2.0.0-b.1.4LM AVX2 Intel (7 Nov 2026), HGDP650 on the SSD. 6 runs per
+version in F R F R F R order, on core 2 (1 thread) or cores 0-7 (8 threads);
+the median of the faster call of each R process; PLINK 2 the wall time of the
+whole command. Load 0.4-0.9, except three 8-thread PLINK 2 runs at 1.6-2.6.
+Medians in seconds (range):
+
+| | full, 1 thread | full, 8 threads | within, 1 thread | within, 8 threads |
+|---|---|---|---|---|
+| base `b8255226` | 6.56 (6.55-6.57) | 0.936 (0.935-0.941) | 0.354 | 0.057 |
+| p1 `72377615` | 5.09 (5.07-5.10) | 0.749 (0.746-0.751) | 0.349 | 0.060 |
+| p3 `e2692136` (AVX2) | **3.72** (3.71-3.79) | **0.613** (0.612-0.901) | 0.321 | 0.055 |
+| p3s (scalar) | 5.02 (5.01-5.06) | 0.742 (0.739-0.743) | 0.353 | 0.060 |
+| PLINK 2 `.pgen` / `.bed` | 5.15 / 5.13 | 0.79 / 0.81 | 0.32 / 0.30 | 0.12 / 0.10 |
+
+- **p3 is 1.76x faster than base on 1 thread, 1.53x on 8**; its scalar path
+  (p3s) 1.31x and 1.26x, as fast as p1. The gains are smaller than on the
+  laptop (2.3x and 1.5x on 1 thread): base is 2.1x faster on the desktop
+  than on the laptop, p3 1.6x.
+- **Against PLINK 2:** p3 is 1.4x faster on 1 thread (3.72 against 5.15 s)
+  and 1.3x on 8 (0.61 against 0.79 s); p3s is on a par with PLINK 2, and
+  base 1.3x slower on 1 thread. PLINK 2's times include its start-up and
+  reading (`--pgen` alone: 0.12 s on 1 thread).
+- **Within groups** the versions are within 10% (packing dominates); on 8
+  threads 0.055-0.060 s against 0.10-0.12 s for PLINK 2 (7.2 s for a
+  `--keep` loop over the populations).
+- p3's second call on 1 thread is slower than its first in every run (4.01
+  against 3.72 s); no other version does this. Not explained.
+- Tables: `pairwise_bitpacked/king_desktop_2026-11-20/` (columns as above;
+  `summary.txt` has the medians of each call).
 
 ## Open questions
 
-- **Merge the two-path KING kernel (p3, `king_plink_ideas`)?** 2.3x on the
-  full matrix with AVX2, 1.5x without (laptop, 20 Nov); time on the desktop
-  against PLINK 2 at 1 and 8 threads, and check a build without AVX2,
-  before a PR.
+- **Merge the two-path KING kernel (p3, `king_plink_ideas`)?** On the
+  desktop, 1.76x on the full matrix with AVX2 (1.4x faster than PLINK 2) and
+  1.3x without (20 Nov); check a build without AVX2 before a PR.
 - Merge `king_simd_packing`? Only if single-core grouped KING matters (it is
   memory-bound on 8 cores).
 - Packing blocks whose rows are not consecutive (e.g. after `filter()`) reads

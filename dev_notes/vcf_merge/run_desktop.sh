@@ -153,7 +153,7 @@ if ! wait_idle; then say "the machine was never idle before $NO_START_AFTER: not
 say "machine idle (load $(load))"
 
 # ---- PHASES, in order of priority ------------------------------------------------
-# (the laptop has 4-thread runs of 20 Nov; 1 thread and the tools are missing)
+# (1 and 8 threads, and the tools at 8; the laptop has 4-thread runs of 20 Nov)
 phase vcf_t1   vcf 1 2                  # ~30-40 min
 phase vcf_t8   vcf 8 0-7                # ~20 min
 phase tools_t8 tools 8 0-7 pops many    # ~12 min

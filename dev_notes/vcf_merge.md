@@ -86,6 +86,53 @@ files). The full test suite was not run.
 
 ## Numbers
 
+**Desktop, 20 Nov 2026** (manica01, i9-13900, P-cores; the unattended job
+`vcf_merge_king`, 19:30-19:56). Same -O2 builds and data as below, data on
+the SSD, `MERGE_MODE=real`, 3 runs per version in A B C D, D C B A, A B C D
+order, on core 2 (1 thread) or cores 0-7 (8 threads); load 0.3-1.3. Median
+wall time in seconds including R start-up:
+
+| version | pops, 1 thread | sgdp, 1 | many, 1 | pops, 8 threads | sgdp, 8 | many, 8 |
+|---|---|---|---|---|---|---|
+| base `5e207d78` | 7.43 | 38.96 | 28.90 | 3.12 | 16.70 | 18.07 |
+| P1 `d3b982d0` | 6.21 | 26.01 | 22.05 | 3.08 | 14.11 | 15.40 |
+| P3 `bc6856b6` | 6.11 | 25.35 | 22.51 | 2.92 | 11.65 | 12.30 |
+| P4 `6982994c` | 5.96 | 24.22 | 21.63 | 2.74 | 10.48 | 11.37 |
+| base / P4 | 1.25x | 1.61x | 1.34x | 1.14x | 1.59x | 1.59x |
+
+- Runs within 3% of each other, except base's first run on pops at 1
+  thread (8.11 s) and one P1 run on pops at 8 threads (3.31 s).
+  Outputs identical in every run (the checksums below).
+- On 1 thread P1 carries the gain (reading each file once); P3's parallel
+  parsing adds nothing there, as expected, and 17-20% on 8 threads.
+- User cycles (G, 1 thread), base / P1 / P3 / P4: pops 41 / 33 / 33 / 32;
+  sgdp 219 / 144 / 140 / 134; many 157 / 118 / 118 / 112. Instructions (G):
+  pops 115 / 96 / 94 / 92; sgdp 501 / 348 / 330 / 312; many 422 / 332 / 304
+  / 283. Peak memory 0.66-0.69 GB (pops), 0.85-0.88 (sgdp), 0.94-0.97
+  (many).
+
+Other tools on the desktop, 8 threads (cores 0-7), 3 runs each, median
+seconds (peak memory). bcftools 1.25 (`merge -m none`, plus `-0` for the
+single-sample files; `-Ou` to /dev/null, `-Oz` to a file) and plink2
+v2.0.0-b.1.4LM AVX2 (`--vcf` import of each file, then `--pmerge-list`):
+
+| scenario | bcftools `-Ou` | bcftools `-Oz` | plink2 import | plink2 merge | P4 |
+|---|---|---|---|---|---|
+| pops | 9.45 (0.14 GB) | 12.73 | 1.21 | 1.77 (0.47 GB) | 2.74 |
+| sgdp | 73.89 (1.5 GB) | 76.61 | 23.58 | 22.85 (5.0 GB) | 10.48 |
+| many | 63.47 (4.5 GB) | 67.34 | 20.06 | 19.90 (1.1 GB) | 11.37 |
+
+- P4 (a `gen_tibble` on disk, R start-up included) is 3.4x (pops) to 7.1x
+  (sgdp) faster than bcftools writing uncompressed BCF to /dev/null. On pops
+  plink2's import and merge together (3.0 s) are on a par with P4; on the
+  single-sample files plink2 takes 3.5x (many, 40 s) to 4.4x (sgdp, 46 s)
+  longer.
+- plink2's sgdp merge ran out of memory with `--memory 4000` (the setting
+  of the other scenarios); sgdp was re-run with 32000 for the merge (peak
+  5.0 GB) at 22:14-22:24, load 0.03-1.6.
+- Tables: `vcf_merge/desktop_2026-11/` (`runs.tsv`, `tools.tsv`,
+  `phases_<version>.tsv`, `status.md`).
+
 **Balanced runs, 20 Nov 2026** (laptop laptopX1, 4 threads, `taskset -c 0-3`,
 3 runs per version in A B C D, D C B A, A B C D order, `MERGE_MODE=real`, i.e. the
 installed `gt_merge_vcfs()`; -O2 installs of each commit; data on the WD
@@ -111,7 +158,7 @@ start-up (range in brackets):
   twice. The 1.9x of the single runs below came from a base run slowed by
   other load.
 - The 1-thread runs and bcftools/plink2 were not run (stopped for the 06:00
-  deadline); they are in the desktop job (`run_desktop.sh`).
+  deadline); the desktop runs above have them.
 - Tables: `vcf_merge/results/2026-11-20/` (`runs.tsv`, `status.log`).
 
 **Single runs, 19 Nov 2026** (superseded by the above for base/P1/P3/P4).
@@ -179,11 +226,8 @@ annex on 20 Nov).
 
 ## Open questions
 
-- **Desktop timings:** the laptop's balanced 4-thread runs (20 Nov) give
-  1.6x on sgdp and many, 1.2x on pops. Still missing: 1 and 8 threads on the
-  desktop's P-cores, and bcftools and plink2 on all three datasets
-  (`setup_desktop.sh`, then `run_desktop.sh`).
-- **Make a PR of `merge_vcf_speed`?** P1 and P3 carry most of the gain.
+- **Make a PR of `merge_vcf_speed`?** The desktop timings (20 Nov) confirm
+  1.6x on sgdp (1 and 8 threads) and on many with 8 threads. P1 and P3 carry most of the gain.
   Before a PR: name the file in P1's genotype errors, a test that the cache
   and the re-read give the same result (swapped loci with haploid calls),
   the full test suite, and a `gen_tibble()` timing for P3.
