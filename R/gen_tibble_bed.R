@@ -7,6 +7,7 @@ gen_tibble_bed_rds <- function(
   allow_duplicates = FALSE,
   backingfile = NULL,
   names_as_int = FALSE,
+  n_cores = 1,
   quiet = FALSE
 ) {
   # if file ends in bed
@@ -35,7 +36,8 @@ gen_tibble_bed_rds <- function(
     fbm_path <- fbm_read_bed(x,
       n_indiv = nrow(indiv_meta),
       n_snp = nrow(loci),
-      backingfile = backingfile
+      backingfile = backingfile,
+      n_cores = n_cores
     )
 
     fbm_obj <- readRDS(fbm_path)
@@ -118,12 +120,17 @@ gen_tibble_bed_rds <- function(
   return(new_gen_tbl)
 }
 
-# this is a stripped down version of bigsnpr::snp_readBed
-# it only creates the fbm of the genotypes
+# Read the genotypes of a PLINK .bed file into a new FBM.code256 (with the
+# code of bigsnpr, 0, 1, 2 and NA), saved next to its backing file; this
+# replaces bigsnpr::snp_readBed(), which also reads the .bim and .fam files
+# (here they are read by loci_from_bim() and indiv_meta_from_fam()). The
+# genotypes are decoded in parallel with n_cores cores (read_bed_to_fbm(),
+# in src/read_bed.cpp). Returns the path of the .rds file of the FBM.
 fbm_read_bed <- function(bedfile,
                          n_indiv,
                          n_snp,
-                         backingfile = bigsnpr::sub_bed(bedfile)) {
+                         backingfile = bigsnpr::sub_bed(bedfile),
+                         n_cores = 1) {
   backingfile <- path.expand(backingfile)
   # check that file exists
   if (file.exists(paste0(backingfile, ".bk"))) {
@@ -137,7 +144,9 @@ fbm_read_bed <- function(bedfile,
     code = bigsnpr::CODE_012, backingfile = backingfile, init = NULL,
     create_bk = TRUE
   )
-  reach_eof <- readbina(path.expand(bedfile), big_geno, getCode())
+  reach_eof <- read_bed_to_fbm(
+    path.expand(bedfile), big_geno, getCode(), n_cores
+  )
   if (!reach_eof) {
     warning("EOF of bedfile has not been reached.")
   }

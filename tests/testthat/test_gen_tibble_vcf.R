@@ -836,6 +836,53 @@ test_that("truncated packedancestry geno files are caught", {
   }
 })
 
+test_that("bed files are read on several cores, and bad bed files are caught", {
+  ext_dir <- system.file("extdata", package = "tidypopgen")
+  bed_file <- file.path(ext_dir, "pop_a.bed")
+  # the genotypes are those read by bigsnpr, on one or two cores
+  bigsnp_obj <- bigsnpr::snp_attach(
+    bigsnpr::snp_readBed(bed_file, backingfile = tempfile())
+  )
+  for (n_cores in c(1, 2)) {
+    bed_gt <- gen_tibble(bed_file,
+      backingfile = tempfile(), n_cores = n_cores, quiet = TRUE
+    )
+    expect_identical(show_genotypes(bed_gt), bigsnp_obj$genotypes[])
+  }
+  # copies of the bed file (with its bim and fam), with changed bytes
+  bed_bytes <- readBin(bed_file, "raw", n = 1e5)
+  bed_dir <- tempfile("bed_")
+  dir.create(bed_dir)
+  file.copy(file.path(ext_dir, "pop_a.bim"), bed_dir)
+  file.copy(file.path(ext_dir, "pop_a.fam"), bed_dir)
+  bad_path <- file.path(bed_dir, "pop_a.bed")
+  # truncated (a byte missing, or only the magic number)
+  for (n_bytes in c(length(bed_bytes) - 1, 3)) {
+    writeBin(bed_bytes[seq_len(n_bytes)], bad_path)
+    expect_error(
+      gen_tibble(bad_path, backingfile = tempfile(), quiet = TRUE),
+      "truncated or corrupted"
+    )
+  }
+  # not a bed file, or an individual-major one
+  writeBin(c(as.raw(0), bed_bytes[-1]), bad_path)
+  expect_error(
+    gen_tibble(bad_path, backingfile = tempfile(), quiet = TRUE),
+    "wrong magic number"
+  )
+  writeBin(c(bed_bytes[1:2], as.raw(0), bed_bytes[-(1:3)]), bad_path)
+  expect_error(
+    gen_tibble(bad_path, backingfile = tempfile(), quiet = TRUE),
+    "individual-major"
+  )
+  # extra bytes at the end give a warning
+  writeBin(c(bed_bytes, as.raw(0)), bad_path)
+  expect_warning(
+    gen_tibble(bad_path, backingfile = tempfile(), quiet = TRUE),
+    "EOF of bedfile has not been reached"
+  )
+})
+
 test_that("file extensions are matched ignoring case", {
   # copy the pop_a files, using upper case extensions for the main files
   upper_dir <- tempfile("upper_")

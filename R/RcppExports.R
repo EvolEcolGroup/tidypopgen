@@ -173,6 +173,10 @@ pop_stats_dip_pseudo_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploi
     .Call(`_tidypopgen_pop_stats_dip_pseudo_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, by_locus_ho, by_locus_hs, by_locus_fis, by_locus_global, block_size, ncores)
 }
 
+read_bed_to_fbm <- function(filename, BM, tab, n_threads) {
+    .Call(`_tidypopgen_read_bed_to_fbm`, filename, BM, tab, n_threads)
+}
+
 read_packedancestry <- function(filename, BM, tab) {
     .Call(`_tidypopgen_read_packedancestry`, filename, BM, tab)
 }
