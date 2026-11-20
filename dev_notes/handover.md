@@ -128,7 +128,9 @@ sessions first (the benchmarking skill, "Unattended desktop jobs").
 ### Scheduled: the VCF merge and KING job of 20 Nov, 19:20
 
 - **What:** one unattended job, `vcf_merge_king` (systemd user timer, fires
-  Fri 20 Nov 19:20, no phase starts after Sat 07:00): the VCF merge phases
+  Fri 20 Nov 19:20, no phase starts after Mon 23 Nov 06:00, set with
+  `--setenv=NO_START_AFTER=...`: Andrea is away for the weekend): the VCF
+  merge phases
   (`vcf_t1`, `vcf_t8`, `tools_t8`), then KING (`king_bench_t1`,
   `king_bench_t8`, `king_proto_t1`, `king_proto_t8`, 6 balanced rounds
   each). Expected ~3 h once the machine is idle (at least 10 min of idle
