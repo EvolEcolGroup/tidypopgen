@@ -4,6 +4,26 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-20 (manica01): vignettes group by population early; grouped rbind() and gt_add_sf() fixed
+
+- **Done:** every vignette and article with several populations groups the
+  `gen_tibble` as soon as the populations are added (Andrea's request, from
+  their edits of a02 and the HGDP benchmark); metadata column names are
+  lower case (`plot_order_punctatus_n46.csv` header `id`; HGDP and SGDP
+  metadata lower-cased on reading); `rbind()` of grouped `gen_tibble`s fixed
+  (it went to dplyr's method); `gt_add_sf()` no longer messages on grouped
+  data; `select_loci_if()` documents that groups are ignored.
+- **Where:** branch `vignette_grouping` (from `pca_missing` at `dd7a251d`),
+  `84417a3b`..`5301d5cc`, not pushed; worktree
+  `~/claude_work/tidypopgen/wt_vignette_grouping`.
+- **Result:** on HGDP650, grouping changes only the HWE p-values (loci with
+  p < 0.01: 405,493 ungrouped, 2,744 within populations); all articles knit
+  with identical printed results; full test suite run on the branch build.
+- **Decisions:** `select_loci_if()` keeps evaluating on all individuals of a
+  grouped `gen_tibble` (documented, with examples of selecting on
+  per-group statistics) (Andrea asked to clarify it).
+- **Notes changed:** `handover.md`.
+
 ## 2026-11-20 (manica01): desktop set-up of the VCF merge and KING timings, scheduled
 
 - **Done:** set up both desktop jobs of the queue (Andrea's request): bcftools
