@@ -42,8 +42,9 @@ header.
   `rowInd`; the counts of each group's packed triangle follow one another.
   `.pairwise_king_by_group()` turns them into one matrix per group (empty
   groups give a 0 x 0 `pairwise_matrix`, as `pairwise_king()` on an empty
-  `gen_tibble`). Grouped tibbles of other genotype classes go through
-  `group_map()`.
+  `gen_tibble`). There is no `group_map()` fallback for other classes of
+  genotypes (removed in `f6110412`: a gen_tibble's genotypes are always a
+  `vctrs_bigSNP`).
 - **Tidy output**: `dist_matrix_pairs()` gives the pairs of a matrix as
   vectors (also used by `tidy_dist_matrix()`), and one tibble is made for all
   groups (a tibble per group took 0.32 s for ~350 families of 3).
@@ -95,12 +96,86 @@ clean-up).
 No precompiled article times the functions that changed (the HGDP
 benchmark's `gt_pca()` step is unchanged), so none needs re-knitting.
 
+## Comparison with PLINK 2 (19 Nov 2026)
+
+An agent read the KING code of PLINK 2 (v2.0.0-b.1.4LM AVX2 Intel binary of
+7 Nov 2026; plink-ng source at `5f7c3bcc`, 17 Nov 2026, references under
+`plink-ng/2.0/`) and compared it with ours on HGDP650. It was stopped by the
+annex failure before its benchmarks, so there are no proper timings.
+
+- **Same estimator and same core loop.** KING-robust between families,
+  `0.5 - (4 ibs0 + het1hom2 + het2hom1) / (4 min het)`
+  (`plink2_matrix_calc.cc:1589-1607`), algebraically identical to ours.
+  `IncrKing` (:1249-1290) does 4 scalar `popcnt` per 64-bit word and pair
+  (ibs0, hethet, het2hom1, het1hom2), about 22 instructions per word against
+  our ~23; the AVX2 build has no vector popcount (its vectorised version is
+  only for builds without SSE4.2).
+- **What differs around the loop:**
+  - 2 bit planes per sample (`hom`, `ref2het`; missing is neither), made
+    from each variant's 2-bit row with SIMD and turned sample-major with
+    512x512 bit-block transposes; we keep 4 planes.
+  - Blocks of 1024 variants (16 words); our full-matrix chunks are 7 words
+    (~450 loci) on HGDP650.
+  - Double buffering: the main thread reads and transposes the next block
+    while threads - 1 compare the current one; rows of the triangle split by
+    area.
+  - A sparse pass for variants where all but at most n/33 samples share a
+    genotype (`CalcKingSparseThread`, :873-1247): 23,857 variants (3.7%) on
+    HGDP650, many more on whole-genome data.
+- **Within groups:** `--make-king-table rel-check` with the population as FID
+  computes only the pairs within each population in one pass, like
+  `.pairwise_king_by_group()` (no sparse pass on that path).
+- **Agreement:** full matrix, largest difference from
+  `pairwise_king(n_cores = 1)` 2.2e-16 over 543,403 pairs; within
+  populations, the same 13,100 pairs, differing only by PLINK's rounding to
+  6 digits. Missing genotypes are handled the same way.
+- **Timings (single runs on core 3 at load 3-4; do not quote):** within
+  populations, PLINK 0.83 s against ours 0.76 s (packing alone 0.51 s); the
+  full matrix in PLINK 18.2 s (ours not timed then; 9.1 s on manica01 above).
+  So PLINK is not clearly faster on 1 thread; the 4-thread comparison never
+  ran.
+- **Licence:** `plink2_matrix_calc.cc` is GPL (>= 3), pgenlib under
+  `include/` LGPL (>= 3); copying into tidypopgen (GPL >= 3) is compatible if
+  the notices are kept and Christopher Chang and Shaun Purcell are credited
+  as `cph`. The prototypes below are our own code, not copied.
+
+**Ideas, ranked by the agent (none measured):**
+
+1. Tiles of pairs plus 64-word chunks for the full matrix: the 8.7 MB pair
+   counts (more than L3) are now updated ~1,438 times on HGDP650, against
+   ~629 in PLINK; perhaps 1.3-1.5x, more on several cores; ~60 portable
+   lines. Prototype `72377615` on `king_plink_ideas`, not compiled.
+2. An AVX2 vector popcount (Muła's nibble lookup) chosen at run time
+   (`target("avx2")`, `__builtin_cpu_supports()`, as the popcnt dispatch;
+   no compiler flags, fine for CRAN): ~2x on comparing (most of the full
+   matrix, ~30% of grouped KING on 1 core); ~120 lines of x86-only code with
+   the scalar fallback. Not in PLINK. Work in progress `ef1c0b4c` on
+   `king_plink_ideas` (4-word plane blocks, `pw_row_king_avx2`,
+   `PwAvx2<PwKing>`, off with `TIDYPOPGEN_NO_AVX2`), never compiled.
+3. Two popcounts per word instead of four when few genotypes are missing
+   (HGDP650: 0.086% missing, ~5% of words with one), correcting only the
+   words with missing genotypes: ~1.6x on comparing, with a fallback for
+   data with many missing genotypes. Not in PLINK.
+4. PLINK's sparse pass for rare variants: ~4% on HGDP650, but large at our
+   >40M-loci target; ~300 lines with the pair corrections.
+5. Two planes instead of four: half the plane memory and loads, <= 10%.
+6. Skipping each individual's pair with itself: 7% of grouped comparing on
+   HGDP650, up to 50% for families of 3.
+
+The agent's scripts (agreement checks, PLINK timings, prototype timings,
+never run for timings) are in `dev_notes/pairwise_bitpacked/plink_scripts/`
+(paths hard-coded to the laptop's annex). PLINK 2, its source, the HGDP650
+`.pgen` with FID set to the population and the check outputs are on the
+laptop in `/media/andrea/annex/tmp/claude/tidypopgen/plink_king/`.
+
 ## Open questions
 
 - Comparing the pairs (4 popcounts per word and pair) is now ~30% of grouped
   KING on one core and most of the full matrix (7.6 s): a vectorised
-  popcount (AVX2 Harley-Seal, or AVX-512 `VPOPCNTQ`) with run-time dispatch
-  could halve it; not tried.
+  popcount with run-time dispatch could halve it. An AVX2 version is in
+  progress on `king_plink_ideas` (idea 2 above), with the tiles (idea 1);
+  compile, test against `b8255226`, and time on the desktop against PLINK 2
+  at 1 and 8 threads.
 - Merge `king_simd_packing`? Only if single-core grouped KING matters (it is
   memory-bound on 8 cores).
 - Packing blocks whose rows are not consecutive (e.g. after `filter()`) reads

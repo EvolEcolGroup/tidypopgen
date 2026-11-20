@@ -1,6 +1,6 @@
 # tidypopgen: handover
 
-Updated 2026-11-19 (manica01). For the next session: read this and
+Updated 2026-11-20 (laptopX1). For the next session: read this and
 `summary.md` first. History is in `progress.md`; designs are in the topic
 documents listed in `README.md`.
 
@@ -8,11 +8,19 @@ documents listed in `README.md`.
 
 | branch | purpose | base | pushed | merged |
 |---|---|---|---|---|
-| `pca_missing` | `gt_pca()` with missing genotypes as PLINK, projections; with #232 (checks, DAPC and pcadapt) and #233 (LD clumping and pruning); CI fix, re-rendered articles, and the fixes of the review of #232/#233 (merged from `codereview_missing`, report in `code_review_2026-11_pca_missing.md`); then grouped `pairwise_king()` and the faster bit-packed kernel (4 commits from `53843683` to `e39cdf49`, see `pairwise_bitpacked.md`) | `dev` | yes | no (PR #231) |
+| `pca_missing` | `gt_pca()` with missing genotypes as PLINK, projections; with #232 (checks, DAPC and pcadapt) and #233 (LD clumping and pruning); CI fix, re-rendered articles, the fixes of the review of #232/#233 (`code_review_2026-11_pca_missing.md`); grouped `pairwise_king()` and the faster bit-packed kernel (`53843683` to `e39cdf49`), grouped `indiv_inbreeding()` in one pass and the KING fallback removed (`f6110412`, `5718c15c`; `pairwise_bitpacked.md`) | `dev` | yes | no (PR #231) |
+| `merge_vcf_speed` | three prototypes speeding up `gt_merge_vcfs()` (`d3b982d0` keep the genotypes of pass 1, `bc6856b6` parallel line parsing, `6982994c` raw alleles), outputs identical; worktree `/media/andrea/annex/tmp/claude/tidypopgen/merge_vcf/wt` (`vcf_merge.md`) | `pca_missing` at `5e207d78` | yes (20 Nov) | no PR |
+| `king_plink_ideas` | KING ideas from PLINK 2: `72377615` tiles + 64-word chunks, `ef1c0b4c` AVX2 KING kernel (work in progress); neither compiled; worktree `/media/andrea/annex/tmp/claude/tidypopgen/plink_king/wt` (`pairwise_bitpacked.md`) | `pca_missing` at `b8255226` | yes (20 Nov) | no |
 | `king_simd_packing` | SIMD packing of the bit-packed kernel (`9853e055`), not merged: below the 1.5x bar (`pairwise_bitpacked.md`) | `pca_missing` at `c7c09c67` | no | no |
 
 About 19 other local branches on the laptop look unmerged to git (`git branch
 --no-merged origin/dev`), but many were squash-merged; see the clean-up task.
+
+The annex drive (USB) disconnected on 19 Nov at 22:09 and came back after a
+re-plug and a reboot; `git fsck` was clean and the unpushed commits read
+back. A copy of what was then unpushed is in
+`~/claude_work/tidypopgen_rescue/` on the laptop's root drive (27 KB; delete
+once the branches are no longer needed).
 
 ## Next tasks
 
@@ -20,49 +28,65 @@ About 19 other local branches on the laptop look unmerged to git (`git branch
 
 - **Read first:** `code_review_2026-11_pca_missing.md` ("Changes in
   behaviour to check before merging", "Fixes by area"; Andrea ticks the
-  boxes).
-- **Then:** check that the CI of #231 is green (the KING commits, which
-  change what `pairwise_king()` returns on grouped tibbles, were pushed on
-  19 Nov; see `pairwise_bitpacked.md`), and merge #231 into `dev` (squash).
-- **Done when:** #231 is merged.
+  boxes), and `pairwise_bitpacked.md` for the grouped `pairwise_king()` and
+  `indiv_inbreeding()` (they used to ignore groups or use `group_map()`).
+- **State:** CI at `b8255226` passes on all R-CMD-check jobs, lint, pkgdown
+  and test-coverage; codecov fails on coverage only (patch 94.68% against a
+  95.50% target, project -0.08%). Later commits touch only `dev_notes/`.
+- **Done when:** #231 is merged into `dev` (squash).
 
-### 2. **P2** [desktop] Re-time the HGDP650 benchmarks
+### 2. **P2** [desktop] Re-time on the P-cores
 
-- See the desktop queue.
+- See the desktop queue: HGDP650 PCA/DAPC/pcadapt/LD, the VCF merge, KING
+  against PLINK 2.
 
-### 3. **P2** [claude] Keep optimising (Andrea)
+### 3. **P2** [claude] Make `merge_vcf_speed` ready for a PR
 
-- **Branch:** a new branch from `dev`, after #231 is merged.
+- **Branch:** `merge_vcf_speed` (rebase or merge onto `dev` after #231).
+- **Read first:** `vcf_merge.md` ("How it works", "Open questions").
+- **To do:** name the file in the genotype errors raised in pass 1 (P1's
+  regression); a test that the cache and the re-read give the same result
+  (swapped loci with haploid calls in diploids); the full test suite; time
+  `gen_tibble()` on one large VCF for P3 (-O2 builds only); NEWS.
+- **Done when:** a PR into `dev`, with the desktop timings (task 2) in it.
+
+### 4. **P2** [claude] Keep optimising (Andrea)
+
+- **Branch:** a new branch from `dev`, after #231 is merged; for KING,
+  `king_plink_ideas`.
 - **Read first:** `gt_pca.md` ("Breakdown by operation", "Open questions"),
-  `ld_missing.md`.
+  `ld_missing.md`, `pairwise_bitpacked.md` ("Comparison with PLINK 2").
 - **Candidates:** pcadapt's t-scores (bigsnpr's `multLinReg`, ~5 of 7 s on
   HGDP650 with 44% missing genotypes), which would also give the counts of
   missing genotypes that `max_missing` now reads in an extra pass (+4%);
   the GRM's count of loci genotyped in both individuals (~2-3 s with
-  missing genotypes); the DAPC regression (3.8 s); the pair comparisons
-  of the bit-packed kernel (vectorised popcount; ~30% of grouped KING on
-  one core and most of the full KING matrix, `pairwise_bitpacked.md`).
+  missing genotypes); the DAPC regression (3.8 s); KING: compile and test
+  the tiles and the AVX2 popcount of `king_plink_ideas` against `b8255226`
+  (identical outputs), then the ideas ranked in `pairwise_bitpacked.md`.
 - **Check:** -O2 builds only (`pkgbuild::clean_dll()`,
   `compile_dll(debug = FALSE)`, `load_all(compile = FALSE)`, or
   `R CMD INSTALL` into a separate library); the benchmarking skill; the
-  scripts and data are in `/media/andrea/annex/tmp/claude/tidypopgen/bench_dapc/`
-  and `bench_ld/` on the laptop.
+  scripts and data are in `/media/andrea/annex/tmp/claude/tidypopgen/bench_dapc/`,
+  `bench_ld/` and `plink_king/` on the laptop.
 - **Done when:** faster by more than 5%, with identical outputs.
 
-### 4. **P2** [review] Release 1.1.0 (from claude_jobs#5, 15 Nov; not rechecked)
+### 5. **P2** [review] Release 1.1.0 (from claude_jobs#5, 15 Nov; not rechecked)
 
 - After #231: set the version, merge `dev` into `main` (pkgdown then publishes
   `rad_seq.html`), re-run `urlchecker::url_check()` and submit;
   `cran-comments.md` gives the intermittent failures as the reason for the
   early resubmission.
 
-### 5. **P3** [cleanup] Branches and scratch files
+### 6. **P3** [cleanup] Branches and scratch files
 
-- Delete `pca_missing` once #231 is merged, and `king_simd_packing` once
-  decided; review the other local branches on the laptop (many
-  squash-merged).
-- When the optimisation is done: `/media/andrea/annex/tmp/claude/tidypopgen/bench_dapc/`
-  (~3 GB) and `bench_ld/` (~0.5 GB) on the laptop.
+- Delete `pca_missing` once #231 is merged, `king_simd_packing` and
+  `king_plink_ideas` once decided, `merge_vcf_speed` once its PR is merged;
+  review the other local branches on the laptop (many squash-merged).
+- Ask Andrea before deleting benchmark files (he may keep optimising with
+  them). On the laptop's annex, under `/media/andrea/annex/tmp/claude/tidypopgen/`:
+  `bench_dapc/` (~3 GB), `bench_ld/` (~0.5 GB), `bench_inb/`, `merge_vcf/`
+  (data, builds, bcftools, outputs) and `plink_king/` (PLINK 2, its source,
+  HGDP650 `.pgen`); `~/claude_work/tidypopgen_rescue/` on the root drive.
 - On manica01: `~/claude_work/tidypopgen/` (the -O2 library of
   `e3b2b69c`, logs; `king/` holds the HGDP650 `gen_tibble` (~0.7 GB), the
   libraries and scripts of the KING timings of 19 Nov); the NearEast data in
@@ -71,6 +95,9 @@ About 19 other local branches on the laptop look unmerged to git (`git branch
 
 ## Desktop queue
 
+All on the P-cores (`taskset -c 0-7`), timing-sensitive: tell the other
+sessions first (the benchmarking skill, "Unattended desktop jobs").
+
 ### HGDP650 timings of `gt_pca()`, DAPC, pcadapt, clumping and pruning
 
 - **Branch and set-up:** `pca_missing` (or `dev` after #231); the HGDP650
@@ -78,10 +105,37 @@ About 19 other local branches on the laptop look unmerged to git (`git branch
   `bench_dapc/scripts/` and `bench_ld/scripts/` (paths to adapt); the masked
   data are made by `bench_dapc/scripts/mask_dev.R`; PLINK 1.9 is at
   `/usr/bin/plink1.9` (apt).
-- **Run:** on the P-cores (`taskset -c 0-7`), timing-sensitive: `gt_pca()`
-  with and without missing genotypes, the DAPC and pcadapt routes, clumping
-  and pruning against bigsnpr and PLINK.
+- **Run:** `gt_pca()` with and without missing genotypes, the DAPC and
+  pcadapt routes, clumping and pruning against bigsnpr and PLINK.
 - **Results:** numbers into `gt_pca.md` and `ld_missing.md`.
+
+### Balanced timings of the `gt_merge_vcfs()` prototypes
+
+- **Set-up:** the scripts in `dev_notes/vcf_merge/scripts/` (set `W` and
+  `MERGE_DATA` to a folder under `~/claude_work/tidypopgen/merge_vcf/`);
+  make the data with `make_merge_data.R <dir> pops|sgdp|many`, then `bgzip`
+  and `tabix` (~2.4 GB bgzipped; the sgdp headers need the INFO lines, as
+  in `vcf_merge.md`); install `5e207d78`, `d3b982d0`, `bc6856b6` and
+  `6982994c` into their own libraries (`git archive`, `R CMD INSTALL`);
+  bcftools 1.25 built from source; plink2 (AVX2 build).
+- **Run:** `run_timing.sh <scenario> <n_cores> 3 base:<lib> p1:<lib>
+  p3:<lib> p4:<lib>` for the three scenarios at 1 and 4 cores (~1-2 h), then
+  `tools_timing.sh` for bcftools and plink2 on the three scenarios (~1-2 h;
+  bcftools took ~4 min per sgdp merge at 4 threads).
+- **Results:** medians into `vcf_merge.md` ("Numbers"), the tables into
+  `dev_notes/vcf_merge/results/`.
+
+### KING against PLINK 2
+
+- **Set-up:** the HGDP650 `gen_tibble` of `~/claude_work/tidypopgen/king/`;
+  the scripts in `dev_notes/pairwise_bitpacked/plink_scripts/` (paths to
+  adapt); PLINK 2 (AVX2 build) and a `.pgen` of HGDP650 with FID set to the
+  population.
+- **Run:** `run_bench.sh`: full matrix and within populations
+  (`--make-king-table rel-check`), 1 and 8 threads, against
+  `pairwise_king()` from an -O2 install of `b8255226`; once compiled and
+  tested, the prototypes of `king_plink_ideas` with `run_proto.sh`.
+- **Results:** into `pairwise_bitpacked.md` ("Comparison with PLINK 2").
 - **Report:** a progress entry, and a log comment in claude_jobs#5.
 
 ## Backlog
@@ -96,6 +150,9 @@ About 19 other local branches on the laptop look unmerged to git (`git branch
   `R_sNMF` has an invalid write.
 - [claude] Redraft and post the bigsnpr issue on the temporary FBMs left in
   `tempdir()` by `snp_clumping()` and `snp_autoSVD()`.
+- VCF merge, further candidates (`vcf_merge.md`): match while reading,
+  matching per chromosome in parallel, a decompression thread, libdeflate,
+  a 2-bit genotype cache, and copying by blocks of columns at SGDP scale.
 - The laptop section of benchmark_hgdp still times the old pipeline (with
   imputation): re-run `precompile_benchmark_hgdp_laptop.R` on the laptop
   (its copy of `hgdp650_id_pop.txt` may have old population labels: use the

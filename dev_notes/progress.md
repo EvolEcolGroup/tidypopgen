@@ -4,6 +4,26 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-20 (laptopX1): VCF merge and PLINK 2 KING findings, after the annex failure
+
+- **Done:** two agents of 19 Nov (Andrea's requests): where `gt_merge_vcfs()`
+  spends its time, with three prototypes and timings of bcftools and plink2;
+  how PLINK 2 computes KING within groups. The annex (USB drive) disconnected
+  at 22:09 and stopped both before their balanced timings. On 20 Nov the
+  drive was back (`git fsck` clean); both branches pushed (the AVX2 work in
+  progress committed as `ef1c0b4c`), findings, scripts and result tables
+  written to `dev_notes/`.
+- **Where:** `merge_vcf_speed` (`d3b982d0`, `bc6856b6`, `6982994c`, from
+  `5e207d78`), `king_plink_ideas` (`72377615`, `ef1c0b4c`, from
+  `b8255226`), both pushed 20 Nov, no PR; notes on `pca_missing`.
+- **Result:** merge up to ~1.9x faster with identical outputs (sgdp 55.5 ->
+  33.0 s, many 62.5 -> 32.6 s; single runs); bcftools 2-4x slower than base;
+  PLINK 2 KING agrees with ours (2.2e-16), not clearly faster within groups.
+- **Decisions:** none new (bcftools built from its latest release: Andrea).
+- **Notes changed:** `vcf_merge.md` (new, with `vcf_merge/`),
+  `pairwise_bitpacked.md` (PLINK 2 section), `README.md`, `handover.md`,
+  `summary.md`.
+
 ## 2026-11-19 (laptopX1): grouped `indiv_inbreeding()` in one pass
 
 - **Done:** grouped `indiv_inbreeding()` uses the within-group bit-packed
