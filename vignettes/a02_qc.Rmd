@@ -227,11 +227,15 @@ First, lets add some imaginary population data to our gen_tibble:
 data <- data %>% mutate(population = c(rep("A", 4), rep("B", 4)))
 ```
 
-We can then group by population and run quality control on each group:
+We can then group by population
 
 ```{r}
-grouped_loci_report <- data %>%
-  group_by(population) %>%
+grouped_data <- data %>% group_by(population)
+```
+and run quality control on each group:
+
+```{r}
+grouped_loci_report <- grouped_data %>%
   qc_report_loci()
 head(grouped_loci_report)
 ```
@@ -241,8 +245,7 @@ The loci report that we receive here will calculate Hardy-Weinberg equilibrium f
 Similarly, we can run a quality control report for individuals within each population:
 
 ```{r}
-grouped_individual_report <- data %>%
-  group_by(population) %>%
+grouped_individual_report <- grouped_data %>%
   qc_report_indiv(kings_threshold = 0.177)
 head(grouped_individual_report)
 ```
@@ -254,8 +257,7 @@ This is important when we have related individuals, as background population str
 It is also possible to run `loci` and `indiv` functions on grouped data. This is useful when you want to run the same quality control on each group of data, but don't want to split the data into separate gen_tibbles.
 
 ```{r}
-loci_maf_grouped <- data %>%
-  group_by(population) %>%
+loci_maf_grouped <- grouped_data %>%
   loci_maf()
 ```
 

@@ -100,6 +100,15 @@ Let's confirm that we have read all the expected information:
 hgdp
 ```
 
+As this dataset includes information from multiple populations, we want to
+group the gen_tibble:
+
+```{r}
+hgdp <- hgdp %>%
+  group_by(population)
+```
+
+
 # Loci Report
 
 We can then call `qc_report_loci`. This function supplies minor allele
