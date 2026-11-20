@@ -68,6 +68,14 @@ over the wrong data due to mismatched ordering.
 anole_gt <- anole_gt %>% left_join(pops, by = "id")
 ```
 
+As our lizards come from two populations, we group the `gen_tibble` by
+population straight away, so that the functions that use groups (e.g.
+quality control, or `gt_admixture()` and its plots below) take them into
+account:
+```{r}
+anole_gt <- anole_gt %>% group_by(population)
+```
+
 Let us check that we have been successful:
 ```{r}
 anole_gt %>% glimpse()
@@ -345,10 +353,12 @@ library(adegenet)
 scatter(anole_dapc, posi.da = "bottomright")
 ```
 
-We can also plot these results onto the map we created earlier.
+We can also plot these results onto the map we created earlier. As
+`anole_gt` is grouped, `mutate()` would work within each population, so we
+add the DAPC cluster of each individual with `$`:
 
 ```{r}
-anole_gt <- anole_gt %>% mutate(dapc = anole_dapc$grp)
+anole_gt$dapc <- anole_dapc$grp
 
 ggplot() +
   geom_sf(data = map) +
@@ -375,8 +385,6 @@ Lets begin by running `gt_admixture`. We can run K clusters from k=2 to k=6.
 We will use just one repeat, but ideally we should run multiple repetitions for each K:
 
 ```{r, results='hide', echo=TRUE, eval=FALSE}
-anole_gt <- anole_gt %>% group_by(population)
-
 anole_adm_original <- gt_admixture(
   x = anole_gt,
   k = 2:6,
@@ -387,8 +395,6 @@ anole_adm_original <- gt_admixture(
 ```
 
 ```{r, results="hide", echo=FALSE, eval=TRUE, warning=FALSE}
-anole_gt <- anole_gt %>% group_by(population)
-
 anole_adm <- readRDS("a03_anole_adm.rds")
 ```
 

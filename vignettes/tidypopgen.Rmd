@@ -87,9 +87,20 @@ few:
 head(lobsters %>% show_loci())
 ```
 
-Now we have a `gen_tibble` to work with, we can start to clean the data. 
+Now we have a `gen_tibble` to work with, we can start to clean the data.
 
 # Quality control
+
+Our dataset contains several lobster populations, so we group it by
+population before quality control. The quality control functions then take
+the populations into account: for example, `qc_report_loci` tests
+Hardy-Weinberg equilibrium within each population (a test across populations
+would flag many loci only because their allele frequencies differ between
+populations).
+
+```{r}
+lobsters <- lobsters %>% group_by(population)
+```
 
 Let's start by checking the quality of the data for each individual lobster in
 our dataset. We can use the `qc_report_indiv` function to generate a report
@@ -124,17 +135,10 @@ and Hardy-Weinberg Equilibrium for each locus.
 loci_qc_lobsters <- lobsters %>% qc_report_loci()
 ```
 
-Here, we get a message because the `qc_report_loci` function calculates
-Hardy-Weinberg equilibrium assuming that all individuals are part of a single
-population. As our dataset contains multiple lobster populations, we should 
-group our data by population first:
-
-```{r}
-lobsters <- lobsters %>% group_by(population)
-loci_qc_lobsters <- lobsters %>% qc_report_loci()
-```
-
-That's better. Now, lets take a look at minor allele frequency for all loci:
+As `lobsters` is grouped, Hardy-Weinberg equilibrium is tested within each
+population (with a Bonferroni correction across populations), while the minor
+allele frequency and the missingness of each locus are computed over all
+lobsters. Let's take a look at minor allele frequency for all loci:
 
 ```{r, fig.alt = "Histogram of minor allele frequency"}
 autoplot(loci_qc_lobsters, type = "maf")
@@ -148,7 +152,7 @@ Now let's look at missingness.
 autoplot(loci_qc_lobsters, type = "missing")
 ```
 Our data mostly have low missingness, but we can see that some loci have > 5%
-missingness across individuals, and we want to remove these individuals.
+missingness across individuals, and we want to remove these loci.
 
 In tidypopgen, there are two functions to subset the loci in a `gen_tibble`
 object: `select_loci` and `select_loci_if`. The function `select_loci` operates
@@ -161,6 +165,11 @@ function, operating on the `genotypes` column of our `gen_tibble`.
 ```{r}
 lobsters <- lobsters %>% select_loci_if(loci_missingness(genotypes) < 0.05)
 ```
+
+Note that `select_loci_if` ignores the groups: all populations share the same
+loci, so the missingness of each locus is computed over all lobsters, as in
+`qc_report_loci`. To select loci on statistics computed within each
+population, see the vignette 'The grammar of population genetics'.
 
 Through our filtering, we have removed a few individuals and loci. Most
 functions, including the PCA below, work directly on the remaining data.
