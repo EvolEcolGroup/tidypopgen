@@ -2,8 +2,9 @@
 
 Where `gen_tibble()` spends its time on a large PLINK fileset (`.bed`,
 `.bim`, `.fam`), and a prototype reader of the `.bed` that replaces
-bigsnpr's `readbina()` (branch `bed_reader`, commit `0b1265c2`, from
-`pca_missing` at `520f717d`; not pushed, no PR). The code is
+bigsnpr's `readbina()` (branch `bed_reader`, from `pca_missing` at
+`520f717d`: the reader `0b1265c2`, the size check `4c7cbdeb`; PR into
+`pca_missing`, to retarget to `dev` after #231). The code is
 `R/gen_tibble_bed.R` (`gen_tibble_bed_rds()`, `fbm_read_bed()`,
 `loci_from_bim()`), `src/read_bed.cpp` (`read_bed_to_fbm()`, new) and
 `validate_loci()` in `R/gen_tibble_fbm.R`. Work of 20 Nov 2026 on manica01.
@@ -14,8 +15,10 @@ bigsnpr's `readbina()` (branch `bed_reader`, commit `0b1265c2`, from
 |---|---|---|---|---|
 | Not worth improving a step that takes less than 30 s | | the gain is not felt | 2026-11-20 | Andrea |
 | Time on the baboon file (486 x 166M SNPs) rather than HGDP650 | HGDP650 (1043 x 644k, 1.1 s in all); a synthetic 2000 x 15M | HGDP650 is too small; the baboon file is the real case (Andrea) | 2026-11-20 | Andrea |
-| Write the decoded genotypes straight into the memory-mapped FBM, from several threads | `write()`/`fwrite()` from a buffer (as the VCF reader's `BkWriter`), `posix_fallocate()` or `MAP_POPULATE` before mapping | for a 670 MB file: mmap 0.28 s on 1 thread, 0.12 s on 4; `fwrite` 0.22-0.24 s and `pwrite` 0.18-0.20 s on 1 or 4 threads (the inode lock serialises them); fallocate and populate no faster. For 30 GB, `dd` with `write()` took 12-13.5 s, no less kernel time than the page faults | 2026-11-20 | Claude, prototype only: not decided |
-| Read the `.bed` in chunks of ~64 MB, the next chunk read by one thread while the others decode | read one locus at a time (`readbina()`) | fewer, larger reads; the read overlaps the decoding when n_cores > 1 | 2026-11-20 | Claude, prototype only |
+| Write the decoded genotypes straight into the memory-mapped FBM, from several threads | `write()`/`fwrite()` from a buffer (as the VCF reader's `BkWriter`), `posix_fallocate()` or `MAP_POPULATE` before mapping | for a 670 MB file: mmap 0.28 s on 1 thread, 0.12 s on 4; `fwrite` 0.22-0.24 s and `pwrite` 0.18-0.20 s on 1 or 4 threads (the inode lock serialises them); fallocate and populate no faster. For 30 GB, `dd` with `write()` took 12-13.5 s, no less kernel time than the page faults | 2026-11-20 | Claude |
+| Read the `.bed` in chunks of ~64 MB, the next chunk read by one thread while the others decode | read one locus at a time (`readbina()`) | fewer, larger reads; the read overlaps the decoding when n_cores > 1 | 2026-11-20 | Claude |
+| Make a PR of the reader, with `n_cores` (default 1) as the speed-up | keep bigsnpr's `readbina()` | 1.5x on the `.bed` step with 8 cores on an SSD, and the checks of truncated and individual-major files | 2026-11-20 | Andrea |
+| A `.bed` larger than the `.bim` and `.fam` say is an error (it was a warning), checked in R before the backing file is created | keep the warning | as PLINK; a truncated `.bim` gave a valid-looking result (the baboon file); no 80 GB backing file left behind by a bad file | 2026-11-20 | Andrea |
 
 ## How it works
 
@@ -49,9 +52,18 @@ Attribution: header comment, `inst/COPYRIGHTS`.
 
 Tests (`test_gen_tibble_vcf.R`, "bed files are read on several cores, and bad
 bed files are caught"): genotypes identical to `bigsnpr::snp_readBed()` on 1
-and 2 cores; errors for truncated files and wrong or individual-major magic
-numbers; the warning for extra bytes. The truncation and magic-number
-expectations fail on `520f717d`. `test_gen_tibble_vcf.R` passes; the full
+and 2 cores; errors for truncated files, extra bytes, and wrong or
+individual-major magic numbers, each leaving no backing file behind. The
+truncation and magic-number expectations fail on `520f717d`.
+
+**Size check (`4c7cbdeb`).** `check_bed_file()` (in `fbm_read_bed()`,
+before the FBM is created) reads the 3 magic bytes and compares
+`file.size()` with `3 + n_snp * ceiling(n_indiv / 4)`: smaller is "truncated
+or corrupted", larger is "the .bim or .fam file might be truncated, or the
+files might not belong together", both naming the numbers of individuals
+and loci. `read_bed_to_fbm()` repeats the checks (the file could change in
+between). On the baboon files it stops with "larger than expected ... (486)
+... (91162139)". `test_gen_tibble_vcf.R` passes; the full
 suite was not run. The `.bk` files are identical to `readbina()`'s on
 HGDP650 (1043 individuals, not a multiple of 4) and a 1043 x 5003
 synthetic file, on 1, 3 and 8 cores.
@@ -126,17 +138,11 @@ fread drops the cut line. Found 20 Nov 2026; the file was not changed.
 
 ## Open questions
 
-- **Make a PR of the prototype?** Gains: 1.5x on the `.bed` step with 8
-  cores on an SSD (1.25x on the whole call), 5% on one core, none from an
-  HDD; and the checks of truncated and individual-major files, which are
-  worth having whatever the speed. Andrea to decide.
-- **A `.bim` with a size mismatch:** with the prototype a `.bed` longer than
-  the `.bim` says still gives only a warning; should it be an error (as a
-  shorter one is)? It would have caught the baboon `.bim`.
-- **Saving the `.gt`** is now the largest step after the `.bed` with
-  `names_as_int` (22 s on 91M loci, ~40 s expected on 166M): gzip level 1
-  of ~4 GB of serialised loci table. Candidates: no compression, or
-  alleles stored more compactly.
+- **Saving and loading the `.gt`** is now the largest step after the `.bed`
+  with `names_as_int` (22 s on 91M loci, ~40 s expected on 166M); see
+  `gt_save_speed.md`.
+- The *packedancestry* reader (`read_packedancestry()`) still only warns
+  when its `.geno` file is longer than expected.
 - **Locus names at this scale:** 116 s for 91M names (vs 17.5 s without).
   A C++ `.bim` reader would save fread's work but not the cost of the R
   strings themselves; `names_as_int = TRUE` is the answer, and the docs
