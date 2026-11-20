@@ -1,12 +1,19 @@
 #!/bin/bash
 # Unattended desktop (manica01) timings of the gt_merge_vcfs() prototypes
 # (vcf_merge.md): base 5e207d78, P1 d3b982d0, P3 bc6856b6, P4 6982994c, and
-# bcftools 1.25 and plink2, on the pops, sgdp and many datasets. Run
-# setup_desktop.sh first, then schedule this with a systemd user timer:
+# bcftools 1.25 and plink2, on the pops, sgdp and many datasets; then KING
+# against PLINK 2 and the KING prototypes (pairwise_bitpacked.md): base
+# b8255226, p1 72377615, p3 e2692136 (p3s: p3 without AVX2). Run
+# setup_desktop.sh and the KING set-up ("KING against PLINK 2" in
+# handover.md) first, then schedule this with a systemd user timer:
 #
-#   systemd-run --user --on-calendar='YYYY-MM-DD 01:00' --unit=vcf_merge \
-#     bash ~/git/tidypopgen/dev_notes/vcf_merge/run_desktop.sh
+#   cp ~/git/tidypopgen/dev_notes/vcf_merge/run_desktop.sh ~/claude_work/tidypopgen/
+#   systemd-run --user --on-calendar='YYYY-MM-DD 01:00' --unit=vcf_merge_king \
+#     bash ~/claude_work/tidypopgen/run_desktop.sh
 #   loginctl show-user "$USER" -p Linger    # must be yes to fire after logout
+#
+# Run a copy: bash reads a script as it runs, so a git pull in the checkout
+# during the run could change it under the running job.
 #
 # From the benchmarking skill's template: waits for an idle machine, runs each
 # phase once (markers in $WORK/done), starts no phase after NO_START_AFTER,
@@ -16,12 +23,17 @@ set -uo pipefail
 # run_timing.sh counts cycles with perf: needs kernel.perf_event_paranoid <= 2
 
 # ---- CONFIG ------------------------------------------------------------------
-JOB=${JOB:-vcf_merge}
+JOB=${JOB:-vcf_merge_king}
 REPO=${REPO:-$HOME/git/tidypopgen}
 export TPG_WORK=${TPG_WORK:-$HOME/claude_work/tidypopgen}
 W=$TPG_WORK/merge_vcf
 WORK=${WORK:-$W/desktop}
 RESULTS_IN_REPO=${RESULTS_IN_REPO:-dev_notes/vcf_merge/desktop_$(date +%Y-%m)}
+BRANCH=${BRANCH:-pca_missing}   # results are committed only if REPO is on it
+export TPG_REPO=$REPO
+K=$TPG_WORK/plink_king
+KING_IN_REPO=${KING_IN_REPO:-dev_notes/pairwise_bitpacked/king_desktop_$(date +%F)}
+KROUNDS=${KROUNDS:-"F R F R F R"}  # each round runs every task once; R reverses
 ISSUE=${ISSUE:-dramanica/claude_jobs/issues/5}
 IDLE_LOAD=${IDLE_LOAD:-1.0}
 NO_START_AFTER=${NO_START_AFTER:-$(date -d 'tomorrow 07:00' '+%F %H:%M')}
@@ -85,23 +97,44 @@ tools() {  # tools <threads> <cores>
   done
 }
 
+# KING: run_bench.sh (PLINK 2 against pairwise_king() of b8255226) and
+# run_proto.sh (the prototypes); each fails if rows are missing from its tables
+king_bench() {  # king_bench <threads>
+  local t=$1 n=$(wc -w <<< "$KROUNDS")
+  bash "$K/scripts/run_bench.sh" "$t" $KROUNDS
+  [ "$(wc -l < "$K/out/bench_plink_$t.tsv")" -ge $((8 * n)) ] &&
+    [ "$(wc -l < "$K/out/bench_tpg_$t.tsv")" -ge $((4 * n)) ] &&
+    ! grep -q "exited with non-zero" "$K/out/bench_plink_$t.tsv"
+}
+king_proto() {  # king_proto <threads>
+  local t=$1 n=$(wc -w <<< "$KROUNDS")
+  VERS="base p1 p3 p3s" bash "$K/scripts/run_proto.sh" "$t" "full grouped" $KROUNDS
+  [ "$(wc -l < "$K/out/proto_$t.tsv")" -ge $((8 * n)) ]
+}
+
 report() {
   trap - EXIT
   say "reporting"
-  local dest=$REPO/$RESULTS_IN_REPO pushed=""
-  mkdir -p "$dest"
+  local dest=$REPO/$RESULTS_IN_REPO kdest=$REPO/$KING_IN_REPO pushed="" br
+  mkdir -p "$dest" "$kdest"
   cp "$W"/results/runs.tsv "$W"/results/tools.tsv "$W"/results/phases_*.tsv "$dest/" 2>/dev/null
   cp "$STATUS" "$dest/" 2>/dev/null
-  if (cd "$REPO" && git add -A "$RESULTS_IN_REPO" &&
+  cp "$K"/out/bench_*.tsv "$K"/out/proto_*.tsv "$K"/out/*_log.txt "$kdest/" 2>/dev/null
+  Rscript "$K/scripts/summarise.R" "$K/out" > "$kdest/summary.txt" 2>&1
+  br=$(cd "$REPO" && git rev-parse --abbrev-ref HEAD)
+  if [ "$br" != "$BRANCH" ]; then
+    echo "$REPO is on $br, not $BRANCH: nothing committed" >> "$LOGS/report.log"
+  elif (cd "$REPO" && git pull -q --ff-only &&
+      git add -A "$RESULTS_IN_REPO" "$KING_IN_REPO" &&
       git commit -qm "Desktop run of $(date +%F): $JOB results
 
-$ATTRIB" && git push -q origin HEAD) >> "$LOGS/report.log" 2>&1; then
-    pushed="$(cd "$REPO" && git rev-parse --abbrev-ref HEAD)@$(cd "$REPO" && git rev-parse --short HEAD)"
+$ATTRIB" -- "$RESULTS_IN_REPO" "$KING_IN_REPO" && git push -q origin HEAD) >> "$LOGS/report.log" 2>&1; then
+    pushed="$br@$(cd "$REPO" && git rev-parse --short HEAD)"
   fi
   {
     echo "## $(date +%F): unattended desktop run of $JOB finished"
     echo
-    echo "Pushed: ${pushed:-nothing (see $LOGS/report.log on manica01)}; results in \`$RESULTS_IN_REPO\`. Not interpreted yet."
+    echo "Pushed: ${pushed:-nothing (see $LOGS/report.log on manica01)}; results in \`$RESULTS_IN_REPO\` and \`$KING_IN_REPO\`. Not interpreted yet."
     echo
     cat "$STATUS"
   } > "$WORK/comment.md"
@@ -119,5 +152,9 @@ say "machine idle (load $(load))"
 phase vcf_t1   vcf 1 2                  # ~30-40 min
 phase vcf_t8   vcf 8 0-7                # ~20 min
 phase tools_t8 tools 8 0-7              # ~1 h (bcftools on sgdp ~4 min a run)
+phase king_bench_t1 king_bench 1        # core 2; ~15 min
+phase king_bench_t8 king_bench 8        # P-cores; ~10 min
+phase king_proto_t1 king_proto 1        # core 2; ~15 min
+phase king_proto_t8 king_proto 8        # P-cores; ~8 min
 # ------------------------------------------------------------------------------
 say "all phases run"

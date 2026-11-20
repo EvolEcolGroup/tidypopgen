@@ -15,6 +15,9 @@ VERSIONS=("$@")
 export TMPDIR=$W/rtmp
 export OMP_NUM_THREADS=$T
 CORES=${CORES:-"0-$((T - 1))"}
+# a counter from perf stat -x, summed over the core types of a hybrid CPU
+# (the desktop prints one line for cpu_atom and one for cpu_core)
+perf_sum() { awk -F, -v e="$1" '$3 ~ e && $1 ~ /^[0-9]+$/ { s += $1 } END { print s + 0 }' "$2"; }
 RUNS=$W/results/runs.tsv
 [ -f "$RUNS" ] || echo -e "date\tversion\tscenario\tn_cores\trep\twall_s\tpeak_rss_mb\tload1\tbk_md5\tmode\tcycles_u\tinstr_u\tcommit" > "$RUNS"
 MODE=${MERGE_MODE:-phases}
@@ -36,8 +39,8 @@ run_one() { # version:lib rep
   # keep the samples and loci of this run, to compare the versions
   cp "$out/merged_meta.rds" "$W/results/meta/${SC}_${v}_T${T}_r${rep}.rds"
   local cyc ins commit
-  cyc=$(grep "cycles:u" "$out/perf" | cut -d, -f1)
-  ins=$(grep "instructions:u" "$out/perf" | cut -d, -f1)
+  cyc=$(perf_sum cycles:u "$out/perf")
+  ins=$(perf_sum instructions:u "$out/perf")
   commit=$(cat "$lib/COMMIT" 2>/dev/null || echo "?")
   echo -e "$(date +%FT%T)\t$v\t$SC\t$T\t$rep\t$wall\t$((rss / 1024))\t$load1\t$md5\t$MODE\t$cyc\t$ins\t$commit" >> "$RUNS"
   echo "$v $SC T=$T rep=$rep: ${wall}s $((rss / 1024))MB load=$load1 md5=$md5"

@@ -10,16 +10,20 @@ T=$1
 TASKS=$2
 shift 2
 ROUNDS="$*"
-if [ "$T" = 1 ]; then CPUS=2; else CPUS=0-$((T - 1)); fi
+# CPUS and OUTDIR can be set (e.g. for a smoke test on the E-cores)
+if [ "$T" = 1 ]; then CPUS=${CPUS:-2}; else CPUS=${CPUS:-0-$((T - 1))}; fi
+OD=${OUTDIR:-$P/out}
+mkdir -p $OD
 export TMPDIR=$P/rtmp OMP_NUM_THREADS=$T OPENBLAS_NUM_THREADS=1
-LOG=$P/out/proto_log.txt
-TSV=$P/out/proto_$T.tsv
+LOG=$OD/proto_log.txt
+TSV=$OD/proto_$T.tsv
 declare -A LIBS=([base]=$P/build/lib_base
   [p1]=$P/build/lib_p1 [p2]=$P/build/lib_p2 [p2s]=$P/build/lib_p2 [p3]=$P/build/lib_p3 [p3s]=$P/build/lib_p3)
 VERS=${VERS:-"base p1 p2 p2s"}
 RVERS=$(echo $VERS | tr ' ' '\n' | tac | tr '\n' ' ')
 load() { uptime | sed 's/.*average: //; s/,//g' | cut -d' ' -f1; }
-echo "# $(date -Is) $(hostname) T=$T CPUS=$CPUS tasks: $TASKS rounds: $ROUNDS; base=$(cat ${LIBS[base]}/COMMIT) p1=$(cat ${LIBS[p1]}/COMMIT) p2=$(cat ${LIBS[p2]}/COMMIT) p3=$(cat ${LIBS[p3]}/COMMIT 2>/dev/null)" >> $LOG
+commits=$(for v in $VERS; do printf "%s=%s " $v "$(cat ${LIBS[$v]}/COMMIT 2>/dev/null)"; done)
+echo "# $(date -Is) $(hostname) T=$T CPUS=$CPUS tasks: $TASKS rounds: $ROUNDS; $commits" >> $LOG
 for r in $ROUNDS; do
   if [ "$r" = F ]; then list=$VERS; else list=$RVERS; fi
   for task in $TASKS; do

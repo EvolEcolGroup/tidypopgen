@@ -1,6 +1,6 @@
 # tidypopgen: handover
 
-Updated 2026-11-20 (laptopX1). For the next session: read this and
+Updated 2026-11-20 (manica01). For the next session: read this and
 `summary.md` first. History is in `progress.md`; designs are in the topic
 documents listed in `README.md`.
 
@@ -38,7 +38,10 @@ once the branches are no longer needed).
 ### 2. **P2** [desktop] Re-time on the P-cores
 
 - See the desktop queue: HGDP650 PCA/DAPC/pcadapt/LD, the VCF merge, KING
-  against PLINK 2.
+  against PLINK 2. The VCF merge and KING are set up and scheduled for
+  20 Nov, 19:20 (`vcf_merge_king`); on 21 Nov, read the results it pushed
+  and put the medians into `vcf_merge.md` and `pairwise_bitpacked.md`.
+  HGDP650 PCA/DAPC/pcadapt/LD is not set up yet.
 
 ### 3. **P2** [claude] Make `merge_vcf_speed` ready for a PR
 
@@ -93,7 +96,10 @@ once the branches are no longer needed).
   (PLINK 2, its source, HGDP650 `.pgen`, builds, worktree); `~/claude_work/tidypopgen_rescue/` on the root drive.
 - On manica01: `~/claude_work/tidypopgen/` (the -O2 library of
   `e3b2b69c`, logs; `king/` holds the HGDP650 `gen_tibble` (~0.7 GB), the
-  libraries and scripts of the KING timings of 19 Nov); the NearEast data in
+  libraries and scripts of the KING timings of 19 Nov; `merge_vcf/`, ~2.5 GB:
+  data, bcftools, builds and outputs of the VCF job; `plink_king/`: plink2,
+  the PLINK input, builds and outputs of the KING job; `bench_inb/`:
+  symlinks; `run_desktop.sh`: the copy the timer runs); the NearEast data in
   `vignettes/articles/data/NearEastPublic/` (git-ignored, needed to
   re-render aDNA_pseudohaploids).
 
@@ -113,15 +119,43 @@ sessions first (the benchmarking skill, "Unattended desktop jobs").
   pcadapt routes, clumping and pruning against bigsnpr and PLINK.
 - **Results:** numbers into `gt_pca.md` and `ld_missing.md`.
 
+### Scheduled: the VCF merge and KING job of 20 Nov, 19:20
+
+- **What:** one unattended job, `vcf_merge_king` (systemd user timer, fires
+  Fri 20 Nov 19:20, no phase starts after Sat 07:00): the VCF merge phases
+  (`vcf_t1`, `vcf_t8`, `tools_t8`), then KING (`king_bench_t1`,
+  `king_bench_t8`, `king_proto_t1`, `king_proto_t8`, 6 balanced rounds
+  each). Expected ~3 h once the machine is idle (at least 10 min of idle
+  checks, VCF ~1 h 50, KING ~45 min), so results by ~22:30. Script: a copy of `dev_notes/vcf_merge/run_desktop.sh` at
+  `~/claude_work/tidypopgen/run_desktop.sh` (rerunning it skips the phases
+  with a marker in `merge_vcf/desktop/done/`).
+- **Set-up done (20 Nov, manica01):** both set-ups below; plink2
+  v2.0.0-b.1.4LM AVX2 (7 Nov 2026, as the laptop); bgzip and tabix built
+  from the htslib 1.25 bundled with bcftools (they were not installed); perf
+  counts cycles (`perf_event_paranoid` 1). The three KING builds and p3
+  without AVX2 give `identical()` outputs (`check_proto.R`); one smoke run of
+  each VCF version on the E-cores gave the laptop's md5s on all three
+  datasets (moved to `merge_vcf/results_smoke/`).
+- **Watch:** `~/claude_work/tidypopgen/merge_vcf/desktop/status.md`;
+  `systemctl --user list-timers vcf_merge_king.timer`. At the end it commits
+  the tables to `dev_notes/vcf_merge/desktop_2026-11/` and
+  `dev_notes/pairwise_bitpacked/king_desktop_<date>/` on `pca_missing` (only
+  if `~/git/tidypopgen` is on that branch) and posts the log on
+  claude_jobs#5.
+- **Then:** medians into `vcf_merge.md` and `pairwise_bitpacked.md`;
+  disable the timer (`systemctl --user stop vcf_merge_king.timer`) and
+  prune the work directories.
+
 ### Balanced timings of the `gt_merge_vcfs()` prototypes
 
 - **State:** the laptop ran the 4-thread matrix on 20 Nov (3 balanced runs,
   `real` mode; tables in `dev_notes/vcf_merge/results/2026-11-20/`);
-  the 1-thread runs and bcftools/plink2 are left for the desktop.
+  the 1-thread runs and bcftools/plink2 are scheduled on the desktop (above).
 - **Set-up (untimed, E-cores):** `bash dev_notes/vcf_merge/setup_desktop.sh`
-  (builds bcftools 1.25, regenerates the seeded datasets, installs the four
-  versions into `~/claude_work/tidypopgen/merge_vcf/libs/`); put the plink2
-  AVX2 binary at `~/claude_work/tidypopgen/plink_king/bin/plink2`; set
+  (builds bcftools 1.25, and bgzip and tabix if missing, regenerates the
+  seeded datasets, installs the four versions into
+  `~/claude_work/tidypopgen/merge_vcf/libs/`); put the plink2 AVX2 binary at
+  `~/claude_work/tidypopgen/plink_king/bin/plink2`; set
   `kernel.perf_event_paranoid` to 2 or less.
 - **Run:** schedule `dev_notes/vcf_merge/run_desktop.sh` (systemd user timer,
   see its header): phases `vcf_t1` (core 2), `vcf_t8` (P-cores), `tools_t8`;
@@ -148,8 +182,13 @@ sessions first (the benchmarking skill, "Unattended desktop jobs").
   hgdp650_pop`, and `keep/<population>.txt` (FID IID, one file per
   population) for the `--keep` loop. Check
   first that the three builds give `identical()` outputs (`check_proto.R`).
+  On manica01 (20 Nov) `bench_inb/data/hgdp650.{gt,rds,bk}` are symlinks to
+  `king/data/`, so the scripts need no change; they take `CPUS` and
+  `OUTDIR` from the environment (smoke tests on the E-cores went to
+  `plink_king/out_smoke/`).
 - **State:** the laptop ran both scripts at 1 and 4 threads on 20 Nov
-  (`dev_notes/pairwise_bitpacked/king_2026-11-20/`).
+  (`dev_notes/pairwise_bitpacked/king_2026-11-20/`); the desktop runs are
+  scheduled (above).
 - **Run:** `run_bench.sh`: full matrix and within populations
   (`--make-king-table rel-check`), 1 and 8 threads, against
   `pairwise_king()` from an -O2 install of `b8255226`; `run_proto.sh` with
