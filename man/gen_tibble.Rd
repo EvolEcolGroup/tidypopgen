@@ -106,6 +106,7 @@ in case your
 file compressed with \code{bgzip} (as most are) is also decompressed in
 parallel (other gzipped files are decompressed on a single core). For
 a PLINK \emph{.ped} file, the lines are split and the genotypes coded in
+parallel, and for a PLINK \emph{.bed} file the genotypes are decoded in
 parallel. It is ignored for other formats and for \code{parser = "vcfR"}.}
 
 \item{chunk_size}{the number of loci or individuals (depending on the format)

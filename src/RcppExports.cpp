@@ -727,6 +727,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// read_bed_to_fbm
+void read_bed_to_fbm(std::string filename, Environment BM, const RawMatrix& tab, int n_threads);
+RcppExport SEXP _tidypopgen_read_bed_to_fbm(SEXP filenameSEXP, SEXP BMSEXP, SEXP tabSEXP, SEXP n_threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const RawMatrix& >::type tab(tabSEXP);
+    Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
+    read_bed_to_fbm(filename, BM, tab, n_threads);
+    return R_NilValue;
+END_RCPP
+}
 // read_packedancestry
 bool read_packedancestry(const char * filename, Environment BM, const RawMatrix& tab);
 RcppExport SEXP _tidypopgen_read_packedancestry(SEXP filenameSEXP, SEXP BMSEXP, SEXP tabSEXP) {
@@ -1146,6 +1159,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_count_ped_individuals", (DL_FUNC) &_tidypopgen_count_ped_individuals, 2},
     {"_tidypopgen_ped_to_fbm", (DL_FUNC) &_tidypopgen_ped_to_fbm, 5},
     {"_tidypopgen_pop_stats_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_pop_stats_dip_pseudo_cpp, 12},
+    {"_tidypopgen_read_bed_to_fbm", (DL_FUNC) &_tidypopgen_read_bed_to_fbm, 4},
     {"_tidypopgen_read_packedancestry", (DL_FUNC) &_tidypopgen_read_packedancestry, 3},
     {"_tidypopgen_roh_sliding_cpp", (DL_FUNC) &_tidypopgen_roh_sliding_cpp, 17},
     {"_tidypopgen_sfs_config_counts_cpp", (DL_FUNC) &_tidypopgen_sfs_config_counts_cpp, 14},

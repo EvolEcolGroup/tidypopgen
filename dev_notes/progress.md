@@ -4,6 +4,36 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-20 (manica01): `.gt` alleles as codes not adopted
+
+- **Decision (Andrea):** the faster `.gt` format (alleles as codes:
+  `gt_load()` 17.2 -> 4.1 s, saving 20.9 -> 7.3 s on 91M loci) is not worth
+  the extra complexity; with that many loci `names_as_int = TRUE` is needed
+  anyway. PR #234 (the `.bed` reader) stays as it is.
+- **Done:** the prototype is kept as a patch
+  (`dev_notes/gt_save_speed/alleles_as_codes.patch`), with its notes,
+  scripts and logs, on `bed_reader`; the local branch `gt_save_speed` and
+  its worktree were deleted.
+- **Notes changed:** `gt_save_speed.md` (moved to `bed_reader`),
+  `bed_reader.md`, `README.md`, `handover.md`, `summary.md`.
+
+## 2026-11-20 (manica01): parallel `.bed` reader (PR #234), and `.gt` alleles as codes
+
+- **Done:** where `gen_tibble()` spends its time on large PLINK files (the
+  baboon data, 486 x 166M SNPs, Andrea's target); a reader of `.bed` files
+  replacing bigsnpr's `readbina()`, in parallel with `n_cores`, which checks
+  the size and magic number (branch `bed_reader`, PR #234 into
+  `pca_missing`); the alleles of `.gt` files saved as codes (branch
+  `gt_save_speed`, local).
+- **Results:** `.bed` step 43.7 -> 28.3 s on 8 cores from an SSD (91M loci),
+  5% on 1 core, nothing from a hard disk (disk-bound); `gt_load()`
+  17.2 -> 4.1 s, saving 20.9 -> 7.3 s. The baboon `.bim` is truncated (91M
+  of 166M loci): it used to give only a warning.
+- **Decisions (Andrea):** below 30 s is not worth improving; PR of the
+  reader; a size mismatch is an error. The `.gt` format change waits.
+- **Notes changed:** `bed_reader.md` (new), `gt_save_speed.md` (new, on
+  `gt_save_speed`), `README.md`, `handover.md`, `summary.md`.
+
 ## 2026-11-20 (manica01): desktop set-up of the VCF merge and KING timings, scheduled
 
 - **Done:** set up both desktop jobs of the queue (Andrea's request): bcftools

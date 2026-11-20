@@ -1,6 +1,6 @@
 # tidypopgen: handover
 
-Updated 2026-11-20 (manica01). For the next session: read this and
+Updated 2026-11-20 (manica01, bed reader session). For the next session: read this and
 `summary.md` first. History is in `progress.md`; designs are in the topic
 documents listed in `README.md`.
 
@@ -11,6 +11,7 @@ documents listed in `README.md`.
 | `pca_missing` | `gt_pca()` with missing genotypes as PLINK, projections; with #232 (checks, DAPC and pcadapt) and #233 (LD clumping and pruning); CI fix, re-rendered articles, the fixes of the review of #232/#233 (`code_review_2026-11_pca_missing.md`); grouped `pairwise_king()` and the faster bit-packed kernel (`53843683` to `e39cdf49`), grouped `indiv_inbreeding()` in one pass and the KING fallback removed (`f6110412`, `5718c15c`; `pairwise_bitpacked.md`) | `dev` | yes | no (PR #231) |
 | `merge_vcf_speed` | three prototypes speeding up `gt_merge_vcfs()` (`d3b982d0` keep the genotypes of pass 1, `bc6856b6` parallel line parsing, `6982994c` raw alleles), outputs identical; balanced 4-thread laptop runs: 1.6x on sgdp and many, 1.2x on pops; worktree `/media/andrea/Elements1/tmp/claude/tidypopgen/merge_vcf/wt` (`vcf_merge.md`) | `pca_missing` at `5e207d78` | yes (20 Nov) | no PR |
 | `king_plink_ideas` | KING ideas from PLINK 2: `72377615` tiles + 64-word chunks (1.35x), `ef1c0b4c` AVX2 KING kernel, `e2692136` two paths (AVX2 2.3x on the full matrix, scalar 1.5x); outputs identical, tests pass with and without AVX2; worktree `/media/andrea/Elements1/tmp/claude/tidypopgen/plink_king/wt` (`pairwise_bitpacked.md`) | `pca_missing` at `b8255226` | yes (20 Nov) | no |
+| `bed_reader` | `.bed` files read in parallel (`read_bed_to_fbm()`, `0b1265c2`), a `.bed` that does not match its `.bim` and `.fam` is an error (`4c7cbdeb`), NEWS, version 1.0.0.9012; full suite passes; worktree `~/claude_work/tidypopgen/bed_reader/wt` on manica01 (`bed_reader.md`) | `pca_missing` (merged up to `dd7a251d`) | yes | no (PR #234 into `pca_missing`) |
 | `king_simd_packing` | SIMD packing of the bit-packed kernel (`9853e055`), not merged: below the 1.5x bar (`pairwise_bitpacked.md`) | `pca_missing` at `c7c09c67` | no | no |
 
 About 19 other local branches on the laptop look unmerged to git (`git branch
@@ -35,7 +36,17 @@ once the branches are no longer needed).
   95.50% target, project -0.08%). Later commits touch only `dev_notes/`.
 - **Done when:** #231 is merged into `dev` (squash).
 
-### 2. **P2** [desktop] Re-time on the P-cores
+### 2. **P2** [review] Review PR #234 (`.bed` reader)
+
+- **Read first:** `bed_reader.md` (decisions, numbers), the PR description.
+- **State:** full test suite passes (on an -O2 install, 739 tests); the CI
+  of a PR into `pca_missing` may not run (check the workflows' branches).
+- **Then:** when #231 is merged into `dev`, merge `origin/dev` into
+  `bed_reader` (resolve with `--ours` if the squash equals a commit already
+  on the branch, see the memory on squash merges) and retarget #234 to
+  `dev`.
+
+### 3. **P2** [desktop] Re-time on the P-cores
 
 - See the desktop queue: HGDP650 PCA/DAPC/pcadapt/LD, the VCF merge, KING
   against PLINK 2. The VCF merge and KING are set up and scheduled for
@@ -43,7 +54,7 @@ once the branches are no longer needed).
   and put the medians into `vcf_merge.md` and `pairwise_bitpacked.md`.
   HGDP650 PCA/DAPC/pcadapt/LD is not set up yet.
 
-### 3. **P2** [claude] Make `merge_vcf_speed` ready for a PR
+### 4. **P2** [claude] Make `merge_vcf_speed` ready for a PR
 
 - **Branch:** `merge_vcf_speed` (rebase or merge onto `dev` after #231).
 - **Read first:** `vcf_merge.md` ("How it works", "Open questions").
@@ -53,7 +64,7 @@ once the branches are no longer needed).
   `gen_tibble()` on one large VCF for P3 (-O2 builds only); NEWS.
 - **Done when:** a PR into `dev`, with the desktop timings (task 2) in it.
 
-### 4. **P2** [claude] Keep optimising (Andrea)
+### 5. **P2** [claude] Keep optimising (Andrea)
 
 - **Branch:** a new branch from `dev`, after #231 is merged; for KING,
   `king_plink_ideas`.
@@ -76,14 +87,14 @@ once the branches are no longer needed).
   (with `build/lib_{base,p1,p2}` and `run_proto.sh`) on the laptop.
 - **Done when:** faster by more than 5%, with identical outputs.
 
-### 5. **P2** [review] Release 1.1.0 (from claude_jobs#5, 15 Nov; not rechecked)
+### 6. **P2** [review] Release 1.1.0 (from claude_jobs#5, 15 Nov; not rechecked)
 
 - After #231: set the version, merge `dev` into `main` (pkgdown then publishes
   `rad_seq.html`), re-run `urlchecker::url_check()` and submit;
   `cran-comments.md` gives the intermittent failures as the reason for the
   early resubmission.
 
-### 6. **P3** [cleanup] Branches and scratch files
+### 7. **P3** [cleanup] Branches and scratch files
 
 - Delete `pca_missing` once #231 is merged, `king_simd_packing` and
   `king_plink_ideas` once decided, `merge_vcf_speed` once its PR is merged;
@@ -199,6 +210,18 @@ sessions first (the benchmarking skill, "Unattended desktop jobs").
 
 ## Backlog
 
+- [claude] Large PLINK files with locus names: 116 s for the `.bim` of 91M
+  loci (fread 84 s, then the loci table 32 s: GCs over 91M strings) against
+  17.5 s with `names_as_int = TRUE`; recommend `names_as_int` in the docs
+  for tens of millions of loci (`bed_reader.md`).
+- [claude] `read_packedancestry()` still only warns when its `.geno` file is
+  longer than expected (as the `.bed` reader did).
+- [claude] Saving `.gt` files with tens of millions of loci: alleles as
+  codes, 4x faster loading, not adopted (Andrea); patch and numbers in
+  `gt_save_speed.md`.
+- On manica01, `~/claude_work/tidypopgen/bed_reader/` holds the worktree of
+  `bed_reader`, -O2 libraries, and the 91M-SNP baboon subset (14 GB in
+  `data/`); delete once #234 is merged.
 - [decide] Merge `king_simd_packing` (SIMD packing: 1.35-1.5x on grouped
   KING on one core, 1.04x on 8; ~170 lines of x86-only code)? Recommended
   no, unless single-core grouped KING matters (`pairwise_bitpacked.md`).

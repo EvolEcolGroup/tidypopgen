@@ -27,6 +27,8 @@ bigsnpr and bigstatsr
   https://github.com/privefl/bigstatsr
   - src/read_packedancestry.cpp: adapted from readbina() (src/read-plink.cpp
     of bigsnpr).
+  - src/read_bed.cpp: read_bed_to_fbm() is adapted from readbina()
+    (src/read-plink.cpp of bigsnpr).
   - R/gt_as_plink.R: write_bed() is adapted from bigsnpr::snp_writeBed().
   - R/predict_gt_pca.R: predict.gt_pca() started from
     bigstatsr::predict.big_SVD().

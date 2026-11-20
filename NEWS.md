@@ -57,6 +57,7 @@
   many groups), reading the genotypes once for all groups
 * faster VCF reading (in parallel with `n_cores`), and faster reading of
   *.ped* files straight into the backing file
+* PLINK *.bed* files are read in parallel with `n_cores`
 * faster `gt_as_vcf()`, `gt_update_backingfile()` and `gt_order_loci()` with
   many chromosomes; `gt_as_genlight()` works in chunks of loci
 * faster `select_loci()` with variables and function calls;
@@ -85,6 +86,9 @@
 
 ## Bug fixes
 
+* `gen_tibble()`: fix *.bed* files whose size does not match the *.bim* and
+  *.fam* files (e.g. one of them truncated), and individual-major *.bed*
+  files, which were read without an error
 * `gt_pcadapt()`: a clear error, naming them, for loci with the same genotype
   in every individual (e.g. all heterozygous after heavy imputation), instead
   of "You can't have missing values in 'U'" (#179)
