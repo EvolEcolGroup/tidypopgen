@@ -6,7 +6,7 @@
 # (tidypopgen), with the load before each run in out/bench_log.txt.
 set -u
 P=${TPG_WORK:-/media/andrea/Elements1/tmp/claude/tidypopgen}/plink_king
-LIB=${TPG_WORK:-/media/andrea/Elements1/tmp/claude/tidypopgen}/bench_inb/lib_new
+LIB=$P/build/lib_base
 PL=$P/bin/plink2
 DATA=$P/data/hgdp650_pop
 T=$1
@@ -67,7 +67,7 @@ tpg_pack() { ttpg pack; }
 TASKS="pl_pgen_full tpg_full pl_bed_full tpg_full_kernel pl_pgen_within tpg_grouped pl_bed_within tpg_pack pl_keeploop pl_convert pl_load pl_read"
 RTASKS=$(echo $TASKS | tr ' ' '\n' | tac | tr '\n' ' ')
 
-echo "# $(date -Is) $(hostname) T=$T CPUS=$CPUS rounds: $ROUNDS; $($PL --version); tidypopgen $(git -C ${TPG_REPO:-/media/andrea/annex/git/tidypopgen} rev-parse --short HEAD) (lib_new)" >> $LOG
+echo "# $(date -Is) $(hostname) T=$T CPUS=$CPUS rounds: $ROUNDS; $($PL --version); tidypopgen $(cat $LIB/COMMIT) (build/lib_base)" >> $LOG
 # warm the page cache
 cat $DATA.bed $DATA.pgen $DATA.pvar $DATA.bim ${TPG_WORK:-/media/andrea/Elements1/tmp/claude/tidypopgen}/bench_inb/data/hgdp650.bk > /dev/null
 for r in $ROUNDS; do

@@ -17,7 +17,9 @@ suppressPackageStartupMessages(library(tidypopgen, lib.loc = lib))
 d <- file.path(Sys.getenv("TPG_REPO", "/media/andrea/annex/git/tidypopgen"), "vignettes/articles/data/hgdp")
 t_load <- system.time({
   gt <- gt_load(
-    file.path(Sys.getenv("TPG_WORK", "/media/andrea/Elements1/tmp/claude/tidypopgen"), "bench_inb/data/hgdp650.gt")
+    file.path(Sys.getenv("TPG_WORK", "/media/andrea/Elements1/tmp/claude/tidypopgen"), "bench_inb/data/hgdp650.gt"),
+    # the .gt still points at the backing files' old place on the annex
+    reattach_to = file.path(Sys.getenv("TPG_WORK", "/media/andrea/Elements1/tmp/claude/tidypopgen"), "bench_inb/data/hgdp650.rds")
   )
 })[["elapsed"]]
 pops <- read.delim(file.path(d, "hgdp650_id_pop.txt"))

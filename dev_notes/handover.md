@@ -111,19 +111,20 @@ sessions first (the benchmarking skill, "Unattended desktop jobs").
 
 ### Balanced timings of the `gt_merge_vcfs()` prototypes
 
-- **Set-up:** the scripts in `dev_notes/vcf_merge/scripts/` (set `W` and
-  `MERGE_DATA` to a folder under `~/claude_work/tidypopgen/merge_vcf/`);
-  make the data with `make_merge_data.R <dir> pops|sgdp|many`, then `bgzip`
-  and `tabix` (~2.4 GB bgzipped; the sgdp headers need the INFO lines, as
-  in `vcf_merge.md`); install `5e207d78`, `d3b982d0`, `bc6856b6` and
-  `6982994c` into their own libraries (`git archive`, `R CMD INSTALL`);
-  bcftools 1.25 built from source; plink2 (AVX2 build).
-- **Run:** `run_timing.sh <scenario> <n_cores> 3 base:<lib> p1:<lib>
-  p3:<lib> p4:<lib>` for the three scenarios at 1 and 4 cores (~1-2 h), then
-  `tools_timing.sh` for bcftools and plink2 on the three scenarios (~1-2 h;
-  bcftools took ~4 min per sgdp merge at 4 threads).
-- **Results:** medians into `vcf_merge.md` ("Numbers"), the tables into
-  `dev_notes/vcf_merge/results/`.
+- **State:** the laptop ran the 4-thread matrix on 20 Nov (3 balanced runs,
+  `real` mode; results on the Elements drive, `merge_vcf/results/runs.tsv`);
+  the 1-thread runs and bcftools/plink2 are left for the desktop.
+- **Set-up (untimed, E-cores):** `bash dev_notes/vcf_merge/setup_desktop.sh`
+  (builds bcftools 1.25, regenerates the seeded datasets, installs the four
+  versions into `~/claude_work/tidypopgen/merge_vcf/libs/`); put the plink2
+  AVX2 binary at `~/claude_work/tidypopgen/plink_king/bin/plink2`; set
+  `kernel.perf_event_paranoid` to 2 or less.
+- **Run:** schedule `dev_notes/vcf_merge/run_desktop.sh` (systemd user timer,
+  see its header): phases `vcf_t1` (core 2), `vcf_t8` (P-cores), `tools_t8`;
+  ~2 h. Check that the md5s in `runs.tsv` match the laptop's (pops
+  `87fe0252_1cb5b27f`, sgdp `2e2fdeae_e4f9c90e`, many `f286411f_d33f758d`).
+- **Results:** it commits the tables to `dev_notes/vcf_merge/desktop_<yyyy-mm>/`
+  and posts the log on claude_jobs#5; medians into `vcf_merge.md`.
 
 ### KING against PLINK 2
 

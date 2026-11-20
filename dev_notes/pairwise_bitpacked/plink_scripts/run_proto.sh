@@ -1,7 +1,7 @@
 #!/bin/bash
 # Balanced timings of the prototypes against the base build (tidypopgen only).
 # Usage: run_proto.sh <threads> <tasks, e.g. "full grouped"> <rounds, e.g. "F R F">
-# Versions: base (lib_new, b8255226), p1 (tiles + 64-word chunks), p2 (p1 +
+# Versions: base (build/lib_base, b8255226), p1 (tiles + 64-word chunks), p2 (p1 +
 # AVX2 popcount for KING), p2s (p2 with the AVX2 kernel turned off: tiles,
 # block layout, scalar popcount).
 set -u
@@ -14,12 +14,12 @@ if [ "$T" = 1 ]; then CPUS=2; else CPUS=0-$((T - 1)); fi
 export TMPDIR=$P/rtmp OMP_NUM_THREADS=$T OPENBLAS_NUM_THREADS=1
 LOG=$P/out/proto_log.txt
 TSV=$P/out/proto_$T.tsv
-declare -A LIBS=([base]=${TPG_WORK:-/media/andrea/Elements1/tmp/claude/tidypopgen}/bench_inb/lib_new
+declare -A LIBS=([base]=$P/build/lib_base
   [p1]=$P/build/lib_p1 [p2]=$P/build/lib_p2 [p2s]=$P/build/lib_p2)
 VERS="base p1 p2 p2s"
 RVERS=$(echo $VERS | tr ' ' '\n' | tac | tr '\n' ' ')
 load() { uptime | sed 's/.*average: //; s/,//g' | cut -d' ' -f1; }
-echo "# $(date -Is) $(hostname) T=$T CPUS=$CPUS tasks: $TASKS rounds: $ROUNDS; p1=$(git -C $P/wt rev-parse --short king_plink_ideas~1) p2=$(git -C $P/wt rev-parse --short king_plink_ideas)" >> $LOG
+echo "# $(date -Is) $(hostname) T=$T CPUS=$CPUS tasks: $TASKS rounds: $ROUNDS; base=$(cat ${LIBS[base]}/COMMIT) p1=$(cat ${LIBS[p1]}/COMMIT) p2=$(cat ${LIBS[p2]}/COMMIT)" >> $LOG
 for r in $ROUNDS; do
   if [ "$r" = F ]; then list=$VERS; else list=$RVERS; fi
   for task in $TASKS; do
