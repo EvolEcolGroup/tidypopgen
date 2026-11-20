@@ -166,11 +166,16 @@ autoplot(anole_pca, type = "scores", k = c(1, 3))
 
 The autoplots generate `ggplot2` objects, and so they can be further embellished with the usual
 `ggplot2` grammar:
-```{r, fig.alt = "Score plot of individuals across the first and second Principal Components, with individual samples coloured by population"}
+```{r, fig.width = 6, fig.height = 4.5, fig.alt = "Score plot of individuals across the first and second Principal Components, with individual samples coloured by population"}
 library(ggplot2)
 autoplot(anole_pca, type = "scores") +
   aes(color = anole_gt$population) +
-  labs(color = "population")
+  labs(color = "population") +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 9)
+  )
 ```
 
 For more complex/publication ready plots, we will want to add the PC scores
@@ -355,10 +360,15 @@ scatter(anole_dapc, posi.da = "bottomright")
 
 We can also plot these results onto the map we created earlier. As
 `anole_gt` is grouped, `mutate()` would work within each population, so we
-add the DAPC cluster of each individual with `$`:
+add the DAPC cluster of each individual by ungrouping temporarily
+(we could have also used the `$` operator: `anole_gt$dapc <- anole_dapc$grp`
+directly on the grouped object):
 
 ```{r}
-anole_gt$dapc <- anole_dapc$grp
+anole_gt <- anole_gt %>%
+  ungroup() %>%
+  mutate(dapc = anole_dapc$grp) %>%
+  group_by(population)
 
 ggplot() +
   geom_sf(data = map) +
@@ -487,21 +497,21 @@ And now we can use `ggplot2` directly to generate our custom plot:
 
 ```{r, fig.alt = "Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources"}
 tidy_q <- tidy_q %>%
-  dplyr::group_by(id) %>%
-  dplyr::mutate(dominant_q = max(percentage)) %>%
-  dplyr::ungroup() %>%
-  dplyr::arrange(group, dplyr::desc(dominant_q)) %>%
-  dplyr::mutate(
-    plot_order = dplyr::row_number(),
+  group_by(id) %>%
+  mutate(dominant_q = max(percentage)) %>%
+  ungroup() %>%
+  arrange(group, desc(dominant_q)) %>%
+  mutate(
+    plot_order = row_number(),
     id = factor(id, levels = unique(id))
   )
 
-plt <- ggplot2::ggplot(tidy_q, ggplot2::aes(x = id, y = percentage, fill = q)) +
-  ggplot2::geom_col(
+plt <- ggplot(tidy_q, aes(x = id, y = percentage, fill = q)) +
+  geom_col(
     width = 1,
-    position = ggplot2::position_stack(reverse = TRUE)
+    position = position_stack(reverse = TRUE)
   ) +
-  ggplot2::labs(
+  labs(
     y = "Population Structure for K = 3",
     title = "ADMIXTURE algorithm on A. punctatus"
   ) +
