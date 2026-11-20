@@ -111,6 +111,8 @@
 * `loci_ld_clump()`: `exclude` values that are not indices of loci (out of
   range, negative, not whole numbers, or names) give an error, rather than
   excluding nothing or the wrong loci
+* `rbind()`: fix grouped `gen_tibble`s (an error from `bind_rows()`); the
+  merged `gen_tibble` keeps the grouping of the first one
 
 # tidypopgen 1.0.0
 

@@ -79,6 +79,10 @@ column \code{to_swap} of its \code{target} table, and \code{\link[=select_loci]{
 them). If only one of them is phased, the phase of its genotypes is
 discarded (with a message), and the two datasets are merged as unphased
 data (swapping alleles as needed).
+
+If the first \code{gen_tibble} is grouped, the merged \code{gen_tibble} is grouped by
+the same variables (as with \code{\link[dplyr:bind_rows]{dplyr::bind_rows()}}); the grouping of the
+second \code{gen_tibble} is ignored.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

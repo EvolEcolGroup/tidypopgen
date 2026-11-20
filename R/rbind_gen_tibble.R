@@ -30,6 +30,10 @@
 #' discarded (with a message), and the two datasets are merged as unphased
 #' data (swapping alleles as needed).
 #'
+#' If the first `gen_tibble` is grouped, the merged `gen_tibble` is grouped by
+#' the same variables (as with [dplyr::bind_rows()]); the grouping of the
+#' second `gen_tibble` is ignored.
+#'
 #' @param ... two [`gen_tibble`] objects. Note that this function can not take
 #'   more objects, `rbind` has to be done sequentially for large sets of
 #'   objects.
@@ -108,6 +112,12 @@ rbind.gen_tbl <- function(
   }
   ref <- dots[[1]]
   target <- dots[[2]]
+  # the merged gen_tibble is grouped as the first one (as with
+  # dplyr::bind_rows()): we record its grouping, and merge ungrouped copies
+  ref_groups <- dplyr::group_vars(ref)
+  ref_drop <- dplyr::group_by_drop_default(ref)
+  ref <- dplyr::ungroup(ref)
+  target <- dplyr::ungroup(target)
   # only bind diploid tibbles
   stopifnot_dip_pseudo(ref$genotypes)
   stopifnot_dip_pseudo(target$genotypes)
@@ -355,8 +365,39 @@ rbind.gen_tbl <- function(
     merged_tbl,
     class = "gen_tbl"
   )
+  # restore the grouping of the first gen_tibble
+  if (length(ref_groups) > 0) {
+    merged_tibble <- dplyr::group_by(
+      merged_tibble,
+      dplyr::pick(dplyr::all_of(ref_groups)),
+      .drop = ref_drop
+    )
+  }
   gt_save(merged_tibble, quiet = quiet)
   return(merged_tibble)
+}
+
+# rbind() dispatches on the classes of its arguments: without this method,
+# dplyr's method for grouped_df (which calls bind_rows()) would be used for a
+# grouped gen_tibble, and fail
+#' @export
+#' @noRd
+rbind.grouped_gen_tbl <- function(
+  ...,
+  as_is = FALSE,
+  flip_strand = FALSE,
+  use_position = FALSE,
+  quiet = FALSE,
+  backingfile = NULL
+) {
+  rbind.gen_tbl(
+    ...,
+    as_is = as_is,
+    flip_strand = flip_strand,
+    use_position = use_position,
+    quiet = quiet,
+    backingfile = backingfile
+  )
 }
 
 
