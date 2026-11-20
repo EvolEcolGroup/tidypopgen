@@ -157,7 +157,7 @@ allele frequency and the missingness are computed over all individuals.
 loci_report <- qc_report_loci(hgdp)
 ```
 
-loci_report: 130ms
+loci_report: 133ms
 The resulting report can be observed using `autoplot`.
 
 
@@ -180,9 +180,7 @@ hgdp <- hgdp %>%
   )
 ```
 
-<!-- filter_loci: timing pending. This section was patched by hand on the
-laptop; re-run precompile_hgdp_benchmark.R on the desktop to time it (the
-summary below still has the time of the previous code). -->
+filter_loci: 98ms
 
 
 # Individual Report
@@ -196,7 +194,7 @@ individual, and rate of missingness per individual.
 indiv_report <- qc_report_indiv(hgdp)
 ```
 
-indiv_report: 190ms
+indiv_report: 198ms
 
 
 ``` r
@@ -226,9 +224,7 @@ indiv_report %>% count(lost = missingness >= 0.01)
 hgdp <- hgdp %>% filter(indiv_missingness(genotypes) < 0.01)
 ```
 
-<!-- filter_indiv: timing pending. This section was patched by hand on the
-laptop; re-run precompile_hgdp_benchmark.R on the desktop to time it (the
-summary below still has the time of the previous code). -->
+filter_indiv: 1.7s
 
 A few missing genotypes remain after filtering. We do not need to impute
 them: LD clumping, the PCA and the DAPC below use, for each locus (or pair of
@@ -247,7 +243,7 @@ hgdp <- hgdp %>%
   select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, n_cores = n_cores))
 ```
 
-ld_clumping: 327ms
+ld_clumping: 311ms
 
 # PCA
 
@@ -259,7 +255,7 @@ and LD clumped dataset.
 test_pca <- hgdp %>% gt_pca(n_cores = n_cores)
 ```
 
-pca: 1s
+pca: 952ms
 
 Plot PCA:
 
@@ -287,7 +283,7 @@ test_dapc <- gt_dapc(test_pca,
 )
 ```
 
-dapc: 131ms
+dapc: 112ms
 
 Plot DAPC:
 
@@ -311,7 +307,7 @@ pairwise_fsts <- hgdp %>% pairwise_pop_fst(
 )
 ```
 
-pairwise_fst: 50ms
+pairwise_fst: 49ms
 
 Plot pairwise Fst:
 
@@ -347,10 +343,10 @@ gt_as_plink(hgdp,
   type = "bed",
   overwrite = TRUE
 )
-#> [1] "/tmp/Rtmp4T8e7i/file2a4499610fe0db.bed"
+#> [1] "/tmp/Rtmp3etJzX/file2d96cf271176c9.bed"
 ```
 
-plink_save: 159ms
+plink_save: 161ms
 
 # Summary
 
@@ -359,17 +355,17 @@ Here is a summary of the time taken (in seconds) to perform each step of the ana
 
 ```
 #>            step time
-#> 1    read_plink 1.19
+#> 1    read_plink 1.24
 #> 2   loci_report 0.13
-#> 3   filter_loci 0.24
-#> 4  indiv_report 0.19
-#> 5  filter_indiv    0
-#> 6   ld_clumping 0.33
-#> 7           pca    1
-#> 8          dapc 0.13
+#> 3   filter_loci  0.1
+#> 4  indiv_report  0.2
+#> 5  filter_indiv 1.66
+#> 6   ld_clumping 0.31
+#> 7           pca 0.95
+#> 8          dapc 0.11
 #> 9  pairwise_fst 0.05
 #> 10   plink_save 0.16
-#> 11        Total 3.42
+#> 11        Total 4.91
 ```
 # Running the benchmark on a laptop
 We will now run this benchmark on a laptop 
