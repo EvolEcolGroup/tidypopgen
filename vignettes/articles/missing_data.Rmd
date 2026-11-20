@@ -42,7 +42,8 @@ loci strongly differentiated in the first population (F~ST~ = 0.7 in that
 population), as loci under selection would be. Each individual misses a proportion of its genotypes,
 from 0 to 80% (as is common, e.g., with ancient DNA), at random loci. Since
 `gt_simulate_bn()` draws the genotypes before the missing ones, the same
-seeds give the complete data, our truth.
+seeds give the complete data, our truth. We group each `gen_tibble` by
+population as soon as we create it.
 
 ```{r simulate}
 library(tidypopgen)
@@ -71,7 +72,8 @@ simulate_data <- function(missing) {
       allele_ref = "A", allele_alt = "G"
     ),
     backingfile = tempfile(), quiet = TRUE
-  )
+  ) %>%
+    group_by(population)
 }
 complete_gt <- simulate_data(missing = 0)
 missing_gt <- simulate_data(missing = missing_rate)

@@ -37,6 +37,14 @@ pops <- read.csv(pops_path)
 anole_gt <- anole_gt %>% left_join(pops, by = "id")
 ```
 
+As the lizards come from two populations, we group the `gen_tibble` by
+population straight away, so that the functions that use groups take them
+into account:
+
+```{r}
+anole_gt <- anole_gt %>% group_by(population)
+```
+
 And we can check our data using:
 
 ```{r}

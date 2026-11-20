@@ -103,7 +103,8 @@ hgdp
 ```
 
 As this dataset includes information from multiple populations, we want to
-group the gen_tibble:
+group the gen_tibble, so that quality control and the population statistics
+below work within populations:
 
 ```{r}
 hgdp <- hgdp %>%
@@ -115,6 +116,9 @@ hgdp <- hgdp %>%
 
 We can then call `qc_report_loci`. This function supplies minor allele
 frequency, rate of missingness, and a Hardy-Weinberg exact p-value for each SNP.
+As `hgdp` is grouped, Hardy-Weinberg equilibrium is tested within each
+population (with a Bonferroni correction across populations), while the minor
+allele frequency and the missingness are computed over all individuals.
 
 ```{r loci_report, benchmark = TRUE}
 loci_report <- qc_report_loci(hgdp)
@@ -128,7 +132,7 @@ autoplot(loci_report, type = "all")
 # Filter Loci
 
 Following this, we filter the loci to only including those with a minor allele
-frequency over 0.05, and a missingness rate below 0.05.
+frequency over 0.05, and a missingness rate below 0.05 (over all individuals).
 
 ```{r filter_loci, benchmark = TRUE}
 to_keep_loci <-
@@ -217,11 +221,10 @@ autoplot(test_dapc, type = "scores")
 # Calculate Fst
 
 To examine the differentiation between populations in the global HGDP set, we
-calculate pairwise Fst.
+calculate pairwise Fst between the populations that `hgdp` is grouped by.
 
 ```{r pairwise_fst, benchmark = TRUE}
-grouped_hgdp <- hgdp %>% group_by(population)
-pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(
+pairwise_fsts <- hgdp %>% pairwise_pop_fst(
   n_cores = n_cores,
   type = "pairwise"
 )
@@ -231,8 +234,8 @@ Plot pairwise Fst:
 
 ```{r pairwise_fst_plot}
 # Order by continents
-grouped_hgdp_order <- grouped_hgdp %>% arrange(region, population)
-regional_order <- unique(grouped_hgdp_order$population)
+hgdp_order <- hgdp %>% arrange(region, population)
+regional_order <- unique(hgdp_order$population)
 
 autoplot(pairwise_fsts, order = regional_order) +
   scale_fill_viridis_c() +

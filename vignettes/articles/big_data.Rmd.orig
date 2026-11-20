@@ -127,6 +127,16 @@ sgdp$region[sgdp$region == "WestEurasia"] <- "West Eurasia"
 sgdp$region[sgdp$region == "EastAsia"] <- "East Asia"
 ```
 
+We have added the population and the region of each individual, from the
+metadata of the SGDP. As we have only one or two individuals from each
+population, we group the individuals by region, so that quality control (e.g.
+the Hardy-Weinberg test of `qc_report_loci()`) and the pairwise F~ST~ below
+work within regions:
+
+```{r group_by_region}
+sgdp <- sgdp %>% group_by(region)
+```
+
 When we now call our loci tibble with `show_loci()`, we can see that the loci names are now integers:
 
 ```{r show_loci}
@@ -150,9 +160,7 @@ sgdp_indiv_rep <- qc_report_indiv(sgdp)
 ```
 
 ```{r loci_report, benchmark = TRUE}
-sgdp <- sgdp %>% group_by(region)
 sgdp_loci_rep <- qc_report_loci(sgdp)
-sgdp <- sgdp %>% ungroup()
 ```
 
 However, it is important to be mindful that analyses on very large datasets will produce large outputs:
@@ -190,7 +198,7 @@ rm(sgdp_loci_rep)
 
 We can then proceed with basic data filtering in the same way as working with any other gen_tibble object.
 
-We filter for minor allele frequency, choosing to select loci with MAF greater than 5%:
+We filter for minor allele frequency, choosing to select loci with MAF greater than 5% (`select_loci_if()` ignores the groups: the MAF of each locus is computed over all individuals):
 
 ```{r maf_filter, benchmark = TRUE}
 sgdp <- sgdp %>%
@@ -251,11 +259,10 @@ Our DAPC autoplot shows that most individuals are assigned to their own region's
 
 # Pairwise F~ST~
 
-Finally, to examine the differentiation between regions, we can calculate pairwise F~ST~.
+Finally, to examine the differentiation between regions, we can calculate pairwise F~ST~ between the regions that `sgdp` is grouped by.
 
 ```{r pairwise_fst, benchmark = TRUE}
-grouped_sgdp <- sgdp %>% group_by(region)
-pairwise_fst <- grouped_sgdp %>% pairwise_pop_fst(
+pairwise_fst <- sgdp %>% pairwise_pop_fst(
   n_cores = n_cores,
   type = "pairwise"
 )
