@@ -44,12 +44,10 @@ once the branches are no longer needed).
   (`87c75ea4`, 20 Nov) with indicative timings: re-time them on a quiet
   machine before a release (the laptop section of the HGDP benchmark is
   older still, with an "impute" step).
-- **HGDP benchmark:** re-rendered on the desktop (`f364012d`, quiet
-  machine, 20 threads), timing the new filters. `filter_indiv` now takes
-  1.7 s (4 ms with the old `hgdp[to_keep_indiv, ]`): on the grouped
-  `gen_tibble`, `filter()` calls `indiv_missingness()` once per population
-  (51 scans); ungrouped it takes 0.23 s, same 1041 individuals. Andrea's
-  call whether to keep it.
+- **HGDP benchmark:** re-rendered on the desktop (`f364012d`, `cbd25afa`,
+  quiet machine, 20 threads): loci are filtered on the columns of
+  `loci_report` (no recomputing), individuals on the ungrouped `gen_tibble`
+  (Andrea's choices); printed results unchanged, total 3.5 s.
 - **Done when:** #231 is merged into `dev` (squash).
 
 ### 2. **P2** [desktop] Re-time on the P-cores

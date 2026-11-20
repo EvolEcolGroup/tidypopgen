@@ -9,11 +9,12 @@ files, SFS, CRAN checks) is described in the topic documents listed in
 - **Done:** pulled `grouping` (`88eaed6e`) and re-knitted
   `benchmark_hgdp.Rmd` with `precompile_hgdp_benchmark.R` (-O2 install of the
   branch, 20 threads, quiet machine; laptop section re-appended unchanged).
-- **Where:** `grouping`, `f364012d`.
-- **Result:** printed results unchanged; total 4.91 s (was 3.42 s), as
-  `filter_indiv` went from 4 ms to 1.66 s: the grouped `filter()` calls
-  `indiv_missingness()` once per population (1.9 s grouped, 0.23 s
-  ungrouped, same individuals). Left for Andrea to decide.
+- **Where:** `grouping`, `f364012d`, `cbd25afa`.
+- **Result:** printed results unchanged. The grouped `filter()` of
+  individuals called `indiv_missingness()` once per population (1.66 s);
+  Andrea chose to ungroup for that step (0.19 s), and to filter loci on the
+  `maf` and `missingness` columns of `loci_report` (0.10 -> 0.02 s). Total
+  3.52 s.
 - **Notes changed:** `handover.md`, `summary.md`.
 
 ## 2026-11-20 (laptopX1): vignette fixes on grouping, PR #235 into pca_missing
