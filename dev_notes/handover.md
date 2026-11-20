@@ -141,8 +141,12 @@ sessions first (the benchmarking skill, "Unattended desktop jobs").
   `.gt` at `bench_inb/data/hgdp650.gt` (the one in
   `~/claude_work/tidypopgen/king/` will do: adapt the path in
   `time_tpg.R`/`check_proto.R`); the plink2 AVX2 binary at
-  `plink_king/bin/plink2` (shared with the VCF job) and a `.pgen` of
-  HGDP650 with FID set to the population (`run_bench.sh` shows how). Check
+  `plink_king/bin/plink2` (shared with the VCF job); in `plink_king/data/`,
+  `hgdp650_pop.{bed,bim,fam}`: `vignettes/articles/data/hgdp/hgdp650.qc.hg19.*`
+  with the FID (column 1 of the `.fam`) replaced by the population of
+  `hgdp650_id_pop.txt`, then `plink2 --bfile hgdp650_pop --make-pgen --out
+  hgdp650_pop`, and `keep/<population>.txt` (FID IID, one file per
+  population) for the `--keep` loop. Check
   first that the three builds give `identical()` outputs (`check_proto.R`).
 - **State:** the laptop ran both scripts at 1 and 4 threads on 20 Nov
   (`dev_notes/pairwise_bitpacked/king_2026-11-20/`).
