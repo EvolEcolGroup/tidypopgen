@@ -5,9 +5,9 @@
 # plink_merge (default: all). Appends to results/tools.tsv (wall time, peak
 # RSS, user-space cycles and instructions, load, date).
 set -euo pipefail
-W=/media/andrea/annex/tmp/claude/tidypopgen/merge_vcf
+W=${TPG_WORK:-/media/andrea/Elements1/tmp/claude/tidypopgen}/merge_vcf
 B=$W/tools/bcftools/bin/bcftools
-P=/media/andrea/annex/tmp/claude/tidypopgen/plink_king/bin/plink2
+P=${TPG_WORK:-/media/andrea/Elements1/tmp/claude/tidypopgen}/plink_king/bin/plink2
 SC=$1
 T=$2
 REP=$3

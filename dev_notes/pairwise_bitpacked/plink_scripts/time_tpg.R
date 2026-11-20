@@ -14,10 +14,10 @@ n_cores <- as.integer(args[3])
 label <- args[4]
 out <- args[5]
 suppressPackageStartupMessages(library(tidypopgen, lib.loc = lib))
-d <- "/media/andrea/annex/git/tidypopgen/vignettes/articles/data/hgdp"
+d <- file.path(Sys.getenv("TPG_REPO", "/media/andrea/annex/git/tidypopgen"), "vignettes/articles/data/hgdp")
 t_load <- system.time({
   gt <- gt_load(
-    "/media/andrea/annex/tmp/claude/tidypopgen/bench_inb/data/hgdp650.gt"
+    file.path(Sys.getenv("TPG_WORK", "/media/andrea/Elements1/tmp/claude/tidypopgen"), "bench_inb/data/hgdp650.gt")
   )
 })[["elapsed"]]
 pops <- read.delim(file.path(d, "hgdp650_id_pop.txt"))

@@ -3,7 +3,7 @@
 # triploid files, and saves the genotypes, to compare versions
 args <- commandArgs(trailingOnly = TRUE)
 suppressPackageStartupMessages(library(tidypopgen, lib.loc = args[1]))
-d <- "/media/andrea/annex/tmp/claude/tidypopgen/merge_vcf/edge"
+d <- file.path(Sys.getenv("TPG_WORK", "/media/andrea/Elements1/tmp/claude/tidypopgen"), "merge_vcf/edge")
 hdr <- function(s) c("##fileformat=VCFv4.2", paste(c("#CHROM", "POS", "ID",
   "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT", s), collapse = "\t"))
 line <- function(chr, pos, ref, alt, gts) {

@@ -21,7 +21,7 @@ if (startsWith(lib, "loadall:")) {
   suppressPackageStartupMessages(library(tidypopgen, lib.loc = lib))
 }
 data_dir <- Sys.getenv(
-  "MERGE_DATA", "/media/andrea/annex/tmp/claude/tidypopgen/merge_vcf/data"
+  "MERGE_DATA", file.path(Sys.getenv("TPG_WORK", "/media/andrea/Elements1/tmp/claude/tidypopgen"), "merge_vcf/data")
 )
 files <- sort(list.files(file.path(data_dir, scenario),
   pattern = "\\.vcf\\.gz$", full.names = TRUE

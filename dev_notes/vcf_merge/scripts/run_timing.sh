@@ -6,7 +6,7 @@
 # results/phases.tsv (phase times) and results/runs.tsv (wall time, peak
 # RSS, load, date, md5 of the .bk).
 set -euo pipefail
-W=/media/andrea/annex/tmp/claude/tidypopgen/merge_vcf
+W=${TPG_WORK:-/media/andrea/Elements1/tmp/claude/tidypopgen}/merge_vcf
 SC=$1
 T=$2
 REPS=$3

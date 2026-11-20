@@ -5,8 +5,8 @@
 # Results: out/bench_<threads>.tsv (PLINK) and out/tpg_<threads>.tsv
 # (tidypopgen), with the load before each run in out/bench_log.txt.
 set -u
-P=/media/andrea/annex/tmp/claude/tidypopgen/plink_king
-LIB=/media/andrea/annex/tmp/claude/tidypopgen/bench_inb/lib_new
+P=${TPG_WORK:-/media/andrea/Elements1/tmp/claude/tidypopgen}/plink_king
+LIB=${TPG_WORK:-/media/andrea/Elements1/tmp/claude/tidypopgen}/bench_inb/lib_new
 PL=$P/bin/plink2
 DATA=$P/data/hgdp650_pop
 T=$1
@@ -67,9 +67,9 @@ tpg_pack() { ttpg pack; }
 TASKS="pl_pgen_full tpg_full pl_bed_full tpg_full_kernel pl_pgen_within tpg_grouped pl_bed_within tpg_pack pl_keeploop pl_convert pl_load pl_read"
 RTASKS=$(echo $TASKS | tr ' ' '\n' | tac | tr '\n' ' ')
 
-echo "# $(date -Is) $(hostname) T=$T CPUS=$CPUS rounds: $ROUNDS; $($PL --version); tidypopgen $(git -C /media/andrea/annex/git/tidypopgen rev-parse --short HEAD) (lib_new)" >> $LOG
+echo "# $(date -Is) $(hostname) T=$T CPUS=$CPUS rounds: $ROUNDS; $($PL --version); tidypopgen $(git -C ${TPG_REPO:-/media/andrea/annex/git/tidypopgen} rev-parse --short HEAD) (lib_new)" >> $LOG
 # warm the page cache
-cat $DATA.bed $DATA.pgen $DATA.pvar $DATA.bim /media/andrea/annex/tmp/claude/tidypopgen/bench_inb/data/hgdp650.bk > /dev/null
+cat $DATA.bed $DATA.pgen $DATA.pvar $DATA.bim ${TPG_WORK:-/media/andrea/Elements1/tmp/claude/tidypopgen}/bench_inb/data/hgdp650.bk > /dev/null
 for r in $ROUNDS; do
   if [ "$r" = F ]; then list=$TASKS; else list=$RTASKS; fi
   for t in $list; do $t; done

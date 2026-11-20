@@ -5,7 +5,7 @@
 # AVX2 popcount for KING), p2s (p2 with the AVX2 kernel turned off: tiles,
 # block layout, scalar popcount).
 set -u
-P=/media/andrea/annex/tmp/claude/tidypopgen/plink_king
+P=${TPG_WORK:-/media/andrea/Elements1/tmp/claude/tidypopgen}/plink_king
 T=$1
 TASKS=$2
 shift 2
@@ -14,7 +14,7 @@ if [ "$T" = 1 ]; then CPUS=2; else CPUS=0-$((T - 1)); fi
 export TMPDIR=$P/rtmp OMP_NUM_THREADS=$T OPENBLAS_NUM_THREADS=1
 LOG=$P/out/proto_log.txt
 TSV=$P/out/proto_$T.tsv
-declare -A LIBS=([base]=/media/andrea/annex/tmp/claude/tidypopgen/bench_inb/lib_new
+declare -A LIBS=([base]=${TPG_WORK:-/media/andrea/Elements1/tmp/claude/tidypopgen}/bench_inb/lib_new
   [p1]=$P/build/lib_p1 [p2]=$P/build/lib_p2 [p2s]=$P/build/lib_p2)
 VERS="base p1 p2 p2s"
 RVERS=$(echo $VERS | tr ' ' '\n' | tac | tr '\n' ' ')

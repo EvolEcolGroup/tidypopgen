@@ -3,9 +3,9 @@
 # Usage: Rscript check_proto.R <lib> <out.rds>
 args <- commandArgs(trailingOnly = TRUE)
 suppressPackageStartupMessages(library(tidypopgen, lib.loc = args[1]))
-d <- "/media/andrea/annex/git/tidypopgen/vignettes/articles/data/hgdp"
+d <- file.path(Sys.getenv("TPG_REPO", "/media/andrea/annex/git/tidypopgen"), "vignettes/articles/data/hgdp")
 gt <- gt_load(
-  "/media/andrea/annex/tmp/claude/tidypopgen/bench_inb/data/hgdp650.gt"
+  file.path(Sys.getenv("TPG_WORK", "/media/andrea/Elements1/tmp/claude/tidypopgen"), "bench_inb/data/hgdp650.gt")
 )
 pops <- read.delim(file.path(d, "hgdp650_id_pop.txt"))
 gt$population <- pops$population[match(gt$id, pops$Id)]
