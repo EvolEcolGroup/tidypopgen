@@ -4,6 +4,23 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-20 (manica01): desktop set-up of the VCF merge and KING timings, scheduled
+
+- **Done:** set up both desktop jobs of the queue (Andrea's request): bcftools
+  1.25, the seeded VCF datasets, the four merge builds; plink2 b.1.4LM AVX2
+  (as the laptop); -O2 installs of `b8255226`, `72377615`, `e2692136`, the
+  PLINK input with populations as FID; KING phases added to
+  `vcf_merge/run_desktop.sh`, which a systemd user timer runs from
+  20 Nov 19:20 (`vcf_merge_king`).
+- **Fixes to the scripts:** perf prints two `cycles:u` lines on the hybrid
+  desktop (summed now); bgzip and tabix built from bcftools' htslib (not
+  installed); a SIGPIPE stopped `setup_desktop.sh`; KING scripts take
+  `CPUS` and `OUTDIR`.
+- **Result:** the KING builds (and p3 without AVX2) give `identical()`
+  outputs on HGDP650.
+- **Decisions:** none.
+- **Notes changed:** `handover.md`, `summary.md`.
+
 ## 2026-11-20 (laptopX1): two-path KING kernel (AVX2 and scalar)
 
 - **Done:** the scalar fallback of the AVX2 prototype read the AVX2 layout
