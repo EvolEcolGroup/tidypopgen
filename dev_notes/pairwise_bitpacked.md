@@ -197,9 +197,9 @@ pass with and without `TIDYPOPGEN_NO_AVX2`. Medians in seconds (range):
 - **Within groups nothing changes** (packing, 0.40 s of the 0.60 s, dominates).
 - **p2's scalar path is much slower than base** (20.7 against 12.9 s):
   p2 lays the planes out in blocks of 4 words (`pw_word_offset()`), and the
-  scalar `pw_row_popcnt()` now strides through them. Not profiled. This is
-  the path of CPUs without AVX2 and of non-x86 builds, so p2 cannot be merged
-  as it is.
+  scalar `pw_row_popcnt()` now strides through them. This is the path of
+  CPUs without AVX2 and of non-x86 builds. Fixed the same morning (p3,
+  below).
 - The 4-thread block ran at load 1-2.6 and base and p1 were bimodal
   (3.8 or 5.4 s; `bench_tpg` gave 5.5 s for base): indicative only. PLINK 2's
   `--keep` loop over populations took 16.4 s on 1 thread.
@@ -208,21 +208,35 @@ pass with and without `TIDYPOPGEN_NO_AVX2`. Medians in seconds (range):
   load average; `bench_tpg_<T>.tsv` the same for base; `bench_plink_<T>.tsv`:
   time, step, threads, elapsed, user, system, load).
 
-**Proposal (Andrea, 20 Nov): two paths.** Keep the AVX2 kernel for the CPUs
-that have it, and the tiles (p1) or the current layout (base) for the rest,
-since 2x is worth ~120 lines of x86-only code. Not decided. To do it, the
-scalar path must not lose: either give it p1's word-major layout (two plane
-layouts, chosen with `use_avx2` before packing), or make the scalar loop read
-the 4-word blocks efficiently; then time p2 with and without AVX2 against
-base and p1 on the desktop (1 and 8 threads), and check a non-AVX2 build
-(e.g. `-march=x86-64` with the dispatch off, and an arm64 CI job).
+**Two paths (Andrea's proposal, 20 Nov): p3 `e2692136`.** The AVX2 kernel
+for the CPUs that have it, and p1's word-major layout and scalar kernel for
+the rest: the layout is chosen with the kernel, before packing
+(`blk = use_avx2 ? 4 : 1` in `pw_word_offset()`; 41 lines added, 61
+removed). Outputs `identical()` to base (KING full, grouped and subset, IBS,
+allele sharing, grouped inbreeding, GRM), with and without
+`TIDYPOPGEN_NO_AVX2`; the 11 test files of the kernel pass both ways.
+Laptop, same protocol as above (06:04-06:14, load 0.8-1.1; p3s is p3 with
+`TIDYPOPGEN_NO_AVX2=1`):
+
+| | full, 1 thread | full, 4 threads | within, 1 thread | within, 4 threads |
+|---|---|---|---|---|
+| base `b8255226` | 13.83 (12.48-13.88) | 4.48 (4.05-5.47) | 0.59 | 0.20 |
+| p1 `72377615` | 9.57 (8.79-9.65) | 3.64 (2.82-3.65) | 0.59 | 0.20 |
+| p3 (AVX2) | **6.08** (6.02-6.09) | **2.32** (1.92-2.41) | 0.54 | 0.18 |
+| p3s (scalar) | **9.15** (9.06-9.60) | 3.00 (2.88-3.64) | 0.60 | 0.20 |
+
+- With AVX2, p3 is as fast as p2 (2.3x over base on 1 thread); without, it is
+  as fast as p1 (1.5x over base), instead of 1.6x slower.
+- Not merged: still needs the desktop timings (1 and 8 threads, against
+  PLINK 2), a build without AVX2 (non-x86 or the dispatch compiled out),
+  and a decision to carry ~120 lines of x86-only code.
 
 ## Open questions
 
-- **AVX2 and tiles (`king_plink_ideas`):** 2.1x on the full matrix on the
-  laptop (20 Nov, above), but the scalar fallback is 1.6x slower than base.
-  Two paths (Andrea's proposal)? Fix the scalar path first, then time on the
-  desktop against PLINK 2 at 1 and 8 threads.
+- **Merge the two-path KING kernel (p3, `king_plink_ideas`)?** 2.3x on the
+  full matrix with AVX2, 1.5x without (laptop, 20 Nov); time on the desktop
+  against PLINK 2 at 1 and 8 threads, and check a build without AVX2,
+  before a PR.
 - Merge `king_simd_packing`? Only if single-core grouped KING matters (it is
   memory-bound on 8 cores).
 - Packing blocks whose rows are not consecutive (e.g. after `filter()`) reads

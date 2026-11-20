@@ -15,18 +15,18 @@ export TMPDIR=$P/rtmp OMP_NUM_THREADS=$T OPENBLAS_NUM_THREADS=1
 LOG=$P/out/proto_log.txt
 TSV=$P/out/proto_$T.tsv
 declare -A LIBS=([base]=$P/build/lib_base
-  [p1]=$P/build/lib_p1 [p2]=$P/build/lib_p2 [p2s]=$P/build/lib_p2)
-VERS="base p1 p2 p2s"
+  [p1]=$P/build/lib_p1 [p2]=$P/build/lib_p2 [p2s]=$P/build/lib_p2 [p3]=$P/build/lib_p3 [p3s]=$P/build/lib_p3)
+VERS=${VERS:-"base p1 p2 p2s"}
 RVERS=$(echo $VERS | tr ' ' '\n' | tac | tr '\n' ' ')
 load() { uptime | sed 's/.*average: //; s/,//g' | cut -d' ' -f1; }
-echo "# $(date -Is) $(hostname) T=$T CPUS=$CPUS tasks: $TASKS rounds: $ROUNDS; base=$(cat ${LIBS[base]}/COMMIT) p1=$(cat ${LIBS[p1]}/COMMIT) p2=$(cat ${LIBS[p2]}/COMMIT)" >> $LOG
+echo "# $(date -Is) $(hostname) T=$T CPUS=$CPUS tasks: $TASKS rounds: $ROUNDS; base=$(cat ${LIBS[base]}/COMMIT) p1=$(cat ${LIBS[p1]}/COMMIT) p2=$(cat ${LIBS[p2]}/COMMIT) p3=$(cat ${LIBS[p3]}/COMMIT 2>/dev/null)" >> $LOG
 for r in $ROUNDS; do
   if [ "$r" = F ]; then list=$VERS; else list=$RVERS; fi
   for task in $TASKS; do
     for v in $list; do
       l=$(load)
       echo "# $(date -Is) $v $task T=$T load=$l" >> $LOG
-      if [ $v = p2s ]; then noavx="TIDYPOPGEN_NO_AVX2=1"; else noavx="X_UNUSED=1"; fi
+      if [ $v = p2s ] || [ $v = p3s ]; then noavx="TIDYPOPGEN_NO_AVX2=1"; else noavx="X_UNUSED=1"; fi
       env $noavx taskset -c $CPUS Rscript $P/scripts/time_tpg.R ${LIBS[$v]} $task $T $v $TSV > /dev/null 2>> $LOG
       sleep 3
     done

@@ -4,6 +4,18 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-20 (laptopX1): two-path KING kernel (AVX2 and scalar)
+
+- **Done:** the scalar fallback of the AVX2 prototype read the AVX2 layout
+  and was 1.6x slower than base; the plane layout is now chosen with the
+  kernel (`king_plink_ideas` `e2692136`, pushed). Outputs identical, the
+  kernel's tests pass with and without AVX2.
+- **Result:** full HGDP650 KING on 1 thread: base 13.8 s, AVX2 6.1 s,
+  scalar 9.2 s (was 20.7 s); within groups unchanged.
+- **Decisions:** two paths (Andrea); merging still to decide after the
+  desktop timings.
+- **Notes changed:** `pairwise_bitpacked.md`, `handover.md`, `summary.md`.
+
 ## 2026-11-20 (laptopX1): balanced laptop timings of the VCF merge and KING prototypes
 
 - **Done:** moved the job files to the WD Elements HDD (the annex stick drops

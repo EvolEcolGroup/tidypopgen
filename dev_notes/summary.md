@@ -9,7 +9,7 @@ paragraph, status and next steps are copied into the issue
 
 Population genetics with `gen_tibble`s: faster input (VCF reading in `dev`, merging of VCFs prototyped), analyses with missing genotypes without imputation (PCA, DAPC, pcadapt, LD clumping and pruning), and fast kinship and inbreeding within groups.
 
-**Status.** PR #231 (`pca_missing` into `dev`, with #232 and #233, the review fixes, and grouped `pairwise_king()` and `indiv_inbreeding()` in one pass) passes CI except codecov (patch coverage 94.7%, target 95.5%), and waits for Andrea's review. Prototypes on `merge_vcf_speed` make `gt_merge_vcfs()` 1.6x faster on many single-sample files with identical outputs (balanced laptop runs, sgdp-like 54.9 -> 33.0 s), and on `king_plink_ideas` an AVX2 popcount doubles the speed of the full KING matrix (12.9 -> 6.1 s on 1 thread, ~1.9x faster than PLINK 2), though its scalar fallback is slower than the current code. Handover: `dev_notes/handover.md` on `pca_missing`; `vcf_merge.md`, `pairwise_bitpacked.md`.
+**Status.** PR #231 (`pca_missing` into `dev`, with #232 and #233, the review fixes, and grouped `pairwise_king()` and `indiv_inbreeding()` in one pass) passes CI except codecov (patch coverage 94.7%, target 95.5%), and waits for Andrea's review. Prototypes on `merge_vcf_speed` make `gt_merge_vcfs()` 1.6x faster on many single-sample files with identical outputs (balanced laptop runs, sgdp-like 54.9 -> 33.0 s), and on `king_plink_ideas` a two-path KING kernel makes the full matrix 2.3x faster with AVX2 (13.8 -> 6.1 s on 1 thread, ~1.9x faster than PLINK 2) and 1.5x faster without, outputs identical. Handover: `dev_notes/handover.md` on `pca_missing`; `vcf_merge.md`, `pairwise_bitpacked.md`.
 
 With missing genotypes, imputation pulls individuals with many missing
 genotypes together and makes missingness an axis of the PCA (on HGDP650, PC1
@@ -25,15 +25,15 @@ work) is not released yet.
 `gt_merge_vcfs()` read each file twice; reading it once and parsing lines in
 parallel removes most of the cost (1.6x on files with one sample, 1.2x on
 files with 100), and was 2-4x faster than `bcftools merge` in single runs.
-The 1-thread runs and the tools are set up to run on the desktop. For KING,
-Andrea proposed two paths: AVX2 where available, the tiles or the current
-code elsewhere.
+The 1-thread runs and the tools are set up to run on the desktop. For KING, the
+two paths Andrea proposed (AVX2 where available, the tiles elsewhere) are
+implemented and tested; they need desktop timings and a decision.
 
 **Next steps**
 - [ ] **P1** [review] Review the fixes (boxes of the review report) and the grouped `pairwise_king()` and `indiv_inbreeding()`, and merge PR #231: done when #231 is in `dev`.
 - [ ] **P2** [desktop] Re-time on the P-cores: the HGDP650 PCA/DAPC/pcadapt/LD benchmarks, the `gt_merge_vcfs()` prototypes against bcftools and plink2 (1 and 8 threads; set up: `vcf_merge/run_desktop.sh`), KING against PLINK 2 (1 and 8 threads): results in `gt_pca.md`, `ld_missing.md`, `vcf_merge.md`, `pairwise_bitpacked.md`.
 - [ ] **P2** [claude] Make `merge_vcf_speed` ready for a PR (file names in pass-1 errors, a cache-vs-reread test, full suite, `gen_tibble()` timing): done when a PR into `dev` is open, after #231.
-- [ ] **P2** [claude] Keep optimising: pcadapt's t-scores, the GRM's count of shared loci, the DAPC regression, KING with two paths (the AVX2 kernel of `king_plink_ideas` where available, after making its scalar fallback no slower than base): done when >5% faster with identical outputs.
+- [ ] **P2** [claude] Keep optimising: pcadapt's t-scores, the GRM's count of shared loci, the DAPC regression, KING: time the two-path kernel (`king_plink_ideas` `e2692136`) on the desktop and check a build without AVX2, then a PR if Andrea agrees: done when >5% faster with identical outputs.
 - [ ] **P2** [review] Release 1.1.0 after #231: set the version, merge `dev` into `main`, re-run `urlchecker::url_check()` and submit (from 15 Nov; not rechecked).
 - [ ] **P3** [cleanup] Delete merged branches (`pca_missing`, then `merge_vcf_speed`, `king_*` once decided); review the other local branches on the laptop; ask before deleting the benchmark data on the laptop's annex and in `~/claude_work/tidypopgen/` on the desktop.
 
