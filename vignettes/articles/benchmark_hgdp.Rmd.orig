@@ -135,9 +135,10 @@ Following this, we filter the loci to only including those with a minor allele
 frequency over 0.05, and a missingness rate below 0.05 (over all individuals).
 
 ```{r filter_loci, benchmark = TRUE}
-to_keep_loci <-
-  subset(loci_report, loci_report$maf > 0.05 & loci_report$missingness < 0.05)
-hgdp <- hgdp %>% select_loci(to_keep_loci$snp_id)
+hgdp <- hgdp %>%
+  select_loci_if(
+    loci_maf(genotypes) > 0.05 & loci_missingness(genotypes) < 0.05
+  )
 ```
 
 
