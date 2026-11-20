@@ -1,0 +1,7 @@
+start 08:22:23 load 3.39 3.98 2.65
+[1] "/home/andrea/claude_work/tidypopgen/bed_reader/out/reader.rds"
+Warning message:
+'out/reader.bk' will take 30.0% of the available disk space. 
+fbm_read_bed n_indiv 486 n_snp 166099533 cores 1: elapsed 79.52 user 14.47 sys 36.60
+wall 81.65 s, maxrss 79087012 KB
+end 08:23:50
