@@ -4,6 +4,19 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-21 (laptopX1): test times on CRAN and per test file
+
+- **Done:** read the test, example and vignette times of 1.0.0 in CRAN's
+  check logs, compared the suite on GitHub's runners at 1.0.0 and on `dev`
+  (about the same), and timed each test file of `dev` (`e20145a2`) on an
+  -O2 build in CRAN mode on 2 cores (`test_times_2026-11.md`, raw tables in
+  `test_times/`).
+- **Results:** CRAN's tests take 4–11 min on the slower flavours (check
+  8–17 min); on the laptop 271 s, of which CRAN runs 214 s; the 10 slowest
+  files hold 46%, 13 blocks over 2 s hold 24%; core's tests are the slowest
+  (117 s). Eight `skip_on_cran()` candidates would save about 24%.
+- **Next:** Andrea picks the skips before 1.1.0.
+
 ## 2026-11-21 (laptopX1): plan for splitting tidypopgen, deferred
 
 - **Done:** surveyed the module boundaries (internal calls, C++, tests,

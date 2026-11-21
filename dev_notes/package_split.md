@@ -17,7 +17,7 @@ of the code and of the packages that use tidypopgen.
 ## Why
 
 - **Check time.** CRAN's checks of 1.0.0 (21 Nov 2026) take 904 s on
-  r-release-linux, 1296 s on r-devel-windows and 1410 s on r-oldrel-windows,
+  r-release-linux, 1095 s on r-devel-windows and 1410 s on r-oldrel-windows,
   above the 10-minute guideline. Most of it is the check itself (tests,
   examples, vignettes: 689–1014 s), not the installation (215–396 s).
 - **Size.** About 30k lines of R, 12k of C++ and 31k of tests in 108 files;
@@ -350,7 +350,8 @@ the ones only stats uses move to stats.
 3. Refresh the map: `Rscript dev_notes/package_split/make_modules.R` stops on
    files that match no rule, and warns about rules that match no file.
 4. Set a time budget per package, on release builds and a quiet machine:
-   test time per file (testthat's `ListReporter`), example times
+   test time per file (a first measurement is in `test_times_2026-11.md`:
+   core has the slowest tests), example times
    (`R CMD check --timings`) and vignette times, summed per package and
    multiplied by 1.5 for Windows. Aim at 6 minutes or less per package, and
    list the `skip_on_cran()` candidates (the comparisons with PLINK,
@@ -568,7 +569,7 @@ tests catch what the static check misses (`do.call()`,
 
 | measure | value | machine | commit | date |
 |---|---|---|---|---|
-| CRAN check of 1.0.0, total (install + check) | r-release-linux 904 s (215 + 689); r-devel-windows 1296 s; r-oldrel-windows 1410 s (396 + 1014) | CRAN check servers | 1.0.0 | 2026-11-21 |
+| CRAN check of 1.0.0, total (install + check) | r-release-linux 904 s (215 + 689); r-devel-windows 1095 s; r-oldrel-windows 1410 s (396 + 1014); tests alone 4–11 min on the slower flavours (`test_times_2026-11.md`) | CRAN check servers | 1.0.0 | 2026-11-21 |
 | installed size | 28.1 Mb (doc 1.8, extdata 1.3; about 3 Mb without the compiled code) | laptopX1 | 1.0.0 | 2026-11-07 |
 | lines of R: core / stats / tidygenclust / to split | 10,451 / 16,733 / 1,806 / 695 | laptopX1 | `e20145a2` | 2026-11-21 |
 | lines of C++: core / stats (+ generated) | 4,878 / 6,353 (+ 1,193) | laptopX1 | `e20145a2` | 2026-11-21 |
@@ -576,6 +577,7 @@ tests catch what the static check misses (`do.call()`,
 | compiled objects of a debug build (relative sizes only) | core ~22 MB, stats ~71 MB | laptopX1 | `466feb51` | 2026-11-21 |
 | commits since 1 May (`dev` and `pca_missing`) that touch both core and stats files | 17 of 130 | laptopX1 | `e20145a2` | 2026-11-21 |
 | exports / S3 methods | 132 / 192 | laptopX1 | `e20145a2` | 2026-11-21 |
+| test time by package, as CRAN runs them (-O2, 2 cores; indicative) | core 117 s, stats 77 s, tidygenclust 16 s (69 s with the ADMIXTURE tests CRAN skips) | laptopX1 | `e20145a2` | 2026-11-21 |
 
 To reproduce the sizes: `Rscript dev_notes/package_split/make_modules.R`,
 then count the lines of the files of each module in `modules.csv`.

@@ -73,7 +73,24 @@ once the branches are no longer needed).
   manica01.
 - **Done when:** faster by more than 5%, with identical outputs.
 
-### 4. **P2** [review] Release 1.1.0 (from claude_jobs#5, 15 Nov; not rechecked)
+### 4. **P2** [decide] Shorten the tests on CRAN, before 1.1.0
+
+- **Why:** on CRAN, 1.0.0's tests take 4–11 minutes on the slower flavours,
+  and the whole check 8–17 minutes against the guideline of about 10; the
+  suite is as long on `dev` (`test_times_2026-11.md`).
+- **Read first:** `test_times_2026-11.md` ("Candidates for
+  `skip_on_cran()`": 8 candidates, about 51 s of the 214 s CRAN runs on the
+  laptop, 24%; halving needs some input files made smaller or the slower
+  input/output files partly skipped). Raw tables in `test_times/`.
+- **Andrea decides** which to skip; then a branch from `dev`, one commit
+  per file, with the skipped blocks still run on GitHub (`NOT_CRAN=true`
+  there).
+- **Check:** re-time with `test_times/time_test_files.R` on an -O2 build
+  (CRAN mode), and compare the totals.
+- **Done when:** the skips are merged into `dev`, before the 1.1.0
+  submission.
+
+### 5. **P2** [review] Release 1.1.0 (from claude_jobs#5, 15 Nov; not rechecked)
 
 - #231 is merged (21 Nov): set the version, merge `dev` into `main` (pkgdown
   then publishes
@@ -85,7 +102,7 @@ once the branches are no longer needed).
   the laptop section of the HGDP benchmark still times the old pipeline
   (with imputation; see the backlog).
 
-### 5. **P3** [cleanup] Branches and scratch files
+### 6. **P3** [cleanup] Branches and scratch files
 
 - Delete `pca_missing` (merged as #231), `king_simd_packing` and
   `king_plink_ideas` once decided, `merge_vcf_speed` once its PR is merged;
@@ -102,7 +119,8 @@ once the branches are no longer needed).
   (`bed_reader.md`).
 - Ask Andrea before deleting benchmark files (he may keep optimising with
   them). On the laptop's annex, under `/media/andrea/annex/tmp/claude/tidypopgen/`:
-  `bench_dapc/` (~3 GB), `bench_ld/` (~0.5 GB), `bench_inb/`; on the
+  `bench_dapc/` (~3 GB), `bench_ld/` (~0.5 GB), `bench_inb/`, `test_timing/`
+  (197 MB: the -O2 library of `e20145a2` and its source, to re-time the tests); on the
   Elements HDD, under `/media/andrea/Elements1/tmp/claude/tidypopgen/`:
   `merge_vcf/` (data, builds, bcftools, outputs, worktree) and `plink_king/`
   (PLINK 2, its source, HGDP650 `.pgen`, builds, worktree); `~/claude_work/tidypopgen_rescue/` on the root drive.

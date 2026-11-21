@@ -1,0 +1,723 @@
+"file","test","real","user","system","skipped","failed","error"
+"test_annotate_group_info.R","annotate_group_info ignores unused group levels",0.121,0.114,0.00499999999999999,FALSE,0,FALSE
+"test_annotate_group_info.R","annotate_group_info labels groups of a single individual",0.223,0.212,0.011,FALSE,0,FALSE
+"test_augment_loci.R","augment_loci adds to loci_table",1.182,1.126,0.127,FALSE,0,FALSE
+"test_autoplot_loci_report.R","autoplot when one loci is missing for all indivs",0.762,0.718,0.031,FALSE,0,FALSE
+"test_autoplot_loci_report.R","loci report autoplot with all SNPs under MAF threshold",0.390000000000001,0.39,0,FALSE,0,FALSE
+"test_autoplot_loci_report.R","reordering",0.458,0.439,0.003,FALSE,0,FALSE
+"test_autoplot_pairwise.R","autoplot works for pairwise matrices and tibbles",0.879,0.812,0.005,FALSE,0,FALSE
+"test_autoplot_pairwise.R","heatmap_pairwise detects duplicate pairs in tidy input",0.159,0.159,0,FALSE,0,FALSE
+"test_autoplot_pairwise.R","heatmap_pairwise works with factor ids in tidy input",0.333,0.324,0.004,FALSE,0,FALSE
+"test_autoplot_pairwise.R","heatmap_pairwise error messages",0.187,0.186,0,FALSE,0,FALSE
+"test_autoplot_pairwise.R","autoplot covers remaining matrix validation and ordering branches",0.206,0.202,0.002,FALSE,0,FALSE
+"test_autoplot_sfs.R","pop_sfs tidy outputs are plotted as bar plots",0.449999999999999,0.448,0.002,FALSE,0,FALSE
+"test_autoplot_sfs.R","pairwise_pop_sfs tidy outputs are plotted as heatmaps",0.32,0.318999999999999,0.002,FALSE,0,FALSE
+"test_autoplot_sfs.R","sfs objects are plotted",0.202,0.201000000000001,0.002,FALSE,0,FALSE
+"test_autoplot_sfs.R","pop_sfs_preview outputs are plotted",0.43,0.428000000000001,0.001,FALSE,0,FALSE
+"test_autoplot_sfs.R","autoplot checks its input",0.138999999999999,0.137,0.002,FALSE,0,FALSE
+"test_bootstrap_blocks.R","bootstrap_blocks draws blocks that never span chromosomes",0.0199999999999996,0.0189999999999984,0.001,FALSE,0,FALSE
+"test_bootstrap_blocks.R","bootstrap_blocks needs at least 2 blocks",0.0120000000000005,0.011000000000001,0,FALSE,0,FALSE
+"test_bootstrap_sfs.R","each replicate is the spectrum of the resampled blocks",2.728,2.677,0.02,FALSE,0,FALSE
+"test_bootstrap_sfs.R","the spectra of the blocks add up to the spectrum of all loci",0.0259999999999998,0.0250000000000004,0,FALSE,0,FALSE
+"test_bootstrap_sfs.R","bootstrap replicates are reproducible",0.0629999999999988,0.0449999999999999,0.002,FALSE,0,FALSE
+"test_bootstrap_sfs.R","bootstrap replicates are returned as tidy tibbles",0.0760000000000005,0.0709999999999997,0.005,FALSE,0,FALSE
+"test_bootstrap_sfs.R","blocks can be defined in base pairs or as single SNPs",0.0250000000000004,0.0220000000000002,0.003,FALSE,0,FALSE
+"test_bootstrap_sfs.R","projections are chosen with all loci, and ancestral is used",0.0359999999999996,0.0350000000000001,0.001,FALSE,0,FALSE
+"test_bootstrap_sfs.R","bootstrap arguments are checked",0.043000000000001,0.0429999999999993,0,FALSE,0,FALSE
+"test_bootstrap_sfs.R","write_sfs writes the bootstrap replicates of a gen_tibble",0.178000000000001,0.163,0.014,FALSE,0,FALSE
+"test_bootstrap_sfs.R","replicates with many blocks do not depend on the number of cores",0.307,0.32,0.001,FALSE,0,FALSE
+"test_cbind_gen_tbl.R","cbind correctly binds",0.304,0.303000000000001,0.001,FALSE,0,FALSE
+"test_count_vcf_individuals.R","count_vcf_individuals with gzfile",0.0779999999999994,0.0679999999999996,0,FALSE,0,FALSE
+"test_count_vcf_individuals.R","count_vcf_individuals counts samples with missing genotypes",0.622,0.619,0.004,FALSE,0,FALSE
+"test_count_vcf_variants.R","count_vcf_variants with gzfile",0.0289999999999999,0.0289999999999999,0,FALSE,0,FALSE
+"test_easysfs.R","pop_sfs, pairwise_pop_sfs and nwise_pop_sfs match easySFS",0.297999999999998,0.289000000000001,0.00900000000000001,FALSE,0,FALSE
+"test_easysfs.R","the order of the populations matches easySFS --order",0.145000000000003,0.142000000000003,0.003,FALSE,0,FALSE
+"test_easysfs.R","pop_sfs_preview matches easySFS --preview",0.132999999999999,0.134,0,FALSE,0,FALSE
+"test_easysfs.R","pop_sfs matches easySFS on haploid data",0.131999999999998,0.131,0.001,FALSE,0,FALSE
+"test_easysfs.R","write_sfs writes the files of easySFS",0.666,0.635000000000002,0.031,FALSE,0,FALSE
+"test_empty_groups.R","loci_* functions give NA for each locus without individuals",0.0279999999999987,0.0259999999999998,0.002,FALSE,0,FALSE
+"test_empty_groups.R","pairwise functions give empty results without individuals",0.041999999999998,0.0429999999999993,0,FALSE,0,FALSE
+"test_empty_groups.R","group_map() and grouped indiv_inbreeding() work with empty groups",0.177999999999997,0.175999999999998,0.003,FALSE,0,FALSE
+"test_example_gt.R","example_gt functions",1.021,0.976000000000003,0.015,FALSE,0,FALSE
+"test_filter_high_relatedness.R","filter_high_relatedness removes necessary individuals",0.198999999999998,0.199999999999999,0,FALSE,0,FALSE
+"test_filter_high_relatedness.R","filter_high_relatedness ignores negative kinship",0.00799999999999912,0.00900000000000034,0,FALSE,0,FALSE
+"test_filter_high_relatedness.R","filter_high_relatedness handles missing kinship",0.603000000000002,0.536999999999999,0.01,FALSE,0,FALSE
+"test_gen_tibble_phased.R","gen_tibble(phased = TRUE) reads a phased vcf",0.121000000000002,0.117000000000001,0.004,FALSE,0,FALSE
+"test_gen_tibble_phased.R","gen_tibble(phased = TRUE) reads gzipped vcf files",0.0970000000000013,0.097999999999999,0,FALSE,0,FALSE
+"test_gen_tibble_phased.R","gen_tibble(phased = TRUE) stores integer names and chromosomes",0.300000000000001,0.307000000000002,0.00600000000000001,FALSE,0,FALSE
+"test_gen_tibble_phased.R","gen_tibble ignores the phase of a phased vcf by default",0.106999999999999,0.105,0.002,FALSE,0,FALSE
+"test_gen_tibble_phased.R","gen_tibble(phased = TRUE) reads missing genotypes",0.0939999999999976,0.0940000000000012,0,FALSE,0,FALSE
+"test_gen_tibble_phased.R","gen_tibble(phased = TRUE) refuses any unphased genotype",0.167999999999999,0.179000000000002,0.003,FALSE,0,FALSE
+"test_gen_tibble_phased.R","gen_tibble(phased = TRUE) refuses genotypes that are not diploid",0.0309999999999988,0.0280000000000022,0.003,FALSE,0,FALSE
+"test_gen_tibble_phased.R","phased = TRUE is only available for vcf files with parser cpp",0.0129999999999981,0.0130000000000017,0,FALSE,0,FALSE
+"test_gen_tibble_phased.R","gen_tibble(phased = TRUE) creates a gen_tibble from haplotypes",0.276,0.271999999999998,0.003,FALSE,0,FALSE
+"test_gen_tibble_phased.R","gen_tibble(phased = TRUE) validates the matrix of haplotypes",0.0279999999999987,0.0279999999999987,0,FALSE,0,FALSE
+"test_gen_tibble_phased.R","phased and unphased gen_tibbles have the same genotypes",0.0140000000000029,0.0130000000000017,0.001,FALSE,0,FALSE
+"test_gen_tibble_phased.R","loci and individual statistics are the same with phased data",0.155000000000001,0.141999999999999,0.00599999999999989,FALSE,0,FALSE
+"test_gen_tibble_phased.R","population statistics are the same with phased data",0.209,0.199000000000002,0.00900000000000001,FALSE,0,FALSE
+"test_gen_tibble_phased.R","tibbles that lost the gen_tbl class keep the phase",0.0549999999999997,0.0530000000000008,0.002,FALSE,0,FALSE
+"test_gen_tibble_phased.R","pairwise statistics of individuals are the same with phased data",0.288,0.196000000000002,0.005,FALSE,0,FALSE
+"test_gen_tibble_phased.R","PCA and LD clumping are the same with phased data",0.407,0.417000000000002,0.001,FALSE,0,FALSE
+"test_gen_tibble_phased.R","exports of phased data are the same as of unphased data",0.558999999999997,0.431999999999999,0.016,FALSE,0,FALSE
+"test_gen_tibble_phased.R","phased gen_tibbles can not be imputed",0.036999999999999,0.0359999999999978,0.001,FALSE,0,FALSE
+"test_gen_tibble_phased.R","subsetting, saving and loading keep phased data",0.349999999999998,0.346,0.005,FALSE,0,FALSE
+"test_gen_tibble_phased.R","gt_as_vcf writes phased genotypes, which can be read back",0.231000000000002,0.227,0.004,FALSE,0,FALSE
+"test_gen_tibble_phased.R","rbind keeps the phase of two phased gen_tibbles",0.858999999999998,0.844000000000001,0.003,FALSE,0,FALSE
+"test_gen_tibble_phased.R","rbind does not swap or flip the alleles of phased gen_tibbles",0.959,0.942999999999998,0.00800000000000001,FALSE,0,FALSE
+"test_gen_tibble_phased.R","rbind of phased and unphased gen_tibbles discards the phase",1.278,1.248,0.00700000000000001,FALSE,0,FALSE
+"test_gen_tibble_phased.R","rbind_byte_luts recodes phased bytes",0.0249999999999986,0.0219999999999985,0.003,FALSE,0,FALSE
+"test_gen_tibble_phased.R","gt_merge_vcfs reads phased vcf files",0.66,0.558,0.01,FALSE,0,FALSE
+"test_gen_tibble_phased.R","gt_concat_vcfs reads phased vcf files",0.194000000000003,0.192,0.002,FALSE,0,FALSE
+"test_gen_tibble_phased.R","is_phased checks its input",0.0169999999999995,0.0150000000000006,0.001,FALSE,0,FALSE
+"test_gen_tibble_save_load.R","gt files are gzip compressed and load back identical",0.227,0.225000000000001,0.001,FALSE,0,FALSE
+"test_gen_tibble_save_load.R","save and load gt",0.204000000000001,0.201000000000001,0.002,FALSE,0,FALSE
+"test_gen_tibble_save_load.R","error if saving a non gen_tibble object",0.00700000000000145,0.00600000000000023,0.001,FALSE,0,FALSE
+"test_gen_tibble_save_load.R","old bigsnp gen_tibbles can be loaded",0.321000000000002,0.315999999999999,0.00600000000000001,FALSE,0,FALSE
+"test_gen_tibble_save_load.R","old bigsnp gen_tibbles keep the ploidy of all FBM individuals",0.332000000000001,0.327000000000002,0.004,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","test gentibble from VCF with missingness issue",3.004,2.966,0.003,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","gen_tibble from files",2.849,2.799,0.01,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","gen_tibble from files with missingness",2.906,2.848,0.0069999999999999,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","gentibble with packedancestry",0.300999999999995,0.297999999999995,0.003,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","gentibble with packedancestry and missingness",0.296999999999997,0.295000000000002,0.002,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","check summary stats for gen_tibbles read in different ways",0.335000000000001,0.329999999999998,0.005,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","gt without population is valid",0.350000000000001,0.335999999999999,0.014,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","additional vcf tests with larger file",1.054,0.998999999999995,0.00900000000000001,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","vcf's with haploid markers",0.719999999999999,0.707000000000001,0.004,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","vcf tests storing names as integers",1.37,1.36,0.01,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","ped files with a trailing blank line can be read",0.189,0.183,0.00600000000000001,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","truncated packedancestry geno files are caught",0.0319999999999965,0.0320000000000036,0,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","bed files are read on several cores, and bad bed files are caught",0.409999999999997,0.360999999999997,0.00800000000000001,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","file extensions are matched ignoring case",0.768999999999998,0.750999999999998,0.018,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","vcf_gt_dosages_cpp reads genotypes as the R code did",0.0180000000000007,0.017000000000003,0.001,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","the md5 sum of the FBM is that of its saved rds for VCF inputs",0.510000000000005,0.456000000000003,0.003,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","a missing chromosome '.' is NA with both parsers",0.452000000000005,0.445,0.002,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","order_as_levels sorts as the levels of as.factor()",0.036999999999999,0.0290000000000035,0.001,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","malformed variant lines give clear errors with the cpp parser",0.0169999999999959,0.017000000000003,0,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","the cpp parser codes missing genotypes once ploidies are known",0.097999999999999,0.097999999999999,0,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","the cpp parser leaves no backing files after an error",0.0279999999999987,0.0249999999999986,0.003,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","the cpp parser reads bgzipped VCFs in parallel",0.368000000000002,0.401999999999994,0.002,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","the cpp parser rejects invalid genotypes and positions",0.186999999999998,0.18,0.00700000000000001,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","the cpp parser handles unusual but valid VCF files",0.194000000000003,0.191000000000003,0.002,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","vcf_to_fbm_cpp puts the backing file next to the VCF",0.128,0.126999999999995,0.001,FALSE,0,FALSE
+"test_gen_tibble_vcf.R","the cpp parser finds chromosomes that come back after others",0.0919999999999987,0.0919999999999987,0,FALSE,0,FALSE
+"test_gen_tibble_versioning.R","versioning updates correctly through gt_order_loci",0.444000000000003,0.443000000000005,0.001,FALSE,0,FALSE
+"test_gen_tibble_versioning.R","versioning if .bk already exists",0.411000000000001,0.408000000000001,0.003,FALSE,0,FALSE
+"test_gen_tibble_versioning.R","only file type extensions are removed from backing file names",0.413000000000004,0.410000000000004,0.003,FALSE,0,FALSE
+"test_gen_tibble.R","create gen_tibble from dfs",0.017000000000003,0.0169999999999959,0,FALSE,0,FALSE
+"test_gen_tibble.R","create gen_tibble from dfs",0.161000000000001,0.159999999999997,0,FALSE,0,FALSE
+"test_gen_tibble.R","gen_tibble catches invalid alleles",0.292999999999999,0.291999999999994,0,FALSE,0,FALSE
+"test_gen_tibble.R","the allele checks in C++ match %in%",0.0499999999999972,0.0420000000000016,0.001,FALSE,0,FALSE
+"test_gen_tibble.R","the check for duplicated loci names matches anyDuplicated()",0.0279999999999987,0.0279999999999987,0.00099999999999989,FALSE,0,FALSE
+"test_gen_tibble.R","valid alleles check for .character method",0.00799999999999557,0.00799999999999557,0,FALSE,0,FALSE
+"test_gen_tibble.R","loci_from_bim reads loci names and alleles as characters",0.019999999999996,0.0189999999999984,0.001,FALSE,0,FALSE
+"test_gen_tibble.R","gen_tibble reads bed and rds files with integer loci names",0.390999999999998,0.388999999999996,0.002,FALSE,0,FALSE
+"test_gen_tibble.R","0 is always accepted as a missing allele",0.358000000000004,0.356000000000002,0.002,FALSE,0,FALSE
+"test_gen_tibble.R","0 is always a missing genotype in ped files",0.574999999999996,0.531999999999996,0.004,FALSE,0,FALSE
+"test_gen_tibble.R","ped files: allele coding, missing and multi-allelic loci",0.317,0.344999999999999,0.001,FALSE,0,FALSE
+"test_gen_tibble.R","ped files: a third allele in either position is multi-allelic",0.213000000000001,0.224999999999994,0.002,FALSE,0,FALSE
+"test_gen_tibble.R","ped files: alleles and missing values longer than one character",0.201000000000001,0.210999999999999,0.004,FALSE,0,FALSE
+"test_gen_tibble.R","ped files with the wrong number of fields give an error",0.342999999999996,0.272999999999996,0.001,FALSE,0,FALSE
+"test_gen_tibble.R","truncated or corrupted gzipped ped files give an error",0.0159999999999982,0.0150000000000006,0.001,FALSE,0,FALSE
+"test_gen_tibble.R","ped files: input checks and messages",0.422999999999995,0.408999999999999,0.003,FALSE,0,FALSE
+"test_gen_tibble.R","error if genotypes and loci tables differ in length",0.0069999999999979,0.00799999999999557,0,FALSE,0,FALSE
+"test_gen_tibble.R","stopifnot_gen_tibble catches invalid tibbles",0.0140000000000029,0.0139999999999958,0,FALSE,0,FALSE
+"test_gen_tibble.R","sex is stored in gen_tibble if not missing",0.112000000000002,0.110999999999997,0.002,FALSE,0,FALSE
+"test_gen_tibble.R","IDs in fam files are read as characters",0.114999999999995,0.116,0,FALSE,0,FALSE
+"test_gen_tibble.R","phenotypes in fam files are read as case/control or quantitative",0.536999999999999,0.530999999999999,0.00600000000000001,FALSE,0,FALSE
+"test_gen_tibble.R","if order of loci is changed, order of genotypes also changes",0.110999999999997,0.109999999999999,0.001,FALSE,0,FALSE
+"test_gen_tibble.R","gen_tibble does not accept character matrix",0.0069999999999979,0.00799999999999557,0,FALSE,0,FALSE
+"test_gen_tibble.R","gen_tibble wrong filetype error",0.00799999999999557,0.00900000000000034,0,FALSE,0,FALSE
+"test_gen_tibble.R","gen_tibble loci is dataframe or tbl",0.00800000000000267,0.0069999999999979,0.001,FALSE,0,FALSE
+"test_gen_tibble.R","gen_tibble requires id column",0.007000000000005,0.00799999999999557,0,FALSE,0,FALSE
+"test_gen_tibble.R","gen_tibble indiv_meta is list, dataframe, or tbl",0.00800000000000267,0.00600000000000023,0.001,FALSE,0,FALSE
+"test_gen_tibble.R","gen_tibble identifies wrong dimensions in genotypes",0.0069999999999979,0.00800000000000267,0,FALSE,0,FALSE
+"test_gen_tibble.R","gen_tibble.matrix validates ploidy and dosages",0.156999999999996,0.155000000000001,0.002,FALSE,0,FALSE
+"test_gen_tibble.R","dosage matrices are checked and written in C++ as in R",0.036999999999999,0.0349999999999966,0.002,FALSE,0,FALSE
+"test_gen_tibble.R","gen_tibble identifies wrong loci table columns",0.0069999999999979,0.0069999999999979,0,FALSE,0,FALSE
+"test_gen_tibble.R","new infrastructure for double NA",0.988999999999997,0.918999999999997,0.005,FALSE,0,FALSE
+"test_gen_tibble.R","gen_tibble allow_duplicates finds duplicates",0.283999999999999,0.280999999999999,0.003,FALSE,0,FALSE
+"test_gen_tibble.R","gen_tibbles with no loci or no individuals can be formatted",0.0319999999999965,0.0319999999999965,0,FALSE,0,FALSE
+"test_gen_tibble.R","gen_tibble from a bigSNP rds does not overwrite the rds",0.427999999999997,0.426000000000002,0.002,FALSE,0,FALSE
+"test_gen_tibble.R","functions writing to the FBM leave the bigSNP files untouched",4.023,6.444,0.05,FALSE,0,FALSE
+"test_gen_tibble.R","gen_tibble from a read-only bigSNP rds can be imputed",0.249000000000002,0.248000000000005,0.001,FALSE,0,FALSE
+"test_gen_tibble.R","validate_loci finds duplicated loci, sorted or not",0.017000000000003,0.0159999999999982,0.001,FALSE,0,FALSE
+"test_gen_tibble.R","is.finite() and friends work on the genotypes column",0.145000000000003,0.144999999999996,0,FALSE,0,FALSE
+"test_genotypes_tbl_class.R","genotypes_tbl_class maps the genotypes column to the tibble class",0.00600000000000023,0.00499999999999545,0.001,FALSE,0,FALSE
+"test_genotypes_tbl_class.R","restore_genotypes_tbl restores the (grouped) gen_tibble class",0.0240000000000009,0.0210000000000008,0.003,FALSE,0,FALSE
+"test_genotypes_tbl_class.R","restore_genotypes_tbl errors on invalid tibbles",0.0240000000000009,0.0249999999999986,0,FALSE,0,FALSE
+"test_genotypes_tbl_class.R","generics restore the class of tibbles that lost it",0.109000000000002,0.109000000000002,0.001,FALSE,0,FALSE
+"test_genotypes_tbl_class.R","generics work on gen_tibbles returned by pick() and reframe()",0.0719999999999956,0.0719999999999956,0,FALSE,0,FALSE
+"test_genotypes_tbl_class.R","the jackknife generics restore the class of tibbles that lost it",0.119,0.117999999999995,0,FALSE,0,FALSE
+"test_genotypes_tbl_class.R","the SFS generics restore the class of tibbles that lost it",0.290000000000006,0.284999999999997,0.005,FALSE,0,FALSE
+"test_genotypes_tbl_class.R","the fallback errors for a class without a method",0.0279999999999987,0.0279999999999916,0,FALSE,0,FALSE
+"test_genotypes_tbl_class.R","tbl_df methods hand any known genotypes column over",0.0189999999999984,0.0180000000000007,0.002,FALSE,0,FALSE
+"test_group_order.R","tidy outputs keep the type of the grouping variable",0.13900000000001,0.13600000000001,0.003,FALSE,0,FALSE
+"test_group_order.R","groups of individuals from several grouping variables are ordered",0.0330000000000013,0.0310000000000059,0.001,FALSE,0,FALSE
+"test_group_order.R","tidy, augment and autoplot of a q_matrix keep the order of groups",0.608000000000004,0.606000000000009,0.002,FALSE,0,FALSE
+"test_group_order.R","reorder_within_groups keeps the order of the groups",0.433000000000007,0.432000000000002,0,FALSE,0,FALSE
+"test_group_order.R","heatmap_pairwise keeps the order of a tidy input",0.456000000000003,0.421000000000006,0.001,FALSE,0,FALSE
+"test_gt_add_sf.R","gt_add_sf() works with gen_tibble",0.201999999999998,0.195999999999998,0.00600000000000001,FALSE,0,FALSE
+"test_gt_add_sf.R","gt_add_sf gives the correct errors",0.156999999999996,0.155000000000001,0.002,FALSE,0,FALSE
+"test_gt_add_sf.R","retain sf class after imputing and augmenting pca",0.174000000000007,0.164000000000001,0,FALSE,0,FALSE
+"test_gt_add_sf.R","retain sf class after being saved and reloaded",0.237000000000009,0.236000000000004,0,FALSE,0,FALSE
+"test_gt_add_sf.R","retain sf class after reordering",0.228000000000009,0.224999999999994,0.002,FALSE,0,FALSE
+"test_gt_add_sf.R","select_loci and select_loci_if retain sf class",0.139999999999986,0.137999999999991,0.002,FALSE,0,FALSE
+"test_gt_add_sf.R","merging two gen_tibbles with sf",0.429000000000002,0.426999999999992,0.002,FALSE,0,FALSE
+"test_gt_add_sf.R","cbind gen_tibble and extra data with sf",0.241,0.188000000000002,0.003,FALSE,0,FALSE
+"test_gt_add_sf.R","gt_add_sf works with group_by",0.159000000000006,0.158000000000001,0.002,FALSE,0,FALSE
+"test_gt_admix_methods.R","combine identical gt_admix objects correctly",0.0870000000000033,0.0789999999999935,0.00700000000000001,FALSE,0,FALSE
+"test_gt_admix_methods.R","combine gt_admix objects with different kand runs",13.252,0.290999999999997,0.0159999999999999,FALSE,0,FALSE
+"test_gt_admix_methods.R","gt_admix objects with different individuals arent combined",0.0300000000000011,0.0289999999999964,0.00100000000000011,FALSE,0,FALSE
+"test_gt_admix_methods.R","combine gt_admix objects with different attributes",3.03800000000001,0.198999999999998,0.00800000000000001,FALSE,0,FALSE
+"test_gt_admix_methods.R","combine gt_admix where one had attribute and one doesnt",0.285000000000011,0.272000000000006,0.0129999999999999,FALSE,0,FALSE
+"test_gt_admix_methods.R","combine gt_admix where one has optional extras and one doesn't",0.0589999999999975,0.0550000000000068,0.004,FALSE,0,FALSE
+"test_gt_admix_methods.R","gt_admix_reorder_q keeps a K = 1 q matrix as a matrix",0.153999999999996,0.152000000000001,0.002,FALSE,0,FALSE
+"test_gt_admix_methods.R","autoplot cv works for gt_admix without algorithm",0.0230000000000103,0.0219999999999914,0,FALSE,0,FALSE
+"test_gt_admixture_conda.R","without conda, conda_env = 'auto' uses a copy on the PATH",0.0499999999999972,0.00799999999999557,0,FALSE,0,FALSE
+"test_gt_admixture.R","gt_admixture error messages",0.161000000000001,0.158000000000001,0.00100000000000011,FALSE,0,FALSE
+"test_gt_admixture.R","run admixture as single run",1.619,0.0830000000000126,0.00299999999999989,FALSE,0,FALSE
+"test_gt_admixture.R","P matrix rows match the loci of the gen_tibble",0.647999999999996,0.0769999999999982,0.112,FALSE,0,FALSE
+"test_gt_admixture.R","admixture_loci_order sorts by chromosome and position",0.00799999999999557,0.00900000000000034,0.00700000000000012,FALSE,0,FALSE
+"test_gt_admixture.R","run admixture as multiple runs",3.681,0.521000000000001,0.0900000000000001,FALSE,0,FALSE
+"test_gt_admixture.R","assigning factor levels reorders populations in autoplot",0.843000000000004,0.262,0.002,FALSE,0,FALSE
+"test_gt_admixture.R","checking autoplot arrange_ and annotate_ arguments work",0.524000000000001,0.266999999999996,0.00100000000000011,FALSE,0,FALSE
+"test_gt_admixture.R","grouping before running gt_admxiture vs reordering after running gt_admixture",7.613,0.404999999999987,0.00299999999999989,FALSE,0,FALSE
+"test_gt_admixture.R","set output dir for admixture Q files",12.277,0.102999999999994,0.00600000000000001,FALSE,0,FALSE
+"test_gt_admixture.R","gt_admixture works with '.bed' elsewhere in the file name",0.0459999999999923,0.0119999999999862,0,FALSE,0,FALSE
+"test_gt_admixture.R","seed length",5.331,0.239999999999995,0.00700000000000012,FALSE,0,FALSE
+"test_gt_as_.R","show_loci gets and sets information",0.165999999999997,0.156999999999996,0.002,FALSE,0,FALSE
+"test_gt_as_.R","gt_as_genlight in chunks is the same as from the full matrix",0.299999999999997,0.296999999999997,0.00299999999999989,FALSE,0,FALSE
+"test_gt_as_.R","gt_as_hierfstat errors on polyploid data",0.269999999999996,0.268999999999991,0.00100000000000011,FALSE,0,FALSE
+"test_gt_as_.R","gt_as_hierfstat keeps population labels and loci names",0.149999999999991,0.147000000000006,0.00100000000000011,FALSE,0,FALSE
+"test_gt_as_.R","gt_as_hierfstat treats pseudohaploid dosage as diploid",0.154999999999987,0.153999999999996,0.00099999999999989,FALSE,0,FALSE
+"test_gt_as_.R","gt_as_genind works on uniform polyploid data",0.203000000000003,0.167999999999992,0.00299999999999989,FALSE,0,FALSE
+"test_gt_as_.R","gt_as_genind works on mixed-ploidy data",0.162999999999997,0.162000000000006,0.00100000000000011,FALSE,0,FALSE
+"test_gt_as_.R","gt_as_genind replaces '.' in loci names",0.156999999999996,0.158000000000001,0,FALSE,0,FALSE
+"test_gt_as_.R","gt_as_genind treats pseudohaploid dosage as diploid",0.158999999999992,0.159000000000006,0.00099999999999989,FALSE,0,FALSE
+"test_gt_as_.R","gt_as_hierfstat needs a population column",0.147999999999996,0.14800000000001,0.00100000000000011,FALSE,0,FALSE
+"test_gt_as_geno_lea.R","gt_as_geno_lea errors on polyploid data",0.143000000000001,0.144000000000005,0,FALSE,0,FALSE
+"test_gt_as_geno_lea.R","gt_as_geno_lea writes a .geno file for diploid data",0.140000000000001,0.13900000000001,0.00099999999999989,FALSE,0,FALSE
+"test_gt_as_geno_lea.R","gt_as_geno_lea writes a .geno file for pseudohaploid data",0.144000000000005,0.143000000000001,0.002,FALSE,0,FALSE
+"test_gt_as_plink.R","write a bed file",0.23599999999999,0.23299999999999,0.004,FALSE,0,FALSE
+"test_gt_as_plink.R","test for overwriting files",0.0619999999999976,0.0600000000000023,0.00299999999999989,FALSE,0,FALSE
+"test_gt_as_plink.R","gt_as_plink uses loci and indiv information from the gen_tibble",0.239000000000004,0.236000000000004,0.00300000000000011,FALSE,0,FALSE
+"test_gt_as_plink.R","family.ID equals sample.ID from vcf",0.506000000000014,0.481000000000009,0.00299999999999989,FALSE,0,FALSE
+"test_gt_as_plink.R","ped and raw use the sample ID as family ID without population",0.0290000000000248,0.027000000000001,0.00100000000000011,FALSE,0,FALSE
+"test_gt_as_plink.R","ped and raw write numeric phenotypes",0.0230000000000246,0.0220000000000056,0,FALSE,0,FALSE
+"test_gt_as_plink.R","ped map file includes the genetic distance",0.106000000000023,0.102999999999994,0.002,FALSE,0,FALSE
+"test_gt_as_plink.R","ped and raw keep parents, sex and phenotype",0.25200000000001,0.24799999999999,0.00499999999999989,FALSE,0,FALSE
+"test_gt_as_plink.R","bed fam file has the same individual information as ped",0.161000000000001,0.159000000000006,0.002,FALSE,0,FALSE
+"test_gt_as_plink.R","ped files are read into the same columns as bed files",0.670000000000016,0.629000000000005,0.00299999999999989,FALSE,0,FALSE
+"test_gt_as_plink.R","individual information survives round trips through PLINK files",4.078,3.90300000000001,0.0550000000000002,FALSE,0,FALSE
+"test_gt_as_plink.R","information of example PLINK files survives round trips",2.226,2.15300000000001,0.0209999999999999,FALSE,0,FALSE
+"test_gt_as_plink.R","handling of duplicated loci",0.790999999999997,0.730999999999995,0.00499999999999989,FALSE,0,FALSE
+"test_gt_as_plink.R","gt_as_plink errors on polyploid data",0.158999999999992,0.158000000000001,0,FALSE,0,FALSE
+"test_gt_as_plink.R","gt_as_plink works on pseudohaploid data",0.388000000000005,0.384999999999991,0.002,FALSE,0,FALSE
+"test_gt_as_plink.R","plink files location when 'file' is NULL",0.153999999999996,0.152999999999992,0,FALSE,0,FALSE
+"test_gt_as_plink.R","double positions are not written in scientific notation",0.0309999999999775,0.0289999999999964,0.00099999999999989,FALSE,0,FALSE
+"test_gt_as_plink.R","ped and raw write subsets of individuals and loci",0.0190000000000055,0.0180000000000007,0.00100000000000011,FALSE,0,FALSE
+"test_gt_as_plink.R","ped and raw write missing reference alleles as 0",0.225999999999999,0.186999999999998,0.002,FALSE,0,FALSE
+"test_gt_as_vcf.R","test we can write and read a vcf",0.478999999999985,0.477999999999994,0.00099999999999989,FALSE,0,FALSE
+"test_gt_as_vcf.R","test reading and writing is equivalent",0.753999999999991,0.749000000000009,0.00100000000000011,FALSE,0,FALSE
+"test_gt_as_vcf.R","test reading and writing with chunking is equivalent cpp",0.211999999999989,0.208000000000013,0.004,FALSE,0,FALSE
+"test_gt_as_vcf.R","test reading and writing with chunking is equivalent rvcf",0.395999999999987,0.385000000000005,0.00099999999999989,FALSE,0,FALSE
+"test_gt_as_vcf.R","integer chromosome becomes factor",0.231999999999999,0.230000000000004,0.002,FALSE,0,FALSE
+"test_gt_as_vcf.R","vcf fileDate is a zero-padded YYYYMMDD date",0.00999999999999091,0.0100000000000051,0,FALSE,0,FALSE
+"test_gt_as_vcf.R","double positions are not written in scientific notation",0.233000000000004,0.230999999999995,0.002,FALSE,0,FALSE
+"test_gt_as_vcf.R","gt_as_vcf writes subsets of individuals and loci",0.0230000000000246,0.0210000000000008,0.002,FALSE,0,FALSE
+"test_gt_as_vcf.R","contig lines follow the order in which chromosomes appear",0.156000000000006,0.154999999999987,0.00100000000000011,FALSE,0,FALSE
+"test_gt_as_vcf.R","missing chromosomes are written as '.'",0.640999999999991,0.609999999999999,0.002,FALSE,0,FALSE
+"test_gt_concat_vcfs.R","gt_concat_vcfs reads files as gen_tibble reads them concatenated",0.311000000000007,0.309000000000012,0.002,FALSE,0,FALSE
+"test_gt_concat_vcfs.R","gt_concat_vcfs reorders the samples of each file",0.188000000000017,0.201000000000008,0.00099999999999989,FALSE,0,FALSE
+"test_gt_concat_vcfs.R","gt_concat_vcfs checks the samples and the loci",0.039999999999992,0.0370000000000061,0.002,FALSE,0,FALSE
+"test_gt_concat_vcfs.R","gt_concat_vcfs keeps the largest ploidy of each individual",0.304000000000002,0.295000000000002,0.0089999999999999,FALSE,0,FALSE
+"test_gt_dapc_and_tidiers.R","gt_dapc_and_tidiers",0.396000000000015,0.411999999999992,0.114,FALSE,0,FALSE
+"test_gt_dapc_and_tidiers.R","scores plot error if only 2 populations",0.138000000000005,0.140999999999991,0.02,FALSE,0,FALSE
+"test_gt_dapc_and_tidiers.R","gt_cluster_pca works with a single k and a single component",0.13900000000001,0.153999999999996,0.122,FALSE,0,FALSE
+"test_gt_dapc_and_tidiers.R","best_k is a value of k when k_clusters does not start at 1",0.209000000000003,0.209000000000003,0.175,FALSE,0,FALSE
+"test_gt_dapc_and_tidiers.R","gt_dapc var is the proportion of variance of the retained PCs",0.131,0.137,0.04,FALSE,0,FALSE
+"test_gt_dapc_and_tidiers.R","gt_dapc uses k-1 PCs by default",0.137999999999977,0.156999999999996,0.119,FALSE,0,FALSE
+"test_gt_dapc_and_tidiers.R","gt_dapc gives an informative error for an invalid pop",0.143000000000001,0.164000000000001,0.112,FALSE,0,FALSE
+"test_gt_dapc_and_tidiers.R","augment.gt_dapc works with one discriminant axis and checks ids",0.144000000000005,0.156999999999996,0.118,FALSE,0,FALSE
+"test_gt_dapc_and_tidiers.R","gt_dapc with a PCA of missing genotypes",0.195000000000022,0.233999999999995,0.143,FALSE,0,FALSE
+"test_gt_dapc_and_tidiers.R","loadings of loci by least squares with missing genotypes",0.485000000000014,0.546999999999997,0.303,FALSE,0,FALSE
+"test_gt_dapc_and_tidiers.R","gt_dapc gives NA loadings to loci with many missing genotypes",0.655000000000001,0.60199999999999,0.00600000000000023,FALSE,0,FALSE
+"test_gt_dapc_and_tidiers.R","loadings and pcadapt with filtered, reordered and imputed data",0.279000000000025,0.293999999999997,0.105,FALSE,0,FALSE
+"test_gt_dapc_and_tidiers.R","loadings of loci with a nearly singular regression are NA",0.168000000000006,0.165999999999997,0.00199999999999978,FALSE,0,FALSE
+"test_gt_extract_f2.R","extract f2 correctly",1.84099999999998,1.77200000000001,0.0150000000000001,FALSE,0,FALSE
+"test_gt_extract_f2.R","n_cores can be set",1.197,1.203,0.004,FALSE,0,FALSE
+"test_gt_extract_f2.R","gt_extract_f2 drops empty groups",1.21600000000001,1.211,0.00499999999999989,FALSE,0,FALSE
+"test_gt_filter_ploidy.R","filter refreshes ploidy when a mixed-ploidy gen_tibble becomes uniform",0.165999999999997,0.164000000000001,0.00200000000000022,FALSE,0,FALSE
+"test_gt_filter_ploidy.R","filter leaves ploidy at 0 when the remaining individuals are still mixed",0.14500000000001,0.14500000000001,0,FALSE,0,FALSE
+"test_gt_filter_ploidy.R","filter refreshes ploidy for grouped mixed-ploidy gen_tibbles",0.148999999999972,0.146999999999991,0,FALSE,0,FALSE
+"test_gt_filter_ploidy.R","filter refreshes ploidy for grouped pseudohaploid gen_tibbles",0.173000000000002,0.170000000000002,0.00200000000000022,FALSE,0,FALSE
+"test_gt_filter_ploidy.R","filter does not error when it drops all individuals",0.144999999999982,0.140000000000001,0.00199999999999978,FALSE,0,FALSE
+"test_gt_from_genlight.R","gt can convert from genlight",0.150000000000006,0.147999999999996,0.00200000000000022,FALSE,0,FALSE
+"test_gt_from_genlight.R","gt can convert from genlight without pop",0.144000000000005,0.143000000000001,0.00099999999999989,FALSE,0,FALSE
+"test_gt_from_genlight.R","gt_as_genlight and gt_from_genlight round trip",0.294000000000011,0.290000000000006,0.004,FALSE,0,FALSE
+"test_gt_from_genlight.R","error with non-diploid genlight",0.00799999999998136,0.00600000000000023,0.00099999999999989,FALSE,0,FALSE
+"test_gt_from_genlight.R","error with null slots",0.007000000000005,0.007000000000005,0,FALSE,0,FALSE
+"test_gt_impute_simple.R","impute and use the imputation",0.0720000000000027,0.0720000000000027,0.00099999999999989,FALSE,0,FALSE
+"test_gt_impute_simple.R","backingfile error if individuals do not match the FBM",0.0200000000000102,0.019999999999996,0,FALSE,0,FALSE
+"test_gt_impute_simple.R","impute the whole FBM if the gen_tibble has a subset of the loci",0.26400000000001,0.257999999999996,0.00599999999999978,FALSE,0,FALSE
+"test_gt_impute_simple.R","impute a gen_tibble with all individuals in a different order",0.224999999999994,0.219999999999999,0.00399999999999956,FALSE,0,FALSE
+"test_gt_impute_simple.R","error imputing an already imputed set",0.0240000000000009,0.0229999999999961,0,FALSE,0,FALSE
+"test_gt_impute_simple.R","gt_impute imputes properly",0.176999999999992,0.176000000000002,0,FALSE,0,FALSE
+"test_gt_impute_simple.R","n_cores can be set",0.132999999999981,0.150999999999996,0.00199999999999978,FALSE,0,FALSE
+"test_gt_impute_simple.R","imputed gt retains status after gt_update_backingfile",0.313999999999993,0.251000000000005,0.004,FALSE,0,FALSE
+"test_gt_impute_xgboost.R","impute and use the imputation",2.67500000000001,5.092,0.0369999999999999,FALSE,0,FALSE
+"test_gt_impute_xgboost.R","gt_impute_xgboost works with loci out of order",1.446,2.44499999999999,0.0329999999999999,FALSE,0,FALSE
+"test_gt_impute_xgboost.R","backingfile error if gt and bk have uneven number of loci/indivs",0.0129999999999768,0.0130000000000052,0,FALSE,0,FALSE
+"test_gt_impute_xgboost.R","error imputing an already imputed set",0.0550000000000068,0.054000000000002,0,FALSE,0,FALSE
+"test_gt_impute_xgboost.R","n_cores can be set",3.11599999999999,5.875,0.048,FALSE,0,FALSE
+"test_gt_impute_xgboost.R","append_error correct dimensions",3.24600000000001,6.12400000000001,0.0550000000000002,FALSE,0,FALSE
+"test_gt_merge_vcfs.R","gt_merge_vcfs keeps the intersection or the union of the sites",0.546999999999997,0.542000000000002,0.00500000000000034,FALSE,0,FALSE
+"test_gt_merge_vcfs.R","gt_merge_vcfs matches rbind() and handles REF mismatches",0.591999999999985,0.588999999999999,0.00299999999999967,FALSE,0,FALSE
+"test_gt_merge_vcfs.R","gt_merge_vcfs handles samples, ploidy, integer names and gz",0.23599999999999,0.246000000000009,0.00500000000000034,FALSE,0,FALSE
+"test_gt_merge_vcfs.R","gt_merge_vcfs checks its arguments",0.133999999999986,0.132999999999981,0,FALSE,0,FALSE
+"test_gt_merge_vcfs.R","gt_merge_vcfs checks the samples and genotypes of each file",1.024,0.950999999999993,0.00699999999999967,FALSE,0,FALSE
+"test_gt_merge_vcfs.R","gt_merge_vcfs skips loci that are not biallelic SNPs",0.10499999999999,0.102000000000004,0.00200000000000022,FALSE,0,FALSE
+"test_gt_merge_vcfs.R","gt_merge_vcfs merges files with many loci",0.199999999999989,0.197000000000003,0.00199999999999978,FALSE,0,FALSE
+"test_gt_merge_vcfs.R","gt_merge_vcfs keeps loci at the same position in a file apart",0.397999999999996,0.390999999999991,0.00600000000000023,FALSE,0,FALSE
+"test_gt_merge_vcfs.R","gt_merge_vcfs finds REF mismatches whatever the order of files",0.209000000000003,0.204999999999984,0.00499999999999989,FALSE,0,FALSE
+"test_gt_merge_vcfs.R","gt_merge_vcfs swaps genotypes with fewer alleles than the ploidy",0.0980000000000132,0.0970000000000084,0.00200000000000022,FALSE,0,FALSE
+"test_gt_merge_vcfs.R","the C++ merge helpers check their inputs",0.0949999999999989,0.0909999999999798,0.00399999999999956,FALSE,0,FALSE
+"test_gt_order_loci.R","manually resorted table is respected by loci functions",0.156000000000006,0.153999999999996,0.00200000000000022,FALSE,0,FALSE
+"test_gt_order_loci.R","gt_update_backingfile correctly updates",0.343999999999994,0.338999999999999,0.00499999999999989,FALSE,0,FALSE
+"test_gt_order_loci.R","gt_order_loci reorders and regenerates backingfiles",0.448999999999984,0.448000000000008,0.00099999999999989,FALSE,0,FALSE
+"test_gt_order_loci.R","gt_order_loci catches unsorted and duplicated positions",0.566000000000003,0.554000000000002,0.00300000000000011,FALSE,0,FALSE
+"test_gt_order_loci.R","gt_order_loci catches unsorted and duplicated genetic_dist",0.304000000000002,0.257000000000005,0.004,FALSE,0,FALSE
+"test_gt_order_loci.R","gt_update_backingfile catches unsorted and duplicated genetic_dist",0.238,0.236999999999995,0,FALSE,0,FALSE
+"test_gt_order_loci.R","genetic_dist sorted within chromosomes are kept",0.449999999999989,0.448000000000008,0.00200000000000022,FALSE,0,FALSE
+"test_gt_order_loci.R","is_loci_table_ordered catches unsorted genetic_dist",0.275000000000006,0.272999999999996,0.00099999999999989,FALSE,0,FALSE
+"test_gt_order_loci.R","is_loci_table_ordered catches unsorted and duplicated positions",0.425000000000011,0.423000000000002,0.00199999999999978,FALSE,0,FALSE
+"test_gt_order_loci.R","check updated positions/distances are inherited by the merged gt",0.567000000000007,0.566000000000003,0,FALSE,0,FALSE
+"test_gt_order_loci.R","cast_chromosome_to_int transforms correctly from character",0.332999999999998,0.25,0.00600000000000023,FALSE,0,FALSE
+"test_gt_order_loci.R","cast_chromosome_to_int transforms correctly from factor",0.241000000000014,0.241000000000014,0.00099999999999989,FALSE,0,FALSE
+"test_gt_order_loci.R","cast_chromosome_to_int keeps numeric names with non-numeric ones",0.25800000000001,0.256999999999977,0.00200000000000022,FALSE,0,FALSE
+"test_gt_order_loci.R","gt_update_backingfile works if n loci is a multiple of chunk_size",0.335999999999984,0.332999999999998,0.004,FALSE,0,FALSE
+"test_gt_order_loci.R","cast_chromosome_to_int gives the same codes for factors",0.007000000000005,0.007000000000005,0.00099999999999989,FALSE,0,FALSE
+"test_gt_order_loci.R","find_duplicated_loci lists duplicates by chromosome",0.15900000000002,0.156000000000006,0.00300000000000011,FALSE,0,FALSE
+"test_gt_order_loci.R","order checks in C++ match split() and is.unsorted()",0.0409999999999968,0.0390000000000157,0.00299999999999967,FALSE,0,FALSE
+"test_gt_order_loci.R","missing positions and genetic distances give informative errors",0.282999999999987,0.283000000000015,0.00100000000000033,FALSE,0,FALSE
+"test_gt_pca_tidiers.R","gt_pca_tidiers",0.182000000000016,0.207999999999998,0.04,FALSE,0,FALSE
+"test_gt_pca_tidiers.R","augment and augment_loci work with a single component",0.167000000000002,0.177999999999997,0.0990000000000002,FALSE,0,FALSE
+"test_gt_pca_tidiers.R","augment_loci works with gt_pca_autoSVD",0.265000000000015,0.252999999999986,0.0710000000000002,FALSE,0,FALSE
+"test_gt_pca_tidiers.R","augment checks the ids of data",0.128000000000014,0.143000000000001,0,FALSE,0,FALSE
+"test_gt_pca.R","fit_gt_pca_and_predict",1.06,0.346000000000004,1.085,FALSE,0,FALSE
+"test_gt_pca.R","adjusting roll_size fixes gt_pca_autoSVD problem ",0.699999999999989,0.698000000000008,0.0580000000000007,FALSE,0,FALSE
+"test_gt_pca.R","fit_gt_pca_and_predict_splitted_data",0.961999999999989,0.5,0.629,FALSE,0,FALSE
+"test_gt_pca.R","PCA functions work with loci out of order",0.266999999999996,0.298000000000002,0.223,FALSE,0,FALSE
+"test_gt_pca.R","gt_pca_autoSVD works with loci out of order",1.23399999999998,0.450999999999993,0.845000000000001,FALSE,0,FALSE
+"test_gt_pca.R","PCA computes frobenius when needed",0.175000000000011,0.185999999999979,0.0469999999999997,FALSE,0,FALSE
+"test_gt_pca.R","our stdevs are comparable to prcomp",0.235000000000014,0.262,0.0950000000000006,FALSE,0,FALSE
+"test_gt_pca.R","the randomised SVDs use at most n_cores cores",0.191999999999979,0.224999999999994,0.00399999999999956,FALSE,0,FALSE
+"test_gt_pcadapt.R","gt_pcadapt works on gt_pca object",0.021000000000015,0.0260000000000105,0.016,FALSE,0,FALSE
+"test_gt_pcadapt.R","gt_pcadapt with a PCA of missing genotypes",0.192999999999984,0.211000000000013,0.117,FALSE,0,FALSE
+"test_gt_pcadapt.R","gt_pcadapt does not test loci with many missing genotypes",0.472000000000008,0.469999999999999,0.00199999999999978,FALSE,0,FALSE
+"test_gt_pcadapt.R","gt_pcadapt names the right loci when some are not tested",0.336000000000013,0.300999999999988,0.00300000000000011,FALSE,0,FALSE
+"test_gt_pcadapt.R","gt_pcadapt checks that individuals match the pca",0.00699999999997658,0.007000000000005,0,FALSE,0,FALSE
+"test_gt_pcadapt.R","gt_pcadapt looks for missing genotypes only where they are used",0.14500000000001,0.151999999999987,0.0280000000000005,FALSE,0,FALSE
+"test_gt_pcadapt.R","n_cores can be set",0.0150000000000148,0.0199999999999818,0.0100000000000007,FALSE,0,FALSE
+"test_gt_pcadapt.R","gt_pcadapt 'U' error with heavily imputed SNPs",0.89100000000002,0.875,0.056,FALSE,0,FALSE
+"test_gt_pseudohaploid.R","gt_pseudohaploid correctly deals with ploidy",0.0760000000000218,0.0739999999999839,0.000999999999999446,FALSE,0,FALSE
+"test_gt_pseudohaploid.R","gt_pseudohaploid on grouped tibble correctly deals with ploidy",0.147999999999996,0.14500000000001,0.00300000000000011,FALSE,0,FALSE
+"test_gt_pseudohaploid.R","we can rbind pseudohaploids and diploids",0.290999999999997,0.290999999999997,0,FALSE,0,FALSE
+"test_gt_pseudohaploid.R","gt_pseudohaploid updates ploidy after dropping pseudohploids",0.181999999999988,0.182000000000016,0,FALSE,0,FALSE
+"test_gt_pseudohaploid.R","gt_pseudohaploid keeps ploidy of individuals not in the tibble",0.0240000000000009,0.0219999999999914,0.00199999999999978,FALSE,0,FALSE
+"test_gt_pseudohaploid.R","gt_pseudohaploid only works on diploid data",0.174999999999983,0.150000000000006,0.00399999999999956,FALSE,0,FALSE
+"test_gt_roh.R","gt_roh_froh computes F_ROH",0.116000000000014,0.112000000000023,0.00300000000000011,FALSE,0,FALSE
+"test_gt_roh.R","gt_roh_froh gives the F_ROH of detectRUNS",0.063999999999993,0.0550000000000068,0.00199999999999978,FALSE,0,FALSE
+"test_gt_roh.R","gt_roh_loci counts the individuals in runs at each locus",0.085000000000008,0.0829999999999984,0.00199999999999978,FALSE,0,FALSE
+"test_gt_roh.R","gt_roh_islands finds the regions in runs in many individuals",0.0699999999999932,0.0700000000000216,0.00100000000000033,FALSE,0,FALSE
+"test_gt_simulate_bn.R","gt_simulate_bn gives populations with the requested structure",0.319999999999993,0.317000000000007,0.00199999999999978,FALSE,0,FALSE
+"test_gt_simulate_bn.R","gt_simulate_bn sets missing genotypes per individual",0.158999999999992,0.15900000000002,0,FALSE,0,FALSE
+"test_gt_simulate_bn.R","gt_simulate_bn checks its arguments",0.0200000000000102,0.0199999999999818,0,FALSE,0,FALSE
+"test_gt_snmf.R","gt_snmf error messages",0.0229999999999961,0.0229999999999961,0,FALSE,0,FALSE
+"test_gt_snmf.R","gt_snmf from file and from gen_tibble are the same",11.858,11.003,0.0990000000000002,FALSE,0,FALSE
+"test_gt_snmf.R","gt_snmf cross-entropy matches k and run",0.186999999999983,0.177999999999997,0.00199999999999978,FALSE,0,FALSE
+"test_gt_snmf.R","gt_snmf works with 'geno' elsewhere in the path",0.149000000000001,0.14700000000002,0.00100000000000033,FALSE,0,FALSE
+"test_gt_snmf.R","gt_snmf default seed works with several runs",0.157999999999987,0.15100000000001,0.00399999999999956,FALSE,0,FALSE
+"test_gt_snmf.R","gt_snmf returns the runs of the current call in a project",0.25,0.222999999999985,0.00600000000000023,FALSE,0,FALSE
+"test_gt_tibble_vcf.R","gen_tibble_vcf filters non-biallelic SNPs",0.597000000000008,0.59099999999998,0.00499999999999989,FALSE,0,FALSE
+"test_gt_tibble_vcf.R","partially missing vcf genotypes are coded as missing",0.498999999999995,0.491000000000014,0.00100000000000033,FALSE,0,FALSE
+"test_gt_tibble_vcf.R","missing genotypes on the first variant do not set ploidy",1.01499999999999,1,0.00600000000000023,FALSE,0,FALSE
+"test_gt_tibble_vcf.R","invalid vcf loci do not leave backing files behind",0.836999999999989,0.814999999999998,0.00299999999999923,FALSE,0,FALSE
+"test_gt_tibble_vcf.R","vcf with a trailing blank line or CRLF line endings can be read",1.46000000000001,1.446,0.00700000000000056,FALSE,0,FALSE
+"test_gt_tibble_vcf.R","genotypes with more alleles than max_ploidy are caught",0.350999999999999,0.34099999999998,0,FALSE,0,FALSE
+"test_gt_tibble_vcf.R","missing vcf alleles are missing with custom missing_alleles",0.988,0.980999999999995,0.00600000000000023,FALSE,0,FALSE
+"test_heatmap_add_dendro.R","heatmap_add_dendro adds requested dendrogram panels",0.859999999999985,0.849999999999994,0.00100000000000033,FALSE,0,FALSE
+"test_heatmap_add_dendro.R","heatmap_add_dendro matches the heatmap order with tied distances",0.731999999999999,0.731999999999999,0,FALSE,0,FALSE
+"test_heatmap_add_dendro.R","heatmap_add_dendro objects can be drawn and saved",0.965000000000003,0.936999999999983,0.00499999999999989,FALSE,0,FALSE
+"test_heatmap_add_dendro.R","heatmap_add_dendro validates input plots",0.0740000000000123,0.0740000000000123,0,FALSE,0,FALSE
+"test_heatmap_add_dendro.R","heatmap_add_dendro requires an hclust order function",0.0579999999999927,0.0580000000000211,0.00100000000000033,FALSE,0,FALSE
+"test_indiv_het_obs.R","indiv_het_obs computes correctly",0.168000000000006,0.164999999999992,0.00300000000000011,FALSE,0,FALSE
+"test_indiv_het_obs.R","indiv_het_obs returns 0's when all genotypes are homozygous",0.155000000000001,0.155000000000001,0,FALSE,0,FALSE
+"test_indiv_het_obs.R","indiv_het_obs computes correctly for tetraploid data",0.164999999999992,0.164999999999992,0,FALSE,0,FALSE
+"test_indiv_het_obs.R","indiv_het_obs computes correctly for mixed-ploidy data",0.152000000000015,0.151999999999987,0,FALSE,0,FALSE
+"test_indiv_het_obs.R","indiv_het_obs uses only the selected loci as denominator",0.290999999999997,0.288999999999987,0.00199999999999978,FALSE,0,FALSE
+"test_indiv_inbreeding.R","indiv_inbreeding compute correctly",0.0369999999999777,0.0270000000000152,0.00300000000000011,FALSE,0,FALSE
+"test_indiv_inbreeding.R","indiv_inbreeding and allele sharing work with a single individual",0.284999999999997,0.266999999999996,0.00800000000000001,FALSE,0,FALSE
+"test_indiv_inbreeding.R","indiv_inbreeding is a generic with methods for gen_tibbles",0.100999999999999,0.0979999999999848,0.00300000000000011,FALSE,0,FALSE
+"test_indiv_inbreeding.R","indiv_inbreeding on a grouped gen_tibble works within groups",0.201999999999998,0.197999999999979,0.00300000000000011,FALSE,0,FALSE
+"test_indiv_missingness.R","indiv_missingness computes correctly",0.0290000000000248,0.0270000000000152,0.00199999999999978,FALSE,0,FALSE
+"test_indiv_missingness.R","as_counts switch",0.021000000000015,0.0190000000000055,0.00199999999999978,FALSE,0,FALSE
+"test_indiv_missingness.R","indiv_missingness on a subset",0.0120000000000005,0.0109999999999957,0.00100000000000033,FALSE,0,FALSE
+"test_jackknife_helpers.R",".jackknife_block_ids never spans chromosomes",0.164000000000016,0.164999999999992,0,FALSE,0,FALSE
+"test_jackknife_helpers.R",".jackknife_block_ids checks its inputs",0.161000000000001,0.161000000000001,0,FALSE,0,FALSE
+"test_jackknife_helpers.R",".jackknife_weighted matches the classic jackknife for equal m",0.0260000000000105,0.0250000000000057,0.000999999999999446,FALSE,0,FALSE
+"test_jackknife_helpers.R",".jackknife_weighted follows Busing et al. for unequal m",0.0270000000000152,0.025999999999982,0.00100000000000033,FALSE,0,FALSE
+"test_jackknife_helpers.R",".block_sums does not create row names",0.170000000000016,0.167000000000002,0.00300000000000011,FALSE,0,FALSE
+"test_jackknife_helpers.R","jackknife blocks work with chromosomes not contiguous in a table",0.0180000000000007,0.0169999999999959,0.000999999999999446,FALSE,0,FALSE
+"test_jackknife_helpers.R","jackknife blocks in bp match windows of the same size",0.00999999999999091,0.00999999999999091,0,FALSE,0,FALSE
+"test_jackknife_nwise_pop_pbs.R","jackknife_nwise_pop_pbs matches pbs from genome-wide fst",0.186000000000007,0.186000000000007,0,FALSE,0,FALSE
+"test_jackknife_nwise_pop_pbs.R","jackknife_nwise_pop_pbs checks its inputs",0.152999999999992,0.152999999999992,0,FALSE,0,FALSE
+"test_jackknife_pairwise_pop_fst.R","jackknife_pairwise_pop_fst leave-one-out matches subsets",0.335000000000008,0.328000000000003,0.00700000000000056,FALSE,0,FALSE
+"test_jackknife_pairwise_pop_fst.R","jackknife_pairwise_pop_fst returns the right format",0.175000000000011,0.171000000000021,0.00399999999999956,FALSE,0,FALSE
+"test_jackknife_pairwise_pop_fst.R",".jackknife_fst_blocks matches the sums of num and den by locus",0.181000000000012,0.177999999999997,0.00300000000000011,FALSE,0,FALSE
+"test_jackknife_pop_tajimas_d.R","jackknife_pop_tajimas_d leave-one-out matches subsets",0.276999999999987,0.27200000000002,0.00500000000000078,FALSE,0,FALSE
+"test_jackknife_pop_tajimas_d.R","jackknife_pop_tajimas_d uses the sample size of all loci",0.239000000000004,0.237000000000023,0.00199999999999978,FALSE,0,FALSE
+"test_jackknife_pop_tajimas_d.R","the jackknife of tajimas d depends on the total sample size",0.0149999999999864,0.01400000000001,0.00199999999999978,FALSE,0,FALSE
+"test_jackknife_pop_tajimas_d.R","jackknife_pop_tajimas_d returns the right format",0.185000000000002,0.183999999999997,0.00100000000000033,FALSE,0,FALSE
+"test_jackknife_pop_tajimas_d.R","jackknife_pop_tajimas_d works with several grouping variables",0.191999999999979,0.179999999999978,0.000999999999999446,FALSE,0,FALSE
+"test_jackknife_pop_tajimas_d.R","jackknife_pop_tajimas_d counts pseudohaploid allele copies",0.156000000000006,0.153999999999996,0.00199999999999978,FALSE,0,FALSE
+"test_jackknife_pop_tajimas_d.R","jackknife_pop_tajimas_d matches pop_tajimas_d with missing pi",0.295000000000016,0.293000000000006,0.00200000000000067,FALSE,0,FALSE
+"test_jackknife_stats_generic.R","jackknife_stats_generic works with mean and custom",0.176000000000016,0.177000000000021,0,FALSE,0,FALSE
+"test_jackknife_stats_generic.R","jackknife_stats_generic checks its inputs",0.149000000000001,0.148000000000025,0.00100000000000033,FALSE,0,FALSE
+"test_local_reimplementations.R","fct_inorder_base orders levels by first appearance",0.0200000000000102,0.018999999999977,0.00199999999999978,FALSE,0,FALSE
+"test_loci_freq.R","loci_alt_freq and loci_maf computes correctly",0.335999999999984,0.320999999999998,0.00600000000000023,FALSE,0,FALSE
+"test_loci_freq.R","loci_alt_freq and loci_maf on grouped tibbles",0.483000000000004,0.513999999999982,0.0110000000000001,FALSE,0,FALSE
+"test_loci_freq.R","test loci_ with only one individual",0.156999999999982,0.156000000000006,0.00100000000000033,FALSE,0,FALSE
+"test_loci_freq.R","loci_alt_freq on polyploids",0.215000000000003,0.180000000000007,0.00199999999999978,FALSE,0,FALSE
+"test_loci_freq.R","loci_alt_freq grouped with one allele",0.156000000000006,0.156000000000006,0,FALSE,0,FALSE
+"test_loci_freq.R","loci_alt_freq grouped with one group",0.161000000000001,0.15900000000002,0.00199999999999978,FALSE,0,FALSE
+"test_loci_freq.R","grouped loci_ functions work with factor and numeric groups",0.328000000000003,0.323999999999984,0.00499999999999989,FALSE,0,FALSE
+"test_loci_freq.R","grouped loci_ functions keep empty groups with .drop = FALSE",0.275000000000006,0.242999999999995,0.00800000000000001,FALSE,0,FALSE
+"test_loci_freq.R","format_grouped_output tidy is the pivoted matrix",0.0209999999999866,0.0209999999999866,0,FALSE,0,FALSE
+"test_loci_freq.R","loci_alt_freq matches a reference for reordered indiv and loci",0.167000000000002,0.165999999999997,0.00100000000000033,FALSE,0,FALSE
+"test_loci_hwe.R","loci_hwe produces the same output as plink --hardy midp",0.173999999999978,0.173000000000002,0.000999999999999446,FALSE,0,FALSE
+"test_loci_hwe.R","loci_hwe mid_p = FALSE produces the same output as plink --hardy ",0.169000000000011,0.165999999999997,0.00300000000000011,FALSE,0,FALSE
+"test_loci_hwe.R","loci_hwe for grouped tibble gives the correct result",0.229000000000013,0.25,0.00600000000000023,FALSE,0,FALSE
+"test_loci_hwe.R","grouped loci_hwe gives NA for empty groups",0.16500000000002,0.161999999999978,0.00300000000000011,FALSE,0,FALSE
+"test_loci_ld_clump.R","ld clumping runs",0.00499999999999545,0.00499999999999545,0.000999999999999446,FALSE,0,FALSE
+"test_loci_ld_clump.R","loci_ld_clump with missing genotypes",0.200999999999993,0.212000000000018,0.00400000000000045,FALSE,0,FALSE
+"test_loci_ld_clump.R","loci_ld_clump uses pairs genotyped together in min_shared",0.146999999999991,0.145999999999987,0.00100000000000033,FALSE,0,FALSE
+"test_loci_ld_clump.R","loci_ld_clump windows include loci at their size",0.135999999999996,0.134999999999991,0.000999999999999446,FALSE,0,FALSE
+"test_loci_ld_clump.R","loci_ld_clump excludes loci and checks the cores",0.188999999999993,0.185000000000002,0.00499999999999989,FALSE,0,FALSE
+"test_loci_ld_clump.R","ld clumping leaves no temporary FBMs in tempdir()",0.0109999999999957,0.0109999999999957,0,FALSE,0,FALSE
+"test_loci_ld_clump.R","with_private_fbm_dir() uses a fresh directory and deletes it",0.0859999999999843,0.0520000000000209,0.00100000000000033,FALSE,0,FALSE
+"test_loci_ld_clump.R","S statistic is the correct length",0.0130000000000052,0.0130000000000052,0,FALSE,0,FALSE
+"test_loci_ld_clump.R","loci_ld_clump returns the same as bigsnpr",0.263000000000005,0.259999999999991,0.00399999999999956,FALSE,0,FALSE
+"test_loci_ld_clump.R","loci_ld_clump error unsorted loci",0.135999999999996,0.133999999999986,0.00100000000000033,FALSE,0,FALSE
+"test_loci_ld_clump.R","loci order",0.151999999999987,0.146999999999991,0.00300000000000011,FALSE,0,FALSE
+"test_loci_ld_clump.R","loci_ld_clump works on a grouped gt",0.121999999999986,0.121000000000009,0.00100000000000033,FALSE,0,FALSE
+"test_loci_ld_clump.R","n_cores can be set",0.0219999999999914,0.035000000000025,0.000999999999999446,FALSE,0,FALSE
+"test_loci_ld_prune.R","r2 over the individuals genotyped at both loci matches PLINK",0.0139999999999816,0.0129999999999768,0.000999999999999446,FALSE,0,FALSE
+"test_loci_ld_prune.R","r2 of complete and incomplete loci matches cor()",0.198000000000008,0.198000000000008,0,FALSE,0,FALSE
+"test_loci_ld_prune.R","loci_ld_prune matches plink --indep-pairwise",0.0199999999999818,0.0190000000000055,0.00100000000000033,FALSE,0,FALSE
+"test_loci_ld_prune.R","r2 and pruning match PLINK with several words per locus",0.150000000000006,0.14700000000002,0.00300000000000011,FALSE,0,FALSE
+"test_loci_ld_prune.R","loci_ld_prune checks its parameters as PLINK does",0.0349999999999966,0.035000000000025,0,FALSE,0,FALSE
+"test_loci_ld_prune.R","loci_ld_prune treats pairs with few shared individuals as asked",0.149000000000001,0.14700000000002,0.00199999999999978,FALSE,0,FALSE
+"test_loci_ld_prune.R","loci_ld_prune uses pairs genotyped together in min_shared",0.140999999999991,0.13900000000001,0.00100000000000033,FALSE,0,FALSE
+"test_loci_ld_prune.R","loci_ld_prune windows in kb include loci at their size",0.200000000000017,0.156999999999982,0.00499999999999989,FALSE,0,FALSE
+"test_loci_ld_prune.R","loci_ld_prune windows in kb can be shorter than the gaps",0.143000000000001,0.143000000000001,0,FALSE,0,FALSE
+"test_loci_ld_prune.R","loci_ld_prune keeps lone loci with no variance, as PLINK",0.143000000000001,0.139999999999986,0.00300000000000011,FALSE,0,FALSE
+"test_loci_ld_prune.R","loci_ld_prune works with several cores and grouped gen_tibbles",0.0130000000000052,0.0229999999999961,0,FALSE,0,FALSE
+"test_loci_missingness.R","loci_missingness",0.0229999999999961,0.0209999999999866,0.00199999999999978,FALSE,0,FALSE
+"test_loci_missingness.R","loci_missingness computes correctly",0.0160000000000196,0.0169999999999959,0,FALSE,0,FALSE
+"test_loci_missingness.R","loci_missingness on grouped tibble",0.230000000000018,0.254999999999995,0.00300000000000011,FALSE,0,FALSE
+"test_loci_missingness.R","n_cores can be set",0.00499999999999545,0.00800000000000978,0,FALSE,0,FALSE
+"test_loci_missingness.R","test loci_ with only one individual",0.14100000000002,0.149000000000001,0.00199999999999978,FALSE,0,FALSE
+"test_loci_pi_polyploid.R","loci_pi computes correctly for uniform tetraploid data",0.15100000000001,0.150999999999982,0.00100000000000033,FALSE,0,FALSE
+"test_loci_pi_polyploid.R","loci_pi computes correctly for mixed-ploidy data",0.144000000000005,0.144000000000005,0,FALSE,0,FALSE
+"test_loci_pi_polyploid.R","loci_pi computes correctly grouped by uniform-ploidy populations",0.152000000000015,0.149000000000001,0.00199999999999978,FALSE,0,FALSE
+"test_loci_pi_polyploid.R","loci_pi handles a population mixing diploid and tetraploid individuals",0.142999999999972,0.143000000000001,0,FALSE,0,FALSE
+"test_loci_pi_polyploid.R","loci_pi is NA when a locus has 0 or 1 valid allele copies in a group",0.143000000000001,0.141999999999996,0.00100000000000033,FALSE,0,FALSE
+"test_loci_pi_polyploid.R","the polyploid kernel reduces to the diploid kernel at ploidy 2",0.140999999999991,0.141999999999996,0,FALSE,0,FALSE
+"test_loci_pi_polyploid.R","loci_pi computes pseudohaploid allele counts correctly",0.157999999999987,0.156999999999982,0.00199999999999978,FALSE,0,FALSE
+"test_loci_pi.R","loci_pi computes correctly",0.162999999999982,0.163000000000011,0,FALSE,0,FALSE
+"test_loci_pi.R","loci_pi on grouped tibbles",0.23599999999999,0.265999999999991,0.00499999999999989,FALSE,0,FALSE
+"test_loci_pi.R","loci_pi is NA, not NaN, when a group has 0 valid individuals at a locus",0.14500000000001,0.143000000000001,0.00199999999999978,FALSE,0,FALSE
+"test_loci_sidecar.R","the locus sidecar restores the names of names_as_int = FALSE",0.341000000000008,0.353999999999985,0.00600000000000023,FALSE,0,FALSE
+"test_loci_sidecar.R","missing IDs and chromosomes are restored as names_as_int = FALSE",0.186000000000007,0.182000000000016,0.00400000000000045,FALSE,0,FALSE
+"test_loci_sidecar.R","gt_lookup_loci looks up rows and subsets of the loci table",0.240000000000009,0.239999999999981,0,FALSE,0,FALSE
+"test_loci_sidecar.R","the locus sidecar follows subsets, reordering and rbind",0.926000000000016,0.908000000000015,0.00900000000000034,FALSE,0,FALSE
+"test_loci_sidecar.R","lookups check that the sidecar belongs to the data",0.224000000000018,0.220999999999975,0.00300000000000011,FALSE,0,FALSE
+"test_loci_sidecar.R","sidecars with Windows line endings can be read",0.106999999999999,0.10499999999999,0.00199999999999978,FALSE,0,FALSE
+"test_loci_sidecar.R","corrupted, truncated or swapped sidecars give clear errors",0.126000000000005,0.123000000000019,0.00199999999999978,FALSE,0,FALSE
+"test_loci_sidecar.R","sidecars are copied whole for a new backing file, or not at all",0.463999999999999,0.451999999999998,0.0120000000000005,FALSE,0,FALSE
+"test_loci_sidecar.R","integer names and chromosome codes are checked before lookups",0.271999999999991,0.242999999999995,0,FALSE,0,FALSE
+"test_loci_sidecar.R","restoring a subset of loci keeps only their chromosomes",0.199999999999989,0.194999999999993,0.00499999999999989,FALSE,0,FALSE
+"test_loci_sidecar.R","chromosomes_as_int is only available for VCF files with cpp",0.0129999999999768,0.0130000000000052,0,FALSE,0,FALSE
+"test_loci_sidecar.R","gt_save lists the sidecars to keep with the files",0.175000000000011,0.170999999999992,0.00300000000000011,FALSE,0,FALSE
+"test_loci_sidecar.R","gt_get_file_names and gt_save list the sidecars in use",0.364999999999981,0.356999999999999,0.00800000000000001,FALSE,0,FALSE
+"test_loci_sidecar.R","very long names are kept by the sidecar",0.12700000000001,0.12299999999999,0.00400000000000045,FALSE,0,FALSE
+"test_loci_sidecar.R","missing chromosomes stay missing as integer codes",0.206000000000017,0.204999999999984,0,FALSE,0,FALSE
+"test_loci_sidecar.R","large chromosome codes are grouped as their names",0.444999999999993,0.405000000000001,0.00800000000000001,FALSE,0,FALSE
+"test_loci_sidecar.R","sidecar copies and reads check the order and number of lines",0.127999999999986,0.126999999999981,0.00100000000000033,FALSE,0,FALSE
+"test_loci_sidecar.R","sidecars left by older files with the same name are removed",0.10899999999998,0.105999999999995,0.00199999999999978,FALSE,0,FALSE
+"test_loci_sidecar.R","chromosome names that are numbers keep their value as codes",0.207000000000022,0.203999999999979,0.00300000000000011,FALSE,0,FALSE
+"test_loci_sidecar.R","integer chromosomes are restored, looked up and kept",0.473000000000013,0.463999999999999,0.00999999999999979,FALSE,0,FALSE
+"test_loci_sidecar.R","rbind matches integer chromosomes by name",0.841000000000008,0.824000000000012,0.00499999999999989,FALSE,0,FALSE
+"test_loci_sidecar.R","window statistics and runs keep integer chromosomes",0.405000000000001,0.387,0.00399999999999956,FALSE,0,FALSE
+"test_loci_sidecar.R","gt_merge_vcfs writes sidecars that restore the names",0.621000000000009,0.605999999999995,0.0150000000000006,FALSE,0,FALSE
+"test_loci_sidecar.R","gt_concat_vcfs writes sidecars that restore the names",0.290999999999997,0.288000000000011,0.00299999999999923,FALSE,0,FALSE
+"test_loci_sidecar.R","sidecar_gather writes lines in any order, with new keys",0.10299999999998,0.103000000000009,0,FALSE,0,FALSE
+"test_loci_transversions_transitions.R","find transitions and transversions",0.144000000000005,0.144999999999982,0,FALSE,0,FALSE
+"test_loci_transversions_transitions.R","check warning message for different alleles",0.144000000000005,0.143000000000001,0.000999999999999446,FALSE,0,FALSE
+"test_loci_transversions_transitions.R","all purine-pyrimidine pairs are transversions",0.140999999999991,0.13900000000001,0.00199999999999978,FALSE,0,FALSE
+"test_matrix_int_names.R","matrix_int_names creation works",0.0120000000000005,0.0120000000000005,0,FALSE,0,FALSE
+"test_matrix_int_names.R","matrix_int_names requires integer or character names",0.0150000000000148,0.0149999999999864,0,FALSE,0,FALSE
+"test_matrix_int_names.R","matrix_int_names validates name lengths",0.0120000000000005,0.0120000000000005,0,FALSE,0,FALSE
+"test_matrix_int_names.R","matrix_int_names works without names",0.007000000000005,0.00499999999999545,0.00199999999999978,FALSE,0,FALSE
+"test_matrix_int_names.R","subsetting by position works",0.025999999999982,0.025999999999982,0.00100000000000033,FALSE,0,FALSE
+"test_matrix_int_names.R","subsetting by integer names works",0.0360000000000014,0.0330000000000155,0.00300000000000011,FALSE,0,FALSE
+"test_matrix_int_names.R","subsetting with drop works",0.0169999999999959,0.0169999999999959,0,FALSE,0,FALSE
+"test_matrix_int_names.R","assignment to matrix_int_names works",0.01400000000001,0.0120000000000005,0.00199999999999978,FALSE,0,FALSE
+"test_matrix_int_names.R","getter and setter functions work",0.0220000000000198,0.0219999999999914,0,FALSE,0,FALSE
+"test_matrix_int_names.R","character names work as dimnames",0.0120000000000005,0.0100000000000193,0.00200000000000067,FALSE,0,FALSE
+"test_matrix_int_names.R","subsetting by character names works",0.0260000000000105,0.025999999999982,0,FALSE,0,FALSE
+"test_matrix_int_names.R","assignment with character names works",0.00900000000001455,0.00800000000000978,0.000999999999999446,FALSE,0,FALSE
+"test_matrix_int_names.R","can mix integer and character names",0.0149999999999864,0.01400000000001,0.00100000000000033,FALSE,0,FALSE
+"test_matrix_int_names.R","row_names and col_names methods work with integer names",0.0109999999999957,0.00899999999998613,0.00199999999999978,FALSE,0,FALSE
+"test_matrix_int_names.R","row_names and col_names methods work with character names",0.0109999999999957,0.00999999999999091,0.00100000000000033,FALSE,0,FALSE
+"test_matrix_int_names.R","row_names<- and col_names<- setters work",0.0199999999999818,0.0190000000000055,0.00100000000000033,FALSE,0,FALSE
+"test_matrix_int_names.R","row_names and col_names setters clear names when set to NULL",0.00600000000000023,0.00499999999999545,0.00100000000000033,FALSE,0,FALSE
+"test_matrix_int_names.R","row_names and col_names work with mixed name types",0.0109999999999957,0.00999999999999091,0.000999999999999446,FALSE,0,FALSE
+"test_matrix_int_names.R","switching between integer and character names works",0.0269999999999868,0.0269999999999868,0,FALSE,0,FALSE
+"test_matrix_int_names.R","logical subsetting works",0.0159999999999911,0.0159999999999911,0,FALSE,0,FALSE
+"test_matrix_int_names.R","negative indexing works",0.0149999999999864,0.0130000000000052,0.00199999999999978,FALSE,0,FALSE
+"test_matrix_int_names.R","print method works",0.0130000000000052,0.0120000000000005,0,FALSE,0,FALSE
+"test_matrix_int_names.R","edge cases are handled",0.00999999999999091,0.0100000000000193,0,FALSE,0,FALSE
+"test_matrix_int_names.R","as.data.frame preserves numeric row names",0.007000000000005,0.007000000000005,0,FALSE,0,FALSE
+"test_matrix_int_names.R","as.data.frame works without row or column names",0.0120000000000005,0.0109999999999957,0.00100000000000033,FALSE,0,FALSE
+"test_matrix_int_names.R","indexing with a single index works as for a standard matrix",0.0229999999999961,0.0219999999999914,0.000999999999999446,FALSE,0,FALSE
+"test_multiple_grouping_vars.R","loci_* functions work with several grouping variables",0.116000000000014,0.113,0.00300000000000011,FALSE,0,FALSE
+"test_multiple_grouping_vars.R","pop_* functions work with several grouping variables",0.119,0.114000000000004,0.00499999999999989,FALSE,0,FALSE
+"test_multiple_grouping_vars.R","pairwise_pop_fst works with several grouping variables",0.437000000000012,0.370000000000005,0.00400000000000045,FALSE,0,FALSE
+"test_multiple_grouping_vars.R","windows and jackknife functions work with several grouping vars",0.291999999999973,0.289000000000016,0.00300000000000011,FALSE,0,FALSE
+"test_multiple_grouping_vars.R","qc reports and exports work with several grouping variables",0.0760000000000218,0.0749999999999886,0,FALSE,0,FALSE
+"test_multiple_grouping_vars.R","empty groups get NA without changing other groups",0.207999999999998,0.177000000000021,0.00499999999999989,FALSE,0,FALSE
+"test_multiple_grouping_vars.R","empty groups from .drop = FALSE are kept",0.0509999999999877,0.0500000000000114,0.000999999999999446,FALSE,0,FALSE
+"test_multiple_grouping_vars.R","gt_snmf stores the combined group labels",0.0129999999999768,0.00900000000001455,0.00100000000000033,FALSE,0,FALSE
+"test_nwise_pop_pbs.R","requires a grouped gen_tibble",0.007000000000005,0.007000000000005,0,FALSE,0,FALSE
+"test_nwise_pop_pbs.R","error with multiple grouping variables",0.0200000000000102,0.0180000000000007,0.00200000000000067,FALSE,0,FALSE
+"test_nwise_pop_pbs.R","nwise_pop_pbs works correctly",0.046999999999997,0.0420000000000016,0.00499999999999989,FALSE,0,FALSE
+"test_nwise_pop_pbs.R","type argument delivers correct objects",0.0230000000000246,0.0219999999999914,0.000999999999999446,FALSE,0,FALSE
+"test_nwise_pop_sfs.R","nwise_pop_sfs matches easySFS (folded and unfolded)",0.212999999999994,0.210000000000008,0.00399999999999956,FALSE,0,FALSE
+"test_nwise_pop_sfs.R","nwise_pop_sfs keeps the order of the populations",0.0619999999999834,0.0619999999999834,0.00100000000000033,FALSE,0,FALSE
+"test_nwise_pop_sfs.R","nwise_pop_sfs of two groups is their pairwise spectrum",0.0130000000000052,0.0130000000000052,0.000999999999999446,FALSE,0,FALSE
+"test_nwise_pop_sfs.R","nwise_pop_sfs checks its arguments",0.0440000000000111,0.0439999999999827,0,FALSE,0,FALSE
+"test_nwise_pop_sfs.R","nwise_pop_sfs works with many populations",0.177999999999997,0.176000000000016,0.00100000000000033,FALSE,0,FALSE
+"test_nwise_pop_sfs.R","pop_sfs works with large populations",0.155000000000001,0.155000000000001,0.00100000000000033,FALSE,0,FALSE
+"test_pairwise_allele_sharing.R","snp_allele_sharing and pairwise_allele_sharing computes allele sharing correctly",0.0349999999999966,0.0319999999999823,0.00200000000000067,FALSE,0,FALSE
+"test_pairwise_allele_sharing.R","snp_allele_sharing is correct when blocks have different sizes",0.0240000000000009,0.0229999999999961,0.000999999999999446,FALSE,0,FALSE
+"test_pairwise_allele_sharing.R","snp_allele_sharing is correct across bit-packing boundaries",0.14500000000001,0.150000000000006,0,FALSE,0,FALSE
+"test_pairwise_allele_sharing.R","pairwise_allele_sharing uses imputed genotypes only if set to",0.174999999999983,0.197000000000003,0.0790000000000006,FALSE,0,FALSE
+"test_pairwise_allele_sharing.R","pairwise_allele_sharing is a generic with methods for gen_tibbles",0.13300000000001,0.128999999999991,0.00399999999999956,FALSE,0,FALSE
+"test_pairwise_dist.R","pairwise_dist scores pairs of genotypes as ngsDist",0.0780000000000314,0.0769999999999982,0.00100000000000033,FALSE,0,FALSE
+"test_pairwise_dist.R","pairwise_dist corrects the distances",0.220000000000027,0.215000000000003,0.00499999999999989,FALSE,0,FALSE
+"test_pairwise_dist.R","pairwise_dist gives a tidy tibble or a matrix",0.0439999999999827,0.0439999999999827,0.000999999999999446,FALSE,0,FALSE
+"test_pairwise_dist.R","pairwise_dist is a generic with methods for gen_tibbles",0.343000000000018,0.134000000000015,0.0120000000000005,FALSE,0,FALSE
+"test_pairwise_grm.R","pairwise_grm compute correctly",0.0130000000000337,0.0130000000000052,0,FALSE,0,FALSE
+"test_pairwise_grm.R","pairwise_grm(method = 'plink') matches plink --make-rel",0.147000000000048,0.164999999999992,0.024,FALSE,0,FALSE
+"test_pairwise_pop_fst.R","requires a grouped gen_tibble",0.00900000000001455,0.00900000000001455,0,FALSE,0,FALSE
+"test_pairwise_pop_fst.R","pairwise_pop_fst Nei87",0.0539999999999736,0.0450000000000159,0.00199999999999978,FALSE,0,FALSE
+"test_pairwise_pop_fst.R","pairwise_pop_fst WC84",0.615999999999985,0.604000000000013,0.00499999999999989,FALSE,0,FALSE
+"test_pairwise_pop_fst.R","loci with no data in a population are dropped",0.585999999999956,0.552999999999997,0.00300000000000011,FALSE,0,FALSE
+"test_pairwise_pop_fst.R","pairwise_pop_fst hudson",0.578000000000031,0.576999999999998,0.000999999999999446,FALSE,0,FALSE
+"test_pairwise_pop_fst.R","n_cores can be set",0.0640000000000214,0.103999999999985,0.000999999999999446,FALSE,0,FALSE
+"test_pairwise_pop_fst.R","pairwise_pop_fst does not depend on blocks, cores or ordering",0.0660000000000309,0.115000000000009,0.00600000000000023,FALSE,0,FALSE
+"test_pairwise_pop_fst.R","type = pairwise",0.0450000000000159,0.0500000000000114,0.000999999999999446,FALSE,0,FALSE
+"test_pairwise_pop_fst.R","by_locus_type",0.21999999999997,0.195999999999998,0.00500000000000078,FALSE,0,FALSE
+"test_pairwise_pop_fst.R","pairwise_pop_fst when names stored as integers",0.244999999999948,0.237000000000023,0.00799999999999912,FALSE,0,FALSE
+"test_pairwise_pop_sfs.R","pairwise_pop_sfs matches easySFS (folded and unfolded)",0.473000000000013,0.453999999999979,0.0190000000000001,FALSE,0,FALSE
+"test_pairwise_pop_sfs.R","pairwise_pop_sfs returns a tidy tibble",0.0520000000000209,0.0510000000000161,0.00100000000000033,FALSE,0,FALSE
+"test_pairwise_pop_sfs.R","pairwise_pop_sfs marginals match pop_sfs without missing data",0.170999999999992,0.170000000000016,0.00100000000000033,FALSE,0,FALSE
+"test_pairwise_pop_sfs.R","pairwise_pop_sfs does not depend on the number of cores",0.007000000000005,0.0109999999999957,0,FALSE,0,FALSE
+"test_pairwise_pop_sfs.R","pairwise_pop_sfs chooses the projections by default",0.0339999999999918,0.0409999999999968,0.00100000000000033,FALSE,0,FALSE
+"test_pairwise_pop_sfs.R","pairwise_pop_sfs checks its arguments",0.021000000000015,0.0209999999999866,0,FALSE,0,FALSE
+"test_pairwise_pop_sfs.R","pairwise_pop_sfs uses one column per grouping variable",0.0980000000000132,0.0870000000000175,0.00100000000000033,FALSE,0,FALSE
+"test_pixy_tajimas_d.R","windows_pop_tajimas_d matches pixy",0.0180000000000291,0.0190000000000055,0,FALSE,0,FALSE
+"test_pixy_tajimas_d.R","pop_tajimas_d and jackknife_pop_tajimas_d match pixy",0.0419999999999732,0.0409999999999968,0.000999999999999446,FALSE,0,FALSE
+"test_plink_roh.R","windows_indiv_roh gives the runs of PLINK --homozyg",0.921999999999969,0.910000000000025,0.0110000000000001,FALSE,0,FALSE
+"test_plink_roh.R","gt_roh_loci counts the individuals in runs as PLINK",0.622000000000014,0.543000000000006,0.00499999999999989,FALSE,0,FALSE
+"test_ploidy_vcf.R","import a vcf with multiple ploidy",0.54000000000002,0.538000000000011,0.00199999999999978,FALSE,0,FALSE
+"test_ploidy_vcf.R","indiv_het_obs and pop_het_obs run end-to-end on real mixed-ploidy data",0.466000000000008,0.457999999999998,0.00100000000000033,FALSE,0,FALSE
+"test_pop_basic_stats.R","pop_* basic stats functions work correctly",0.103000000000009,0.102000000000004,0.000999999999999446,FALSE,0,FALSE
+"test_pop_basic_stats.R","pop_* basic stats work on a single population",0.0219999999999914,0.021000000000015,0.00100000000000033,FALSE,0,FALSE
+"test_pop_basic_stats.R","n_cores can be set",0.0130000000000337,0.0220000000000198,0.00299999999999923,FALSE,0,FALSE
+"test_pop_basic_stats.R","pop_stats_dip_pseudo_cpp does not depend on blocks or cores",0.021000000000015,0.0380000000000109,0.00200000000000067,FALSE,0,FALSE
+"test_pop_basic_stats.R","pop_global_stats handles a population with no data at a locus",0.177999999999997,0.177999999999997,0.00100000000000033,FALSE,0,FALSE
+"test_pop_fis_fst.R","pop_fst and pop_fist WG17 compute correctly",0.103000000000009,0.0949999999999989,0.000999999999999446,FALSE,0,FALSE
+"test_pop_het_obs_polyploid.R","pop_het_obs computes correctly for a single tetraploid population",0.15100000000001,0.150000000000006,0.000999999999999446,FALSE,0,FALSE
+"test_pop_het_obs_polyploid.R","pop_het_obs computes correctly for two tetraploid populations",0.147999999999968,0.14700000000002,0.00100000000000033,FALSE,0,FALSE
+"test_pop_het_obs_polyploid.R","pop_het_obs handles a population mixing diploid and tetraploid individuals",0.141999999999996,0.142000000000024,0,FALSE,0,FALSE
+"test_pop_het_obs_polyploid.R","pop_het_obs on polyploid data matches diploid results for ploidy = 2",0.141999999999996,0.13900000000001,0.00199999999999978,FALSE,0,FALSE
+"test_pop_sfs.R","pop_sfs matches easySFS (folded and unfolded)",0.586000000000013,0.567999999999984,0.0189999999999992,FALSE,0,FALSE
+"test_pop_sfs.R","pop_sfs returns a tidy tibble",0.0600000000000023,0.0579999999999927,0.00100000000000033,FALSE,0,FALSE
+"test_pop_sfs.R","pop_sfs works on ungrouped data",0.0439999999999827,0.0420000000000016,0.00199999999999978,FALSE,0,FALSE
+"test_pop_sfs.R","pop_sfs without missing data is the count of alternate copies",0.177000000000021,0.176999999999992,0.000999999999999446,FALSE,0,FALSE
+"test_pop_sfs.R","pop_sfs does not depend on the number of cores or block size",0.00600000000002865,0.0109999999999957,0,FALSE,0,FALSE
+"test_pop_sfs.R","pop_sfs checks n_proj",0.0629999999999882,0.070999999999998,0.00100000000000033,FALSE,0,FALSE
+"test_pop_sfs.R","pop_sfs_preview matches easySFS --preview",0.331000000000017,0.322999999999979,0.00199999999999978,FALSE,0,FALSE
+"test_pop_sfs.R","pop_sfs chooses the projection with pop_sfs_preview by default",0.0360000000000014,0.0349999999999966,0.00100000000000033,FALSE,0,FALSE
+"test_pop_sfs.R","pop_sfs works with polyploid and mixed-ploidy data",0.159999999999968,0.155000000000001,0.00499999999999989,FALSE,0,FALSE
+"test_pop_sfs.R","pop_sfs counts one allele copy for pseudohaploids",0.165999999999997,0.165999999999997,0,FALSE,0,FALSE
+"test_pop_sfs.R","pop_sfs needs integer genotypes",0.147999999999968,0.14700000000002,0.00100000000000033,FALSE,0,FALSE
+"test_pop_sfs.R","pop_sfs drops empty groups",0.0590000000000259,0.0380000000000109,0.00199999999999978,FALSE,0,FALSE
+"test_pop_sfs.R","pop_sfs uses one column per grouping variable",0.0780000000000314,0.0769999999999982,0.000999999999999446,FALSE,0,FALSE
+"test_pop_tajimas_d.R","pop_tajimas_d computes correctly",0.194999999999993,0.194000000000017,0.000999999999999446,FALSE,0,FALSE
+"test_pop_tajimas_d.R","pop_tajimas_d handles loci with little or no data",0.419999999999959,0.41500000000002,0.00500000000000078,FALSE,0,FALSE
+"test_pop_tajimas_d.R","pop_tajimas_d on grouped tibbles",0.160000000000025,0.177000000000021,0,FALSE,0,FALSE
+"test_pop_tajimas_d.R","pop_tajimas_d ignores loci with missing pi",0.16500000000002,0.182000000000016,0.000999999999999446,FALSE,0,FALSE
+"test_pop_tajimas_d.R","pop_tajimas_d counts pseudohaploid allele copies",0.168999999999983,0.168000000000006,0.00100000000000033,FALSE,0,FALSE
+"test_pop_tajimas_d.R","pop_tajimas_d works on polyploid data",0.212999999999965,0.181000000000012,0.00100000000000033,FALSE,0,FALSE
+"test_pop_tajimas_d.R","pop_tajimas_d uses the sample size of each locus",0.161999999999978,0.160000000000025,0.00199999999999978,FALSE,0,FALSE
+"test_pop_tajimas_d.R",".tajimas_d_sums matches the sums of the locus terms",0.174000000000035,0.204000000000008,0.00199999999999978,FALSE,0,FALSE
+"test_q_matrix.R","q_matrix reads q_files",0.0260000000000105,0.0250000000000057,0.00100000000000033,FALSE,0,FALSE
+"test_q_matrix.R","get_q_matrix returns correct q-matrix",0.035000000000025,0.032999999999987,0.00199999999999978,FALSE,0,FALSE
+"test_q_matrix.R","get_p_matrix returns correct p-matrix",0.0480000000000018,0.0480000000000018,0,FALSE,0,FALSE
+"test_q_matrix.R","tidying and augmenting a q_matrix",0.185000000000002,0.182999999999993,0.00199999999999978,FALSE,0,FALSE
+"test_q_matrix.R","tidy and augment use the id attribute of a q_matrix",0.157999999999959,0.156999999999982,0.00100000000000033,FALSE,0,FALSE
+"test_q_matrix.R","autoplot of a q_matrix arranges individuals by id",0.264999999999986,0.260999999999996,0,FALSE,0,FALSE
+"test_q_matrix.R","reorder_within_groups sorts individuals by dominant component",0.146999999999991,0.146000000000015,0.00199999999999978,FALSE,0,FALSE
+"test_q_matrix.R","arrange_by_indiv sorts individuals by their id",0.269000000000005,0.26600000000002,0.00199999999999978,FALSE,0,FALSE
+"test_q_matrix.R","autoplot of a q_matrix works with numeric groups",0.706999999999994,0.704000000000008,0.00300000000000011,FALSE,0,FALSE
+"test_q_matrix.R","the distruct colours are unique, and recycled when needed",0.101999999999975,0.100999999999999,0,FALSE,0,FALSE
+"test_qc_report_indiv.R","qc_report_indiv filters relatives within groups",0.212999999999965,0.20999999999998,0.00199999999999978,FALSE,0,FALSE
+"test_qc_report_indiv.R","qc_report_indiv$to_keep is correctly ordered",0.0760000000000218,0.0740000000000123,0.00300000000000011,FALSE,0,FALSE
+"test_qc_report_indiv.R","qc_report_indiv$to_keep is correct for interleaved groups",0.24799999999999,0.123999999999995,0.00300000000000011,FALSE,0,FALSE
+"test_qc_report_indiv.R","autoplot qc_report_indiv list for each population",0.109000000000037,0.106999999999999,0.000999999999999446,FALSE,0,FALSE
+"test_qc_report_indiv.R","non-numeric kings_threshold arguments ",1.41000000000003,1.31099999999998,0.00100000000000033,FALSE,0,FALSE
+"test_qc_report_indiv.R","qc_report_indiv for pseudohaploid data",0.225999999999999,0.224000000000018,0.00300000000000011,FALSE,0,FALSE
+"test_qc_report_indiv.R","qc_report_indiv works with several grouping variables",0.0579999999999927,0.0560000000000116,0.00199999999999978,FALSE,0,FALSE
+"test_qc_report_indiv.R","relatedness autoplot fails without kings_threshold",0.0310000000000059,0.0309999999999775,0,FALSE,0,FALSE
+"test_qc_report_indiv.R","histogram autoplot fails for non-pseudohaploid",0.0320000000000391,0.0330000000000155,0,FALSE,0,FALSE
+"test_qc_report_indiv.R",".pairwise_king_by_group matches pairwise_king on each group",0.0729999999999791,0.0829999999999984,0.00100000000000033,FALSE,0,FALSE
+"test_qc_report_loci.R","grouped hwe within qc_report_loci",0.298999999999978,0.296999999999997,0.00300000000000011,FALSE,0,FALSE
+"test_qc_report_loci.R","qc_report_loci for pseudohaploid data",0.705000000000041,0.693000000000012,0,FALSE,0,FALSE
+"test_qc_report_loci.R","qc_report_loci matches loci_maf, loci_missingness and loci_hwe",0.180000000000007,0.176000000000016,0.00400000000000045,FALSE,0,FALSE
+"test_qc_report_loci.R","grouped qc_report_loci ignores empty groups",0.176999999999964,0.171999999999997,0.00399999999999956,FALSE,0,FALSE
+"test_qc_report_loci.R","qc_report_loci(hwe = FALSE) matches loci_maf and loci_missingness",0.21999999999997,0.215000000000003,0.00499999999999989,FALSE,0,FALSE
+"test_rbind_dry_run.R","merge report detects matching rsID's correctly",0.0339999999999918,0.0339999999999918,0,FALSE,0,FALSE
+"test_rbind_dry_run.R","merge report evaluates non-matching target loci correctly",0.00599999999997181,0.00600000000000023,0,FALSE,0,FALSE
+"test_rbind_dry_run.R","merge report detects ambiguous alleles correctly",0.0160000000000196,0.0149999999999864,0.000999999999999446,FALSE,0,FALSE
+"test_rbind_dry_run.R","merge report detects flip alleles correctly",0.0110000000000241,0.00999999999999091,0.00100000000000033,FALSE,0,FALSE
+"test_rbind_dry_run.R","merge report detects opposite strand alleles correctly",0.0109999999999673,0.00999999999999091,0.000999999999999446,FALSE,0,FALSE
+"test_rbind_dry_run.R","missing cases are given the correct alleles",0.0270000000000437,0.0269999999999868,0,FALSE,0,FALSE
+"test_rbind_dry_run.R","an unobserved allele in either column does not error",0.33499999999998,0.334000000000003,0.00100000000000033,FALSE,0,FALSE
+"test_rbind_dry_run.R","an unobserved allele_alt is resolved from the other dataset",0.0600000000000023,0.0360000000000014,0.000999999999999446,FALSE,0,FALSE
+"test_rbind_dry_run.R","an unobserved allele_ref is resolved from the other dataset",0.0400000000000205,0.0389999999999873,0.00100000000000033,FALSE,0,FALSE
+"test_rbind_dry_run.R","swaps and flips are still detected alongside unobserved alleles",0.0260000000000105,0.0270000000000152,0,FALSE,0,FALSE
+"test_rbind_dry_run.R","the summary reports the loci swapped in the reference",0.0199999999999818,0.0199999999999818,0,FALSE,0,FALSE
+"test_rbind_dry_run.R","rbind of loci with unobserved alleles gives a complete object",0.322999999999979,0.317000000000007,0.00599999999999934,FALSE,0,FALSE
+"test_rbind_dry_run.R","a flipped locus missing allele_ref in both datasets is swapped",0.428999999999974,0.426000000000016,0.00300000000000011,FALSE,0,FALSE
+"test_rbind_dry_run.R","resolve_missing_alleles infers each kind of missing allele",0.007000000000005,0.007000000000005,0,FALSE,0,FALSE
+"test_rbind_gen_tibble.R","merge combines datasets correctly",0.0250000000000341,0.0229999999999961,0.00100000000000033,FALSE,0,FALSE
+"test_rbind_gen_tibble.R","warning when no snps overlap",0.565999999999974,0.562999999999988,0.00299999999999923,FALSE,0,FALSE
+"test_rbind_gen_tibble.R","merge by position works correctly",0.192999999999984,0.191999999999979,0.00100000000000033,FALSE,0,FALSE
+"test_rbind_gen_tibble.R","original gen_tibble objects remain the same after merge",0.549000000000035,0.497000000000014,0.00499999999999989,FALSE,0,FALSE
+"test_rbind_gen_tibble.R","rbind keeps ploidy of subset and reordered individuals",0.579000000000008,0.573000000000008,0.00600000000000023,FALSE,0,FALSE
+"test_rbind_gen_tibble.R","as_is is deprecated and ignored by rbind",0.300999999999988,0.301999999999992,0,FALSE,0,FALSE
+"test_rbind_gen_tibble.R","rbind keeps the grouping of the first gen_tibble",0.379999999999995,0.330999999999989,0.000999999999999446,FALSE,0,FALSE
+"test_rbind_gen_tibble.R","rbind fails if gen_tibbles contain same ID",0.007000000000005,0.007000000000005,0,FALSE,0,FALSE
+"test_rbind_gen_tibble.R","Duplicated loci trigger clear errors (position and name)",0.605999999999995,0.605999999999995,0,FALSE,0,FALSE
+"test_select_loci_if.R","select_loci_if subsets correctly",0.182999999999993,0.176999999999992,0.00700000000000056,FALSE,0,FALSE
+"test_select_loci.R","select_loci subsets correctly",0.151999999999987,0.152000000000015,0,FALSE,0,FALSE
+"test_select_loci.R","select_loci resolves simple selections as tidyselect does",0.323000000000036,0.312999999999988,0.00900000000000034,FALSE,0,FALSE
+"test_select_loci.R","select_loci evaluates function calls once, as tidyselect does",0.416999999999973,0.394000000000005,0.0109999999999992,FALSE,0,FALSE
+"test_select_loci.R","select_loci resolves a variable as all_of(), as tidyselect does",0.208000000000027,0.204000000000008,0.00400000000000045,FALSE,0,FALSE
+"test_select_loci.R","select_loci warns about a variable as tidyselect does",0.283999999999992,0.277999999999992,0,FALSE,0,FALSE
+"test_select_loci.R","select_loci can always use tidyselect",0.149000000000001,0.149000000000001,0.000999999999999446,FALSE,0,FALSE
+"test_select_loci.R","select_loci leaves unusual selections to tidyselect",0.348000000000013,0.335999999999984,0.00600000000000023,FALSE,0,FALSE
+"test_sfs_ancestral.R","unfolded spectra are polarised with the ancestral allele",0.259000000000015,0.254999999999995,0.00399999999999956,FALSE,0,FALSE
+"test_sfs_ancestral.R","ancestral can be a column of the loci table",0.035000000000025,0.0340000000000202,0.000999999999999446,FALSE,0,FALSE
+"test_sfs_ancestral.R","the reference or alternate allele as ancestral",0.0320000000000391,0.0310000000000059,0.000999999999999446,FALSE,0,FALSE
+"test_sfs_ancestral.R","ancestral is ignored for folded spectra",0.0269999999999868,0.0270000000000152,0,FALSE,0,FALSE
+"test_sfs_ancestral.R","ancestral is checked",0.0179999999999723,0.0180000000000007,0,FALSE,0,FALSE
+"test_sfs_ancestral.R","pop_sfs_preview leaves out the loci that cannot be polarised",0.113999999999976,0.11099999999999,0.00300000000000011,FALSE,0,FALSE
+"test_sfs_ancestral.R","polarised spectra do not depend on the number of cores",0.007000000000005,0.00999999999999091,0.00100000000000033,FALSE,0,FALSE
+"test_sfs_ancestral.R","monomorphic loci are polarised with their reference allele",0.163999999999987,0.162999999999982,0,FALSE,0,FALSE
+"test_sfs_ancestral.R","write_sfs polarises the unfolded spectra of a gen_tibble",0.0209999999999582,0.0190000000000055,0.00300000000000011,FALSE,0,FALSE
+"test_show_loci.R","show_loci gets and sets information",0.199999999999989,0.197000000000003,0.00300000000000011,FALSE,0,FALSE
+"test_show_ploidy.R","ploidy works correctly",0.303999999999974,0.301000000000016,0.00199999999999978,FALSE,0,FALSE
+"test_snp_ibs.R","snp_ibs and pairwise_ibs computes ibs correctly",0.106999999999971,0.105000000000018,0.00199999999999978,FALSE,0,FALSE
+"test_snp_ibs.R","snp_ibs as.counts = FALSE gives the same results as plink",0.177999999999997,0.177999999999997,0,FALSE,0,FALSE
+"test_snp_ibs.R","snp_ibs adjusted_counts gives the same results as plink",0.163000000000011,0.157000000000011,0.00600000000000023,FALSE,0,FALSE
+"test_snp_ibs.R","snp_ibs is correct across bit-packing boundaries",0.161999999999978,0.174000000000007,0.00800000000000001,FALSE,0,FALSE
+"test_snp_ibs.R","pairwise_ibs uses imputed genotypes only if set to",0.475999999999999,0.329999999999984,0.107000000000001,FALSE,0,FALSE
+"test_snp_ibs.R","missing_correction = 'allele_freq' gives the same values as plink",0.190999999999974,0.200999999999993,0.00499999999999901,FALSE,0,FALSE
+"test_snp_ibs.R","missing_correction = 'allele_freq' without missing genotypes",0.245999999999981,0.240000000000009,0.00699999999999967,FALSE,0,FALSE
+"test_snp_ibs.R","pairwise functions delete their temporary FBMs",0.0610000000000355,0.0579999999999927,0.00300000000000011,FALSE,0,FALSE
+"test_snp_ibs.R","pairwise_ibs is a generic with methods for gen_tibbles",0.430000000000007,0.216999999999985,0.00699999999999967,FALSE,0,FALSE
+"test_snp_king.R","snp_king and pairwise_king compute king-robust correctly",0.223000000000013,0.221000000000004,0.00200000000000067,FALSE,0,FALSE
+"test_snp_king.R","snp_king gives the same results as plink",0.187999999999988,0.184999999999974,0.00300000000000011,FALSE,0,FALSE
+"test_snp_king.R","snp_king is correct across bit-packing boundaries",0.159999999999968,0.167000000000002,0.0109999999999992,FALSE,0,FALSE
+"test_snp_king.R","snp_king decodes all bytes of the FBM through its code256",0.0240000000000009,0.0349999999999966,0.0129999999999999,FALSE,0,FALSE
+"test_snp_king.R","pairwise_king uses imputed genotypes only if set to",0.535000000000025,0.356000000000023,0.0879999999999992,FALSE,0,FALSE
+"test_snp_king.R","pairwise_king is a generic with methods for gen_tibbles",0.182999999999993,0.177999999999997,0.00500000000000078,FALSE,0,FALSE
+"test_snp_king.R","pairwise_king on a grouped gen_tibble works within groups",0.709000000000003,0.503000000000014,0.011000000000001,FALSE,0,FALSE
+"test_subset_bigSNP.R","subset_bigSNP correctly subsets the data",0.231999999999971,0.230000000000018,0.00200000000000067,FALSE,0,FALSE
+"test_tidyverse.R","inheritance of group tibbles",0.0470000000000255,0.0459999999999923,0.00199999999999889,FALSE,0,FALSE
+"test_tidyverse.R","sf and grouped methods work",0.46999999999997,0.466000000000008,0.00399999999999956,FALSE,0,FALSE
+"test_tidyverse.R","$<- on grouping variables preserves grouped gen_tibble classes",0.442000000000007,0.437000000000012,0.00400000000000134,FALSE,0,FALSE
+"test_tidyverse.R","mutate dropping genotypes returns a plain ungrouped tibble",0.0250000000000341,0.0249999999999773,0.000999999999999446,FALSE,0,FALSE
+"test_tidyverse.R","group_by without variables returns an ungrouped gen_tibble",0.243999999999971,0.173000000000002,0.000999999999999446,FALSE,0,FALSE
+"test_tidyverse.R","ungroup keeps the sf and gen_tbl classes",0.435999999999979,0.432999999999993,0.00300000000000011,FALSE,0,FALSE
+"test_tidyverse.R","[ dropping the grouping variables returns an ungrouped tibble",0.0240000000000009,0.0240000000000009,0,FALSE,0,FALSE
+"test_tidyverse.R","select, rename and relocate keep grouped gen_tibble classes",0.227999999999952,0.226999999999975,0.00100000000000122,FALSE,0,FALSE
+"test_tidyverse.R","joins, bind_rows and bind_cols keep grouped gen_tibble classes",0.0629999999999882,0.0600000000000023,0.00300000000000011,FALSE,0,FALSE
+"test_tidyverse.R","$<- can remove the geometry from a gen_tibble with sf",0.331999999999994,0.309000000000026,0.000999999999999446,FALSE,0,FALSE
+"test_vcf_int.R","using integers as names works",0.22399999999999,0.236000000000047,0.00300000000000011,FALSE,0,FALSE
+"test_vcf_int.R","grouped loci matrices keep loci names, names_as_int = TRUE",0.241999999999962,0.25200000000001,0.0909999999999993,FALSE,0,FALSE
+"test_vcf_int.R","nwise_pop_pbs keeps loci names, names_as_int = TRUE",0.215000000000032,0.212999999999965,0.00200000000000067,FALSE,0,FALSE
+"test_vcf_int.R","pca and dapc keep loci names, names_as_int = TRUE",1.40599999999995,0.716999999999985,0.135999999999999,FALSE,0,FALSE
+"test_vcf_int.R","grouped loci matrices keep loci names, names_as_int = FALSE",0.254000000000019,0.25200000000001,0.00200000000000067,FALSE,0,FALSE
+"test_vcf_int.R","nwise_pop_pbs keeps loci names, names_as_int = FALSE",0.228000000000009,0.225000000000023,0.00300000000000011,FALSE,0,FALSE
+"test_vcf_int.R","pca and dapc keep loci names, names_as_int = FALSE",4.27699999999999,0.748000000000047,0.115,FALSE,0,FALSE
+"test_window_indiv_roh.R","windows_indiv_roh returns tidy runs",0.274000000000001,0.281000000000006,0.00699999999999967,FALSE,0,FALSE
+"test_window_indiv_roh.R","windows_indiv_roh checks its arguments and the loci",0.249000000000024,0.245999999999981,0,FALSE,0,FALSE
+"test_window_indiv_roh.R","windows_indiv_roh is a generic with a method for gen_tibbles",0.221000000000004,0.20999999999998,0.000999999999999446,FALSE,0,FALSE
+"test_window_indiv_roh.R","homozygotes for the alternate allele are homozygous",0.151999999999987,0.152000000000044,0,FALSE,0,FALSE
+"test_window_indiv_roh.R","windows_indiv_roh follows the algorithm of PLINK --homozyg",4.99400000000003,4.77300000000002,0.0590000000000011,FALSE,0,FALSE
+"test_window_indiv_roh.R","windows_indiv_roh finds the simulated runs",0.552999999999997,0.513999999999953,0.0280000000000005,FALSE,0,FALSE
+"test_window_indiv_roh.R","windows_indiv_roh deals with the edge cases of the simulated runs",0.180000000000007,0.174000000000035,0.00600000000000023,FALSE,0,FALSE
+"test_window_indiv_roh.R","autoplot draws indiv_roh objects",0.685000000000002,0.628999999999962,0.000999999999999446,FALSE,0,FALSE
+"test_window_indiv_roh.R","F_ROH of autoplot is that of detectRUNS",0.19599999999997,0.194999999999993,0,FALSE,0,FALSE
+"test_window_indiv_roh.R","gt_roh_window is the deprecated version based on detectRUNS",0.25,0.225999999999999,0.00500000000000078,FALSE,0,FALSE
+"test_window_indiv_roh.R","the runs are the same with and without chromosomes_as_int",0.317999999999984,0.310999999999979,0.00799999999999912,FALSE,0,FALSE
+"test_window_nwise_pop_pbs.R","windows_nwise_pop_pbs works correctly",0.0339999999999918,0.0330000000000155,0.000999999999999446,FALSE,0,FALSE
+"test_window_nwise_pop_pbs.R","windows type",0.0480000000000018,0.0480000000000018,0,FALSE,0,FALSE
+"test_window_nwise_pop_pbs.R","windows_nwise_pop_pbs uses the requested fst_method",0.0250000000000341,0.0240000000000009,0.00100000000000122,FALSE,0,FALSE
+"test_window_nwise_pop_pbs.R","windows_nwise_pop_pbs tidy output does not warn",0.0209999999999582,0.0199999999999818,0.000999999999999446,FALSE,0,FALSE
+"test_window_pairwise_pop_fst.R","pairwise_pop_fst num and dem are returned correctly",0.0489999999999782,0.0450000000000159,0.00399999999999956,FALSE,0,FALSE
+"test_window_pairwise_pop_fst.R","windows_pairwise_pop_fst works correctly",0.192999999999984,0.182999999999993,0.00900000000000034,FALSE,0,FALSE
+"test_window_pairwise_pop_fst.R","windows type",0.0229999999999677,0.0219999999999914,0.000999999999999446,FALSE,0,FALSE
+"test_window_pairwise_pop_fst.R","windows_pairwise_pop_fst uses the requested method",0.0620000000000118,0.0609999999999786,0.000999999999999446,FALSE,0,FALSE
+"test_window_pairwise_pop_fst.R","windows_pairwise_pop_fst tidy output works with two populations",0.0330000000000155,0.0310000000000059,0.00200000000000067,FALSE,0,FALSE
+"test_window_pairwise_pop_fst.R","windows_pairwise_pop_fst matches windows of num and den",0.15100000000001,0.149999999999977,0.00200000000000067,FALSE,0,FALSE
+"test_window_pairwise_pop_fst.R","windows_pairwise_pop_fst tidy output only pivots the fst columns",0.021000000000015,0.0199999999999818,0.000999999999999446,FALSE,0,FALSE
+"test_window_pop_tajimas_d.R","windows_pop_tajimas_d works correctly / windows_pop_tajimas_d works with bp units",0.00900000000001455,0.00799999999998136,0.000999999999999446,FALSE,0,FALSE
+"test_window_pop_tajimas_d.R","windows_pop_tajimas_d works correctly / windows_pop_tajimas_d respects min_loci",0.00899999999995771,0.00900000000001455,0,FALSE,0,FALSE
+"test_window_pop_tajimas_d.R","windows_pop_tajimas_d works correctly",0.0179999999999723,0.0169999999999959,0.000999999999999446,FALSE,0,FALSE
+"test_window_pop_tajimas_d.R","windows type",0.0380000000000109,0.0369999999999777,0.00100000000000122,FALSE,0,FALSE
+"test_window_pop_tajimas_d.R","windows_pop_tajimas_d counts pseudohaploid allele copies",0.15300000000002,0.15100000000001,0.00199999999999889,FALSE,0,FALSE
+"test_window_pop_tajimas_d.R","windows_pop_tajimas_d matches window sums of the locus terms",0.0679999999999836,0.0660000000000309,0.00200000000000067,FALSE,0,FALSE
+"test_window_pop_tajimas_d.R","windows_pop_tajimas_d ignores loci with missing pi",0.154999999999973,0.15300000000002,0.00199999999999889,FALSE,0,FALSE
+"test_window_pop_tajimas_d.R","windows_pop_tajimas_d works with several grouping variables",0.16700000000003,0.165999999999997,0.00100000000000122,FALSE,0,FALSE
+"test_window_pop_tajimas_d.R","windows_pop_tajimas_d matrix has one row per window",0.230999999999995,0.20799999999997,0.00399999999999956,FALSE,0,FALSE
+"test_window_stats_generic.R","windows_stats_generic is correct",0.0269999999999868,0.0269999999999868,0,FALSE,0,FALSE
+"test_window_stats_generic.R","windows_stats_generic windows include the last loci",0.0310000000000059,0.0289999999999964,0.00200000000000067,FALSE,0,FALSE
+"test_window_stats_generic.R","windows generic correctly catches errors",0.0489999999999782,0.0489999999999782,0.000999999999999446,FALSE,0,FALSE
+"test_window_stats_generic.R","windows_stats_generic matches runner on each chromosome",0.206999999999994,0.185000000000002,0.0109999999999992,FALSE,0,FALSE
+"test_window_stats_generic.R",".window_definitions lists the loci by chromosome",0.0419999999999732,0.0409999999999968,0.00100000000000122,FALSE,0,FALSE
+"test_write_sfs.R","write_sfs writes dadi files",0.0129999999999768,0.0120000000000005,0.00199999999999889,FALSE,0,FALSE
+"test_write_sfs.R","write_sfs writes fastsimcoal2 files",0.159999999999968,0.156999999999982,0.00300000000000011,FALSE,0,FALSE
+"test_write_sfs.R","write_sfs sets the monomorphic sites and rounds",0.0229999999999677,0.021000000000015,0.00199999999999889,FALSE,0,FALSE
+"test_write_sfs.R","write_sfs checks its arguments",0.0260000000000105,0.0260000000000105,0,FALSE,0,FALSE
+"test_write_sfs.R","write_sfs files can be read back",0.153999999999996,0.148000000000025,0.00600000000000023,FALSE,0,FALSE
+"test_write_sfs.R","write_sfs writes the files of easySFS for a gen_tibble",0.257999999999981,0.241000000000042,0.00900000000000034,FALSE,0,FALSE
+"test_write_sfs.R","write_sfs uses the backing files of a gen_tibble by default",0.197999999999979,0.171999999999969,0.00399999999999956,FALSE,0,FALSE
+"test_write_sfs.R","write_sfs works with a gen_tibble with a single group",0.15300000000002,0.151999999999987,0.000999999999999446,FALSE,0,FALSE
+"test_write_sfs.R","write_sfs checks its arguments for a gen_tibble",0.185999999999979,0.182999999999993,0.00300000000000011,FALSE,0,FALSE
