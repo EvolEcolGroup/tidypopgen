@@ -45,6 +45,9 @@
 * faster `select_loci()`, and faster `gt_as_vcf()`, `gt_update_backingfile()`
   and `gt_order_loci()` with many chromosomes; `gt_as_genlight()` uses less
   memory
+* `indiv_inbreeding()` on a grouped `gen_tibble` returns one value per
+  individual, in the order of the rows (computed within each group); the
+  list of one vector per group (`type = "list"`) is deprecated
 * new article on large RAD-seq datasets; the big data article uses
   `gt_merge_vcfs()`
 

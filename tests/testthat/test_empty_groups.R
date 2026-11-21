@@ -56,11 +56,11 @@ test_that("group_map() and grouped indiv_inbreeding() work with empty groups", {
   )
   keep_gt <- test_gt %>% group_by(population, .drop = FALSE)
   drop_gt <- test_gt %>% group_by(population)
-  # indiv_inbreeding() has an empty result for the empty group
+  # indiv_inbreeding() gives one value per individual: the empty group adds
+  # none, and the values of the other groups are unchanged
   inb_keep <- indiv_inbreeding(keep_gt)
-  expect_length(inb_keep, 4)
-  expect_length(inb_keep[[2]], 0)
-  expect_equal(inb_keep[-2], indiv_inbreeding(drop_gt))
+  expect_length(inb_keep, nrow(test_gt))
+  expect_equal(inb_keep, indiv_inbreeding(drop_gt))
   # group_map() of loci_* functions: the other groups are unchanged, and the
   # empty group is NA, as in the grouped methods
   for (fun in list(loci_alt_freq, loci_maf, loci_missingness, loci_hwe)) {

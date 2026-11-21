@@ -9,10 +9,13 @@
 #' likelihoods).
 #'
 #' For a grouped [`gen_tibble`], the coefficients are computed within each
-#' group, giving the same results as
+#' group (the beta estimate is relative to the other individuals of the
+#' group), giving the same values as
 #' `group_map(.x, ~ indiv_inbreeding(.x))`, but much faster: the genotypes are
 #' read only once, and only the pairs of individuals within each group are
-#' compared.
+#' compared. As for an ungrouped [`gen_tibble`], the result has one value per
+#' individual, in the order of the rows, so that it can be added as a column
+#' (e.g. `grouped_gt$inbreeding <- indiv_inbreeding(grouped_gt)`).
 #'
 #' @references Weir, BS and Goudet J (2017) A Unified Characterization of
 #'   Population Structure and Relatedness. Genetics (2017) 206:2085
@@ -25,11 +28,15 @@
 #'   `as_matrix=TRUE`. As a number of statistics can be derived from the Allele
 #'   Sharing matrix, it is sometimes more efficient to pre-compute this matrix.
 #'   It is not possible to use this with grouped tibbles.
+#' @param type only for a grouped [`gen_tibble`]: "vector" (the default), one
+#'   value per individual, in the order of the rows; or "list" (deprecated),
+#'   one vector per group, in the order of [dplyr::group_keys()].
 #' @param ... other arguments passed to specific methods, currently unused.
-#' @return a numeric vector of inbreeding coefficients. For a grouped
-#'   [`gen_tibble`], a list of such vectors, one per group in the order of
-#'   [dplyr::group_keys()] (the coefficients are computed within each group;
-#'   an empty group gives an empty vector).
+#' @return a numeric vector of inbreeding coefficients, one per individual in
+#'   the order of the rows, named by the ids of the individuals. For a grouped
+#'   [`gen_tibble`], the coefficients are computed within each group (with
+#'   `type = "list"`, deprecated, they are returned as a list of vectors, one
+#'   per group; an empty group gives an empty vector).
 #' @rdname indiv_inbreeding
 #' @export
 #' @examples
@@ -99,6 +106,7 @@ indiv_inbreeding.grouped_gen_tbl <- function(
   .x,
   method = c("WG17"),
   allele_sharing_mat = NULL,
+  type = c("vector", "list"),
   ...
 ) {
   rlang::check_dots_empty()
@@ -107,7 +115,28 @@ indiv_inbreeding.grouped_gen_tbl <- function(
     stop("allele_sharing_mat can not be provided for grouped_df objects")
   }
   method <- match.arg(method)
-  .indiv_inbreeding_by_group(.x)
+  type <- match.arg(type)
+  # the coefficients within each group, one vector per group (in the order of
+  # the groups), each named by the ids of the individuals of its group
+  inbreeding <- .indiv_inbreeding_by_group(.x)
+  if (type == "list") {
+    # the output of tidypopgen 1.0.0, kept for compatibility
+    lifecycle::deprecate_soft(
+      "1.1.0", I('`indiv_inbreeding(type = "list")`'),
+      details = paste(
+        "Use the default `type = \"vector\"`, which gives one value per",
+        "individual in the order of the rows."
+      )
+    )
+    return(inbreeding)
+  }
+  # back to the order of the rows: the values of each group go to the rows
+  # of its individuals (every row belongs to exactly one group)
+  inbreeding_rows <- numeric(nrow(.x))
+  inbreeding_rows[unlist(dplyr::group_rows(.x))] <-
+    unlist(inbreeding, use.names = FALSE)
+  names(inbreeding_rows) <- .x$id
+  inbreeding_rows
 }
 
 # WG17 inbreeding within each group of a grouped gen_tibble, as a list of
