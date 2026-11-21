@@ -241,15 +241,15 @@ lobsters <- gt_update_backingfile(lobsters, backingfile = tempfile())
     ## 
     ## gen_backing files updated, now
 
-    ## using FBM RDS: /tmp/RtmpNGGQNf/file2c7e4420c36c.rds
+    ## using FBM RDS: /tmp/Rtmpepdk3R/file2c607885fc85.rds
 
-    ## with FBM backing file: /tmp/RtmpNGGQNf/file2c7e4420c36c.bk
+    ## with FBM backing file: /tmp/Rtmpepdk3R/file2c607885fc85.bk
 
     ## make sure that you do NOT delete those files!
 
     ## to reload the gen_tibble in another session, use:
 
-    ## gt_load('/tmp/RtmpNGGQNf/file2c7e4420c36c.gt')
+    ## gt_load('/tmp/Rtmpepdk3R/file2c607885fc85.gt')
 
 After removing only loci, there would be no need to update the backing
 file. Now that our data are clean, we are ready to impute and create a
