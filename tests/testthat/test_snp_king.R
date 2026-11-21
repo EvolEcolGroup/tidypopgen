@@ -159,6 +159,33 @@ test_that("snp_king is correct across bit-packing boundaries", {
   expect_equal(test_king, king_r(geno_mat[rows, cols]), tolerance = 1e-12)
 })
 
+test_that("snp_king gives the same results with and without AVX2", {
+  # more than 256 loci (a block of 4 words of the AVX2 kernel) and a partial
+  # block; TIDYPOPGEN_NO_AVX2 forces the scalar kernel (on CPUs without AVX2
+  # both calls use it)
+  set.seed(42)
+  geno_vals <- sample(c(0:2, NA), 70 * 600,
+    replace = TRUE,
+    prob = c(0.4, 0.3, 0.25, 0.05)
+  )
+  geno_mat <- matrix(geno_vals, nrow = 70)
+  big_gt <- gen_tibble(
+    x = geno_mat,
+    loci = data.frame(
+      name = paste0("rs", 1:600), chromosome = 1L, position = 1:600,
+      genetic_dist = 0, allele_ref = "A", allele_alt = "T"
+    ),
+    indiv_meta = data.frame(id = paste0("i", 1:70), population = "p1"),
+    quiet = TRUE
+  )
+  test_fbm <- tidypopgen:::.gt_get_fbm(big_gt)
+  king_default <- snp_king(test_fbm, n_cores = 2)
+  withr::local_envvar(TIDYPOPGEN_NO_AVX2 = "1")
+  king_scalar <- snp_king(test_fbm, n_cores = 2)
+  expect_identical(king_default, king_scalar)
+  expect_equal(king_scalar, king_r(geno_mat), tolerance = 1e-12)
+})
+
 test_that("snp_king decodes all bytes of the FBM through its code256", {
   # bytes decoded as genotypes (0 to 2, imputed 4 to 6, dosages 7, 107 and
   # 207), and as missing (3, and the dosage 0.09 of byte 16), in blocks of

@@ -40,8 +40,9 @@
 * faster input and output: VCF and *.bed* files are read in parallel
   (`n_cores`), *.ped* files are read faster, and *.gt* files are saved twice
   as fast
-* faster `pairwise_king()`, `pairwise_ibs()` and `pairwise_allele_sharing()`,
-  and much faster `indiv_inbreeding()` and `qc_report_indiv()` on grouped data
+* faster `pairwise_king()` (up to 1.8 times on CPUs with AVX2), `pairwise_ibs()`
+  and `pairwise_allele_sharing()`, and much faster `indiv_inbreeding()` and
+  `qc_report_indiv()` on grouped data
 * faster `select_loci()`, and faster `gt_as_vcf()`, `gt_update_backingfile()`
   and `gt_order_loci()` with many chromosomes; `gt_as_genlight()` uses less
   memory

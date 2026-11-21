@@ -7,6 +7,7 @@
 #include <vector>
 #include <cstdint>
 #include <algorithm>
+#include <cstdlib>
 
 /******************************************************************************/
 
@@ -49,6 +50,16 @@
 // already maps to a fast instruction.
 #if defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__))
 #define PW_X86_POPCNT 1
+#endif
+
+// AVX2 (x86-64 only): KING counts for 4 words at a time, with a vectorised
+// popcount (a lookup of each half byte with vpshufb, Mula, Kurz and Lemire
+// 2018, https://doi.org/10.1093/comjnl/bxx046), compiled with the target
+// attribute and chosen at run time on CPUs with AVX2 (no compiler flags
+// needed)
+#if defined(__GNUC__) && defined(__x86_64__)
+#define PW_X86_AVX2 1
+#include <immintrin.h>
 #endif
 
 #if defined(__GNUC__)
@@ -191,18 +202,34 @@ struct PwValid {
 
 /******************************************************************************/
 
-// Counts for individual i against all individuals j with i <= j < n, over
-// n_words words of the current chunk; cnt_i points at the counts of pair
-// (i, i) in the packed lower triangle; wts points at the weights of the loci
-// of the chunk (only used by PwIbsWeighted, nullptr otherwise).
+// Layout of the planes of a chunk, for each individual: with blk = 1 (the
+// scalar kernels), the N_PLANES words of word 0, then those of word 1, etc.;
+// with blk = 4 (the AVX2 kernel), blocks of 4 words (256 loci), and within a
+// block the 4 words of plane 0, then the 4 words of plane 1, etc. (so that
+// SIMD code can load the 4 words of a plane at once). Word w of plane p is at
+// (w / blk) * blk * N_PLANES + blk * p + w % blk. The number of words of an
+// individual, ps, is the number of words of the chunk rounded up to a
+// multiple of blk, and the padding words are 0. (The scalar kernels read the
+// blocked layout of blk = 4 at half the speed, hence the two layouts.)
 template <class Stat>
-PW_ALWAYS_INLINE void pw_row_body(std::size_t i, std::size_t n,
-                                  std::size_t n_words,
+PW_ALWAYS_INLINE std::size_t pw_word_offset(std::size_t w, int p,
+                                            std::size_t blk) {
+  return (w / blk) * blk * Stat::N_PLANES + blk * p + w % blk;
+}
+
+// Counts for individual i against the individuals j with j0 <= j < j1 (and
+// j >= i), over the n_words words of the current chunk (layout blk = 1, see
+// above); cnt_i points at the counts of pair (i, i) in the packed lower
+// triangle; wts points at the weights of the loci of the chunk (only used by
+// PwIbsWeighted, nullptr otherwise).
+template <class Stat>
+PW_ALWAYS_INLINE void pw_row_body(std::size_t i, std::size_t j0,
+                                  std::size_t j1, std::size_t n_words,
                                   const uint64_t* planes, uint32_t* cnt_i,
                                   const uint32_t* wts) {
   const std::size_t stride = n_words * Stat::N_PLANES;
   const uint64_t* pi = planes + i * stride;
-  for (std::size_t j = i; j < n; j++) {
+  for (std::size_t j = j0; j < j1; j++) {
     const uint64_t* pj = planes + j * stride;
     uint32_t c[Stat::N_COUNTS] = {0};
     for (std::size_t w = 0; w < n_words; w++) {
@@ -218,21 +245,111 @@ PW_ALWAYS_INLINE void pw_row_body(std::size_t i, std::size_t n,
 
 // generic version (software popcount on x86 without POPCNT)
 template <class Stat>
-void pw_row_generic(std::size_t i, std::size_t n, std::size_t n_words,
-                    const uint64_t* planes, uint32_t* cnt_i,
-                    const uint32_t* wts) {
-  pw_row_body<Stat>(i, n, n_words, planes, cnt_i, wts);
+void pw_row_generic(std::size_t i, std::size_t j0, std::size_t j1,
+                    std::size_t n_words, const uint64_t* planes,
+                    uint32_t* cnt_i, const uint32_t* wts) {
+  pw_row_body<Stat>(i, j0, j1, n_words, planes, cnt_i, wts);
 }
 
 #ifdef PW_X86_POPCNT
 // the same code, compiled to use the POPCNT instruction
 template <class Stat>
 __attribute__((target("popcnt")))
-void pw_row_popcnt(std::size_t i, std::size_t n, std::size_t n_words,
-                   const uint64_t* planes, uint32_t* cnt_i,
-                   const uint32_t* wts) {
-  pw_row_body<Stat>(i, n, n_words, planes, cnt_i, wts);
+void pw_row_popcnt(std::size_t i, std::size_t j0, std::size_t j1,
+                   std::size_t n_words, const uint64_t* planes,
+                   uint32_t* cnt_i, const uint32_t* wts) {
+  pw_row_body<Stat>(i, j0, j1, n_words, planes, cnt_i, wts);
 }
+#endif
+
+// SIMD versions of the row kernel, for the statistics that have one (only
+// KING for now): PwAvx2<Stat>::available says whether there is one
+template <class Stat>
+struct PwAvx2 {
+  static const bool available = false;
+  static void run(std::size_t, std::size_t, std::size_t, std::size_t,
+                  const uint64_t*, uint32_t*) {}
+};
+
+#ifdef PW_X86_AVX2
+// the number of set bits of each byte of v (a lookup of each half byte)
+#define PW_POPCNT8_AVX2(v)                                                \
+  _mm256_add_epi8(                                                        \
+    _mm256_shuffle_epi8(lut, _mm256_and_si256((v), low)),                 \
+    _mm256_shuffle_epi8(lut,                                              \
+                        _mm256_and_si256(_mm256_srli_epi16((v), 4), low)))
+
+// sum of the 4 64-bit lanes of the byte sums of v
+#define PW_HSUM8_AVX2(v, out)                                             \
+  do {                                                                    \
+    __m256i s_ = _mm256_sad_epu8((v), zero);                              \
+    __m128i t_ = _mm_add_epi64(_mm256_castsi256_si128(s_),                \
+                               _mm256_extracti128_si256(s_, 1));          \
+    (out) = static_cast<uint32_t>(_mm_cvtsi128_si64(t_) +                 \
+                                  _mm_extract_epi64(t_, 1));              \
+  } while (0)
+
+// KING counts (see PwKing) of individual i against individuals j0 <= j < j1,
+// 4 words at a time; the byte counters cannot overflow, as a chunk has at
+// most 64 words (16 blocks, at most 8 per byte and block)
+__attribute__((target("avx2")))
+inline void pw_row_king_avx2(std::size_t i, std::size_t j0, std::size_t j1,
+                             std::size_t ps, const uint64_t* planes,
+                             uint32_t* cnt_i) {
+  const std::size_t stride = ps * PwKing::N_PLANES;
+  const std::size_t n_blocks = ps / 4;
+  const uint64_t* pi = planes + i * stride;
+  const __m256i lut = _mm256_setr_epi8(0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3,
+                                       2, 3, 3, 4, 0, 1, 1, 2, 1, 2, 2, 3,
+                                       1, 2, 2, 3, 2, 3, 3, 4);
+  const __m256i low = _mm256_set1_epi8(0x0f);
+  const __m256i zero = _mm256_setzero_si256();
+  for (std::size_t j = j0; j < j1; j++) {
+    const uint64_t* pj = planes + j * stride;
+    __m256i c0 = zero, c1 = zero, c2 = zero, c3 = zero;
+    for (std::size_t b = 0; b < n_blocks; b++) {
+      const __m256i* bi = reinterpret_cast<const __m256i*>(pi + b * 16);
+      const __m256i* bj = reinterpret_cast<const __m256i*>(pj + b * 16);
+      // planes: valid, heterozygous, homozygous reference and alternate
+      const __m256i vi = _mm256_loadu_si256(bi);
+      const __m256i hi = _mm256_loadu_si256(bi + 1);
+      const __m256i ri = _mm256_loadu_si256(bi + 2);
+      const __m256i ai = _mm256_loadu_si256(bi + 3);
+      const __m256i vj = _mm256_loadu_si256(bj);
+      const __m256i hj = _mm256_loadu_si256(bj + 1);
+      const __m256i rj = _mm256_loadu_si256(bj + 2);
+      const __m256i aj = _mm256_loadu_si256(bj + 3);
+      const __m256i hethet = _mm256_and_si256(hi, hj);
+      const __m256i opposite = _mm256_or_si256(_mm256_and_si256(ri, aj),
+                                               _mm256_and_si256(ai, rj));
+      const __m256i het_i = _mm256_and_si256(hi, vj);
+      const __m256i het_j = _mm256_and_si256(hj, vi);
+      c0 = _mm256_add_epi8(c0, PW_POPCNT8_AVX2(hethet));
+      c1 = _mm256_add_epi8(c1, PW_POPCNT8_AVX2(opposite));
+      c2 = _mm256_add_epi8(c2, PW_POPCNT8_AVX2(het_i));
+      c3 = _mm256_add_epi8(c3, PW_POPCNT8_AVX2(het_j));
+    }
+    uint32_t* cnt_ij = cnt_i + (j - i) * PwKing::N_COUNTS;
+    uint32_t s;
+    PW_HSUM8_AVX2(c0, s);
+    cnt_ij[0] += s;
+    PW_HSUM8_AVX2(c1, s);
+    cnt_ij[1] += s;
+    PW_HSUM8_AVX2(c2, s);
+    cnt_ij[2] += s;
+    PW_HSUM8_AVX2(c3, s);
+    cnt_ij[3] += s;
+  }
+}
+
+template <>
+struct PwAvx2<PwKing> {
+  static const bool available = true;
+  static void run(std::size_t i, std::size_t j0, std::size_t j1,
+                  std::size_t ps, const uint64_t* planes, uint32_t* cnt_i) {
+    pw_row_king_avx2(i, j0, j1, ps, planes, cnt_i);
+  }
+};
 #endif
 
 /******************************************************************************/
@@ -258,11 +375,12 @@ void pw_row_popcnt(std::size_t i, std::size_t n, std::size_t n_words,
 // (in the FBM) of locus k of the word, r is the row of the individual in the
 // FBM, spread is the table above, and loci_mask clears the bits of the
 // loci past the end of the last word. The N_PLANES words are written to
-// p_word.
+// p_word[0], p_word[blk], ... (see pw_word_offset()).
 template <class Stat>
 PW_ALWAYS_INLINE void pw_pack_word(const unsigned char* const* col_ptr,
                                    std::size_t r, const uint64_t* spread,
-                                   uint64_t loci_mask, uint64_t* p_word) {
+                                   uint64_t loci_mask, std::size_t blk,
+                                   uint64_t* p_word) {
   uint64_t acc[4];
   for (int q = 0; q < 4; q++) {
     const unsigned char* const* cp = col_ptr + 16 * q;
@@ -282,7 +400,7 @@ PW_ALWAYS_INLINE void pw_pack_word(const unsigned char* const* col_ptr,
     for (int q = 0; q < 4; q++) {
       word |= ((acc[q] >> (16 * p)) & 0xFFFFull) << (16 * q);
     }
-    p_word[p] = word & loci_mask;
+    p_word[blk * p] = word & loci_mask;
   }
 }
 
@@ -408,38 +526,75 @@ std::vector<uint32_t> pw_bitpacked_counts(Environment BM,
               return rows[a] < rows[b];
             });
 
-  // number of 64-bit words per chunk: keep the planes of the individuals
-  // visited by each individual (all of them, or those of its group) within
-  // ~256KB, so that they stay in cache whilst visiting the pairs, and the
-  // planes of all individuals within ~64MB; but use at least 4 and at most
-  // 64 words per chunk
-  std::size_t max_span = 1;
-  for (std::size_t i = 0; i < n; i++) {
-    max_span = std::max(max_span, pair_end[i] - i);
-  }
-  std::size_t chunk_words = (256 * 1024) / (8 * Stat::N_PLANES * max_span);
-  chunk_words = std::min(chunk_words, (64 * 1024 * 1024) /
-    (8 * Stat::N_PLANES * std::max<std::size_t>(n, 1)));
+  // number of 64-bit words per chunk: 64 (4096 loci), unless the planes of
+  // all individuals would exceed ~64MB; but at least 4 words. The pairs are
+  // visited by tiles (below), so that the planes of the individuals visited
+  // stay in cache whatever the size of the chunk; long chunks amortise the
+  // update of the counts of each pair (which, for many individuals, do not
+  // fit in cache)
+  std::size_t chunk_words = (64 * 1024 * 1024) /
+    (8 * Stat::N_PLANES * std::max<std::size_t>(n, 1));
   chunk_words =
     std::min<std::size_t>(64, std::max<std::size_t>(4, chunk_words));
   const std::size_t chunk_loci = chunk_words * 64;
-  // planes, for each individual: chunk_words groups of N_PLANES words
-  std::vector<uint64_t> planes(n * chunk_words * Stat::N_PLANES);
+  // planes, for each individual: chunk_words (rounded up to a multiple of 4
+  // for the AVX2 layout) words of each of the N_PLANES planes (see
+  // pw_word_offset())
+  const std::size_t chunk_words_pad = (chunk_words + 3) / 4 * 4;
+  std::vector<uint64_t> planes(n * chunk_words_pad * Stat::N_PLANES);
   uint64_t* p_planes = planes.data();
   uint32_t* p_counts = counts.data();
+
+  // the pairs are visited by tiles of individuals: a unit of work is the
+  // pairs (i, j) with i in tile ti and j in tile tj (ti <= tj, j >= i), so
+  // that the planes of the individuals of tile tj (~128KB) stay in cache
+  // whilst the individuals of tile ti are compared with them; units
+  // without pairs (e.g. across groups) are skipped
+  const std::size_t tile = std::min<std::size_t>(256, std::max<std::size_t>(
+    16, (128 * 1024) / (8 * chunk_words * Stat::N_PLANES)));
+  const std::size_t n_tiles = (n + tile - 1) / tile;
+  std::vector<std::size_t> tile_max_end(n_tiles, 0);
+  for (std::size_t i = 0; i < n; i++) {
+    tile_max_end[i / tile] = std::max(tile_max_end[i / tile], pair_end[i]);
+  }
+  std::vector<std::size_t> unit_ti, unit_tj;
+  for (std::size_t tj = 0; tj < n_tiles; tj++) {
+    for (std::size_t ti = 0; ti <= tj; ti++) {
+      if (tile_max_end[ti] > tj * tile) {
+        unit_ti.push_back(ti);
+        unit_tj.push_back(tj);
+      }
+    }
+  }
+  const std::size_t n_units = unit_ti.size();
 
   // use the hardware popcount when available
   bool use_popcnt = false;
 #ifdef PW_X86_POPCNT
   use_popcnt = __builtin_cpu_supports("popcnt");
+#else
+  // not used without x86 (avoids an unused-variable warning with -Wall)
+  (void) use_popcnt;
 #endif
+  // and the AVX2 kernel (if the statistic has one); the environment
+  // variable TIDYPOPGEN_NO_AVX2 turns it off (to test the scalar kernel on
+  // CPUs with AVX2, and for timings)
+  bool use_avx2 = false;
+#ifdef PW_X86_AVX2
+  use_avx2 = PwAvx2<Stat>::available && __builtin_cpu_supports("avx2") &&
+    std::getenv("TIDYPOPGEN_NO_AVX2") == nullptr;
+#endif
+  // the layout of the planes (see pw_word_offset())
+  const std::size_t blk = use_avx2 ? 4 : 1;
 
   #pragma omp parallel num_threads(ncores)
   {
     for (std::size_t l0 = 0; l0 < m; l0 += chunk_loci) {
       std::size_t n_loci = std::min(chunk_loci, m - l0);
       std::size_t n_words = (n_loci + 63) / 64;
-      std::size_t stride = n_words * Stat::N_PLANES;
+      // words per plane (a multiple of blk) and per individual
+      std::size_t ps = (n_words + blk - 1) / blk * blk;
+      std::size_t stride = ps * Stat::N_PLANES;
 
       // pack the genotypes of this chunk into bit planes, by words of 64
       // loci and blocks of 64 individuals (in the order of the FBM); each
@@ -484,28 +639,57 @@ std::vector<uint32_t> pw_bitpacked_counts(Environment BM,
         // pack each individual of the block
         for (std::size_t ii = 0; ii < n_ind; ii++) {
           std::size_t idx = pack_order[i0 + ii];
-          pw_pack_word<Stat>(col_ptr, rows[idx], spread, loci_mask,
-                             p_planes + idx * stride + w * Stat::N_PLANES);
+          pw_pack_word<Stat>(col_ptr, rows[idx], spread, loci_mask, blk,
+                             p_planes + idx * stride +
+                               pw_word_offset<Stat>(w, 0, blk));
+        }
+      }
+      // (implicit barrier) the padding words of the last block are 0
+      if (ps > n_words) {
+        #pragma omp for schedule(static)
+        for (std::size_t idx = 0; idx < n; idx++) {
+          for (std::size_t w = n_words; w < ps; w++) {
+            for (int p = 0; p < Stat::N_PLANES; p++) {
+              p_planes[idx * stride + pw_word_offset<Stat>(w, p, blk)] = 0;
+            }
+          }
         }
       }
       // (implicit barrier: all planes are ready)
 
-      // visit all pairs (j >= i); rows of the triangle have different
-      // lengths, so use a dynamic schedule
-      #pragma omp for schedule(dynamic, 8)
-      for (std::size_t i = 0; i < n; i++) {
-        uint32_t* cnt_i = p_counts + tri_start[i] * Stat::N_COUNTS;
-        std::size_t end_i = pair_end[i];
-        const uint32_t* wts_chunk = p_wts ? p_wts + l0 : nullptr;
+      // visit all pairs (j >= i), tile by tile; tiles on the diagonal have
+      // half the pairs, so use a dynamic schedule
+      const uint32_t* wts_chunk = p_wts ? p_wts + l0 : nullptr;
+      #pragma omp for schedule(dynamic, 1)
+      for (std::size_t u = 0; u < n_units; u++) {
+        std::size_t i0 = unit_ti[u] * tile;
+        std::size_t i1 = std::min(n, i0 + tile);
+        std::size_t j0 = unit_tj[u] * tile;
+        std::size_t j1 = std::min(n, j0 + tile);
+        for (std::size_t i = i0; i < i1; i++) {
+          std::size_t start = std::max(i, j0);
+          std::size_t end = std::min(pair_end[i], j1);
+          if (start >= end) {
+            continue;
+          }
+          uint32_t* cnt_i = p_counts + tri_start[i] * Stat::N_COUNTS;
+          if (use_avx2) {
+            PwAvx2<Stat>::run(i, start, end, ps, p_planes, cnt_i);
+            continue;
+          }
 #ifdef PW_X86_POPCNT
-        if (use_popcnt) {
-          pw_row_popcnt<Stat>(i, end_i, n_words, p_planes, cnt_i, wts_chunk);
-        } else {
-          pw_row_generic<Stat>(i, end_i, n_words, p_planes, cnt_i, wts_chunk);
-        }
+          if (use_popcnt) {
+            pw_row_popcnt<Stat>(i, start, end, n_words, p_planes, cnt_i,
+                                wts_chunk);
+          } else {
+            pw_row_generic<Stat>(i, start, end, n_words, p_planes, cnt_i,
+                                 wts_chunk);
+          }
 #else
-        pw_row_generic<Stat>(i, end_i, n_words, p_planes, cnt_i, wts_chunk);
+          pw_row_generic<Stat>(i, start, end, n_words, p_planes, cnt_i,
+                               wts_chunk);
 #endif
+        }
       }
       // (implicit barrier: the planes can be overwritten by the next chunk)
     }
