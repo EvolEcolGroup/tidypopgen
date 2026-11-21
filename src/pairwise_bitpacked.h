@@ -572,6 +572,9 @@ std::vector<uint32_t> pw_bitpacked_counts(Environment BM,
   bool use_popcnt = false;
 #ifdef PW_X86_POPCNT
   use_popcnt = __builtin_cpu_supports("popcnt");
+#else
+  // not used without x86 (avoids an unused-variable warning with -Wall)
+  (void) use_popcnt;
 #endif
   // and the AVX2 kernel (if the statistic has one); the environment
   // variable TIDYPOPGEN_NO_AVX2 turns it off (to test the scalar kernel on
