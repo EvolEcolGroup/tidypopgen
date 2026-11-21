@@ -4,6 +4,21 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-21 (laptopX1): PRs #239 (KING AVX2) and #240 (VCF merge); branches cleaned
+
+- **PR #238** (RcppArmadillo removed) and **#237** merged by Andrea.
+- **Branches:** deleted (Andrea) `pca_missing`, `cran_test_time`,
+  `bed_reader`, `big_data_article`, `adm_plot_ordering`, `pedigree`,
+  `feature/pop-tajimas-d-polyploid` (merged or superseded); `as_fbm` and
+  `skill` kept. `king_simd_packing` is gone (rejected, never pushed).
+- **PR #239** (`king_avx2`, version 1.0.0.9013): the KING prototypes on
+  `dev`, plus a fix of an unused-variable warning on non-x86 and a test of
+  both kernels; kernel tests pass with AVX2, `TIDYPOPGEN_NO_AVX2=1` and the
+  x86 code compiled out; full suite 5908 passed.
+- **PR #240** (`vcf_merge_speed`, 1.0.0.9014): the VCF merge prototypes,
+  pass-1 errors naming the file, a cache-vs-reread test, docs of the cache
+  (`options(tidypopgen.merge_cache = FALSE)`); full suite 5918 passed.
+
 ## 2026-11-21 (laptopX1): RcppArmadillo removed
 
 - **Done:** on `remove_armadillo` (from `dev`, `bffb3460`, local): RcppArmadillo

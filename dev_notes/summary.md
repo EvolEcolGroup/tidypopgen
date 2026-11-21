@@ -1,7 +1,8 @@
 # tidypopgen: summary
 
 Updated 2026-11-21 (laptopX1: #235 and #231 merged into `dev`; the
-package split planned and deferred; PR #237 opened). One section: the package's issue in
+package split planned and deferred; #237 and #238 merged; PRs #239 and
+#240 open). One section: the package's issue in
 dramanica/claude_jobs, with the single list of its tasks. Its first
 paragraph, status and next steps are copied into the issue
 (`scripts/sync_issue.py`).
@@ -10,7 +11,7 @@ paragraph, status and next steps are copied into the issue
 
 Population genetics with `gen_tibble`s: faster input (VCF reading in `dev`, merging of VCFs prototyped), analyses with missing genotypes without imputation (PCA, DAPC, pcadapt, LD clumping and pruning), and fast kinship and inbreeding within groups.
 
-**Status.** PR #231 (missing genotypes in PCA, DAPC, pcadapt and LD; grouped `pairwise_king()` and `indiv_inbreeding()`; the parallel `.bed` reader; with #235, vignettes grouped early) is merged into `dev` (`e20145a2`, 21 Nov), so 1.1.0 is next. Prototypes on `merge_vcf_speed` make `gt_merge_vcfs()` 1.6x faster on many single-sample files with identical outputs (desktop, sgdp-like, 8 threads, 16.7 -> 10.5 s), and on `king_plink_ideas` a two-path KING kernel makes the full matrix 1.76x faster on the desktop with AVX2 (6.56 -> 3.72 s on 1 thread, 1.4x faster than PLINK 2) and 1.3x faster without, outputs identical; a plan for splitting tidypopgen into an umbrella over tidypopcore, tidypopstats and tidygenclust is written and deferred (`package_split.md`). Handover: `dev_notes/handover.md` on `split_plan` (notes only, to merge into `dev`); `vcf_merge.md`, `pairwise_bitpacked.md`, `bed_reader.md`, `gt_save_speed.md`.
+**Status.** PR #231 (missing genotypes in PCA, DAPC, pcadapt and LD; grouped `pairwise_king()` and `indiv_inbreeding()`; the parallel `.bed` reader; with #235, vignettes grouped early) is merged into `dev` (`e20145a2`, 21 Nov), so 1.1.0 is next. PR #240 makes `gt_merge_vcfs()` 1.6x faster on many single-sample files with identical outputs (desktop, sgdp-like, 8 threads, 16.7 -> 10.5 s), and in PR #239 a two-path KING kernel makes the full matrix 1.76x faster on the desktop with AVX2 (6.56 -> 3.72 s on 1 thread, 1.4x faster than PLINK 2) and 1.3x faster without, outputs identical; a plan for splitting tidypopgen into an umbrella over tidypopcore, tidypopstats and tidygenclust is written and deferred (`package_split.md`). Handover: `dev_notes/handover.md` on `split_plan` (notes only, to merge into `dev`); `vcf_merge.md`, `pairwise_bitpacked.md`, `bed_reader.md`, `gt_save_speed.md`.
 
 With missing genotypes, imputation pulls individuals with many missing
 genotypes together and makes missingness an axis of the PCA (on HGDP650, PC1
@@ -42,16 +43,16 @@ but Andrea judged it not worth the complexity (with that many loci
 
 **Next steps**
 - [ ] **P2** [desktop] Re-time the HGDP650 PCA/DAPC/pcadapt/LD benchmarks on the P-cores (not set up): medians in `gt_pca.md`, `ld_missing.md`.
-- [ ] **P2** [claude] Make `merge_vcf_speed` ready for a PR (file names in pass-1 errors, a cache-vs-reread test, full suite, `gen_tibble()` timing): done when a PR into `dev` is open.
-- [ ] **P2** [claude] Keep optimising: pcadapt's t-scores, the GRM's count of shared loci, the DAPC regression, KING: check a build of the two-path kernel without AVX2 (`king_plink_ideas` `e2692136`; 1.76x on the desktop), then a PR if Andrea agrees: done when >5% faster with identical outputs.
-- [ ] **P2** [review] Review and merge PR #237 (`cran_test_time`: 13 slow test blocks skipped on CRAN, CRAN-mode tests 214 -> 163 s on the laptop, all still run on GitHub; and the concise 1.1.0 NEWS): done when it is in `dev`, before 1.1.0.
-- [ ] **P2** [review] Release 1.1.0 (#231 is merged; after the CRAN test trims): set the version, re-time the precompiled articles on a quiet machine, merge `dev` into `main`, re-run `urlchecker::url_check()` and submit.
+- [ ] **P2** [review] Merge PR #239 (KING AVX2 kernel: full matrix 1.76x on the desktop, outputs identical; ~120 lines of x86-only code), then rebase and merge PR #240 (`gt_merge_vcfs()` 1.6x on single-sample merges): done when both are in `dev`, before 1.1.0.
+- [ ] **P2** [claude] Keep optimising: pcadapt's t-scores, the GRM's count of shared loci, the DAPC regression, the other KING and VCF merge ideas: done when >5% faster with identical outputs.
+- [ ] **P2** [review] Release 1.1.0 (after #239 and #240): set the version, re-time the precompiled articles on a quiet machine, merge `dev` into `main`, re-run `urlchecker::url_check()` and submit.
 - [ ] **P3** [decide] Look into the package split when ready (`package_split.md`: decisions, phases, open questions; Phase 0 after 1.1.0).
-- [ ] **P3** [cleanup] Delete merged branches (`bed_reader` on origin, `pca_missing`, then `merge_vcf_speed`, `king_*` once decided); review the other local branches on the laptop; ask before deleting the benchmark data on the laptop's annex and in `~/claude_work/tidypopgen/` on the desktop.
+- [ ] **P3** [cleanup] After #239 and #240, delete `king_avx2`, `vcf_merge_speed`, `king_plink_ideas`, `merge_vcf_speed`; ask before deleting the benchmark data on the laptop's annex and in `~/claude_work/tidypopgen/` on the desktop.
 
 **Done**
 - PR #235 merged into `pca_missing` (`af7fed7e`), then #231 into `dev` (`e20145a2`): 21 Nov (Andrea).
 - Andrea chose to skip all eight candidates on CRAN; done on `cran_test_time` (pushed): 21 Nov.
-- 1.1.0 NEWS rewritten concisely; PR #237 opened (`cran_test_time` into `dev`): 21 Nov.
+- #237 (CRAN test skips, concise NEWS) and #238 (RcppArmadillo removed) merged: 21 Nov.
+- PRs #239 (KING AVX2) and #240 (faster VCF merge) opened; merged and superseded branches deleted: 21 Nov.
 - Test times measured: on CRAN (1.0.0, from its logs) and per test file on the laptop (-O2, CRAN mode: 214 s, the 10 slowest files 46%): 21 Nov.
 - Plan for the package split written and deferred (`package_split.md`, file map in `package_split/`; Andrea's decisions on the umbrella, names, clustering and website): 21 Nov.

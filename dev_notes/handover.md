@@ -1,123 +1,95 @@
 # tidypopgen: handover
 
-Updated 2026-11-21 (laptopX1: #235 and #231 merged into `dev`; the
-package split planned and deferred; PR #237 opened). For the next session: read this and
-`summary.md` first. History is in `progress.md`; designs are in the topic
-documents listed in `README.md`.
+Updated 2026-11-21 (laptopX1: #237 and #238 merged; PRs #239 (KING AVX2)
+and #240 (faster `gt_merge_vcfs()`) open; merged and superseded branches
+deleted). For the next session: read this and `summary.md` first. History
+is in `progress.md`; designs are in the topic documents listed in
+`README.md`.
 
 ## Branches
 
 | branch | purpose | base | pushed | merged |
 |---|---|---|---|---|
 | `split_plan` | dev notes only: the plan for the package split (`package_split.md`, `package_split/`) and these updated living documents; merge into `dev` (no code, `[skip ci]`) | `dev` at `e20145a2` | yes (21 Nov) | no |
-| `remove_armadillo` | RcppArmadillo removed (`bffb3460`): no source file used it; dropped from `LinkingTo`, the `-DARMA_*` flags gone from `src/Makevars`, `RcppExports.cpp` regenerated; compiles, full suite passes (5912, `NOT_CRAN=true`) | `dev` at `e20145a2` | no | no |
-| `merge_vcf_speed` | three prototypes speeding up `gt_merge_vcfs()` (`d3b982d0` keep the genotypes of pass 1, `bc6856b6` parallel line parsing, `6982994c` raw alleles), outputs identical; 1.6x on sgdp and many (laptop, 4 threads; desktop, 8 threads), 1.1-1.25x on pops; worktree `/media/andrea/Elements1/tmp/claude/tidypopgen/merge_vcf/wt` (`vcf_merge.md`) | `pca_missing` at `5e207d78` | yes (20 Nov) | no PR |
-| `king_plink_ideas` | KING ideas from PLINK 2: `72377615` tiles + 64-word chunks (1.35x), `ef1c0b4c` AVX2 KING kernel, `e2692136` two paths (full matrix on the desktop: AVX2 1.76x, 1.4x faster than PLINK 2; scalar 1.3x); outputs identical, tests pass with and without AVX2; worktree `/media/andrea/Elements1/tmp/claude/tidypopgen/plink_king/wt` (`pairwise_bitpacked.md`) | `pca_missing` at `b8255226` | yes (20 Nov) | no |
+| `king_avx2` | PR #239: the KING ideas of `king_plink_ideas` cherry-picked onto `dev` (tiles; AVX2 kernel and scalar fallback, squashed), a warning fix for non-x86 builds, a test of both kernels; version 1.0.0.9013 and NEWS | `dev` at `ce748638` | yes (21 Nov) | no |
+| `vcf_merge_speed` | PR #240: the three prototypes of `merge_vcf_speed` cherry-picked onto `dev`, pass-1 errors naming the file, a cache-vs-reread test, docs; version 1.0.0.9014 (rebase on `DESCRIPTION` after #239) | `dev` at `ce748638` | yes (21 Nov) | no |
+| `merge_vcf_speed` | the original prototypes (`vcf_merge.md`); superseded by `vcf_merge_speed`: delete once #240 is merged | `pca_missing` at `5e207d78` | yes | no |
+| `king_plink_ideas` | the original KING prototypes (`pairwise_bitpacked.md`); superseded by `king_avx2`: delete once #239 is merged | `pca_missing` at `b8255226` | yes | no |
+| `as_fbm`, `skill` | `gt_as_fbm()` (Aug) and tooling to build a Claude skill (Oct); not in `dev`, kept (Andrea, 21 Nov) | old `dev` | yes | no |
 
 Deleted on 21 Nov (Andrea): `pca_missing` (#231), `cran_test_time` (#237),
-`bed_reader` (#234), `big_data_article`, `adm_plot_ordering` and `pedigree`
-(all superseded by `dev`). `king_simd_packing` (rejected, below the 1.5x bar)
-is no longer in the laptop's repository (never pushed). `feature/pop-tajimas-d-polyploid`
-(superseded) deleted too; `as_fbm` and `skill` kept (Andrea).
-`merge_vcf_speed` and `king_plink_ideas` were rechecked on 21 Nov: their
-prototype commits are not in `dev`.
+`remove_armadillo` (#238, merged), `bed_reader` (#234), `big_data_article`,
+`adm_plot_ordering`, `pedigree` and `feature/pop-tajimas-d-polyploid` (all
+superseded by `dev`). `king_simd_packing` (rejected, below the 1.5x bar) is
+no longer in the laptop's repository (never pushed). The Elements HDD now
+mounts as `/media/andrea/Elements` and gave "Permission denied" on 21 Nov.
 
-About 19 other local branches on the laptop look unmerged to git (`git branch
---no-merged origin/dev`), but many were squash-merged; see the clean-up task.
-
-The annex drive (USB) disconnected on 19 Nov at 22:09 and came back after a
-re-plug and a reboot; `git fsck` was clean and the unpushed commits read
-back. A copy of what was then unpushed is in
+A copy of what was unpushed when the annex drive failed (19 Nov) is in
 `~/claude_work/tidypopgen_rescue/` on the laptop's root drive (27 KB; delete
-once the branches are no longer needed).
+now that the branches are pushed or merged).
 
 ## Next tasks
 
-### 1. **P2** [desktop] Re-time on the P-cores
+### 1. **P2** [review] Merge PR #239 (KING AVX2), then PR #240 (VCF merge)
 
-- The VCF merge and KING were timed on 20 Nov (job `vcf_merge_king`;
-  `vcf_merge.md`, `pairwise_bitpacked.md`). Left: the HGDP650
-  PCA/DAPC/pcadapt/LD timings, not set up yet (desktop queue).
+- **#239** (`king_avx2`): HGDP650 full KING on the desktop 1.76x on 1
+  thread with AVX2, 1.31x scalar; outputs identical; tests pass with AVX2,
+  with `TIDYPOPGEN_NO_AVX2=1` and with the x86 code compiled out. Andrea's
+  call: ~120 lines of x86-only code (run-time dispatch, no compiler flags).
+- **#240** (`vcf_merge_speed`): 1.6x on single-sample merges, 1.14-1.25x on
+  pops; outputs identical. After #239 is merged, rebase it on `dev` (only
+  `DESCRIPTION`'s version conflicts; keep 1.0.0.9014) and push.
+- Full suites passed locally on both (5908 and 5918, `NOT_CRAN=true`).
+- **Then:** delete `king_avx2`, `vcf_merge_speed`, `king_plink_ideas` and
+  `merge_vcf_speed`.
 
-### 2. **P2** [claude] Make `merge_vcf_speed` ready for a PR
+### 2. **P2** [review] Release 1.1.0 (after #239 and #240)
 
-- **Branch:** `merge_vcf_speed` (rebase or merge onto `dev`, now that #231
-  is merged).
-- **Read first:** `vcf_merge.md` ("How it works", "Open questions").
-- **To do:** name the file in the genotype errors raised in pass 1 (P1's
-  regression); a test that the cache and the re-read give the same result
-  (swapped loci with haploid calls in diploids); the full test suite; time
-  `gen_tibble()` on one large VCF for P3 (-O2 builds only); NEWS.
-- **Done when:** a PR into `dev`, with the desktop timings of `vcf_merge.md`.
-
-### 3. **P2** [claude] Keep optimising (Andrea)
-
-- **Branch:** a new branch from `dev`; for KING,
-  `king_plink_ideas`.
-- **Read first:** `gt_pca.md` ("Breakdown by operation", "Open questions"),
-  `ld_missing.md`, `pairwise_bitpacked.md` ("Comparison with PLINK 2").
-- **Candidates:** pcadapt's t-scores (bigsnpr's `multLinReg`, ~5 of 7 s on
-  HGDP650 with 44% missing genotypes), which would also give the counts of
-  missing genotypes that `max_missing` now reads in an extra pass (+4%);
-  the GRM's count of loci genotyped in both individuals (~2-3 s with
-  missing genotypes); the DAPC regression (3.8 s); KING: the two-path
-  kernel is done on `king_plink_ideas` (`e2692136`; on the desktop's full
-  matrix AVX2 1.76x on 1 thread and 1.53x on 8, 1.4x faster than PLINK 2;
-  scalar 1.3x; "Timings of the PLINK 2 ideas" in `pairwise_bitpacked.md`);
-  before a PR, a build without AVX2 and Andrea's decision; then the other
-  ideas ranked there.
-- **Check:** -O2 builds only (`pkgbuild::clean_dll()`,
-  `compile_dll(debug = FALSE)`, `load_all(compile = FALSE)`, or
-  `R CMD INSTALL` into a separate library); the benchmarking skill; the
-  scripts and data are in `/media/andrea/annex/tmp/claude/tidypopgen/bench_dapc/`
-  and `bench_ld/`, and in `/media/andrea/Elements1/tmp/claude/tidypopgen/plink_king/`
-  (with `build/lib_{base,p1,p2}` and `run_proto.sh`) on the laptop;
-  `~/claude_work/tidypopgen/plink_king/` (`build/lib_{base,p1,p3}`) on
-  manica01.
-- **Done when:** faster by more than 5%, with identical outputs.
-
-### 4. **P2** [review] Merge PR #237 (`cran_test_time`), before 1.1.0
-
-- **What:** on CRAN, 1.0.0's tests take 4–11 minutes on the slower
-  flavours (the whole check 8–17 minutes). Andrea chose to skip on CRAN the
-  eight candidates of `test_times_2026-11.md`: 13 `test_that()` blocks in
-  eight files, one commit per file (`671bc2da`..`0891844f`), pushed.
-- **Result:** the tests CRAN runs take 163 s instead of 214 s on the laptop
-  (-O2, CRAN mode); the other files did not change (133.6 vs 133.5 s).
-  With `NOT_CRAN=true` (GitHub) nothing is skipped and all pass.
-- **NEWS:** the 1.1.0 section is rewritten concisely on the same branch
-  (`5ed6faa1`; Andrea's edit `06602b35`).
-- **Next:** merge PR #237 into `dev` (opened 21 Nov), then re-check CRAN's times after
-  1.1.0 is published. Further cuts, if needed: smaller inputs for the
-  slowest input/output test files (listed in the report).
-
-### 5. **P2** [review] Release 1.1.0 (from claude_jobs#5, 15 Nov; not rechecked)
-
-- #231 is merged (21 Nov): set the version, merge `dev` into `main` (pkgdown
-  then publishes
+- Set the version, merge `dev` into `main` (pkgdown then publishes
   `rad_seq.html`), re-run `urlchecker::url_check()` and submit;
   `cran-comments.md` gives the intermittent failures as the reason for the
-  early resubmission.
+  early resubmission. #237 (CRAN test skips) and #238 (no RcppArmadillo)
+  are in `dev`.
 - Before submitting, re-time the precompiled articles on a quiet machine:
   they were re-rendered on 20 Nov (`87c75ea4`) with indicative timings, and
   the laptop section of the HGDP benchmark still times the old pipeline
   (with imputation; see the backlog).
+- After publication, re-check CRAN's test times (`test_times_2026-11.md`).
 
-### 6. **P3** [cleanup] Branches and scratch files
+### 3. **P2** [desktop] Re-time on the P-cores
 
-- Delete `pca_missing` (merged as #231), `king_simd_packing` and
-  `king_plink_ideas` once decided, `merge_vcf_speed` once its PR is merged;
-  review the other local branches on the laptop (many squash-merged).
+- Left: the HGDP650 PCA/DAPC/pcadapt/LD timings, not set up yet (desktop
+  queue); and `gen_tibble()` on one large VCF with the parallel parsing of
+  #240 (not timed).
+
+### 4. **P2** [claude] Keep optimising (Andrea)
+
+- **Branch:** a new branch from `dev`.
+- **Read first:** `gt_pca.md` ("Breakdown by operation", "Open questions"),
+  `ld_missing.md`, `pairwise_bitpacked.md` ("Comparison with PLINK 2"),
+  `vcf_merge.md` ("Open questions").
+- **Candidates:** pcadapt's t-scores (bigsnpr's `multLinReg`, ~5 of 7 s on
+  HGDP650 with 44% missing genotypes), which would also give the counts of
+  missing genotypes that `max_missing` now reads in an extra pass (+4%);
+  the GRM's count of loci genotyped in both individuals (~2-3 s with
+  missing genotypes); the DAPC regression (3.8 s); the other KING ideas
+  ranked in `pairwise_bitpacked.md`; the further VCF merge candidates.
+- **Check:** -O2 builds only (`pkgbuild::clean_dll()`,
+  `compile_dll(debug = FALSE)`, `load_all(compile = FALSE)`, or
+  `R CMD INSTALL` into a separate library); the benchmarking skill; the
+  scripts and data are in `/media/andrea/annex/tmp/claude/tidypopgen/bench_dapc/`
+  and `bench_ld/` on the laptop, and in `~/claude_work/tidypopgen/` on
+  manica01.
+- **Done when:** faster by more than 5%, with identical outputs.
+
+### 5. **P3** [cleanup] Branches and scratch files
+
+- After #239 and #240: the branches listed in task 1.
 - On manica01: remove the worktree `~/claude_work/tidypopgen/wt_grouping`
   (`grouping` is merged and deleted), and discard Andrea's uncommitted
   edits of `a02_qc.Rmd` and `benchmark_hgdp.Rmd.orig` (and the lower-case
   edits) in `~/git/tidypopgen`, which are in `dev` through #235, before
   pulling there.
-- `bed_reader` is merged (PR #234); the local branch and
-  `~/claude_work/tidypopgen/bed_reader/` were deleted on 20 Nov (Andrea);
-  the branch is still on origin. To re-time the `.bed` reader, use the full
-  baboon fileset in `/media/andrea/data1/baboon_consortium/phase2_plink/`
-  (`bed_reader.md`).
 - Ask Andrea before deleting benchmark files (he may keep optimising with
   them). On the laptop's annex, under `/media/andrea/annex/tmp/claude/tidypopgen/`:
   `bench_dapc/` (~3 GB), `bench_ld/` (~0.5 GB), `bench_inb/`, `test_timing/`
@@ -182,8 +154,6 @@ The job `vcf_merge_king` ran them on 20 Nov (results in `vcf_merge.md` and
   umbrella over tidypopcore, tidypopstats and tidygenclust
   (`package_split.md`, deferred by Andrea on 21 Nov; its open questions;
   the file map in `package_split/`). Its Phase 0 starts after 1.1.0.
-- [review] RcppArmadillo removed on `remove_armadillo` (`bffb3460`,
-  not pushed): push and merge into `dev` if Andrea agrees.
 - [claude] Large PLINK files with locus names: 116 s for the `.bim` of 91M
   loci (fread 84 s, then the loci table 32 s: GCs over 91M strings) against
   17.5 s with `names_as_int = TRUE`; recommend `names_as_int` in the docs
