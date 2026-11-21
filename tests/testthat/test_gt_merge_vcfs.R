@@ -284,7 +284,8 @@ test_that("gt_merge_vcfs checks the samples and genotypes of each file", {
   bk <- tempfile()
   expect_error(
     gt_merge_vcfs(c(vcf_a, vcf_short), backingfile = bk, quiet = TRUE),
-    "has fewer genotypes than individuals"
+    paste("the VCF", vcf_short, "has fewer genotypes than individuals"),
+    fixed = TRUE
   )
   expect_false(any(file.exists(paste0(bk, c(".bk", ".rds")))))
   # a genotype with more alleles than the ploidy (from the first variant)

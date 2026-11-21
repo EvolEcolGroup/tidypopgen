@@ -694,6 +694,8 @@ private:
  *   genotypes must
  *   all be diploid and phased (any '/' is an error), and missing genotypes
  *   are stored as max_ploidy + 1, as for unphased data
+ * @param name_file Whether errors on genotypes name the VCF (as when several
+ *   files are read by gt_merge_vcfs() and gt_concat_vcfs())
  * Missing IDs (".") are replaced by the chromosome and position (e.g.
  * "1_752566", or "NA_752566" for a missing chromosome ".", as vcfR does), so
  * that the names do not depend on how the chromosomes are returned.
@@ -713,7 +715,9 @@ List vcf_to_bk(std::string filename, std::string bk_file,
                bool chromosomes_as_int = false,
                std::string chromosomes_file = "",
                IntegerVector phased_lut = IntegerVector::create(),
-               bool alleles_as_raw = false) {
+               bool alleles_as_raw = false, bool name_file = false) {
+  // the VCF named by errors on genotypes
+  const std::string error_file = name_file ? filename : "";
   // are we storing phased genotypes? (as bytes of phased_lut)
   unsigned char phased_bytes[4] = {0, 0, 0, 0};
   const bool phased = read_phased_lut(phased_lut, phased_bytes);
@@ -1101,7 +1105,7 @@ List vcf_to_bk(std::string filename, std::string bk_file,
       }
       if (status != GENOTYPES_OK) {
         stop_phased_genotypes(line_start, line_len, snp_lines, n_individuals,
-                              phased_bytes, sample_names);
+                              phased_bytes, sample_names, error_file);
       }
     } else {
 #pragma omp parallel for num_threads(n_threads) schedule(static) \
@@ -1117,7 +1121,8 @@ List vcf_to_bk(std::string filename, std::string bk_file,
       }
     }
     if (status != GENOTYPES_OK) {
-      stop_genotype_status(status, "the VCF");
+      stop_genotype_status(status, error_file.empty() ? "the VCF" :
+                             "the VCF " + error_file);
     }
     max_alleles = std::max(max_alleles, chunk_max_alleles);
     min_alleles = std::min(min_alleles, chunk_min_alleles);

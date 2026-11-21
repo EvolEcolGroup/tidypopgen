@@ -568,7 +568,9 @@ scan_vcf_file <- function(file, names_as_int, n_cores, quiet,
     } else {
       integer(0)
     },
-    alleles_as_raw = alleles_as_raw
+    alleles_as_raw = alleles_as_raw,
+    # (errors on genotypes name the file, as several are read)
+    name_file = TRUE
   )
   if (length(scan$sample_names) == 0) {
     stop("the VCF ", file, " has no samples (or no variants)")
