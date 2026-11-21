@@ -10,7 +10,7 @@ files, SFS, CRAN checks) is described in the topic documents listed in
   data, docs) and the packages that use tidypopgen, and wrote the plan
   `package_split.md`, with a map of every tracked file to its package
   (`package_split/modules.csv`, built by `make_modules.R`). Notes only, on
-  `dev`; no code changed.
+  branch `split_plan` (from `dev`, `43a6b275`); no code changed.
 - **Decisions (Andrea):** tidypopgen 2.0.0 as an umbrella that Depends on
   tidypopcore, tidypopstats and tidygenclust, with a frozen re-export of
   the 1.x functions; clustering moves to tidygenclust, and 2.0.0 waits for
