@@ -1,0 +1,28 @@
+- Sat 21 Nov 15:08: started; waiting for the tidypopgl timings to end (/home/andrea/tpgl_prof/TIMING_BUSY) and an idle machine (5-min load < 1.0)
+- Sat 21 Nov 15:53: machine idle (load 0.10 0.20 0.53)
+- Sat 21 Nov 15:53: start setup (load 0.10 0.20 0.53)
+- Sat 21 Nov 16:00: done setup (6 min)
+- Sat 21 Nov 16:03: start check (load 0.79 5.46 4.17)
+- Sat 21 Nov 16:03: done check (0 min)
+- Sat 21 Nov 16:04: start king_t1 (load 0.43 4.29 3.87)
+- Sat 21 Nov 16:10: done king_t1 (5 min)
+- Sat 21 Nov 16:10: start vcf_t1 (load 0.61 1.82 2.87)
+- Sat 21 Nov 16:18: done vcf_t1 (8 min)
+- Sat 21 Nov 16:18: start king_t8 (load 0.86 1.09 2.07)
+- Sat 21 Nov 16:21: done king_t8 (2 min)
+- Sat 21 Nov 16:21: start vcf_t8 (load 0.72 0.82 1.78)
+- Sat 21 Nov 16:25: done vcf_t8 (4 min)
+- Sat 21 Nov 16:26: start gt_t8 (load 0.81 1.23 1.69)
+- Sat 21 Nov 16:26: FAILED gt_t8 (0 min), see logs/phase_gt_t8.log
+- Sat 21 Nov 16:26: start gt_t1 (load 0.83 1.22 1.69)
+- Sat 21 Nov 16:26: FAILED gt_t1 (0 min), see logs/phase_gt_t1.log
+- Sat 21 Nov 16:26: all phases run
+- Sat 21 Nov 16:26: reporting
+- Sat 21 Nov 16:27: started; waiting for the tidypopgl timings to end (/home/andrea/tpgl_prof/TIMING_BUSY) and an idle machine (5-min load < 1.0)
+- Sat 21 Nov 16:57: machine idle (load 0.08 0.09 0.62)
+- Sat 21 Nov 16:57: start gt_t8 (load 0.08 0.09 0.62)
+- Sat 21 Nov 16:59: done gt_t8 (1 min)
+- Sat 21 Nov 16:59: start gt_t1 (load 0.27 0.15 0.59)
+- Sat 21 Nov 17:01: done gt_t1 (1 min)
+- Sat 21 Nov 17:01: all phases run
+- Sat 21 Nov 17:01: reporting
