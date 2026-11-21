@@ -4,10 +4,13 @@
 #' per population, or per sequencing batch) into a single [`gen_tibble`], as
 #' `bcftools merge` would, followed by [gen_tibble()]. It is much faster than
 #' reading each file with [gen_tibble()] and merging them with
-#' [rbind()][rbind.gen_tbl] (one pair at a time), and needs no space on disk
-#' beyond the merged `gen_tibble`: each file is read twice, once for its loci
-#' (to match them across files) and once for its genotypes, which are written
-#' straight into the merged backing file.
+#' [rbind()][rbind.gen_tbl] (one pair at a time). Each file is read once:
+#' its loci are matched across files, and its genotypes are kept in a
+#' temporary backing file next to the merged one (one byte per genotype,
+#' deleted at the end), then copied into the merged backing file. With little
+#' space on disk, `options(tidypopgen.merge_cache = FALSE)` reads each file
+#' twice instead (once for its loci and once for its genotypes), which is
+#' slower but needs no space beyond the merged `gen_tibble`.
 #'
 #' As with [gen_tibble()], only biallelic SNPs are read from each file. Loci
 #' are matched across files by chromosome and position (as in `bcftools
