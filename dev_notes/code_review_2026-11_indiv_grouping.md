@@ -5,11 +5,11 @@
 - **Branch:** `indiv_grouping` (local, not pushed), from `vignette_filtering`
   at `cb2fe55b` (which is itself a few commits behind `dev`: it lacks
   #239-#241).
-- **Commits:** 11: 6 code fixes (one of them fixes a regression of another,
+- **Commits:** 12: 7 code fixes (one of them fixes a regression of another,
   found by the verifying agent; one is the DESCRIPTION), 5 documentation
   commits (vignette text; two typos and a trailing space in the new
   vignette text of `vignette_filtering`; wording).
-- **Findings not fixed:** 3 (one needs a decision).
+- **Findings not fixed:** 2 (no decision needed).
 - **Scope:** Andrea asked (21 Nov) whether the `indiv_*` family is
   consistent on grouped tibbles. The `loci_*` family was surveyed too.
 
@@ -20,7 +20,8 @@
 | `R CMD check --run-donttest` (with `NOT_CRAN=true`: full test suite, Rd examples incl. `\donttest`, vignettes) on `7c58224d` (the tip but for the whitespace commit `d9fbfad6`), laptop, R 4.6.2 | 0 errors, 0 warnings, 2 notes, both local: `.git` (the check ran in a git worktree, where `.git` is a file) and the `-mno-omit-leaf-frame-pointer` flag of the Ubuntu R build; tests 5.5 min, all pass |
 | `lintr::lint_package()` on `7c58224d` | 2 lints: a trailing space in the new vignette code of `vignette_filtering` (fixed in `d9fbfad6`; the file then lints clean), and an `object_usage_linter` false positive for `read_bed_to_fbm` in `R/gen_tibble_bed.R` (defined in `R/RcppExports.R`; not touched by this branch) |
 | `spelling::spell_check_package()` on the tip | no errors |
-| Each new or changed test fails before its fix and passes after | yes, for all 5 code commits with tests (checked by a separate agent for `34e34394`, `1db53cc8`, `2653506a`, `54f7566e`, and by me for `609927d4`); see the exceptions below |
+| After the full check: `a96e6f67` (grouped counts follow `type`) | its test files (`test_loci_freq.R`, `test_genotypes_tbl_class.R`, `test_empty_groups.R`, `test_gt_pseudohaploid.R`) pass, and lintr is clean on the changed files; the full suite runs again on CI |
+| Each new or changed test fails before its fix and passes after | yes, for all 6 code commits with tests (checked by a separate agent for `34e34394`, `1db53cc8`, `2653506a`, `54f7566e`, and by me for `609927d4` and `a96e6f67`); see the exceptions below |
 
 Exceptions to "each test fails before the fix":
 
@@ -58,6 +59,9 @@ Exceptions to "each test fails before the fix":
 - Grouped `loci_pi()` with a single individual returns the tidy tibble (or
   the list or matrix asked for), not a plain vector; the old test expected
   the vector and was updated.
+- Grouped `loci_alt_freq(as_counts = TRUE)` returns, by default, a tibble
+  with `n_alt` and `n_valid` columns, not a list of two matrices (the output
+  of 1.0.0, still given by `type = "matrix"`, now with names).
 - Merging into `dev`: `NEWS.md` may conflict, as `dev` changed the pairwise
   speed bullet; the new bullets were added as separate items to limit this.
 
@@ -91,6 +95,11 @@ Exceptions to "each test fails before the fix":
 
 - [ ] `54f7566e` · `loci_pi()` grouped method — a single individual gave a
   plain vector whatever `type` *[edge case]*
+- [ ] `a96e6f67` · `loci_alt_freq(as_counts = TRUE)` grouped method — a list
+  of two unnamed matrices whatever `type` (vectors with a single group); now
+  "tidy" (default: `n_alt` and `n_valid` columns), "list" (as `group_map()`)
+  or "matrix" (the two matrices of before, named) *[behaviour change,
+  decided by Andrea]*
 
 ### Documentation
 
@@ -106,14 +115,6 @@ Exceptions to "each test fails before the fix":
   vignette, flagged by lintr *[docs]*
 
 ## Findings not fixed
-
-### Decision needed
-
-- **Grouped `loci_alt_freq(as_counts = TRUE)` ignores `type`:** it always
-  returns a list of two matrices (`n_alt`, `n_valid`), while grouped
-  `loci_missingness(as_counts = TRUE)` follows `type`. A tidy version would
-  need two value columns (or a `count` column); **Decision needed:** keep
-  the list for counts (and document it), or follow `type`?
 
 ### Performance (documented, not fixable in a method)
 
