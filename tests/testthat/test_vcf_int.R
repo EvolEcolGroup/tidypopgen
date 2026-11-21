@@ -97,6 +97,9 @@ for (names_as_int in c(TRUE, FALSE)) {
     "pca and dapc keep loci names, names_as_int =",
     names_as_int
   ), {
+    # slow with names as strings (~4 s): skipped on CRAN to keep its check
+    # short; the run with integer names still runs there
+    if (!names_as_int) skip_on_cran()
     anole_gt <- make_int_gt(names_as_int)
     anole_gt <- gt_impute_simple(anole_gt, method = "mode")
     # (a PCA of the imputed genotypes, whose DAPC needs no 'data')
