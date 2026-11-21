@@ -4,6 +4,17 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-21 (manica01, unattended): desktop timings of PRs #239 and #240
+
+- Job `tpg_pr_timing` (`dev_notes/pr_timing/`), after the tidypopgl timings;
+  -O2 installs of `dev` `ce748638`, `king_avx2`, `vcf_merge_speed` `2f4dc9b6`.
+- KING full HGDP650: 6.59 -> 3.63 s on 1 thread (1.82x; scalar 1.29x),
+  0.94 -> 0.62 s on 8; outputs identical with and without AVX2.
+- `gt_merge_vcfs()`: sgdp 38.97 -> 24.27 s (1.61x) on 1 thread, 16.77 ->
+  10.62 s on 8; pops 1.13-1.21x; many 1.33-1.58x; same checksums.
+- `gen_tibble()` on one VCF: no change on 1 thread, 6-10% on 8.
+- Two bugs of the job script fixed on the way (`85c0eb6b`).
+
 ## 2026-11-21 (laptopX1): PRs #239 (KING AVX2) and #240 (VCF merge); branches cleaned
 
 - **PR #238** (RcppArmadillo removed) and **#237** merged by Andrea.

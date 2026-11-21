@@ -109,27 +109,15 @@ now that the branches are pushed or merged).
 
 ## Desktop queue
 
-### Running: PRs #239 and #240 against `dev` (job `tpg_pr_timing`, scheduled 21 Nov 15:08)
+### Done: PRs #239 and #240 against `dev` (job `tpg_pr_timing`, 21 Nov 15:53-17:01)
 
-- `dev_notes/pr_timing/run_desktop_prs.sh` (copy in
-  `~/claude_work/tidypopgen/pr_timing/scripts/` on manica01), systemd user
-  unit `tpg_pr_timing`. It waits until `~/tpgl_prof/TIMING_BUSY` (the
-  tidypopgl session's timings) is gone and the 5-min load stays below 1,
-  then builds -O2 installs of `dev`, `king_avx2` and `vcf_merge_speed`
-  (E-cores), checks KING outputs, and times KING (dev, AVX2, scalar),
-  `gt_merge_vcfs()` (pops, sgdp, many) and `gen_tibble()` (one VCF with 100
-  samples, one with 1) on core 2 and the P-cores; ~1.5 h; no phase starts
-  after 23 Nov 07:00.
-- Results: committed to `split_plan` in `dev_notes/pr_timing/desktop_<date>/`
-  (`summary.md`), and posted on claude_jobs#5. Status:
-  `~/claude_work/tidypopgen/pr_timing/status.md`. Then: put the numbers in
-  the PRs and in `vcf_merge.md` / `pairwise_bitpacked.md`, disable the timer
-  and prune `~/claude_work/tidypopgen/pr_timing/` (keep the libraries until
-  the PRs are merged).
-
-
-All on the P-cores (`taskset -c 0-7`), timing-sensitive: tell the other
-sessions first (the benchmarking skill, "Unattended desktop jobs").
+- Results in `dev_notes/pr_timing/desktop_2026-11-21/summary.md`: KING full
+  matrix 1.82x (AVX2) / 1.29x (scalar) on 1 thread, 1.52x / 1.22x on 8,
+  outputs identical; `gt_merge_vcfs()` 1.21-1.61x on 1 thread, 1.13-1.58x on
+  8, same outputs; `gen_tibble()` on one VCF 0.99-1.02x on 1 thread,
+  1.06-1.10x on 8 (files of ~1 s).
+- Left on manica01: `~/claude_work/tidypopgen/pr_timing/` (the three -O2
+  libraries, the clone, logs; keep until the PRs are merged).
 
 ### HGDP650 timings of `gt_pca()`, DAPC, pcadapt, clumping and pruning
 
