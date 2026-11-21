@@ -121,7 +121,8 @@ We can see that most individuals have low missingness and heterozygosity, but
 there are a few individuals missing >20% of their genotypes. We can remove
 these individuals using the `filter` function, specifying to keep only
 individuals with missingness under 20%. Note that `filter` can clash with
-grouped data, so we need to ungrop(so that we can use a vector for all individuals, rather than a vector for each population) before filtering, and
+grouped data, so we need to ungroup (so that we can use a vector for all
+individuals, rather than a vector for each population) before filtering, and
 then re-group the data by population.
 
 
