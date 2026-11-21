@@ -1,0 +1,96 @@
+tidypopgen is released under the GNU General Public License, version 3 or
+later (GPL >= 3), copyright (C) Andrea Manica and the other authors listed in
+the DESCRIPTION file.
+
+Some of its code is adapted from, or translated from, the code of other
+software, whose copyright holders and licences are listed below. All these
+licences allow the code to be distributed as part of a GPL >= 3 package.
+
+
+PLINK 1.90
+  Copyright (C) 2005-2023 Shaun Purcell, Christopher Chang.
+  Licence: GPL-3. https://github.com/chrchang/plink-ng
+  - src/hwe.cpp: the Hardy-Weinberg exact test (SNPHWE2(), from
+    plink_stats.c, commit 3848a39), written by Christopher Chang from
+    the original code of Jan Wigginton (Wigginton, Cutler and Abecasis 2005).
+    Used by loci_hwe() and qc_report_loci().
+  - src/roh_sliding_cpp.cpp (windows_indiv_roh()) follows the algorithm of
+    calc_homozyg() and roh_update() in plink_homozyg.c, and
+    tests/testthat/helper_plink_homozyg.R transcribes it in R.
+  - src/ld_bitpacked.cpp: ld_prune_cpp() (loci_ld_prune()) follows ld_prune()
+    in plink_ld.c (--indep-pairwise), and r^2 over the individuals genotyped
+    at both loci is computed from bit planes, as PLINK does.
+
+bigsnpr and bigstatsr
+  Copyright (C) Florian Privé.
+  Licence: GPL-3. https://github.com/privefl/bigsnpr,
+  https://github.com/privefl/bigstatsr
+  - src/read_packedancestry.cpp: adapted from readbina() (src/read-plink.cpp
+    of bigsnpr).
+  - src/read_bed.cpp: read_bed_to_fbm() is adapted from readbina()
+    (src/read-plink.cpp of bigsnpr).
+  - R/gt_as_plink.R: write_bed() is adapted from bigsnpr::snp_writeBed().
+  - R/predict_gt_pca.R: predict.gt_pca() started from
+    bigstatsr::predict.big_SVD().
+  - R/autoplot_gt_dapc.R: the plot of the loadings is modified from bigstatsr.
+  - R/local_reimplementations.R: CutBySize() and seq2(), from bigstatsr.
+  - src/ld_bitpacked.cpp: ld_clump_cpp() (loci_ld_clump()) is adapted from
+    clumping_chr() (src/clumping.cpp) and which_to_check()
+    (src/clumping-utils.h) of bigsnpr, and R/loci_ld_clump.R follows
+    clumpingChr() (R/clumping.R).
+
+hierfstat
+  Copyright (C) Jérôme Goudet.
+  Licence: GPL (>= 2). https://github.com/jgx65/hierfstat
+  - R/pop_global_stats.R, R/pop_het_obs.R, R/pop_het_exp.R (and their C++
+    kernel, src/pop_stats_dip_pseudo_cpp.cpp): adapted from
+    hierfstat::basic.stats().
+  - R/indiv_inbreeding.R: the estimator is taken from hierfstat::beta.dosage().
+
+admixtools
+  Copyright (C) Robert Maier.
+  Licence: GPL-3. https://github.com/uqrmaie1/admixtools
+  - R/gt_extract_f2.R: gt_extract_f2() is adapted from
+    admixtools::extract_f2().
+
+R.utils
+  Copyright (C) Henrik Bengtsson.
+  Licence: LGPL (>= 2.1). https://github.com/HenrikBengtsson/R.utils
+  - R/count_vcf_variants.R: count_vcf_variants() and count_vcf_individuals()
+    are modified from R.utils::countLines().
+
+dadi (Spectrum class, as distributed with easySFS)
+  Copyright (C) 2008 Ryan Gutenkunst.
+  Licence: BSD (3 clauses); the full text is in the header of
+  tests/testthat/helper_sfs_reference.R.
+  - tests/testthat/helper_sfs_reference.R: R translation of
+    count_data_dict(), _from_count_dict(), _cached_projection(), fold() and
+    S(). src/sfs_cpp.cpp follows the same methods.
+
+easySFS
+  Copyright (C) Isaac Overcast.
+  Licence: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/).
+  https://github.com/isaacovercast/easySFS
+  - tests/testthat/helper_sfs_reference.R: R translation of make_datadict()
+    (the changes are described in the header of that file).
+
+
+Example data (inst/extdata/)
+  - lobster/: a subset of the SNP genotypes of European lobsters of Jenkins
+    et al. (2019) Evolutionary Applications 12: 1881-1899,
+    doi:10.1111/eva.12849; data from Dryad, doi:10.5061/dryad.2v1kr38,
+    released under CC0.
+  - anolis/: the RAD-seq genotypes of Anolis punctatus of Prates et al.
+    (2018) Ecology and Evolution 8: 11932-11944, doi:10.1002/ece3.4650,
+    from https://github.com/ivanprates/2018_Anolis_EcolEvol
+    (data/VCFtools_SNMF_punctatus_t70_s10_n46/).
+  - ploidy/arenosa_ploidy_example.vcf.gz: 200 loci of Arabidopsis arenosa
+    from Wos et al. (2019) Annals of Botany 124: 255-268,
+    doi:10.1093/aob/mcz070, taken from the data of the tutorial on
+    polyploid population genomics by Magdalena Bohutinska and Filip Kolar
+    (https://github.com/mbohutinska/PolyplChapter), which accompanies
+    Bohutinska et al. (2023) Population genomic analysis of
+    diploid-autopolyploid species. Methods in Molecular Biology 2545:
+    297-324, doi:10.1007/978-1-0716-2561-3_16.
+  - data/distruct_colours.rda: the colour palette of distruct (Rosenberg
+    2004, Molecular Ecology Notes 4: 137-138).

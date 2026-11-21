@@ -14,7 +14,9 @@ knitr::opts_chunk$set(
 In this vignette, we will demonstrate how to interpolate principal component scores
 across geographic space using the tidypopgen integration with the `sf` package.
 
-To do so, we will use a dataset of *Anolis punctatus* lizards from South America,
+To do so, we will use a dataset of *Anolis punctatus* lizards from South America
+(Prates et al. 2018, *Ecology and Evolution* 8: 11932-11944,
+doi:10.1002/ece3.4650),
 introduced in the vignette 'Population genetic analysis'. For a full analysis of this dataset using `tidypopgen`, and details on how to download the data, please refer to this previous vignette.
 
 Let's begin by reading in the data and attaching the metadata:
@@ -33,6 +35,14 @@ pops_path <- system.file("/extdata/anolis/punctatus_n46_meta.csv",
 )
 pops <- read.csv(pops_path)
 anole_gt <- anole_gt %>% left_join(pops, by = "id")
+```
+
+As the lizards come from two populations, we group the `gen_tibble` by
+population straight away, so that the functions that use groups take them
+into account:
+
+```{r}
+anole_gt <- anole_gt %>% group_by(population)
 ```
 
 And we can check our data using:
@@ -78,10 +88,12 @@ ggplot() +
 Our previous vignette used PCA, DAPC, and ADMIXTURE to show that this sample of *Anolis punctatus* lizards contains three main genetic clusters across the range of the species. Suppose that we wanted to interpolate the first principal component across the range of the species to observe the change in genetic variation across space.
 
 Let's run a PCA and augment the gen_tibble with the principal component scores.
+There is no need to impute the missing genotypes first: `gt_pca()` uses, for
+each pair of individuals, the loci genotyped in both (see the article on
+[missing genotypes](missing_data.html)).
 
 ```{r}
-anole_gt <- gt_impute_simple(anole_gt, method = "mode")
-anole_pca <- anole_gt %>% gt_pca_partialSVD(k = 30)
+anole_pca <- anole_gt %>% gt_pca(k = 30)
 anole_gt <- augment(anole_pca, data = anole_gt)
 ```
 
@@ -162,4 +174,4 @@ ggplot()  +
 
 ```
 
-From our interpolated map, we can see the clear gradient in the first principal component scores across the range of *Anolis punctatus*, with the highest scores among Atlantic forest populations in the east, and the lowest scores clustered among Amazonian populations in the west.
+From our interpolated map, we can see the clear gradient in the first principal component scores across the range of *Anolis punctatus*, with the highest scores clustered among Amazonian populations in the west, and the lowest scores among Atlantic forest populations in the east (the sign of a principal component is arbitrary, so only the gradient matters).

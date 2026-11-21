@@ -1,0 +1,52 @@
+
+# bench_plink_1.tsv (wall s; user s)
+pl_pgen_full       T=1 wall 5.150 (5.150-5.150) n=6; user 5.090 (5.090-5.100) n=6; load 0.57,0.63,0.66,0.65,0.63,0.77
+pl_bed_full        T=1 wall 5.130 (5.120-5.130) n=6; user 5.050 (5.050-5.060) n=6; load 0.65,0.61,0.71,0.57,0.69,0.75
+pl_pgen_within     T=1 wall 0.320 (0.310-0.320) n=6; user 0.280 (0.280-0.280) n=6; load 0.85,0.54,0.75,0.48,0.87,0.73
+pl_bed_within      T=1 wall 0.300 (0.300-0.310) n=6; user 0.255 (0.240-0.260) n=6; load 0.72,0.5,0.63,0.44,0.74,0.71
+pl_pgen_keeploop   T=1 wall 8.230 (8.210-8.520) n=6; user 5.565 (5.520-5.660) n=6; load 0.66,0.47,0.58,0.47,0.76,0.63
+pl_convert         T=1 wall 0.280 (0.230-0.280) n=6; user 0.145 (0.140-0.150) n=6; load 0.66,0.51,0.66,0.52,0.81,0.63
+pl_load            T=1 wall 0.050 (0.050-0.050) n=6; user 0.025 (0.020-0.030) n=6; load 0.66,0.56,0.66,0.56,0.81,0.68
+pl_read            T=1 wall 0.120 (0.110-0.120) n=6; user 0.065 (0.060-0.070) n=6; load 0.6,0.56,0.61,0.56,0.74,0.68
+
+# bench_plink_8.tsv (wall s; user s)
+pl_pgen_full       T=8 wall 0.790 (0.790-0.820) n=6; user 5.140 (5.140-5.150) n=6; load 0.73,0.69,0.69,1.99,1.83,0.48
+pl_bed_full        T=8 wall 0.810 (0.790-0.820) n=6; user 5.090 (5.090-5.100) n=6; load 0.62,0.73,1.74,1.6,1.55,0.48
+pl_pgen_within     T=8 wall 0.120 (0.120-0.130) n=6; user 0.295 (0.290-0.310) n=6; load 0.52,0.86,2.63,1.13,1.31,0.57
+pl_bed_within      T=8 wall 0.100 (0.100-0.110) n=6; user 0.280 (0.260-0.280) n=6; load 0.48,0.33,2.23,1.23,1.29,0.68
+pl_pgen_keeploop   T=8 wall 7.185 (7.180-7.220) n=6; user 5.470 (5.430-5.520) n=6; load 0.4,0.3,2.13,1.4,1.09,0.71
+pl_convert         T=8 wall 0.225 (0.160-0.240) n=6; user 0.150 (0.140-0.160) n=6; load 0.42,0.32,1.95,1.52,0.99,0.77
+pl_load            T=8 wall 0.035 (0.030-0.040) n=6; user 0.030 (0.030-0.030) n=6; load 0.38,0.35,1.8,1.52,0.99,0.84
+pl_read            T=8 wall 0.080 (0.070-0.080) n=6; user 0.070 (0.060-0.070) n=6; load 0.38,0.35,1.65,1.65,0.91,0.84
+
+# bench_tpg_1.tsv (first call, second call, gt_load; s)
+new   full         T=1 first 6.694 (6.685-6.705) n=6; second 6.558 (6.557-6.561) n=6; load 0.359 (0.358-0.367) n=6
+new   full_kernel  T=1 first 6.542 (6.538-6.558) n=6; second 6.482 (6.475-6.493) n=6; load 0.359 (0.357-0.369) n=6
+new   grouped      T=1 first 0.373 (0.372-0.378) n=6; second 0.354 (0.352-0.354) n=6; load 0.360 (0.360-0.361) n=6
+new   pack         T=1 first 0.251 (0.251-0.253) n=6; second 0.230 (0.228-0.230) n=6; load 0.360 (0.359-0.362) n=6
+
+# bench_tpg_8.tsv (first call, second call, gt_load; s)
+new   full         T=8 first 1.070 (1.060-1.085) n=6; second 0.940 (0.938-0.946) n=6; load 0.362 (0.360-0.364) n=6
+new   full_kernel  T=8 first 0.903 (0.902-0.905) n=6; second 0.865 (0.865-0.868) n=6; load 0.361 (0.360-0.375) n=6
+new   grouped      T=8 first 0.062 (0.062-0.063) n=6; second 0.057 (0.056-0.062) n=6; load 0.362 (0.360-0.381) n=6
+new   pack         T=8 first 0.045 (0.045-0.046) n=6; second 0.037 (0.037-0.037) n=6; load 0.363 (0.359-0.372) n=6
+
+# proto_1.tsv (first call, second call, gt_load; s)
+base  full         T=1 first 6.697 (6.694-6.703) n=6; second 6.556 (6.553-6.567) n=6; load 0.360 (0.359-0.381) n=6
+base  grouped      T=1 first 0.373 (0.373-0.374) n=6; second 0.354 (0.353-0.356) n=6; load 0.359 (0.358-0.361) n=6
+p1    full         T=1 first 5.175 (5.169-5.180) n=6; second 5.087 (5.069-5.095) n=6; load 0.360 (0.358-0.360) n=6
+p1    grouped      T=1 first 0.368 (0.368-0.374) n=6; second 0.348 (0.347-0.351) n=6; load 0.359 (0.358-0.361) n=6
+p3    full         T=1 first 3.718 (3.711-3.787) n=6; second 4.009 (4.006-4.031) n=6; load 0.359 (0.358-0.361) n=6
+p3    grouped      T=1 first 0.345 (0.343-0.346) n=6; second 0.321 (0.320-0.323) n=6; load 0.360 (0.357-0.363) n=6
+p3s   full         T=1 first 5.178 (5.171-5.185) n=6; second 5.018 (5.009-5.055) n=6; load 0.359 (0.358-0.361) n=6
+p3s   grouped      T=1 first 0.372 (0.372-0.373) n=6; second 0.353 (0.352-0.353) n=6; load 0.359 (0.357-0.377) n=6
+
+# proto_8.tsv (first call, second call, gt_load; s)
+base  full         T=8 first 1.058 (1.057-1.072) n=6; second 0.935 (0.935-0.941) n=6; load 0.362 (0.360-0.378) n=6
+base  grouped      T=8 first 0.063 (0.062-0.163) n=6; second 0.057 (0.057-0.117) n=6; load 0.362 (0.361-0.384) n=6
+p1    full         T=8 first 0.861 (0.858-0.864) n=6; second 0.748 (0.746-0.751) n=6; load 0.361 (0.359-0.362) n=6
+p1    grouped      T=8 first 0.066 (0.065-0.159) n=6; second 0.059 (0.059-0.070) n=6; load 0.361 (0.358-0.363) n=6
+p3    full         T=8 first 0.772 (0.767-1.308) n=6; second 0.613 (0.612-0.901) n=6; load 0.361 (0.361-0.454) n=6
+p3    grouped      T=8 first 0.060 (0.059-0.101) n=6; second 0.055 (0.054-0.074) n=6; load 0.361 (0.360-0.362) n=6
+p3s   full         T=8 first 0.859 (0.857-0.897) n=6; second 0.742 (0.739-0.743) n=6; load 0.361 (0.360-0.362) n=6
+p3s   grouped      T=8 first 0.066 (0.066-0.066) n=6; second 0.060 (0.060-0.060) n=6; load 0.362 (0.360-0.363) n=6

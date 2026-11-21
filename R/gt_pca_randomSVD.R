@@ -1,5 +1,11 @@
 #' PCA for `gen_tibble` objects by randomized partial SVD
 #'
+#' @description
+#' `r lifecycle::badge("deprecated")`
+#'
+#' This function is deprecated: use [gt_pca()] with `method = "random"`, which
+#' runs the same algorithm (and needs complete or imputed genotypes).
+#'
 #' This function performs Principal Component Analysis on a `gen_tibble`,
 #' by randomised partial SVD based on the
 #' algorithm in RSpectra (by Yixuan Qiu and Jiali Mei).\cr
@@ -28,7 +34,7 @@
 #'   but the total variance will not be stored in the output (and thus it will
 #'   not be possible to assign a proportion of variance explained to the
 #'   components).
-#' @param n_cores Number of cores used.
+#' @param n_cores Number of cores used (see [gt_pca()]).
 #' @param tol Precision parameter of [svds][RSpectra::svds]. Default is `1e-4`.
 #' @param verbose Should some progress be printed? Default is `FALSE`.
 #' @param fun_prod Function that takes 6 arguments (in this order):
@@ -94,54 +100,16 @@ gt_pca_randomSVD <- function(
   fun_cprod = bigstatsr::big_cprodVec,
   total_var = TRUE
 ) {
-  if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {
-    gt_set_imputed(x, set = TRUE)
-    on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)
-  }
-
-  if (n_cores > 1) {
-    # Remove checking for two levels of parallelism
-    .old_opt <- getOption("bigstatsr.check.parallel.blas", TRUE)
-    options(bigstatsr.check.parallel.blas = FALSE)
-    on.exit(options(bigstatsr.check.parallel.blas = .old_opt), add = TRUE)
-  }
-
-  X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
-  x_ind_col <- show_loci(x)$big_index
-  x_ind_row <- vctrs::vec_data(x$genotypes)
-
-  # big_randomSVD() makes a temporary FBM when run in parallel: keep it in a
-  # private directory, deleted on exit (see with_private_fbm_dir())
-  this_svd <- with_private_fbm_dir(bigstatsr::big_randomSVD(
-    X,
-    k = k,
-    ind.row = .gt_fbm_rows(x),
-    ind.col = .gt_fbm_cols(x),
-    fun.scaling = fun_scaling,
-    tol = tol,
-    verbose = verbose,
-    ncores = n_cores,
-    fun.prod = fun_prod,
-    fun.cprod = fun_cprod
-  )) # TODO check that this is correct and expose it,
-  # maybe create convenience function to get the values
-  # add names to the scores (to match them to data later)
-  row.names(this_svd$u) <- x$id
-  this_svd$v <- matrix_int_names(this_svd$v)
-  row_names(this_svd$v) <- loci_names(x)
-  this_svd$method <- "randomSVD"
+  lifecycle::deprecate_soft(
+    "1.1.0", "gt_pca_randomSVD()", "gt_pca(method = 'random')"
+  )
+  # a scaling given by the user (see scaling_lookup())
+  custom_scaling <- !missing(fun_scaling)
+  this_svd <- pca_random_svd(x,
+    k = k, fun_scaling = fun_scaling, tol = tol, verbose = verbose,
+    n_cores = n_cores, fun_prod = fun_prod, fun_cprod = fun_cprod,
+    total_var = total_var, custom_scaling = custom_scaling
+  )
   this_svd$call <- match.call()
-  this_svd$loci <- show_loci(x)
-  class(this_svd) <- c("gt_pca", class(this_svd))
-  if (total_var) {
-    this_svd$square_frobenius <- square_frobenius(
-      X,
-      x_ind_row,
-      x_ind_col,
-      center = this_svd$center,
-      scale = this_svd$scale
-    )
-  }
-
   this_svd
 }

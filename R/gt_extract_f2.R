@@ -7,7 +7,8 @@
 #' This function prepares data for various *ADMIXTOOLS 2* functions from the
 #' package *ADMIXTOOLS 2*. It takes a [`gen_tibble`], computes allele
 #' frequencies and blocked f2-statistics, and writes the results to `outdir`. It
-#' is equivalent to `admixtools::extract_f2()`.
+#' is equivalent to `admixtools::extract_f2()`, from which its code is adapted
+#' (*admixtools* is by Robert Maier, released under GPL-3).
 #' @param .x a grouped [`gen_tibble`], with a group for each population. Empty
 #'   groups (e.g. from `group_by(.drop = FALSE)`) are dropped.
 #' @param outdir Directory where data will be stored.
@@ -86,6 +87,10 @@
 #' f2_path <- tempfile()
 #' gt_extract_f2(lobsters, outdir = f2_path, quiet = TRUE)
 #' admixtools::f2_from_precomp(f2_path, verbose = FALSE)
+# The filtering of the allele frequency table and the computation of the f2
+# blocks are adapted from admixtools::extract_f2() (admixtools, copyright (C)
+# Robert Maier, GPL-3, https://github.com/uqrmaie1/admixtools); the allele
+# frequencies are computed from the gen_tibble by gt_to_aftable().
 gt_extract_f2 <- function(
   .x,
   outdir = NULL,

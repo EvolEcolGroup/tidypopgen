@@ -140,5 +140,6 @@ https://github.com/uqrmaie1/admixtools.
 This function prepares data for various \emph{ADMIXTOOLS 2} functions from the
 package \emph{ADMIXTOOLS 2}. It takes a \code{\link{gen_tibble}}, computes allele
 frequencies and blocked f2-statistics, and writes the results to \code{outdir}. It
-is equivalent to \code{admixtools::extract_f2()}.
+is equivalent to \code{admixtools::extract_f2()}, from which its code is adapted
+(\emph{admixtools} is by Robert Maier, released under GPL-3).
 }

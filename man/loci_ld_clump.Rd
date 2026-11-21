@@ -18,6 +18,8 @@ loci_ld_clump(.x, .col = "genotypes", ...)
   size = 100/thr_r2,
   exclude = NULL,
   use_positions = TRUE,
+  min_shared = 2,
+  insufficient = c("keep", "remove"),
   n_cores = 1,
   return_id = FALSE,
   ...
@@ -51,10 +53,21 @@ as they provide a more sensible approach.}
 
 \item{exclude}{Vector of SNP indices to exclude anyway. For example, can be
 used to exclude long-range LD regions (see Price2008). Another use can be
-for thresholding with respect to p-values associated with \code{S}.}
+for thresholding with respect to p-values associated with \code{S}. The
+indices are those of the loci of \code{.x} (whole numbers between 1 and the
+number of loci); a logical vector with one value per locus (\code{TRUE} for
+the loci to exclude) also works. Other values are an error.}
 
 \item{use_positions}{boolean, if TRUE (the default), \code{size} is in kb, if
 FALSE size is the number of SNPs.}
+
+\item{min_shared}{the minimum number of individuals genotyped at both loci
+for their r^2 to be used. Default is \code{2}, as in PLINK (with fewer, r^2 is
+undefined).}
+
+\item{insufficient}{what to do with pairs of loci genotyped together in
+fewer than \code{min_shared} individuals: \code{"keep"} (the default) both loci,
+or \code{"remove"} the less important one, as if they were linked.}
 
 \item{n_cores}{number of cores to be used}
 
@@ -71,15 +84,30 @@ a boolean vector indicating whether the SNP should be kept (if
 This function uses clumping to remove SNPs at high LD. When used with its
 default options, clumping based on MAF is similar to standard pruning (as
 done by PLINK with "--indep-pairwise (size+1) 1 thr.r2", but it results in a
-better spread of SNPs over the chromosome. This function is a wrapper around
-\code{\link[bigsnpr:snp_clumping]{bigsnpr::snp_clumping()}}. See
+better spread of SNPs over the chromosome; see \code{\link[=loci_ld_prune]{loci_ld_prune()}} for
+pruning as in PLINK. The algorithm is that of \code{\link[bigsnpr:snp_clumping]{bigsnpr::snp_clumping()}}:
+the loci of each chromosome are visited in order of importance (\code{S}), and a
+locus is kept unless its squared correlation with a more important locus
+that is kept, within the window, is above \code{thr_r2}. See
 https://privefl.github.io/bigsnpr/articles/pruning-vs-clumping.html for more
 information on the differences between pruning and clumping.
 }
 \details{
-Any missing values in the genotypes of a \code{gen_tibble} passed to
-\code{loci_ld_clump} will cause an error. To deal with missingness, see
-\code{\link[=gt_impute_simple]{gt_impute_simple()}}.
+Missing genotypes do not need to be imputed: as in PLINK (\code{--r2},
+\code{--indep-pairwise}), the squared correlation (r^2) of the allele counts of
+two loci is computed over the individuals genotyped at both. With complete
+(or imputed) genotypes, the results are those of
+\code{\link[bigsnpr:snp_clumping]{bigsnpr::snp_clumping()}}. Pairs of loci genotyped together in fewer than
+\code{min_shared} individuals have no reliable r^2: by default, both loci are
+kept (as in PLINK, for which r^2 is then undefined); with \code{insufficient = "remove"}, the less important locus is removed, as if they were linked.
+The pairs of loci whose r^2 is undefined because a locus does not vary
+over the individuals genotyped at both are not linked. Imputed genotypes
+are used only if the \code{gen_tibble} is set to use them (see
+\code{\link[=gt_set_imputed]{gt_set_imputed()}}).
+
+r^2 is computed on genotypes packed as bits (64 individuals per word), as
+in PLINK; each chromosome is packed at once, which takes 3 bits per
+genotype.
 }
 \examples{
 \dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}
@@ -88,7 +116,8 @@ data.table::setDTthreads(2)
 RhpcBLASctl::blas_set_num_threads(2)
 RhpcBLASctl::omp_set_num_threads(2)
 }
-example_gt <- load_example_gt("gen_tbl") \%>\% gt_impute_simple()
+# (the example has missing genotypes, which do not need to be imputed)
+example_gt <- load_example_gt("gen_tbl")
 
 # To return a boolean vector indicating whether the SNP should be kept
 example_gt \%>\% loci_ld_clump()
@@ -97,5 +126,6 @@ example_gt \%>\% loci_ld_clump(return_id = TRUE)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[bigsnpr:snp_clumping]{bigsnpr::snp_clumping()}} which this function wraps.
+\code{\link[bigsnpr:snp_clumping]{bigsnpr::snp_clumping()}}, whose algorithm this function
+follows; \code{\link[=loci_ld_prune]{loci_ld_prune()}} for pruning as in PLINK.
 }

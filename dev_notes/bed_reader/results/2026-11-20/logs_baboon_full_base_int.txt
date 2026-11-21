@@ -1,0 +1,12 @@
+start 08:36:19 load 2.57 3.95 3.73
+fread .bim                     elapsed   15.70  user    5.91  sys    1.97  (08:36:36)
+loci_from_bim (rest)           elapsed    1.82  user    1.20  sys    0.62  (08:36:38)
+indiv_meta_from_fam            elapsed    0.00  user    0.00  sys    0.00  (08:36:38)
+fbm_read_bed                   elapsed   43.52  user    8.19  sys   18.97  (08:37:21)
+build gen_tibble               elapsed    0.02  user    0.02  sys    0.00  (08:37:21)
+remove_stale_sidecars          elapsed    0.00  user    0.00  sys    0.00  (08:37:21)
+has_genotypes_without_alleles  elapsed    0.74  user    0.47  sys    0.28  (08:37:22)
+gt_save_light                  elapsed   21.51  user   20.92  sys    0.57  (08:37:43)
+TOTAL elapsed 83.31 user 36.71 sys 22.41; loci 91162139; R memory 3.0 GB
+wall 86.95 s, maxrss 47946044 KB
+end 08:37:46

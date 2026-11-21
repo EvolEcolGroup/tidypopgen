@@ -39,3 +39,30 @@ test_that("pairwise_grm compute correctly", {
   class(grm_gt) <- setdiff(class(grm_gt), "pairwise_matrix")
   expect_true(all.equal(grm_hier, grm_gt, check.attributes = FALSE))
 })
+
+test_that("pairwise_grm(method = 'plink') matches plink --make-rel", {
+  # 60 individuals with 0 to 90% missing genotypes and a monomorphic locus,
+  # and the output of plink --make-rel square, made by the script
+  # create_plink_pca_test_data.R in the folder data-raw/validate
+  fixture <- test_path("testdata", "plink_pca", "missing")
+  missing_gt <- gen_tibble(paste0(fixture, ".bed"),
+    backingfile = tempfile("grm_"), quiet = TRUE
+  )
+  plink_grm <- pairwise_grm(missing_gt, method = "plink", n_cores = 2)
+  plink_rel <- unname(as.matrix(read.table(paste0(fixture, ".rel"))))
+  # PLINK writes 6 significant digits
+  expect_lt(max(abs(unclass(plink_grm) - plink_rel)), 1e-5)
+  expect_s3_class(plink_grm, "pairwise_matrix")
+  expect_equal(rownames(plink_grm), missing_gt$id)
+  # without the count of missing genotypes that gt_pca() uses
+  expect_null(attr(plink_grm, "n_missing"))
+  # the default estimator is unchanged, and differs from PLINK's
+  expect_false(isTRUE(all.equal(
+    unclass(pairwise_grm(missing_gt)), unclass(plink_grm),
+    check.attributes = FALSE
+  )))
+  expect_error(
+    pairwise_grm(missing_gt, allele_sharing_mat = diag(60), method = "plink"),
+    "only used with method"
+  )
+})

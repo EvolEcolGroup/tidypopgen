@@ -1,0 +1,12 @@
+The example script of the tutorial on polyploid population genomics by
+Magdalena Bohutínská and Filip Kolář (Part B, genetic structure with
+adegenet), whose data were used to make inst/extdata/ploidy/
+arenosa_ploidy_example.vcf.gz (see data-raw/create_ploidy_vcf.R):
+
+https://github.com/mbohutinska/PolyplChapter/blob/main/PartB/AdegenetPolyplChapter.R
+
+The tutorial accompanies Bohutínská M. et al. (2023) Population genomic
+analysis of diploid-autopolyploid species. In: Polyploidy, Methods in
+Molecular Biology 2545: 297-324. doi:10.1007/978-1-0716-2561-3_16.
+
+The script is not copied here, as its repository has no licence.

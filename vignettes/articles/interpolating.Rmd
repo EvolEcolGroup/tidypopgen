@@ -9,7 +9,9 @@ date: "2025-10-10"
 In this vignette, we will demonstrate how to interpolate principal component scores
 across geographic space using the tidypopgen integration with the `sf` package.
 
-To do so, we will use a dataset of *Anolis punctatus* lizards from South America,
+To do so, we will use a dataset of *Anolis punctatus* lizards from South America
+(Prates et al. 2018, *Ecology and Evolution* 8: 11932-11944,
+doi:10.1002/ece3.4650),
 introduced in the vignette 'Population genetic analysis'. For a full analysis of this dataset using `tidypopgen`, and details on how to download the data, please refer to this previous vignette.
 
 Let's begin by reading in the data and attaching the metadata:
@@ -17,6 +19,16 @@ Let's begin by reading in the data and attaching the metadata:
 
 ``` r
 library(tidypopgen)
+#> Loading required package: dplyr
+#> 
+#> Attaching package: 'dplyr'
+#> The following objects are masked from 'package:stats':
+#> 
+#>     filter, lag
+#> The following objects are masked from 'package:base':
+#> 
+#>     intersect, setdiff, setequal, union
+#> Loading required package: tibble
 vcf_path <-
   system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
     package = "tidypopgen"
@@ -31,6 +43,15 @@ pops <- read.csv(pops_path)
 anole_gt <- anole_gt %>% left_join(pops, by = "id")
 ```
 
+As the lizards come from two populations, we group the `gen_tibble` by
+population straight away, so that the functions that use groups take them
+into account:
+
+
+``` r
+anole_gt <- anole_gt %>% group_by(population)
+```
+
 And we can check our data using:
 
 
@@ -39,12 +60,13 @@ anole_gt %>% glimpse()
 #> Rows: 46
 #> Columns: 6
 #> A tibble: 46 × 6
-#> $ id         <chr> "punc_BM288", "punc_GN71", "punc_H1907", "punc_H1911", "punc_H2546", "punc_IBSPCRIB036…
-#> $ genotypes  <vctr_SNP> [0,0,...], [2,0,...], [0,2,...], [0,2,...], [0,1,...], [0,0,...], [0,0,...], [0,0…
-#> $ population <chr> "Amazonian_Forest", "Amazonian_Forest", "Amazonian_Forest", "Amazonian_Forest", "Amazo…
-#> $ longitude  <dbl> -51.8448, -54.6064, -64.8247, -64.8203, -65.3576, -46.0247, -36.2838, -40.5219, -40.52…
-#> $ latitude   <dbl> -3.3228, -9.7307, -9.4459, -9.4358, -9.5979, -23.7564, -9.8092, -20.2811, -19.9600, -1…
-#> $ pop        <chr> "Eam", "Eam", "Wam", "Wam", "Wam", "AF", "AF", "AF", "AF", "AF", "Wam", "Wam", "Eam", …
+#> Groups: population [2]
+#> $ id         <chr> "punc_BM288", "punc_GN71", "punc_H1907", "punc_H1911", "pun…
+#> $ genotypes  <vctr_SNP> [0,0,...], [2,0,...], [0,2,...], [0,2,...], [0,1,...],…
+#> $ population <chr> "Amazonian_Forest", "Amazonian_Forest", "Amazonian_Forest",…
+#> $ longitude  <dbl> -51.8448, -54.6064, -64.8247, -64.8203, -65.3576, -46.0247,…
+#> $ latitude   <dbl> -3.3228, -9.7307, -9.4459, -9.4358, -9.5979, -23.7564, -9.8…
+#> $ pop        <chr> "Eam", "Eam", "Wam", "Wam", "Wam", "AF", "AF", "AF", "AF", …
 ```
 
 ## Map
@@ -62,18 +84,19 @@ anole_gt
 #> Geodetic CRS:  WGS 84
 #> # A gen_tibble: 3249 loci
 #> # A tibble:     46 × 7
-#>    id                 genotypes population       longitude latitude pop              geometry
-#>    <chr>             <vctr_SNP> <chr>                <dbl>    <dbl> <chr>         <POINT [°]>
-#>  1 punc_BM288         [0,0,...] Amazonian_Forest     -51.8    -3.32 Eam    (-51.8448 -3.3228)
-#>  2 punc_GN71          [2,0,...] Amazonian_Forest     -54.6    -9.73 Eam    (-54.6064 -9.7307)
-#>  3 punc_H1907         [0,2,...] Amazonian_Forest     -64.8    -9.45 Wam    (-64.8247 -9.4459)
-#>  4 punc_H1911         [0,2,...] Amazonian_Forest     -64.8    -9.44 Wam    (-64.8203 -9.4358)
-#>  5 punc_H2546         [0,1,...] Amazonian_Forest     -65.4    -9.60 Wam    (-65.3576 -9.5979)
-#>  6 punc_IBSPCRIB0361  [0,0,...] Atlantic_Forest      -46.0   -23.8  AF    (-46.0247 -23.7564)
-#>  7 punc_ICST764       [0,0,...] Atlantic_Forest      -36.3    -9.81 AF     (-36.2838 -9.8092)
-#>  8 punc_JFT459        [0,0,...] Atlantic_Forest      -40.5   -20.3  AF    (-40.5219 -20.2811)
-#>  9 punc_JFT773        [0,0,...] Atlantic_Forest      -40.5   -20.0  AF        (-40.52 -19.96)
-#> 10 punc_LG1299        [0,0,...] Atlantic_Forest      -39.1   -15.3  AF    (-39.0694 -15.2696)
+#> # Groups:       population [2]
+#>    id    genotypes population longitude latitude pop              geometry
+#>    <chr> <vctr_SN> <chr>          <dbl>    <dbl> <chr>         <POINT [°]>
+#>  1 punc… [0,0,...] Amazonian…     -51.8    -3.32 Eam    (-51.8448 -3.3228)
+#>  2 punc… [2,0,...] Amazonian…     -54.6    -9.73 Eam    (-54.6064 -9.7307)
+#>  3 punc… [0,2,...] Amazonian…     -64.8    -9.45 Wam    (-64.8247 -9.4459)
+#>  4 punc… [0,2,...] Amazonian…     -64.8    -9.44 Wam    (-64.8203 -9.4358)
+#>  5 punc… [0,1,...] Amazonian…     -65.4    -9.60 Wam    (-65.3576 -9.5979)
+#>  6 punc… [0,0,...] Atlantic_…     -46.0   -23.8  AF    (-46.0247 -23.7564)
+#>  7 punc… [0,0,...] Atlantic_…     -36.3    -9.81 AF     (-36.2838 -9.8092)
+#>  8 punc… [0,0,...] Atlantic_…     -40.5   -20.3  AF    (-40.5219 -20.2811)
+#>  9 punc… [0,0,...] Atlantic_…     -40.5   -20.0  AF        (-40.52 -19.96)
+#> 10 punc… [0,0,...] Atlantic_…     -39.1   -15.3  AF    (-39.0694 -15.2696)
 #> # ℹ 36 more rows
 ```
 
@@ -108,11 +131,13 @@ ggplot() +
 Our previous vignette used PCA, DAPC, and ADMIXTURE to show that this sample of *Anolis punctatus* lizards contains three main genetic clusters across the range of the species. Suppose that we wanted to interpolate the first principal component across the range of the species to observe the change in genetic variation across space.
 
 Let's run a PCA and augment the gen_tibble with the principal component scores.
+There is no need to impute the missing genotypes first: `gt_pca()` uses, for
+each pair of individuals, the loci genotyped in both (see the article on
+[missing genotypes](missing_data.html)).
 
 
 ``` r
-anole_gt <- gt_impute_simple(anole_gt, method = "mode")
-anole_pca <- anole_gt %>% gt_pca_partialSVD(k = 30)
+anole_pca <- anole_gt %>% gt_pca(k = 30)
 anole_gt <- augment(anole_pca, data = anole_gt)
 ```
 
@@ -125,8 +150,15 @@ To begin with, we will need to load the `sf`, `terra`, and `tidyterra` packages.
 
 ``` r
 library(sf)
+#> Linking to GEOS 3.12.2, GDAL 3.11.4, PROJ 9.4.1; sf_use_s2() is TRUE
 library(terra)
+#> terra 1.9.50
 library(tidyterra)
+#> 
+#> Attaching package: 'tidyterra'
+#> The following object is masked from 'package:stats':
+#> 
+#>     filter
 ```
 
 We will first prepare the map by unifying all geometries into a single polygon and casting it to "POLYGON" type.
@@ -202,4 +234,4 @@ ggplot()  +
 
 ![plot of chunk interpolated_anolis](./figure/interpolating/interpolated_anolis-1.png)
 
-From our interpolated map, we can see the clear gradient in the first principal component scores across the range of *Anolis punctatus*, with the highest scores among Atlantic forest populations in the east, and the lowest scores clustered among Amazonian populations in the west.
+From our interpolated map, we can see the clear gradient in the first principal component scores across the range of *Anolis punctatus*, with the highest scores clustered among Amazonian populations in the west, and the lowest scores among Atlantic forest populations in the east (the sign of a principal component is arbitrary, so only the gradient matters).

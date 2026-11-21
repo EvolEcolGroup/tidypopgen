@@ -2,6 +2,39 @@
 
 ## New features and changes
 
+* the authors of code adapted from other software are credited in
+  `DESCRIPTION`, and their copyrights and licences listed in `inst/COPYRIGHTS`
+* new `gt_pca()` computes PCAs: `method = "partial"` (the default) handles
+  missing genotypes as `plink --pca` (PLINK 1.9) does, without imputation, and
+  uses an optimised BLAS when there is one, and Eigen otherwise;
+  `method = "random"` is for very large numbers of individuals
+* `gt_pca` objects record whether they used imputed genotypes and whether
+  their genotypes had missing values (attributes `imputed` and `missing`)
+* `gt_pcadapt()` works with missing genotypes, testing each locus on its
+  genotyped individuals as `pcadapt` does (new argument `max_missing`)
+* `loci_ld_clump()` works with missing genotypes, without imputation: r^2 is
+  computed over the individuals genotyped at both loci, as in PLINK (new
+  arguments `min_shared` and `insufficient`); it uses imputed genotypes only
+  if the `gen_tibble` is set to use them
+* new `loci_ld_prune()` prunes loci as `plink --indep-pairwise` (PLINK 1.9),
+  also with missing genotypes
+* `gt_dapc()` works on a PCA of missing genotypes (new arguments `data`,
+  `max_missing` and `n_cores`): the loadings of each locus come from its
+  genotyped individuals, not imputed ones (`NA` above `max_missing`)
+* errors on missing genotypes name the function and say how to impute them;
+  `gt_pca(method = "random")` no longer reads the genotypes an extra time to
+  look for them
+* `gt_pca_partialSVD()` and `gt_pca_randomSVD()` are deprecated in favour of
+  `gt_pca()`
+* `predict()` of a `gt_pca` now uses `project_method = "least_squares"` on all
+  the components by default, which does not shrink the scores of individuals
+  with missing genotypes; projections are 2-3 times faster
+* new `predict(project_method = "plink")` projects as PLINK 1.9
+  (`--pca-cluster-names`)
+* `pairwise_grm(method = "plink")` gives PLINK 1.9's variance-standardised
+  relationship matrix
+* new `gt_simulate_bn()` simulates toy datasets of unlinked loci (Balding-Nichols
+  model) for quick checks
 * new `gt_merge_vcfs()` and `gt_concat_vcfs()` read several VCF files into a
   single `gen_tibble`, as `bcftools merge` and `bcftools concat`
 * integer chromosomes (`chromosomes_as_int`) for datasets with many
@@ -15,8 +48,16 @@
   genotypes as PLINK 1.9's `--distance` without `flat-missing`
 * `qc_report_loci(hwe = FALSE)` gives the MAF and missingness of loci in a
   single pass
+* faster `pairwise_king()`, `pairwise_ibs()` and `pairwise_allele_sharing()`
+  (about 20%), and `qc_report_indiv(kings_threshold = )` on grouped data
+  (4-5 times)
+* `pairwise_king()` on a grouped `gen_tibble` computes kinship within each
+  group (it used to ignore the groups), 10-30 times faster than `group_map()`
+* faster `indiv_inbreeding()` on a grouped `gen_tibble` (about 10 times with
+  many groups), reading the genotypes once for all groups
 * faster VCF reading (in parallel with `n_cores`), and faster reading of
   *.ped* files straight into the backing file
+* PLINK *.bed* files are read in parallel with `n_cores`
 * faster `gt_as_vcf()`, `gt_update_backingfile()` and `gt_order_loci()` with
   many chromosomes; `gt_as_genlight()` works in chunks of loci
 * faster `select_loci()` with variables and function calls;
@@ -45,6 +86,21 @@
 
 ## Bug fixes
 
+* `gen_tibble()`: fix *.bed* files whose size does not match the *.bim* and
+  *.fam* files (e.g. one of them truncated), and individual-major *.bed*
+  files, which were read without an error
+* `gt_pcadapt()`: a clear error, naming them, for loci with the same genotype
+  in every individual (e.g. all heterozygous after heavy imputation), instead
+  of "You can't have missing values in 'U'" (#179)
+* fix false "You can't have missing values" errors (or hangs, with
+  `n_cores > 1`) in `loci_ld_clump()`, `gt_pcadapt()`, the PCA functions and
+  `predict(project_method = "none")` after removing loci or individuals with
+  missing genotypes: only the genotypes in use are checked
+* `gt_pca(method = "random")` and `gt_pca_autoSVD()` with a custom
+  `fun_scaling`: fix hangs (with `n_cores > 1`) or cryptic errors on missing
+  genotypes
+* `gt_pca(method = "random")` and `gt_pca_autoSVD()` use at most `n_cores`
+  cores (bigstatsr's parallel SVD started one more process)
 * functions using temporary backing files (PCA, LD clumping, KING, IBS and
   allele sharing) delete them, fixing occasional "File '...bk' already
   exists" errors
@@ -56,6 +112,13 @@
   genotypes (now an error), missing chromosomes (now `NA`), and backing files
   left behind on errors
 * `gt_as_vcf()`: fix loci with missing chromosomes (now written as ".")
+* `loci_ld_clump()`: `exclude` values that are not indices of loci (out of
+  range, negative, not whole numbers, or names) give an error, rather than
+  excluding nothing or the wrong loci
+* `rbind()`: fix grouped `gen_tibble`s (an error from `bind_rows()`); the
+  merged `gen_tibble` keeps the grouping of the first one
+* `gt_add_sf()`: no "Adding missing grouping variables" message on grouped
+  `gen_tibble`s
 
 # tidypopgen 1.0.0
 

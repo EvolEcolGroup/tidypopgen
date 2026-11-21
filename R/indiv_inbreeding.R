@@ -8,6 +8,12 @@
 #' can add methods for their own classes (e.g. tibbles of genotype
 #' likelihoods).
 #'
+#' For a grouped [`gen_tibble`], the coefficients are computed within each
+#' group, giving the same results as
+#' `group_map(.x, ~ indiv_inbreeding(.x))`, but much faster: the genotypes are
+#' read only once, and only the pairs of individuals within each group are
+#' compared.
+#'
 #' @references Weir, BS and Goudet J (2017) A Unified Characterization of
 #'   Population Structure and Relatedness. Genetics (2017) 206:2085
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
@@ -21,8 +27,9 @@
 #'   It is not possible to use this with grouped tibbles.
 #' @param ... other arguments passed to specific methods, currently unused.
 #' @return a numeric vector of inbreeding coefficients. For a grouped
-#'   [`gen_tibble`], a list of such vectors, one per group (the coefficients
-#'   are computed within each group).
+#'   [`gen_tibble`], a list of such vectors, one per group in the order of
+#'   [dplyr::group_keys()] (the coefficients are computed within each group;
+#'   an empty group gives an empty vector).
 #' @rdname indiv_inbreeding
 #' @export
 #' @examples
@@ -99,10 +106,73 @@ indiv_inbreeding.grouped_gen_tbl <- function(
   if (!is.null(allele_sharing_mat)) {
     stop("allele_sharing_mat can not be provided for grouped_df objects")
   }
-  group_map(
-    .x,
-    .f = ~ indiv_inbreeding(.x, method = method, allele_sharing_mat = NULL)
-  )
+  method <- match.arg(method)
+  .indiv_inbreeding_by_group(.x)
+}
+
+# WG17 inbreeding within each group of a grouped gen_tibble, as a list of
+# vectors (one per group, in the order of the groups), identical to the
+# output of indiv_inbreeding() on each group (an empty vector for empty
+# groups). Rather than computing a matrix of allele sharing for each group,
+# the genotypes of all individuals are packed once, and only the pairs of
+# individuals within each group are compared (see as_counts_within_groups()).
+.indiv_inbreeding_by_group <- function(
+  .x,
+  block_size = bigstatsr::block_size(nrow(.x)),
+  n_cores = bigstatsr::nb_cores()
+) {
+  X <- attr(.x$genotypes, "fbm") # nolint
+  # the rows of each group, and the individuals (rows of the FBM) ordered by
+  # group (keeping their order within each group)
+  group_rows <- dplyr::group_rows(.x)
+  sizes <- lengths(group_rows)
+  # empty groups have an empty vector, as indiv_inbreeding() on a gen_tibble
+  # without individuals
+  inbreeding <- rep(list(numeric(0)), length(sizes))
+  if (sum(sizes) == 0) {
+    return(inbreeding)
+  }
+  ind_row <- vctrs::vec_data(.x$genotypes)[unlist(group_rows)]
+  # the position (in ind_row) of the last individual of the group of each
+  # individual
+  group_end <- rep(cumsum(sizes), sizes)
+  ind_col <- show_loci(.x$genotypes)$big_index
+  # counts for each pair within each group, summed over blocks of loci (the
+  # counts are integers, so the sums are exact)
+  counts <- 0
+  intervals <- CutBySize(length(ind_col), block_size)
+  for (j in bigstatsr::rows_along(intervals)) {
+    counts <- counts + as_counts_within_groups(X,
+      rowInd = ind_row,
+      colInd = ind_col[seq2(intervals[j, ])],
+      groupEnd = group_end,
+      ncores = n_cores
+    )
+  }
+  # allele sharing of each pair, as in snp_allele_sharing() (NA for pairs
+  # without loci valid in both)
+  ashare <- 0.5 * (1 + counts[1, ] / counts[2, ])
+  ashare[counts[2, ] == 0] <- NA_real_
+  # the pairs of each group (i <= j) are consecutive columns of counts
+  n_pairs <- sizes * (sizes + 1) / 2
+  pair_offset <- c(0, cumsum(n_pairs))
+  for (g in which(sizes > 0)) {
+    k <- sizes[g]
+    ashare_g <- ashare[pair_offset[g] + seq_len(n_pairs[g])]
+    # whether each pair (in the order of the packed triangle) is on the
+    # diagonal, i.e. an individual with itself
+    on_diag <- sequence(k:1) == 1L
+    # as in the method for the genotypes column (from beta.dosage in
+    # hierfstat): the matrix is symmetric, so the mean of its off-diagonal
+    # elements is the mean of one of its triangles (NaN for a single
+    # individual)
+    mii <- ashare_g[on_diag]
+    mb <- mean(ashare_g[!on_diag], na.rm = TRUE)
+    inbreeding_g <- ((mii * 2 - 1) - mb) / (1 - mb)
+    names(inbreeding_g) <- .x$id[group_rows[[g]]]
+    inbreeding[[g]] <- inbreeding_g
+  }
+  inbreeding
 }
 
 # a grouped data frame that has lost the class of its tibble (e.g. a grouped

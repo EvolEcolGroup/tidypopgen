@@ -128,3 +128,38 @@ test_that("indiv_inbreeding is a generic with methods for gen_tibbles", {
   )
   expect_identical(indiv_inbreeding(dummy_tbl), rep(0.5, 3))
 })
+
+test_that("indiv_inbreeding on a grouped gen_tibble works within groups", {
+  # more than 64 individuals, with missing data, in interleaved groups, so
+  # that genotypes are packed into several words; one group of a single
+  # individual, and an empty group
+  set.seed(42)
+  geno_vals <- sample(c(0:2, NA), 140 * 100,
+    replace = TRUE,
+    prob = c(0.4, 0.3, 0.25, 0.05)
+  )
+  pops <- sample(c("A", "B", "C"), 140, replace = TRUE, prob = c(0.6, 0.2, 0.2))
+  pops[17] <- "D"
+  big_gt <- gen_tibble(
+    x = matrix(geno_vals, nrow = 140),
+    loci = data.frame(
+      name = paste0("rs", 1:100), chromosome = 1L, position = 1:100,
+      genetic_dist = 0, allele_ref = "A", allele_alt = "T"
+    ),
+    indiv_meta = data.frame(
+      id = paste0("i", 1:140),
+      population = factor(pops, levels = c("C", "A", "E", "D", "B"))
+    ),
+    quiet = TRUE
+  )
+  grouped_gt <- big_gt %>% group_by(population, .drop = FALSE)
+  # the same as indiv_inbreeding() on each group
+  expected <- group_map(grouped_gt, ~ indiv_inbreeding(.x))
+  inb_grp <- indiv_inbreeding(grouped_gt)
+  expect_equal(inb_grp, expected)
+  expect_named(inb_grp[[2]], big_gt$id[pops == "A"])
+  expect_length(inb_grp[[3]], 0)
+  expect_true(is.nan(inb_grp[[4]]))
+  # several blocks of loci give the same results
+  expect_equal(.indiv_inbreeding_by_group(grouped_gt, block_size = 7), expected)
+})

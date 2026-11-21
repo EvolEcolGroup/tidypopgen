@@ -15,9 +15,12 @@ gt_set_imputed(x, set = NULL)
 the gen_tibble, invisibly
 }
 \description{
-This function sets or unsets the use of imputed data. For some analysis,
-such as PCA, that does not allow for missing data, we have to use imputation,
-but for other analysis it might be preferable to allow for missing data.
+This function sets or unsets the use of imputed data. For some analysis
+that does not allow for missing data (e.g. PCA with
+\code{gt_pca(method = "random")}, or \code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}}), we have to use
+imputation, but for other analysis it might be preferable to allow for
+missing data (e.g. \code{\link[=gt_pca]{gt_pca()}}, \code{\link[=loci_ld_clump]{loci_ld_clump()}} and \code{\link[=loci_ld_prune]{loci_ld_prune()}}
+handle missing genotypes, and use imputed ones only if they are set).
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

@@ -1,0 +1,106 @@
+# 2026-11-20T04:18:18+00:00 laptopX1 T=1 CPUS=2 tasks: full grouped rounds: F R F; base=b8255226cc96d785fe3a7c7d085c1f129b6d1b39 p1=72377615d81c968c7b51dbc46cb90d55ea49851c p2=ef1c0b4cc468687e4de3dcb7bae87dc003722fc2
+# 2026-11-20T04:18:18+00:00 base full T=1 load=0.46
+# 2026-11-20T04:18:49+00:00 p1 full T=1 load=0.59
+# 2026-11-20T04:19:15+00:00 p2 full T=1 load=0.65
+# 2026-11-20T04:19:33+00:00 p2s full T=1 load=0.67
+# 2026-11-20T04:20:21+00:00 base grouped T=1 load=0.93
+# 2026-11-20T04:20:28+00:00 p1 grouped T=1 load=0.93
+# 2026-11-20T04:20:34+00:00 p2 grouped T=1 load=0.94
+# 2026-11-20T04:20:41+00:00 p2s grouped T=1 load=0.95
+# 2026-11-20T04:20:48+00:00 p2s full T=1 load=0.88
+# 2026-11-20T04:21:36+00:00 p2 full T=1 load=1.02
+# 2026-11-20T04:21:54+00:00 p1 full T=1 load=0.94
+# 2026-11-20T04:22:19+00:00 base full T=1 load=0.88
+# 2026-11-20T04:22:53+00:00 p2s grouped T=1 load=0.97
+# 2026-11-20T04:23:01+00:00 p2 grouped T=1 load=0.89
+# 2026-11-20T04:23:07+00:00 p1 grouped T=1 load=0.90
+# 2026-11-20T04:23:14+00:00 base grouped T=1 load=0.83
+# 2026-11-20T04:23:20+00:00 base full T=1 load=0.77
+# 2026-11-20T04:23:53+00:00 p1 full T=1 load=0.79
+# 2026-11-20T04:24:19+00:00 p2 full T=1 load=0.78
+# 2026-11-20T04:24:37+00:00 p2s full T=1 load=0.83
+# 2026-11-20T04:25:25+00:00 base grouped T=1 load=0.85
+# 2026-11-20T04:25:32+00:00 p1 grouped T=1 load=0.86
+# 2026-11-20T04:25:39+00:00 p2 grouped T=1 load=0.88
+# 2026-11-20T04:25:45+00:00 p2s grouped T=1 load=0.81
+# 2026-11-20T04:25:52+00:00 done T=1
+# 2026-11-20T04:31:32+00:00 laptopX1 T=4 CPUS=0-3 tasks: full grouped rounds: F R F; base=b8255226cc96d785fe3a7c7d085c1f129b6d1b39 p1=72377615d81c968c7b51dbc46cb90d55ea49851c p2=ef1c0b4cc468687e4de3dcb7bae87dc003722fc2
+# 2026-11-20T04:31:32+00:00 base full T=4 load=0.99
+# 2026-11-20T04:31:46+00:00 p1 full T=4 load=1.45
+# 2026-11-20T04:31:59+00:00 p2 full T=4 load=1.56
+# 2026-11-20T04:32:10+00:00 p2s full T=4 load=1.62
+# 2026-11-20T04:32:34+00:00 base grouped T=4 load=2.11
+# 2026-11-20T04:32:40+00:00 p1 grouped T=4 load=1.94
+# 2026-11-20T04:32:45+00:00 p2 grouped T=4 load=1.79
+# 2026-11-20T04:32:51+00:00 p2s grouped T=4 load=1.96
+# 2026-11-20T04:32:57+00:00 p2s full T=4 load=1.89
+# 2026-11-20T04:33:19+00:00 p2 full T=4 load=2.11
+# 2026-11-20T04:33:31+00:00 p1 full T=4 load=2.08
+# 2026-11-20T04:33:44+00:00 base full T=4 load=1.99
+# 2026-11-20T04:34:01+00:00 p2s grouped T=4 load=2.57
+# 2026-11-20T04:34:07+00:00 p2 grouped T=4 load=2.44
+# 2026-11-20T04:34:13+00:00 p1 grouped T=4 load=2.14
+# 2026-11-20T04:34:19+00:00 base grouped T=4 load=1.97
+# 2026-11-20T04:34:25+00:00 base full T=4 load=1.81
+# 2026-11-20T04:34:40+00:00 p1 full T=4 load=1.98
+# 2026-11-20T04:34:54+00:00 p2 full T=4 load=2.10
+# 2026-11-20T04:35:05+00:00 p2s full T=4 load=2.08
+# 2026-11-20T04:35:28+00:00 base grouped T=4 load=2.41
+# 2026-11-20T04:35:34+00:00 p1 grouped T=4 load=2.22
+# 2026-11-20T04:35:40+00:00 p2 grouped T=4 load=2.04
+# 2026-11-20T04:35:45+00:00 p2s grouped T=4 load=1.96
+# 2026-11-20T04:35:51+00:00 done T=4
+# 2026-11-20T06:04:18+00:00 laptopX1 T=1 CPUS=2 tasks: full rounds: F R F; base=b8255226cc96d785fe3a7c7d085c1f129b6d1b39 p1=72377615d81c968c7b51dbc46cb90d55ea49851c p2=ef1c0b4cc468687e4de3dcb7bae87dc003722fc2 p3=e2692136
+# 2026-11-20T06:04:18+00:00 base full T=1 load=0.76
+# 2026-11-20T06:04:50+00:00 p1 full T=1 load=0.85
+# 2026-11-20T06:05:14+00:00 p3 full T=1 load=0.96
+# 2026-11-20T06:05:32+00:00 p3s full T=1 load=0.97
+# 2026-11-20T06:05:56+00:00 p3s full T=1 load=1.02
+# 2026-11-20T06:06:20+00:00 p3 full T=1 load=0.93
+# 2026-11-20T06:06:39+00:00 p1 full T=1 load=0.87
+# 2026-11-20T06:07:04+00:00 base full T=1 load=0.84
+# 2026-11-20T06:07:38+00:00 base full T=1 load=0.90
+# 2026-11-20T06:08:12+00:00 p1 full T=1 load=0.95
+# 2026-11-20T06:08:38+00:00 p3 full T=1 load=0.97
+# 2026-11-20T06:08:57+00:00 p3s full T=1 load=0.98
+# 2026-11-20T06:09:22+00:00 done T=1
+# 2026-11-20T06:09:33+00:00 laptopX1 T=1 CPUS=2 tasks: grouped rounds: F R F; base=b8255226cc96d785fe3a7c7d085c1f129b6d1b39 p1=72377615d81c968c7b51dbc46cb90d55ea49851c p2=ef1c0b4cc468687e4de3dcb7bae87dc003722fc2 p3=e2692136
+# 2026-11-20T06:09:33+00:00 base grouped T=1 load=0.83
+# 2026-11-20T06:09:39+00:00 p1 grouped T=1 load=0.78
+# 2026-11-20T06:09:46+00:00 p3 grouped T=1 load=0.72
+# 2026-11-20T06:09:52+00:00 p3s grouped T=1 load=0.74
+# 2026-11-20T06:09:59+00:00 p3s grouped T=1 load=0.70
+# 2026-11-20T06:10:06+00:00 p3 grouped T=1 load=0.64
+# 2026-11-20T06:10:12+00:00 p1 grouped T=1 load=0.67
+# 2026-11-20T06:10:19+00:00 base grouped T=1 load=0.70
+# 2026-11-20T06:10:25+00:00 base grouped T=1 load=0.66
+# 2026-11-20T06:10:32+00:00 p1 grouped T=1 load=0.61
+# 2026-11-20T06:10:38+00:00 p3 grouped T=1 load=0.64
+# 2026-11-20T06:10:45+00:00 p3s grouped T=1 load=0.62
+# 2026-11-20T06:10:51+00:00 done T=1
+# 2026-11-20T06:10:51+00:00 laptopX1 T=4 CPUS=0-3 tasks: full grouped rounds: F R F; base=b8255226cc96d785fe3a7c7d085c1f129b6d1b39 p1=72377615d81c968c7b51dbc46cb90d55ea49851c p2=ef1c0b4cc468687e4de3dcb7bae87dc003722fc2 p3=e2692136
+# 2026-11-20T06:10:51+00:00 base full T=4 load=0.57
+# 2026-11-20T06:11:06+00:00 p1 full T=4 load=0.87
+# 2026-11-20T06:11:17+00:00 p3 full T=4 load=1.35
+# 2026-11-20T06:11:27+00:00 p3s full T=4 load=1.30
+# 2026-11-20T06:11:40+00:00 base grouped T=4 load=1.37
+# 2026-11-20T06:11:46+00:00 p1 grouped T=4 load=1.26
+# 2026-11-20T06:11:51+00:00 p3 grouped T=4 load=1.16
+# 2026-11-20T06:11:57+00:00 p3s grouped T=4 load=1.15
+# 2026-11-20T06:12:03+00:00 p3s full T=4 load=1.14
+# 2026-11-20T06:12:15+00:00 p3 full T=4 load=1.25
+# 2026-11-20T06:12:26+00:00 p1 full T=4 load=1.35
+# 2026-11-20T06:12:40+00:00 base full T=4 load=1.62
+# 2026-11-20T06:12:57+00:00 p3s grouped T=4 load=2.14
+# 2026-11-20T06:13:03+00:00 p3 grouped T=4 load=2.05
+# 2026-11-20T06:13:09+00:00 p1 grouped T=4 load=1.97
+# 2026-11-20T06:13:15+00:00 base grouped T=4 load=1.74
+# 2026-11-20T06:13:20+00:00 base full T=4 load=1.60
+# 2026-11-20T06:13:36+00:00 p1 full T=4 load=1.81
+# 2026-11-20T06:13:50+00:00 p3 full T=4 load=2.11
+# 2026-11-20T06:14:01+00:00 p3s full T=4 load=1.86
+# 2026-11-20T06:14:15+00:00 base grouped T=4 load=2.01
+# 2026-11-20T06:14:20+00:00 p1 grouped T=4 load=1.85
+# 2026-11-20T06:14:26+00:00 p3 grouped T=4 load=1.70
+# 2026-11-20T06:14:32+00:00 p3s grouped T=4 load=1.65
+# 2026-11-20T06:14:38+00:00 done T=4

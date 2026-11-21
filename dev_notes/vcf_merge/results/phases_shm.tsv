@@ -1,0 +1,16 @@
+scenario	n_cores	rep	phase	seconds	n_indiv	n_loci
+sgdp	4	0	p1_scan_cpp	28.482	50	2481704
+sgdp	4	0	p1_r_glue	0.36	50	2481704
+sgdp	4	0	p1_match_cpp	4.635	50	2481704
+sgdp	4	0	p1_sidecar	3.732	50	2481704
+sgdp	4	0	mid_result	0.257	50	2481704
+sgdp	4	0	mid_keep_order	0.273	50	2481704
+sgdp	4	0	mid_sidecar	0.617	50	2481704
+sgdp	4	0	mid_validate_loci	0.242	50	2481704
+sgdp	4	0	p2_fbm_create	0.035	50	2481704
+sgdp	4	0	p2_file_cols	0.382	50	2481704
+sgdp	4	0	p2_genotypes_cpp	17.761	50	2481704
+sgdp	4	0	end_new_gt	0.108	50	2481704
+sgdp	4	0	end_check_alleles	0.015	50	2481704
+sgdp	4	0	end_save_gt	2.129	50	2481704
+sgdp	4	0	total	59.162	50	2481704

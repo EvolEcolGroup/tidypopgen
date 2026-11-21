@@ -38,6 +38,27 @@
 #' these guidelines and consider their individual dataset to ensure best
 #' practices.
 #'
+#' With missing genotypes, the PCA does not need imputed genotypes: the
+#' default method of [gt_pca()] compares individuals over the loci genotyped
+#' in both (as PLINK does), and the discriminant analysis uses its scores as
+#' it would those of any PCA. The loadings of the loci (`loadings_by_locus`)
+#' are then estimated by regressing the standardised genotypes of each locus
+#' on the scores of the `n_pca` components (with an intercept), over the
+#' individuals genotyped at that locus, and multiplying these coefficients by
+#' the loadings of the discriminant functions. This needs the genotypes: give
+#' the `gen_tibble` of the PCA as `data`. With complete genotypes, the
+#' regression coefficients are the loadings of the PCA, so the results are
+#' the same as with the usual matrix product. With missing genotypes, the
+#' loadings of the PCA (which count missing genotypes as 0) would shrink loci
+#' with many missing genotypes, and hide them in the loadings plots. Loci
+#' with more than a fraction `max_missing` of their genotypes missing (by
+#' default, more than half), or genotyped in fewer than `n_pca + 1`
+#' individuals, get `NA` loadings: estimated from few individuals, their
+#' loadings are noisy (the more so the fewer the individuals), and would top
+#' the rankings of the loci. The posterior probabilities of group membership
+#' do not account for the noisier scores of individuals with many missing
+#' genotypes.
+#'
 #' Note that there is no current method to predict scores for
 #' individuals not included in the original analysis. This is because we
 #' currently do not have a mechanism to store the pca information in the
@@ -65,6 +86,18 @@
 #'   contribution of each locus should be stored (TRUE, default) or not (FALSE).
 #'   Such output can be useful, but can also create large matrices when there
 #'   are a lot of loci and many dimensions.
+#' @param data the `gen_tibble` the PCA `x` was computed on (it can have more
+#'   loci than the PCA). It is needed only for the loadings of the loci of a
+#'   PCA with missing genotypes (see Details), and ignored otherwise.
+#' @param max_missing with a PCA of missing genotypes, the largest fraction of
+#'   missing genotypes at a locus for its loadings to be estimated (see
+#'   Details); loci with more get `NA` loadings. Default is `0.5`. The
+#'   fraction is that of the genotypes without imputation, as given by
+#'   [loci_missingness()] when `data` is not set to use imputed genotypes.
+#'   Ignored with a PCA of complete or imputed genotypes.
+#' @param n_cores the number of cores used to estimate the loadings of the
+#'   loci of a PCA with missing genotypes. Default is
+#'   [bigstatsr::nb_cores()].
 #' @returns an object of class [adegenet::dapc]
 #' @export
 #' @seealso [gt_cluster_pca()] [gt_cluster_pca_best_k()] [adegenet::dapc()]
@@ -77,16 +110,17 @@
 #'   quiet = TRUE
 #' )
 #'
-#' # Remove monomorphic loci and impute
+#' # Remove monomorphic loci
 #' lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
-#' lobsters <- gt_impute_simple(lobsters, method = "mode")
 #'
-#' # Create PCA object
-#' pca <- gt_pca_partialSVD(lobsters)
+#' # Create PCA object (the lobsters have some missing genotypes, which do not
+#' # need to be imputed)
+#' pca <- gt_pca(lobsters)
 #'
-#' # Run DAPC on the `gt_pca` object, providing `pop` as factor
+#' # Run DAPC on the `gt_pca` object, providing `pop` as factor; with missing
+#' # genotypes, the loadings of the loci need the genotypes (`data`)
 #' populations <- as.factor(lobsters$population)
-#' gt_dapc(pca, n_pca = 6, n_da = 2, pop = populations)
+#' gt_dapc(pca, n_pca = 6, n_da = 2, pop = populations, data = lobsters)
 #'
 #' # Run clustering on the first 10 PCs
 #' cluster_pca <- gt_cluster_pca(
@@ -106,7 +140,7 @@
 #' )
 #'
 #' # Run DAPC on the `gt_cluster_pca` object
-#' gt_dapc(cluster_pca, n_pca = 10, n_da = 2)
+#' gt_dapc(cluster_pca, n_pca = 10, n_da = 2, data = lobsters)
 #'
 # @param pca_info a logical indicating whether information about the prior PCA
 #' #  should be stored (TRUE, default) or not (FALSE). This information is
@@ -125,7 +159,10 @@ gt_dapc <- function(
   pop = NULL,
   n_pca = NULL,
   n_da = NULL,
-  loadings_by_locus = TRUE
+  loadings_by_locus = TRUE,
+  data = NULL,
+  max_missing = 0.5,
+  n_cores = bigstatsr::nb_cores()
 ) {
   if (!inherits(x, "gt_pca")) {
     stop("'x' should be a 'gt_pca' object")
@@ -133,6 +170,17 @@ gt_dapc <- function(
   if (is.null(x$center)) {
     stop("'x' was run without centering; centering is necessary for 'gt_dapc'")
   }
+  # with a PCA of missing genotypes, the loadings of the loci are estimated
+  # from the genotypes (see loci_lsq_loadings()), so they are needed
+  pca_missing <- isTRUE(attr(x, "missing"))
+  if (loadings_by_locus && pca_missing && is.null(data)) {
+    stop(
+      "'x' is a PCA of genotypes with missing values: the loadings of the ",
+      "loci need the genotypes, so give the gen_tibble of the PCA as ",
+      "'data', or set 'loadings_by_locus = FALSE'"
+    )
+  }
+  stopifnot_max_missing(max_missing)
 
   pop.fac <- NULL
   if (is.null(pop)) {
@@ -246,12 +294,25 @@ gt_dapc <- function(
   ## optional: get loadings of variables
   if (loadings_by_locus) {
     V <- x$v[, 1:n_pca, drop = FALSE] # principal axes
+    if (pca_missing) {
+      # with missing genotypes, the loadings of the PCA (missing genotypes as
+      # 0) are biased: regress each locus on the scores instead, over the
+      # individuals genotyped at that locus (with complete genotypes, this
+      # gives the loadings of the PCA)
+      V[] <- loci_lsq_loadings(x, data,
+        n_pca = n_pca, n_cores = n_cores,
+        max_missing = max_missing
+      )
+    }
     colnames(V) <- paste("PCA-pa", seq_len(ncol(V)), sep = ".")
     var.load <- as.matrix(V) %*% as.matrix(ldaX$scaling[, 1:n_da, drop = FALSE])
     f1 <- function(x) {
-      temp <- sum(x * x)
+      # (loci whose loadings could not be estimated are NA, and are left out
+      # of the sum)
+      temp <- sum(x * x, na.rm = TRUE)
       if (temp < 1e-12) {
-        return(rep(0, length(x)))
+        # (no contribution, except for the loci without loadings)
+        return(ifelse(is.na(x), NA_real_, 0))
       }
       return(x * x / temp)
     }
@@ -265,4 +326,101 @@ gt_dapc <- function(
 
   class(res) <- c("gt_dapc", "dapc")
   return(res)
+}
+
+# Loadings of the loci for gt_dapc() with a PCA of missing genotypes: the
+# coefficients of the least squares regression of the standardised genotypes
+# of each locus (with the centre and scale of the PCA) on an intercept and
+# the scores (u d) of the first n_pca components, over the individuals
+# genotyped at that locus (see grm_loci_lsq_cpp()). With complete genotypes,
+# these are the loadings v of the PCA; with missing genotypes, the loadings
+# of the PCA (missing genotypes as 0) shrink each locus by the fraction of
+# individuals genotyped there, and are distorted when missingness differs
+# between groups.
+# @param pca a gt_pca object
+# @param data the gen_tibble the PCA was computed on (it can have more loci)
+# @param n_pca the number of components
+# @param n_cores the number of cores
+# @param max_missing the largest fraction of missing genotypes at a locus for
+#   its loadings to be estimated (1, the default, keeps all the loci that can
+#   be estimated)
+# @returns a matrix with one row per locus of the PCA and n_pca columns, NA
+#   for loci with more than max_missing of their genotypes missing, and for
+#   loci genotyped in too few individuals (with a warning)
+# @keywords internal
+# @noRd
+loci_lsq_loadings <- function(pca, data, n_pca, n_cores, max_missing = 1) {
+  if (!inherits(data, "gen_tbl")) {
+    stop("'data' should be a gen_tibble")
+  }
+  # the individuals must be those of the PCA, in the same order
+  if (!identical(as.character(data$id), rownames(pca$u))) {
+    stop("the individuals in 'data' do not correspond to those in the PCA")
+  }
+  # the loci of the PCA in data, with the same alleles
+  loci_subset <- pca_match_loci(pca, data,
+    what = "'data'", pca_name = "the PCA"
+  )
+  # the PCA used the genotypes with their missing values, not imputed ones
+  if (gt_has_imputed(data) && gt_uses_imputed(data)) {
+    gt_set_imputed(data, set = FALSE)
+    on.exit(gt_set_imputed(data, set = TRUE), add = TRUE)
+  }
+  n_ind <- nrow(data)
+  pcs <- seq_len(n_pca)
+  # the regression is on u sqrt(n), whose columns have the same norm as the
+  # intercept, so that the test of nearly singular systems (in
+  # grm_loci_lsq_cpp()) is about the individuals genotyped at a locus, not
+  # about the scale of the scores
+  u <- unclass(pca$u)[, pcs, drop = FALSE]
+  coefs <- grm_loci_lsq_cpp(
+    BM = .gt_get_fbm(data),
+    rowInd = .gt_fbm_rows(data),
+    colInd = .gt_fbm_cols(data)[loci_subset],
+    center = pca$center,
+    scale = pca$scale,
+    S = u * sqrt(n_ind),
+    ncores = n_cores
+  )
+  # loci with more than max_missing of their genotypes missing (as
+  # loci_missingness() computes the fraction) get NA: estimated from few
+  # individuals, their loadings are noisy, and would top the rankings
+  n_genotyped <- attr(coefs, "n_genotyped")
+  attr(coefs, "n_genotyped") <- NULL
+  too_sparse <- (n_ind - n_genotyped) / n_ind > max_missing
+  # rescale the coefficients to the scores u d:
+  # z = a + (u sqrt(n)) c = a + (u d) (c sqrt(n) / d)
+  coefs <- sweep(coefs, 2, sqrt(n_ind) / pca$d[pcs], "*")
+  # (the other loci with NA loadings are genotyped in fewer than n_pca + 1
+  # individuals, or have a nearly singular system)
+  n_na <- sum(is.na(coefs[, 1]) & !too_sparse)
+  coefs[too_sparse, ] <- NA
+  if (nrow(coefs) > 0 && all(is.na(coefs[, 1]))) {
+    warning(
+      "no locus is genotyped in enough individuals to estimate its loadings ",
+      "(at most a fraction 'max_missing' of missing genotypes, and at least ",
+      "n_pca + 1 individuals, are needed): all the loadings are NA"
+    )
+  } else if (n_na > 0) {
+    warning(
+      n_na, " loci are genotyped in too few individuals to estimate their ",
+      "loadings (at least n_pca + 1 are needed, with varied scores): ",
+      "their loadings are NA"
+    )
+  }
+  coefs
+}
+
+# Check `max_missing`, the largest fraction of missing genotypes at a locus
+# for its statistics to be estimated (gt_dapc() and gt_pcadapt())
+# @param max_missing the value given by the user
+# @keywords internal
+# @noRd
+stopifnot_max_missing <- function(max_missing) {
+  valid <- is.numeric(max_missing) && length(max_missing) == 1 &&
+    !is.na(max_missing) && max_missing >= 0 && max_missing <= 1
+  if (!valid) {
+    stop("'max_missing' should be a number between 0 and 1")
+  }
+  invisible(TRUE)
 }

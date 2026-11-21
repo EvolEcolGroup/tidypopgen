@@ -287,23 +287,28 @@ sidecars for it, with the loci that they keep.
 
 # Quality control
 
-We add the lineage of each sample, from the `strata` file of the dataset:
+We add the lineage of each sample, from the `strata` file of the dataset,
+and group the samples by lineage, so that the functions that use groups (such
+as the scan below) work within lineages:
 
 ```{r}
 strata <- read.delim("./data/rad/discosnp.strata.tsv")
 rad_gt <- rad_gt %>%
-  mutate(population = strata$pop[match(id, strata$id)])
+  mutate(population = strata$pop[match(id, strata$id)]) %>%
+  group_by(population)
 table(rad_gt$population)
 ```
 
 and remove the loci with more than 20% of missing genotypes, or with a minor
-allele frequency below 5%:
+allele frequency below 5%, over all samples (`select_loci_if()` ignores the
+groups):
 
 ```{r loci_qc, benchmark = TRUE}
-loci_missing <- loci_missingness(rad_gt, n_cores = n_cores)
-loci_freq <- loci_maf(rad_gt, n_cores = n_cores)
 rad_gt <- rad_gt %>%
-  select_loci(which(loci_missing <= 0.2 & loci_freq >= 0.05))
+  select_loci_if(
+    loci_missingness(genotypes, n_cores = n_cores) <= 0.2 &
+      loci_maf(genotypes, n_cores = n_cores) >= 0.05
+  )
 count_loci(rad_gt)
 ```
 
@@ -314,7 +319,6 @@ between two lineages, GS and BS:
 
 ```{r scan, benchmark = TRUE}
 freq <- rad_gt %>%
-  group_by(population) %>%
   loci_alt_freq(n_cores = n_cores, type = "matrix")
 freq_diff <- abs(freq[, "GS"] - freq[, "BS"])
 ```

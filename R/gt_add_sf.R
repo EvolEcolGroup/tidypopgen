@@ -65,9 +65,11 @@ gt_add_sf <- function(x, coords = NULL, crs = NULL, sfc_column = NULL) {
     if (!all(coords %in% colnames(x))) {
       stop("coords must be a vector of length 2, with names of columns in x")
     }
-    # create geometry column from coords
+    # create geometry column from coords (selecting them from an ungrouped
+    # copy: select() keeps the grouping variables of a grouped tibble, with a
+    # message)
     geometry_sf <- sf::st_as_sf(
-      x %>% select(dplyr::all_of(coords)),
+      dplyr::ungroup(x) %>% select(dplyr::all_of(coords)),
       coords = coords,
       crs = crs,
       remove = TRUE

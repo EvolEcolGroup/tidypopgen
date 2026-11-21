@@ -17,10 +17,6 @@ write_dosage_matrix_cpp <- function(x, BM, na_byte) {
     invisible(.Call(`_tidypopgen_write_dosage_matrix_cpp`, x, BM, na_byte))
 }
 
-fbm256_prod_and_rowSumsSq <- function(BM, ind_row, ind_col, center, scale, V, ind, lsq_pcs) {
-    .Call(`_tidypopgen_fbm256_prod_and_rowSumsSq`, BM, ind_row, ind_col, center, scale, V, ind, lsq_pcs)
-}
-
 grouped_alt_freq_dip_pseudo_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores, as_counts, block_size = 100000L, freq_only = FALSE) {
     .Call(`_tidypopgen_grouped_alt_freq_dip_pseudo_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores, as_counts, block_size, freq_only)
 }
@@ -41,6 +37,22 @@ gt_copy_fbm <- function(BM_from, BM_to, rowInd, colInd, col_offset, row_offset, 
     invisible(.Call(`_tidypopgen_gt_copy_fbm`, BM_from, BM_to, rowInd, colInd, col_offset, row_offset, swap, swap_lut, copy_lut))
 }
 
+grm_rank_update_seconds <- function(n, nb, use_blas, ncores) {
+    .Call(`_tidypopgen_grm_rank_update_seconds`, n, nb, use_blas, ncores)
+}
+
+grm_plink_cpp <- function(BM, rowInd, colInd, center, scale, block_size, ncores, use_blas) {
+    .Call(`_tidypopgen_grm_plink_cpp`, BM, rowInd, colInd, center, scale, block_size, ncores, use_blas)
+}
+
+grm_loadings_cpp <- function(BM, rowInd, colInd, center, scale, U, d, block_size, ncores, use_blas) {
+    .Call(`_tidypopgen_grm_loadings_cpp`, BM, rowInd, colInd, center, scale, U, d, block_size, ncores, use_blas)
+}
+
+grm_loci_lsq_cpp <- function(BM, rowInd, colInd, center, scale, S, ncores) {
+    .Call(`_tidypopgen_grm_loci_lsq_cpp`, BM, rowInd, colInd, center, scale, S, ncores)
+}
+
 gt_grouped_pi_diploid <- function(BM, rowInd, colInd, groupIds, ngroups, ncores, block_size = 100000L, return_n = FALSE) {
     .Call(`_tidypopgen_gt_grouped_pi_diploid`, BM, rowInd, colInd, groupIds, ngroups, ncores, block_size, return_n)
 }
@@ -55,6 +67,10 @@ gt_ind_hetero <- function(BM, rowInd, colInd, ncores) {
 
 gt_ind_hetero_polyploid <- function(BM, rowInd, colInd, ploidy, ncores) {
     .Call(`_tidypopgen_gt_ind_hetero_polyploid`, BM, rowInd, colInd, ploidy, ncores)
+}
+
+pca_project_cpp <- function(BM, rowInd, colInd, center, scale, V, lsq_pcs, block_size, use_blas, ncores) {
+    .Call(`_tidypopgen_pca_project_cpp`, BM, rowInd, colInd, center, scale, V, lsq_pcs, block_size, use_blas, ncores)
 }
 
 gt_pi_diploid <- function(BM, rowInd, colInd, ncores, block_size = 100000L) {
@@ -83,6 +99,18 @@ hwe_on_matrix <- function(geno_counts, midp) {
 
 gt_grouped_hwe <- function(BM, rowInd, colInd, groupIds, ngroups, midp, ncores = 1L, block_size = 100000L) {
     .Call(`_tidypopgen_gt_grouped_hwe`, BM, rowInd, colInd, groupIds, ngroups, midp, ncores, block_size)
+}
+
+ld_r2_pairs_cpp <- function(BM, rowInd, colInd, pairs) {
+    .Call(`_tidypopgen_ld_r2_pairs_cpp`, BM, rowInd, colInd, pairs)
+}
+
+ld_clump_cpp <- function(BM, rowInd, colInd, ordInd, rankInd, pos, size, thr, min_shared, remove_insufficient, ncores) {
+    .Call(`_tidypopgen_ld_clump_cpp`, BM, rowInd, colInd, ordInd, rankInd, pos, size, thr, min_shared, remove_insufficient, ncores)
+}
+
+ld_prune_cpp <- function(BM, rowInd, colInd, pos, window_size, window_kb, step, thr, maf, min_shared, remove_insufficient, ncores) {
+    .Call(`_tidypopgen_ld_prune_cpp`, BM, rowInd, colInd, pos, window_size, window_kb, step, thr, maf, min_shared, remove_insufficient, ncores)
 }
 
 unsorted_by_chromosome_cpp <- function(x, chromosome, level_group) {
@@ -145,6 +173,10 @@ pop_stats_dip_pseudo_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploi
     .Call(`_tidypopgen_pop_stats_dip_pseudo_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, by_locus_ho, by_locus_hs, by_locus_fis, by_locus_global, block_size, ncores)
 }
 
+read_bed_to_fbm <- function(filename, BM, tab, n_threads) {
+    invisible(.Call(`_tidypopgen_read_bed_to_fbm`, filename, BM, tab, n_threads))
+}
+
 read_packedancestry <- function(filename, BM, tab) {
     .Call(`_tidypopgen_read_packedancestry`, filename, BM, tab)
 }
@@ -167,6 +199,10 @@ sfs_preview_cpp <- function(n, k, count, n_max) {
 
 increment_as_counts <- function(k, k2, BM, rowInd, colInd, ncores) {
     invisible(.Call(`_tidypopgen_increment_as_counts`, k, k2, BM, rowInd, colInd, ncores))
+}
+
+as_counts_within_groups <- function(BM, rowInd, colInd, groupEnd, ncores) {
+    .Call(`_tidypopgen_as_counts_within_groups`, BM, rowInd, colInd, groupEnd, ncores)
 }
 
 increment_ibs_counts <- function(k, k2, BM, rowInd, colInd, ncores) {

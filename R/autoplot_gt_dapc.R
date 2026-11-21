@@ -36,14 +36,16 @@
 #'   quiet = TRUE
 #' )
 #'
-#' # Remove monomorphic loci and impute
+#' # Remove monomorphic loci
 #' lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
-#' lobsters <- gt_impute_simple(lobsters, method = "mode")
 #'
-#' # Create PCA and run DAPC
-#' pca <- gt_pca_partialSVD(lobsters)
+#' # Create PCA and run DAPC (with missing genotypes, the loadings of the
+#' # loci need the genotypes, `data`)
+#' pca <- gt_pca(lobsters)
 #' populations <- as.factor(lobsters$population)
-#' dapc_res <- gt_dapc(pca, n_pca = 6, n_da = 2, pop = populations)
+#' dapc_res <- gt_dapc(pca,
+#'   n_pca = 6, n_da = 2, pop = populations, data = lobsters
+#' )
 #'
 #' # Screeplot
 #' autoplot(dapc_res, type = "screeplot")
@@ -124,7 +126,8 @@ autoplot.gt_dapc <- function(
       all.p <- lapply(ld, function(i) {
         p <- autoplot(object, type = "loadings", ld = i)
         p$layers[[1]] <- NULL
-        p + ggplot2::geom_hex() + ggplot2::scale_fill_viridis_c()
+        # (loci without loadings, NA, are left out)
+        p + ggplot2::geom_hex(na.rm = TRUE) + ggplot2::scale_fill_viridis_c()
       })
 
       patchwork::wrap_plots(all.p, ncol = n_col)
@@ -135,7 +138,9 @@ autoplot.gt_dapc <- function(
           y = object$var.load[, ld]
         )
       ) +
-        ggplot2::geom_point() +
+        # (loci without loadings, NA, with a PCA of missing genotypes, are
+        # left out)
+        ggplot2::geom_point(na.rm = TRUE) +
         bigstatsr::theme_bigstatsr(size.rel = 1) +
         ggplot2::labs(
           title = paste0("Loadings of LD", ld),

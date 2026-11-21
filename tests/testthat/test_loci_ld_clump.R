@@ -30,6 +30,239 @@ test_that("ld clumping runs", {
   expect_true(all.equal(keep, c(1, 2, 3, 4, 6)) == TRUE)
 })
 
+test_that("loci_ld_clump with missing genotypes", {
+  # the PLINK fixture: 60 individuals, two chromosomes of 100 loci in LD, with
+  # missing genotypes (see data-raw/validate/create_plink_ld_test_data.R)
+  ld_gt <- gen_tibble(test_path("testdata", "plink_ld", "ld.bed"),
+    backingfile = tempfile("ld_"), quiet = TRUE
+  )
+  geno <- show_genotypes(ld_gt)
+  loci <- show_loci(ld_gt)
+  # the reference: bigsnpr's algorithm, sequentially, with r2 over the
+  # individuals genotyped at both loci (loci in order of decreasing MAF; a
+  # locus is kept unless linked to a kept locus within `size` of it, with
+  # the loci at coordinates `coord`); pairs genotyped together in fewer than
+  # `min_shared` individuals are linked if `remove` is TRUE
+  maf <- loci_maf(ld_gt)
+  clump_ref <- function(coord, size, min_shared = 2, remove = FALSE) {
+    ref <- rep(FALSE, ncol(geno))
+    for (chrom in unique(loci$chromosome)) {
+      idx <- which(loci$chromosome == chrom)
+      kept <- integer(0)
+      for (j in idx[order(maf[idx], decreasing = TRUE)]) {
+        linked <- FALSE
+        for (k in kept[abs(coord[kept] - coord[j]) <= size]) {
+          shared <- !is.na(geno[, j]) & !is.na(geno[, k])
+          if (sum(shared) < min_shared) {
+            linked <- remove
+          } else {
+            r2 <- suppressWarnings(
+              stats::cor(geno[shared, j], geno[shared, k])^2
+            )
+            linked <- !is.na(r2) && r2 > 0.2
+          }
+          if (linked) break
+        }
+        if (!linked) kept <- c(kept, j)
+      }
+      ref[kept] <- TRUE
+    }
+    ref
+  }
+  # windows of 50 kb
+  ref <- clump_ref(loci$position, 50000)
+  expect_identical(loci_ld_clump(ld_gt, thr_r2 = 0.2, size = 50), ref)
+  expect_identical(
+    loci_ld_clump(ld_gt, thr_r2 = 0.2, size = 50, n_cores = 2),
+    ref
+  )
+  # windows of 7 loci (the coordinate of a locus is its rank on its
+  # chromosome)
+  loci_rank <- stats::ave(seq_along(maf), loci$chromosome, FUN = seq_along)
+  ref_loci <- clump_ref(loci_rank, 7)
+  expect_false(identical(ref_loci, ref))
+  expect_identical(
+    loci_ld_clump(ld_gt, thr_r2 = 0.2, size = 7, use_positions = FALSE),
+    ref_loci
+  )
+  # pairs genotyped together in fewer than 35 individuals (about a third of
+  # the pairs within 50 kb) have no reliable r2: both loci are kept, or the
+  # less important one is removed
+  ref_keep <- clump_ref(loci$position, 50000, min_shared = 35)
+  ref_remove <- clump_ref(loci$position, 50000,
+    min_shared = 35, remove = TRUE
+  )
+  expect_false(identical(ref_keep, ref_remove))
+  expect_identical(
+    loci_ld_clump(ld_gt, thr_r2 = 0.2, size = 50, min_shared = 35),
+    ref_keep
+  )
+  expect_identical(
+    loci_ld_clump(ld_gt,
+      thr_r2 = 0.2, size = 50, min_shared = 35, insufficient = "remove"
+    ),
+    ref_remove
+  )
+  # with a minimum above the number of individuals, no pair has an r2: with
+  # "keep", every locus is kept; with "remove", every pair is linked, so that
+  # no two loci kept on a chromosome are within 50 kb
+  keep_all <- loci_ld_clump(ld_gt, thr_r2 = 0.2, size = 50, min_shared = 61)
+  expect_true(all(keep_all))
+  keep_few <- loci_ld_clump(ld_gt,
+    thr_r2 = 0.2, size = 50, min_shared = 61, insufficient = "remove"
+  )
+  kept <- loci[keep_few, ]
+  gaps <- tapply(kept$position, kept$chromosome, function(p) min(diff(p)))
+  expect_true(all(gaps > 50000))
+  expect_error(
+    loci_ld_clump(ld_gt, thr_r2 = 0.2, min_shared = 1),
+    "'min_shared' should be an integer of at least 2"
+  )
+  # (values above the largest integer would become NA in C++, and set no
+  # minimum)
+  for (too_large in c(1e10, Inf)) {
+    expect_error(
+      loci_ld_clump(ld_gt, thr_r2 = 0.2, min_shared = too_large),
+      "and at most .Machine$integer.max",
+      fixed = TRUE
+    )
+  }
+  # imputed genotypes are used only if the gen_tibble is set to use them
+  ld_gt <- gt_impute_simple(ld_gt, method = "mode")
+  expect_identical(loci_ld_clump(ld_gt, thr_r2 = 0.2, size = 50), ref)
+  gt_set_imputed(ld_gt, set = TRUE)
+  imputed <- loci_ld_clump(ld_gt, thr_r2 = 0.2, size = 50)
+  gt_set_imputed(ld_gt, set = FALSE)
+  expect_false(identical(imputed, ref))
+})
+
+test_that("loci_ld_clump uses pairs genotyped together in min_shared", {
+  # two loci with the same genotypes in the 4 individuals genotyped at both
+  # (r2 = 1); the second locus has the higher MAF (0.5, against 0.4)
+  pair_gt <- gen_tibble(
+    x = cbind(c(0, 1, 2, 0, NA, 1), c(0, 1, 2, 0, 2, NA)),
+    indiv_meta = data.frame(id = letters[1:6], population = "pop1"),
+    loci = data.frame(
+      name = c("rs1", "rs2"),
+      chromosome = 1,
+      position = c(1000, 2000),
+      genetic_dist = 0,
+      allele_ref = "A",
+      allele_alt = "T"
+    ),
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  r2 <- ld_r2_pairs_cpp(
+    .gt_get_fbm(pair_gt), .gt_fbm_rows(pair_gt), .gt_fbm_cols(pair_gt),
+    matrix(1:2, 2)
+  )
+  expect_identical(r2$n_shared, 4L)
+  expect_equal(r2$r2, 1)
+  # with min_shared equal to the number of individuals genotyped at both
+  # loci, their r2 is used, and the less important locus is removed
+  expect_identical(loci_ld_clump(pair_gt, min_shared = 4), c(FALSE, TRUE))
+  # with one more, the pair has no reliable r2, and both loci are kept
+  expect_identical(loci_ld_clump(pair_gt, min_shared = 5), c(TRUE, TRUE))
+  expect_identical(
+    loci_ld_clump(pair_gt, min_shared = 5, insufficient = "remove"),
+    c(FALSE, TRUE)
+  )
+})
+
+test_that("loci_ld_clump windows include loci at their size", {
+  # three loci with the same genotypes (r2 = 1, and the same MAF, so that
+  # they are visited in order): the second is exactly 10 kb from the first,
+  # the third 10 kb and 1 bp from the second
+  window_gt <- gen_tibble(
+    x = matrix(c(0, 1, 2, 0, 1, 2), nrow = 6, ncol = 3),
+    indiv_meta = data.frame(id = letters[1:6], population = "pop1"),
+    loci = data.frame(
+      name = c("rs1", "rs2", "rs3"),
+      chromosome = 1,
+      position = c(1000, 11000, 21001),
+      genetic_dist = 0,
+      allele_ref = "A",
+      allele_alt = "T"
+    ),
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  # with a window of 10 kb, the second locus is linked to the first, but the
+  # third is outside the window of both (as bigsnpr::snp_clumping())
+  expect_identical(
+    loci_ld_clump(window_gt, thr_r2 = 0.2, size = 10),
+    c(TRUE, FALSE, TRUE)
+  )
+})
+
+test_that("loci_ld_clump excludes loci and checks the cores", {
+  # example-missing has missing genotypes at 367 of its 500 loci: keep the
+  # 133 complete loci, without resaving the backing matrix
+  bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
+  missing_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("missing_"),
+    quiet = TRUE
+  )
+  complete_gt <- missing_gt %>%
+    select_loci_if(loci_missingness(genotypes) == 0)
+  keep_complete <- loci_ld_clump(complete_gt, thr_r2 = 0.2, size = 10)
+  # with complete genotypes, the loci kept are those of bigsnpr (run on a
+  # copy of the complete loci, as it does not allow missing genotypes)
+  complete_fbm <- bigstatsr::big_copy(
+    .gt_get_fbm(complete_gt),
+    ind.row = .gt_fbm_rows(complete_gt),
+    ind.col = .gt_fbm_cols(complete_gt),
+    backingfile = tempfile()
+  )
+  complete_loci <- show_loci(complete_gt)
+  expect_identical(
+    which(keep_complete),
+    bigsnpr::snp_clumping(
+      complete_fbm,
+      # (one integer per chromosome)
+      infos.chr = as.integer(complete_loci$chromosome),
+      infos.pos = complete_loci$position,
+      thr.r2 = 0.2,
+      size = 10
+    )
+  )
+  expect_error(
+    loci_ld_clump(complete_gt, thr_r2 = 0.2, size = 10, n_cores = 0),
+    "'ncores' should be at least 1"
+  )
+  # excluding the loci with missing genotypes gives the same clumps
+  keep_excluded <- loci_ld_clump(missing_gt,
+    thr_r2 = 0.2, size = 10,
+    exclude = which(loci_missingness(missing_gt) > 0)
+  )
+  expect_identical(
+    loci_names(missing_gt)[keep_excluded],
+    loci_names(complete_gt)[keep_complete]
+  )
+  # (or a logical vector with one value per locus)
+  expect_identical(
+    loci_ld_clump(missing_gt,
+      thr_r2 = 0.2, size = 10,
+      exclude = loci_missingness(missing_gt) > 0
+    ),
+    keep_excluded
+  )
+  # values that are not indices of loci are an error (they used to exclude
+  # nothing, or other loci, silently)
+  for (bad_exclude in list(501, 2.5, -1, c(1, NA), c("snp_1", "snp_2"))) {
+    expect_error(
+      loci_ld_clump(missing_gt, thr_r2 = 0.2, exclude = bad_exclude),
+      "'exclude' should be a vector of indices of loci"
+    )
+  }
+  expect_error(
+    loci_ld_clump(missing_gt, thr_r2 = 0.2, exclude = c(TRUE, FALSE)),
+    "or a logical vector with one value per locus"
+  )
+})
+
 test_that("ld clumping leaves no temporary FBMs in tempdir()", {
   # bigsnpr::snp_clumping() creates (and never removes) a temporary FBM for
   # each chromosome; their .bk files used to accumulate in tempdir(), where
@@ -173,8 +406,9 @@ test_that("loci_ld_clump error unsorted loci", {
     select_loci(all_of(random_order)) %>%
     show_loci()
 
-  # impute
+  # impute (and use the imputed genotypes)
   pop_b_imputed <- gt_impute_simple(pop_b, method = "mode")
+  gt_set_imputed(pop_b_imputed, set = TRUE)
 
   # ld
   expect_error(
@@ -274,9 +508,6 @@ test_that("loci order", {
 
 test_that("loci_ld_clump works on a grouped gt", {
   bedfile <- system.file("extdata/related/families.bed", package = "tidypopgen")
-  rds <- bigsnpr::snp_readBed(bedfile, backingfile = tempfile())
-  bigsnp <- bigsnpr::snp_attach(rds)
-
   gen_tbl <- gen_tibble(
     bedfile,
     quiet = TRUE,
@@ -284,25 +515,17 @@ test_that("loci_ld_clump works on a grouped gt", {
     valid_alleles = c("1", "2")
   )
 
-  imputed_data <- gt_impute_simple(gen_tbl, method = "random")
-  to_keep_ld_ungrouped <- loci_ld_clump(imputed_data, thr_r2 = 0.2, size = 10)
+  # (the missing genotypes do not need to be imputed)
+  to_keep_ld_ungrouped <- loci_ld_clump(gen_tbl, thr_r2 = 0.2, size = 10)
 
   gen_tbl$population <- rep(c("population_1", "population_2"), each = 6)
   gen_tbl <- gen_tbl %>% group_by(population)
 
-  imputed_data <- gt_impute_simple(gen_tbl, method = "random")
-  to_keep_ld_grouped <- loci_ld_clump(imputed_data, thr_r2 = 0.2, size = 10)
+  to_keep_ld_grouped <- loci_ld_clump(gen_tbl, thr_r2 = 0.2, size = 10)
 
-  # Removed loci are chosen at random, so we can't use expect equal
-  # However, the same number of loci should be removed in both cases
-  expect_equal(
-    length(to_keep_ld_ungrouped == FALSE),
-    length(to_keep_ld_grouped == FALSE)
-  )
-  expect_equal(
-    length(to_keep_ld_ungrouped == TRUE),
-    length(to_keep_ld_grouped == TRUE)
-  )
+  # the groups do not change the loci kept (most loci are removed)
+  expect_lt(sum(to_keep_ld_ungrouped), length(to_keep_ld_ungrouped) / 2)
+  expect_identical(to_keep_ld_grouped, to_keep_ld_ungrouped)
 })
 
 test_that("n_cores can be set", {

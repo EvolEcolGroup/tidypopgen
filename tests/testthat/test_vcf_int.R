@@ -19,9 +19,9 @@ test_that("using integers as names works", {
   expect_true(is.integer(show_loci(anole_gt)$name))
   # test a pca
   anole_gt <- gt_impute_simple(anole_gt, method = "mode")
-  anole_pca <- anole_gt %>% gt_pca_randomSVD(k = 30)
+  anole_pca <- anole_gt %>% gt_pca(k = 30, method = "random", n_cores = 1)
   expect_true(is.integer(row_names(anole_pca$v)))
-  anole_pca <- anole_gt %>% gt_pca_partialSVD(k = 30)
+  anole_pca <- anole_gt %>% gt_pca(k = 30, n_cores = 2)
   expect_true(is.integer(row_names(anole_pca$v)))
   # tidy the pca
   loadings_pca <- tidy(anole_pca, matrix = "loadings")
@@ -99,7 +99,9 @@ for (names_as_int in c(TRUE, FALSE)) {
   ), {
     anole_gt <- make_int_gt(names_as_int)
     anole_gt <- gt_impute_simple(anole_gt, method = "mode")
-    anole_pca <- gt_pca_partialSVD(anole_gt, k = 5)
+    # (a PCA of the imputed genotypes, whose DAPC needs no 'data')
+    gt_set_imputed(anole_gt, set = TRUE)
+    anole_pca <- gt_pca(anole_gt, k = 5, n_cores = 2)
     expect_identical(row_names(anole_pca$v), loci_names(anole_gt))
     # tidy loadings
     loadings_pca <- tidy(anole_pca, matrix = "loadings")
