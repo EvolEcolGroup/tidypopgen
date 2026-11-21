@@ -109,7 +109,14 @@ output is sorted or plotted.}
 \value{
 a vector of frequencies, one per locus, if \code{as_counts = FALSE};
 else a matrix of two columns, the count of alternate alleles and the count
-valid alleles (i.e. the sum of alternate and reference)
+valid alleles (i.e. the sum of alternate and reference). For a grouped
+\code{\link{gen_tibble}}, the values of each group, as given by \code{type}: a tibble with
+one row per locus and group ("tidy"), a list with one element per group
+("list"), or a matrix with loci in rows and groups in columns ("matrix").
+With \code{as_counts = TRUE}, the tibble has the columns \code{n_alt} and \code{n_valid}
+instead of \code{value}, each element of the list is the two-column matrix of
+its group, and "matrix" gives a list of two matrices, \code{n_alt} and
+\code{n_valid}.
 }
 \description{
 Allele frequencies can be estimates as minimum allele frequencies (MAF) with

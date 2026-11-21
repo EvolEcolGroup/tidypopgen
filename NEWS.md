@@ -52,6 +52,10 @@
 * `indiv_het_obs()`, `indiv_missingness()` and `indiv_ploidy()` have methods
   for grouped `gen_tibble`s (all individuals in one pass, in the order of the
   rows) and for tibbles that lost their class
+* `loci_alt_freq(as_counts = TRUE)` on a grouped `gen_tibble` follows `type`:
+  by default a tibble with the columns `n_alt` and `n_valid`;
+  `type = "matrix"` gives the two matrices of before, now with loci and group
+  names
 * new article on large RAD-seq datasets; the big data article uses
   `gt_merge_vcfs()`
 
