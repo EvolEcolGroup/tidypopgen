@@ -4,6 +4,19 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-21 (laptopX1): grouped indiv_* functions made consistent; PR #242
+
+- Survey of the `indiv_*` and `loci_*` families on grouped `gen_tibble`s:
+  `indiv_inbreeding()` was the odd one out (a list per group); the `loci_*`
+  family was consistent but for two edge cases.
+- Branch `indiv_grouping` (from `vignette_filtering`), PR #242: row-order
+  vector for grouped `indiv_inbreeding()` (`type = "list"` deprecated), its
+  genotypes-column method, grouped methods for the other three (the
+  `grouped_df` fallbacks, which broke extension tibbles, dropped after the
+  verifying agent found it), `loci_pi()` and `loci_alt_freq(as_counts)`
+  follow `type`; decisions by Andrea. Report
+  `code_review_2026-11_indiv_grouping.md` on the branch.
+
 ## 2026-11-21 (laptopX1): #239 and #240 merged; 1.1.0 prepared for CRAN
 
 - #239 (`12a6aa5e`) and #240 (`b4f81b26`, after merging `dev` into it) merged

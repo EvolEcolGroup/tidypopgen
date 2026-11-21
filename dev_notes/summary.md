@@ -44,7 +44,8 @@ but Andrea judged it not worth the complexity (with that many loci
 **Next steps**
 - [ ] **P2** [desktop] Re-time the HGDP650 PCA/DAPC/pcadapt/LD benchmarks on the P-cores (not set up): medians in `gt_pca.md`, `ld_missing.md`.
 - [ ] **P2** [claude] Keep optimising: pcadapt's t-scores, the GRM's count of shared loci, the DAPC regression, the other KING and VCF merge ideas: done when >5% faster with identical outputs.
-- [ ] **P1** [andrea] Release 1.1.0 (all checks done, `dev` at `bf933ac1`): set the version, merge `dev` into `main` (site rebuild fixes two article links), re-run `urlchecker::url_check()`, add the win-builder result to `cran-comments.md`, submit.
+- [ ] **P1** [review] Merge PR #242 (`indiv_grouping`: grouped `indiv_*` functions return one value per individual in row order, grouped `indiv_inbreeding()` `type = "list"` deprecated; `loci_*` edge cases): done when in `dev`, before 1.1.0.
+- [ ] **P1** [andrea] Release 1.1.0 (after #242; re-run the CRAN checks on the final `dev`): set the version, merge `dev` into `main` (site rebuild fixes two article links), re-run `urlchecker::url_check()`, add the win-builder result to `cran-comments.md`, submit.
 - [ ] **P3** [decide] Look into the package split when ready (`package_split.md`: decisions, phases, open questions; Phase 0 after 1.1.0).
 - [ ] **P3** [cleanup] After the release, delete the branch `cran_submission`; ask before deleting the benchmark data on the laptop's annex and in `~/claude_work/tidypopgen/` (incl. `pr_timing/`) on the desktop.
 

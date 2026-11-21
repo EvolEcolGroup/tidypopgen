@@ -9,6 +9,7 @@ is in `progress.md`; designs are in the topic documents listed in
 
 | branch | purpose | base | pushed | merged |
 |---|---|---|---|---|
+| `indiv_grouping` | PR #242: consistent grouped behaviour of the `indiv_*` functions (grouped `indiv_inbreeding()` returns a row-order vector, `type = "list"` deprecated; grouped methods for the other three) and `loci_*` edge cases (`loci_pi()` one individual, `loci_alt_freq(as_counts)` follows `type`); report `dev_notes/code_review_2026-11_indiv_grouping.md`; worktree `/media/andrea/annex/tmp/claude/tidypopgen/wt_indiv` | `vignette_filtering` at `cb2fe55b` (Andrea's vignette edits) | yes (21 Nov) | no |
 | `split_plan` | dev notes only: the plan for the package split (`package_split.md`, `package_split/`) and these updated living documents; merge into `dev` (no code, `[skip ci]`) | `dev` at `e20145a2` | yes (21 Nov) | no |
 | `king_avx2` | PR #239: the KING ideas of `king_plink_ideas` cherry-picked onto `dev` (tiles; AVX2 kernel and scalar fallback, squashed), a warning fix for non-x86 builds, a test of both kernels; version 1.0.0.9013 and NEWS | `dev` at `ce748638` | yes (21 Nov) | no |
 | `vcf_merge_speed` | PR #240: the three prototypes of `merge_vcf_speed` cherry-picked onto `dev`, pass-1 errors naming the file, a cache-vs-reread test, docs; version 1.0.0.9014 (rebase on `DESCRIPTION` after #239) | `dev` at `ce748638` | yes (21 Nov) | no |
@@ -29,7 +30,23 @@ now that the branches are pushed or merged).
 
 ## Next tasks
 
-### 1. **P1** [andrea] Release 1.1.0: everything is done but the version
+### 1. **P1** [review] Merge PR #242 (`indiv_grouping`), before 1.1.0
+
+- Andrea asked (21 Nov) whether the `indiv_*` family is consistent on grouped
+  tibbles; decisions: grouped `indiv_inbreeding()` returns a named vector in
+  row order (`type = "list"` deprecated), grouped methods for
+  `indiv_het_obs()`, `indiv_missingness()` and `indiv_ploidy()` plus a note
+  on grouped `mutate()`, grouped `loci_alt_freq(as_counts = TRUE)` follows
+  `type`; all before 1.1.0.
+- It is built on `vignette_filtering` (Andrea's vignette edits), so the PR
+  carries them too. Checks: fails-before tests (a separate agent and
+  Claude), `R CMD check` clean on `7c58224d`; CI on the PR.
+- After the merge, the CRAN checks of `cran_checks_2026-11-21.md` were run
+  before these changes: re-run `devtools::check(remote = TRUE, manual =
+  TRUE)` and R-hub/win-builder on the final `dev` before submitting. Then
+  delete `indiv_grouping`, `vignette_filtering` and the worktree.
+
+### 1b. **P1** [andrea] Release 1.1.0: everything is done but the version
 
 - `dev` at `bf933ac1` has #237-#241: CRAN test skips, no RcppArmadillo,
   KING AVX2, faster VCF merge, and the pre-submission fixes and
