@@ -17,8 +17,8 @@ documents listed in `README.md`.
 Deleted on 21 Nov (Andrea): `pca_missing` (#231), `cran_test_time` (#237),
 `bed_reader` (#234), `big_data_article`, `adm_plot_ordering` and `pedigree`
 (all superseded by `dev`). `king_simd_packing` (rejected, below the 1.5x bar)
-is no longer in the laptop's repository (never pushed). Still to decide:
-`as_fbm`, `skill`, `feature/pop-tajimas-d-polyploid` (superseded by `dev`).
+is no longer in the laptop's repository (never pushed). `feature/pop-tajimas-d-polyploid`
+(superseded) deleted too; `as_fbm` and `skill` kept (Andrea).
 `merge_vcf_speed` and `king_plink_ideas` were rechecked on 21 Nov: their
 prototype commits are not in `dev`.
 
