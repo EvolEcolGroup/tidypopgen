@@ -477,6 +477,46 @@ test_that("gt_merge_vcfs swaps genotypes with fewer alleles than the ploidy", {
   expect_equal(show_genotypes(merged), rbind(c(1, 2), c(1, 1), c(0, 0)))
 })
 
+test_that("gt_merge_vcfs gives the same result with and without its cache", {
+  # the genotypes kept from the first pass (the default) and those read
+  # again from the VCFs (option tidypopgen.merge_cache = FALSE)
+  loci_a <- data.frame(
+    chrom = "1", pos = c(100, 200, 300), id = ".", ref = c("A", "G", "C"),
+    alt = c("C", "T", "G")
+  )
+  vcf_a <- write_merge_vcf(c("a1", "a2"), loci_a,
+    genotypes = rbind(c("0/1", "1/1"), c("./.", "0/1"), c("0/0", "1/1"))
+  )
+  # REF and ALT swapped at the first two loci, with diploid genotypes only
+  loci_b <- data.frame(
+    chrom = "1", pos = c(100, 200, 400), id = ".", ref = c("C", "T", "A"),
+    alt = c("A", "G", "T")
+  )
+  vcf_b <- write_merge_vcf("b", loci_b,
+    genotypes = rbind("0/1", "1/1", "0/0")
+  )
+  # swapped too, with a haploid genotype in diploids (read again)
+  vcf_c <- write_merge_vcf(c("c1", "c2"), loci_b,
+    genotypes = rbind(c("0/1", "1/1"), c("0", "1"), c("./.", "0/1"))
+  )
+  merge_both_ways <- function(...) {
+    cached <- gt_merge_vcfs(..., backingfile = tempfile(), quiet = TRUE)
+    withr::local_options(tidypopgen.merge_cache = FALSE)
+    reread <- gt_merge_vcfs(..., backingfile = tempfile(), quiet = TRUE)
+    expect_identical(show_genotypes(cached), show_genotypes(reread))
+    expect_identical(show_loci(cached), show_loci(reread))
+    expect_identical(cached$id, reread$id)
+    expect_identical(indiv_ploidy(cached), indiv_ploidy(reread))
+  }
+  merge_both_ways(c(vcf_a, vcf_b, vcf_c),
+    ref_mismatch = "swap", variants = "union"
+  )
+  merge_both_ways(c(vcf_a, vcf_b, vcf_c),
+    ref_mismatch = "swap", variants = "intersection"
+  )
+  merge_both_ways(c(vcf_1, vcf_2), variants = "union")
+})
+
 test_that("the C++ merge helpers check their inputs", {
   # (these inputs are always consistent when they come from gt_merge_vcfs()
   # or gt_concat_vcfs())
