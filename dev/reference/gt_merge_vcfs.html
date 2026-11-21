@@ -3,17 +3,23 @@
 per population, or per sequencing batch) into a single gen_tibble, as
 bcftools merge would, followed by gen_tibble(). It is much faster than
 reading each file with gen_tibble() and merging them with
-rbind() (one pair at a time), and needs no space on disk
-beyond the merged gen_tibble: each file is read twice, once for its loci
-(to match them across files) and once for its genotypes, which are written
-straight into the merged backing file."><meta property="og:description" content="This function reads several VCF files with different samples (e.g. one
+rbind() (one pair at a time). Each file is read once:
+its loci are matched across files, and its genotypes are kept in a
+temporary backing file next to the merged one (one byte per genotype,
+deleted at the end), then copied into the merged backing file. With little
+space on disk, options(tidypopgen.merge_cache = FALSE) reads each file
+twice instead (once for its loci and once for its genotypes), which is
+slower but needs no space beyond the merged gen_tibble."><meta property="og:description" content="This function reads several VCF files with different samples (e.g. one
 per population, or per sequencing batch) into a single gen_tibble, as
 bcftools merge would, followed by gen_tibble(). It is much faster than
 reading each file with gen_tibble() and merging them with
-rbind() (one pair at a time), and needs no space on disk
-beyond the merged gen_tibble: each file is read twice, once for its loci
-(to match them across files) and once for its genotypes, which are written
-straight into the merged backing file."><meta property="og:image" content="https://evolecolgroup.github.io/tidypopgen/logo.png"><meta name="robots" content="noindex"></head><body>
+rbind() (one pair at a time). Each file is read once:
+its loci are matched across files, and its genotypes are kept in a
+temporary backing file next to the merged one (one byte per genotype,
+deleted at the end), then copied into the merged backing file. With little
+space on disk, options(tidypopgen.merge_cache = FALSE) reads each file
+twice instead (once for its loci and once for its genotypes), which is
+slower but needs no space beyond the merged gen_tibble."><meta property="og:image" content="https://evolecolgroup.github.io/tidypopgen/logo.png"><meta name="robots" content="noindex"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -21,7 +27,7 @@ straight into the merged backing file."><meta property="og:image" content="https
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9013</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9014</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,10 +73,13 @@ straight into the merged backing file."><meta property="og:image" content="https
 per population, or per sequencing batch) into a single <code><a href="gen_tibble.html">gen_tibble</a></code>, as
 <code>bcftools merge</code> would, followed by <code><a href="gen_tibble.html">gen_tibble()</a></code>. It is much faster than
 reading each file with <code><a href="gen_tibble.html">gen_tibble()</a></code> and merging them with
-<a href="rbind.gen_tbl.html">rbind()</a> (one pair at a time), and needs no space on disk
-beyond the merged <code>gen_tibble</code>: each file is read twice, once for its loci
-(to match them across files) and once for its genotypes, which are written
-straight into the merged backing file.</p>
+<a href="rbind.gen_tbl.html">rbind()</a> (one pair at a time). Each file is read once:
+its loci are matched across files, and its genotypes are kept in a
+temporary backing file next to the merged one (one byte per genotype,
+deleted at the end), then copied into the merged backing file. With little
+space on disk, <code>options(tidypopgen.merge_cache = FALSE)</code> reads each file
+twice instead (once for its loci and once for its genotypes), which is
+slower but needs no space beyond the merged <code>gen_tibble</code>.</p>
     </div>
 
     <div class="section level2">
@@ -285,12 +294,12 @@ from files of other formats).</p></div>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> reading the genotypes of /home/runner/work/_temp/Library/tidypopgen/extdata/pop_a.vcf</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> reading the genotypes of /home/runner/work/_temp/Library/tidypopgen/extdata/pop_b.vcf</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/Rtmp1NQMIe/merged_1f8444f7c9b1.gt</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/Rtmp1NQMIe/merged_1f8444f7c9b1.rds</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/Rtmp1NQMIe/merged_1f8444f7c9b1.bk</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/Rtmpxha9zc/merged_1f334a915bba.gt</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/Rtmpxha9zc/merged_1f334a915bba.rds</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/Rtmpxha9zc/merged_1f334a915bba.bk</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> make sure that you do NOT delete those files!</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> to reload the gen_tibble in another session, use:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/Rtmp1NQMIe/merged_1f8444f7c9b1.gt')</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/Rtmpxha9zc/merged_1f334a915bba.gt')</span>
 <span class="r-in"><span><span class="va">merged_gt</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A gen_tibble: 8 loci</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble:     8 × 2</span></span>

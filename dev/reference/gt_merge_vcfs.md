@@ -9,10 +9,13 @@ It is much faster than reading each file with
 [`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
 and merging them with
 [rbind()](https://evolecolgroup.github.io/tidypopgen/dev/reference/rbind.gen_tbl.md)
-(one pair at a time), and needs no space on disk beyond the merged
-`gen_tibble`: each file is read twice, once for its loci (to match them
-across files) and once for its genotypes, which are written straight
-into the merged backing file.
+(one pair at a time). Each file is read once: its loci are matched
+across files, and its genotypes are kept in a temporary backing file
+next to the merged one (one byte per genotype, deleted at the end), then
+copied into the merged backing file. With little space on disk,
+`options(tidypopgen.merge_cache = FALSE)` reads each file twice instead
+(once for its loci and once for its genotypes), which is slower but
+needs no space beyond the merged `gen_tibble`.
 
 ## Usage
 
@@ -264,12 +267,12 @@ merged_gt <- gt_merge_vcfs(c(vcf_a, vcf_b),
 #> reading the genotypes of /home/runner/work/_temp/Library/tidypopgen/extdata/pop_a.vcf
 #> reading the genotypes of /home/runner/work/_temp/Library/tidypopgen/extdata/pop_b.vcf
 #> 
-#> gen_tibble saved to /tmp/Rtmp1NQMIe/merged_1f8444f7c9b1.gt
-#> using FBM RDS: /tmp/Rtmp1NQMIe/merged_1f8444f7c9b1.rds
-#> with FBM backing file: /tmp/Rtmp1NQMIe/merged_1f8444f7c9b1.bk
+#> gen_tibble saved to /tmp/Rtmpxha9zc/merged_1f334a915bba.gt
+#> using FBM RDS: /tmp/Rtmpxha9zc/merged_1f334a915bba.rds
+#> with FBM backing file: /tmp/Rtmpxha9zc/merged_1f334a915bba.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/Rtmp1NQMIe/merged_1f8444f7c9b1.gt')
+#> gt_load('/tmp/Rtmpxha9zc/merged_1f334a915bba.gt')
 merged_gt
 #> # A gen_tibble: 8 loci
 #> # A tibble:     8 × 2
