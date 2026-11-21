@@ -81,7 +81,7 @@
 * `gt_add_sf()`: no "Adding missing grouping variables" message on grouped
   `gen_tibble`s
 * `loci_pi()` on a grouped `gen_tibble` with a single individual: fix the
-  output, a plain vector whatever `type`
+  output, which was a plain vector whatever `type`
 
 # tidypopgen 1.0.0
 

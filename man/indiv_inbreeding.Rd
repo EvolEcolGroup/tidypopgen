@@ -41,7 +41,8 @@ one vector per group, in the order of \code{\link[dplyr:group_keys]{dplyr::group
 }
 \value{
 a numeric vector of inbreeding coefficients, one per individual in
-the order of the rows, named by the ids of the individuals. For a grouped
+the order of the rows, named by the ids of the individuals (when
+\code{allele_sharing_mat} is given, by its row names). For a grouped
 \code{\link{gen_tibble}}, the coefficients are computed within each group (with
 \code{type = "list"}, deprecated, they are returned as a list of vectors, one
 per group; an empty group gives an empty vector).
