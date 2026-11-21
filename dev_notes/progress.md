@@ -4,6 +4,14 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-21 (laptopX1): RcppArmadillo removed
+
+- **Done:** on `remove_armadillo` (from `dev`, `bffb3460`, local): RcppArmadillo
+  dropped from `LinkingTo` and the `-DARMA_*` flags from `src/Makevars`;
+  `compileAttributes()` drops its include from `RcppExports.cpp`. No source
+  file or included bigstatsr header uses Armadillo. Clean -O2 compile with
+  no new warnings; full suite 5912 passed, 0 skipped (`NOT_CRAN=true`).
+
 ## 2026-11-21 (laptopX1): concise NEWS for 1.1.0; PR #237
 
 - **Done:** rewrote the 1.1.0 section of `NEWS.md` on `cran_test_time`
