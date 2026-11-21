@@ -4,6 +4,15 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-21 (laptopX1): concise NEWS for 1.1.0; PR #237
+
+- **Done:** rewrote the 1.1.0 section of `NEWS.md` on `cran_test_time`
+  (`5ed6faa1`) in the style of 1.0.0: 44 items to 32, follow-up changes to
+  functions new in 1.1.0 folded or dropped (e.g. the `gt_pca` attributes,
+  the ROH chromosome names with `chromosomes_as_int`), related items merged.
+  Andrea then dropped the `inst/COPYRIGHTS` item (`06602b35`).
+- **PR:** #237, `cran_test_time` into `dev`: the 13 CRAN skips and the NEWS.
+
 ## 2026-11-21 (laptopX1): test times on CRAN and per test file
 
 - **Done:** read the test, example and vignette times of 1.0.0 in CRAN's

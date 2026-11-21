@@ -1,7 +1,7 @@
 # tidypopgen: summary
 
 Updated 2026-11-21 (laptopX1: #235 and #231 merged into `dev`; the
-package split planned and deferred). One section: the package's issue in
+package split planned and deferred; PR #237 opened). One section: the package's issue in
 dramanica/claude_jobs, with the single list of its tasks. Its first
 paragraph, status and next steps are copied into the issue
 (`scripts/sync_issue.py`).
@@ -44,7 +44,7 @@ but Andrea judged it not worth the complexity (with that many loci
 - [ ] **P2** [desktop] Re-time the HGDP650 PCA/DAPC/pcadapt/LD benchmarks on the P-cores (not set up): medians in `gt_pca.md`, `ld_missing.md`.
 - [ ] **P2** [claude] Make `merge_vcf_speed` ready for a PR (file names in pass-1 errors, a cache-vs-reread test, full suite, `gen_tibble()` timing): done when a PR into `dev` is open.
 - [ ] **P2** [claude] Keep optimising: pcadapt's t-scores, the GRM's count of shared loci, the DAPC regression, KING: check a build of the two-path kernel without AVX2 (`king_plink_ideas` `e2692136`; 1.76x on the desktop), then a PR if Andrea agrees: done when >5% faster with identical outputs.
-- [ ] **P2** [review] Review and merge `cran_test_time` (13 slow test blocks skipped on CRAN, one commit per file: CRAN-mode tests 214 -> 163 s on the laptop, all still run on GitHub; `test_times_2026-11.md`): done when it is in `dev`, before 1.1.0.
+- [ ] **P2** [review] Review and merge PR #237 (`cran_test_time`: 13 slow test blocks skipped on CRAN, CRAN-mode tests 214 -> 163 s on the laptop, all still run on GitHub; and the concise 1.1.0 NEWS): done when it is in `dev`, before 1.1.0.
 - [ ] **P2** [review] Release 1.1.0 (#231 is merged; after the CRAN test trims): set the version, re-time the precompiled articles on a quiet machine, merge `dev` into `main`, re-run `urlchecker::url_check()` and submit.
 - [ ] **P3** [decide] Look into the package split when ready (`package_split.md`: decisions, phases, open questions; Phase 0 after 1.1.0).
 - [ ] **P3** [cleanup] Delete merged branches (`bed_reader` on origin, `pca_missing`, then `merge_vcf_speed`, `king_*` once decided); review the other local branches on the laptop; ask before deleting the benchmark data on the laptop's annex and in `~/claude_work/tidypopgen/` on the desktop.
@@ -52,5 +52,6 @@ but Andrea judged it not worth the complexity (with that many loci
 **Done**
 - PR #235 merged into `pca_missing` (`af7fed7e`), then #231 into `dev` (`e20145a2`): 21 Nov (Andrea).
 - Andrea chose to skip all eight candidates on CRAN; done on `cran_test_time` (pushed): 21 Nov.
+- 1.1.0 NEWS rewritten concisely; PR #237 opened (`cran_test_time` into `dev`): 21 Nov.
 - Test times measured: on CRAN (1.0.0, from its logs) and per test file on the laptop (-O2, CRAN mode: 214 s, the 10 slowest files 46%): 21 Nov.
 - Plan for the package split written and deferred (`package_split.md`, file map in `package_split/`; Andrea's decisions on the umbrella, names, clustering and website): 21 Nov.
