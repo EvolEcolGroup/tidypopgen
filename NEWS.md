@@ -49,6 +49,9 @@
   individual, in the order of the rows (computed within each group); the
   list of one vector per group (`type = "list"`) is deprecated. It also
   works on the `genotypes` column, e.g. within `mutate()`
+* `indiv_het_obs()`, `indiv_missingness()` and `indiv_ploidy()` have methods
+  for grouped `gen_tibble`s (all individuals in one pass, in the order of the
+  rows) and for tibbles that lost their class
 * new article on large RAD-seq datasets; the big data article uses
   `gt_merge_vcfs()`
 

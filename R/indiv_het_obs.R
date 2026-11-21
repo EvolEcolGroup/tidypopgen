@@ -8,8 +8,17 @@
 #' against its own ploidy, so individuals of differing ploidy can be mixed
 #' freely).
 #'
+#' On a grouped [`gen_tibble`], heterozygosity is computed for all the
+#' individuals in a single pass over the genotypes (it does not depend on the
+#' groups), and returned in the order of the rows. Within a grouped
+#' `mutate()` or `summarise()`, `dplyr` calls `indiv_het_obs()` on the
+#' genotypes of each group in turn: this gives the same values, but reads the
+#' genotypes once for each group. With many groups and large datasets,
+#' compute it on the whole grouped tibble instead (e.g.
+#' `grouped_gt$het_obs <- indiv_het_obs(grouped_gt)`), or before grouping.
+#'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
-#'   a [`gen_tibble`] object), or a [`gen_tibble`].
+#'   a [`gen_tibble`] object), or a [`gen_tibble`] (grouped or not).
 #' @param as_counts logical, if `TRUE`, return a matrix with two columns:
 #'  the number of heterozygotes and the number of missing values for each
 #'  individual. These quantities can be useful to compute more complex
@@ -40,6 +49,32 @@ indiv_het_obs.tbl_df <- function(.x, as_counts = FALSE, ...) {
   stopifnot_has_genotypes(.x)
   # extract the column and hand it over to its method
   indiv_het_obs(.x$genotypes, as_counts = as_counts, ...)
+}
+
+#' @export
+#' @rdname indiv_het_obs
+indiv_het_obs.grouped_gen_tbl <- function(.x, as_counts = FALSE, ...) {
+  stopifnot_has_genotypes(.x)
+  # heterozygosity does not depend on the groups: compute it for all the
+  # individuals in a single pass over the genotypes (the whole column), in
+  # the order of the rows
+  indiv_het_obs(.x$genotypes, as_counts = as_counts, ...)
+}
+
+# a grouped data frame that has lost the class of its tibble (e.g. a grouped
+# gen_tibble returned by summarise()): restore the class and dispatch again
+#' @export
+#' @noRd
+indiv_het_obs.grouped_df <- function(.x, ...) {
+  indiv_het_obs(restore_genotypes_tbl(.x, "indiv_het_obs"), ...)
+}
+
+# a data frame that has lost the class of its tibble (e.g. a gen_tibble
+# returned by pick() or reframe()): restore the class and dispatch again
+#' @export
+#' @noRd
+indiv_het_obs.data.frame <- function(.x, ...) {
+  indiv_het_obs(restore_genotypes_tbl(.x, "indiv_het_obs"), ...)
 }
 
 #' @export
