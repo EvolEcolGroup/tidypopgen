@@ -10,11 +10,12 @@ articles:
   articles/benchmark_hgdp: benchmark_hgdp.html
   articles/big_data: big_data.html
   articles/interpolating: interpolating.html
+  articles/missing_data: missing_data.html
   articles/rad_seq: rad_seq.html
   articles/roh_hgdp: roh_hgdp.html
   articles/sfs: sfs.html
   tidypopgen: tidypopgen.html
-last_built: 2026-11-21T02:30Z
+last_built: 2026-11-21T10:18Z
 urls:
   reference: https://evolecolgroup.github.io/tidypopgen/reference
   article: https://evolecolgroup.github.io/tidypopgen/articles

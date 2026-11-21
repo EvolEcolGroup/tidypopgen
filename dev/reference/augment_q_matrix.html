@@ -19,7 +19,7 @@ when adapting plotting scripts)."><meta property="og:image" content="https://evo
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9010</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9012</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,7 @@ when adapting plotting scripts)."><meta property="og:image" content="https://evo
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/a01_overview.html">The grammar of population genetics</a></li>
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
     <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/missing_data.html">Missing genotypes: impute only when you must</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseudohaploids</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
     <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity</a></li>
@@ -119,12 +120,12 @@ columns containing each observation's Q values.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   id    population  genotypes .rownames       .Q1       .Q2       .Q3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;vctr_SNP&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> a     pop1        [1,1,...] a         0.000<span style="text-decoration: underline;">100</span>0 1.000     0.000<span style="text-decoration: underline;">100</span>0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> b     pop1        [2,1,...] b         0.000<span style="text-decoration: underline;">100</span>0 0.000<span style="text-decoration: underline;">100</span>0 1.000    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> b     pop1        [2,1,...] b         0.000<span style="text-decoration: underline;">100</span>0 1.000     0.000<span style="text-decoration: underline;">100</span>0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> c     pop2        [2,.,...] c         0.000<span style="text-decoration: underline;">100</span>0 0.000<span style="text-decoration: underline;">100</span>0 1.000    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> d     pop2        [1,0,...] d         1.000     0.000<span style="text-decoration: underline;">100</span>0 0.000<span style="text-decoration: underline;">100</span>0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> d     pop2        [1,0,...] d         0.000<span style="text-decoration: underline;">100</span>0 1.000     0.000<span style="text-decoration: underline;">100</span>0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> e     pop1        [1,2,...] e         1.000     0.000<span style="text-decoration: underline;">100</span>0 0.000<span style="text-decoration: underline;">100</span>0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> f     pop3        [0,0,...] f         0.000<span style="text-decoration: underline;">100</span>0 0.000<span style="text-decoration: underline;">100</span>0 1.000    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span> g     pop3        [0,1,...] g         0.000<span style="text-decoration: underline;">100</span>0 1.000     0.000<span style="text-decoration: underline;">100</span>0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span> g     pop3        [0,1,...] g         0.000<span style="text-decoration: underline;">100</span>0 0.000<span style="text-decoration: underline;">100</span>0 1.000    </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9010</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9012</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -22,6 +22,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/a01_overview.html">The grammar of population genetics</a></li>
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
     <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/missing_data.html">Missing genotypes: impute only when you must</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseudohaploids</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
     <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity</a></li>
@@ -50,7 +51,29 @@
 <h2 class="pkg-version" data-toc-text="1.1.0" id="tidypopgen-110">tidypopgen 1.1.0<a class="anchor" aria-label="anchor" href="#tidypopgen-110"></a></h2>
 <div class="section level3">
 <h3 id="new-features-and-changes-1-1-0">New features and changes<a class="anchor" aria-label="anchor" href="#new-features-and-changes-1-1-0"></a></h3>
-<ul><li>new <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code> and <code><a href="../reference/gt_concat_vcfs.html">gt_concat_vcfs()</a></code> read several VCF files into a single <code>gen_tibble</code>, as <code>bcftools merge</code> and <code>bcftools concat</code>
+<ul><li>the authors of code adapted from other software are credited in <code>DESCRIPTION</code>, and their copyrights and licences listed in <code>inst/COPYRIGHTS</code>
+</li>
+<li>new <code><a href="../reference/gt_pca.html">gt_pca()</a></code> computes PCAs: <code>method = "partial"</code> (the default) handles missing genotypes as <code>plink --pca</code> (PLINK 1.9) does, without imputation, and uses an optimised BLAS when there is one, and Eigen otherwise; <code>method = "random"</code> is for very large numbers of individuals</li>
+<li>
+<code>gt_pca</code> objects record whether they used imputed genotypes and whether their genotypes had missing values (attributes <code>imputed</code> and <code>missing</code>)</li>
+<li>
+<code><a href="../reference/gt_pcadapt.html">gt_pcadapt()</a></code> works with missing genotypes, testing each locus on its genotyped individuals as <code>pcadapt</code> does (new argument <code>max_missing</code>)</li>
+<li>
+<code><a href="../reference/loci_ld_clump.html">loci_ld_clump()</a></code> works with missing genotypes, without imputation: r^2 is computed over the individuals genotyped at both loci, as in PLINK (new arguments <code>min_shared</code> and <code>insufficient</code>); it uses imputed genotypes only if the <code>gen_tibble</code> is set to use them</li>
+<li>new <code><a href="../reference/loci_ld_prune.html">loci_ld_prune()</a></code> prunes loci as <code>plink --indep-pairwise</code> (PLINK 1.9), also with missing genotypes</li>
+<li>
+<code><a href="../reference/gt_dapc.html">gt_dapc()</a></code> works on a PCA of missing genotypes (new arguments <code>data</code>, <code>max_missing</code> and <code>n_cores</code>): the loadings of each locus come from its genotyped individuals, not imputed ones (<code>NA</code> above <code>max_missing</code>)</li>
+<li>errors on missing genotypes name the function and say how to impute them; <code>gt_pca(method = "random")</code> no longer reads the genotypes an extra time to look for them</li>
+<li>
+<code><a href="../reference/gt_pca_partialSVD.html">gt_pca_partialSVD()</a></code> and <code><a href="../reference/gt_pca_randomSVD.html">gt_pca_randomSVD()</a></code> are deprecated in favour of <code><a href="../reference/gt_pca.html">gt_pca()</a></code>
+</li>
+<li>
+<code><a href="https://rspatial.github.io/terra/reference/predict.html" class="external-link">predict()</a></code> of a <code>gt_pca</code> now uses <code>project_method = "least_squares"</code> on all the components by default, which does not shrink the scores of individuals with missing genotypes; projections are 2-3 times faster</li>
+<li>new <code>predict(project_method = "plink")</code> projects as PLINK 1.9 (<code>--pca-cluster-names</code>)</li>
+<li>
+<code>pairwise_grm(method = "plink")</code> gives PLINK 1.9’s variance-standardised relationship matrix</li>
+<li>new <code><a href="../reference/gt_simulate_bn.html">gt_simulate_bn()</a></code> simulates toy datasets of unlinked loci (Balding-Nichols model) for quick checks</li>
+<li>new <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code> and <code><a href="../reference/gt_concat_vcfs.html">gt_concat_vcfs()</a></code> read several VCF files into a single <code>gen_tibble</code>, as <code>bcftools merge</code> and <code>bcftools concat</code>
 </li>
 <li>integer chromosomes (<code>chromosomes_as_int</code>) for datasets with many chromosomes; the original names of integer loci and chromosomes are kept in sidecar files (<code><a href="../reference/gt_lookup_loci.html">gt_lookup_loci()</a></code>, <code><a href="../reference/gt_lookup_loci.html">gt_restore_loci()</a></code> and <code><a href="../reference/gt_lookup_loci.html">gt_lookup_chromosomes()</a></code>), which <code><a href="../reference/gt_get_file_names.html">gt_get_file_names()</a></code> and <code><a href="../reference/gt_save.html">gt_save()</a></code> list</li>
 <li>phased genotypes (experimental): <code>gen_tibble(phased = TRUE)</code> reads phased VCF files; <code><a href="../reference/is_phased.html">is_phased()</a></code> and <code><a href="../reference/show_haplotypes.html">show_haplotypes()</a></code> give the phase, <code><a href="../reference/gt_as_vcf.html">gt_as_vcf()</a></code> writes it, and <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code> keeps it</li>
@@ -59,7 +82,14 @@
 </li>
 <li>
 <code>qc_report_loci(hwe = FALSE)</code> gives the MAF and missingness of loci in a single pass</li>
+<li>faster <code><a href="../reference/pairwise_king.html">pairwise_king()</a></code>, <code><a href="../reference/pairwise_ibs.html">pairwise_ibs()</a></code> and <code><a href="../reference/pairwise_allele_sharing.html">pairwise_allele_sharing()</a></code> (about 20%), and <code>qc_report_indiv(kings_threshold = )</code> on grouped data (4-5 times)</li>
+<li>
+<code><a href="../reference/pairwise_king.html">pairwise_king()</a></code> on a grouped <code>gen_tibble</code> computes kinship within each group (it used to ignore the groups), 10-30 times faster than <code><a href="https://dplyr.tidyverse.org/reference/group_map.html" class="external-link">group_map()</a></code>
+</li>
+<li>faster <code><a href="../reference/indiv_inbreeding.html">indiv_inbreeding()</a></code> on a grouped <code>gen_tibble</code> (about 10 times with many groups), reading the genotypes once for all groups</li>
 <li>faster VCF reading (in parallel with <code>n_cores</code>), and faster reading of <em>.ped</em> files straight into the backing file</li>
+<li>PLINK <em>.bed</em> files are read in parallel with <code>n_cores</code>
+</li>
 <li>faster <code><a href="../reference/gt_as_vcf.html">gt_as_vcf()</a></code>, <code><a href="../reference/gt_update_backingfile.html">gt_update_backingfile()</a></code> and <code><a href="../reference/gt_order_loci.html">gt_order_loci()</a></code> with many chromosomes; <code><a href="../reference/gt_as_genlight.html">gt_as_genlight()</a></code> works in chunks of loci</li>
 <li>faster <code><a href="../reference/select_loci.html">select_loci()</a></code> with variables and function calls; <code>.engine = "tidyselect"</code> always uses <code>tidyselect</code>
 </li>
@@ -76,7 +106,16 @@
 </ul></div>
 <div class="section level3">
 <h3 id="bug-fixes-1-1-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-1-0"></a></h3>
-<ul><li>functions using temporary backing files (PCA, LD clumping, KING, IBS and allele sharing) delete them, fixing occasional “File ‘…bk’ already exists” errors</li>
+<ul><li>
+<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code>: fix <em>.bed</em> files whose size does not match the <em>.bim</em> and <em>.fam</em> files (e.g. one of them truncated), and individual-major <em>.bed</em> files, which were read without an error</li>
+<li>
+<code><a href="../reference/gt_pcadapt.html">gt_pcadapt()</a></code>: a clear error, naming them, for loci with the same genotype in every individual (e.g. all heterozygous after heavy imputation), instead of “You can’t have missing values in ‘U’” (<a href="https://github.com/EvolEcolGroup/tidypopgen/issues/179" class="external-link">#179</a>)</li>
+<li>fix false “You can’t have missing values” errors (or hangs, with <code>n_cores &gt; 1</code>) in <code><a href="../reference/loci_ld_clump.html">loci_ld_clump()</a></code>, <code><a href="../reference/gt_pcadapt.html">gt_pcadapt()</a></code>, the PCA functions and <code>predict(project_method = "none")</code> after removing loci or individuals with missing genotypes: only the genotypes in use are checked</li>
+<li>
+<code>gt_pca(method = "random")</code> and <code><a href="../reference/gt_pca_autoSVD.html">gt_pca_autoSVD()</a></code> with a custom <code>fun_scaling</code>: fix hangs (with <code>n_cores &gt; 1</code>) or cryptic errors on missing genotypes</li>
+<li>
+<code>gt_pca(method = "random")</code> and <code><a href="../reference/gt_pca_autoSVD.html">gt_pca_autoSVD()</a></code> use at most <code>n_cores</code> cores (bigstatsr’s parallel SVD started one more process)</li>
+<li>functions using temporary backing files (PCA, LD clumping, KING, IBS and allele sharing) delete them, fixing occasional “File ‘…bk’ already exists” errors</li>
 <li>
 <code><a href="../reference/windows_indiv_roh.html">windows_indiv_roh()</a></code> and the <code>gt_roh_*()</code> functions give chromosome names with <code>chromosomes_as_int</code>
 </li>
@@ -86,6 +125,12 @@
 <code><a href="../reference/gen_tibble.html">gen_tibble()</a></code> with the “cpp” parser: fix malformed VCF files read as wrong genotypes (now an error), missing chromosomes (now <code>NA</code>), and backing files left behind on errors</li>
 <li>
 <code><a href="../reference/gt_as_vcf.html">gt_as_vcf()</a></code>: fix loci with missing chromosomes (now written as “.”)</li>
+<li>
+<code><a href="../reference/loci_ld_clump.html">loci_ld_clump()</a></code>: <code>exclude</code> values that are not indices of loci (out of range, negative, not whole numbers, or names) give an error, rather than excluding nothing or the wrong loci</li>
+<li>
+<code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code>: fix grouped <code>gen_tibble</code>s (an error from <code><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows()</a></code>); the merged <code>gen_tibble</code> keeps the grouping of the first one</li>
+<li>
+<code><a href="../reference/gt_add_sf.html">gt_add_sf()</a></code>: no “Adding missing grouping variables” message on grouped <code>gen_tibble</code>s</li>
 </ul></div>
 </div>
     <div class="section level2">

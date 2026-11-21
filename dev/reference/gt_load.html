@@ -21,7 +21,7 @@ are found next to the .bk file, so move any of them with it."><meta property="og
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9010</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9012</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,6 +36,7 @@ are found next to the .bk file, so move any of them with it."><meta property="og
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/a01_overview.html">The grammar of population genetics</a></li>
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
     <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/missing_data.html">Missing genotypes: impute only when you must</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseudohaploids</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
     <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity</a></li>
@@ -113,16 +114,16 @@ You should be able to leave this to NULL unless you have moved the files.</p></d
 <span class="r-in"><span>  file_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"_example_filtered"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/RtmpZHNEm1/file1f1519c92e4f_example_filtered.gt</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/RtmpZHNEm1/file1f15b11deee.rds</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/RtmpZHNEm1/file1f15b11deee.bk</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/RtmpVFOvDK/file1f943e90bee8_example_filtered.gt</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/RtmpVFOvDK/file1f943f7150c3.rds</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/RtmpVFOvDK/file1f943f7150c3.bk</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> make sure that you do NOT delete those files!</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> to reload the gen_tibble in another session, use:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/RtmpZHNEm1/file1f1519c92e4f_example_filtered.gt')</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/RtmpVFOvDK/file1f943e90bee8_example_filtered.gt')</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># backing_files[1] contains the name of the saved .gt file</span></span></span>
 <span class="r-in"><span><span class="va">backing_files</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpZHNEm1/file1f1519c92e4f_example_filtered.gt"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpVFOvDK/file1f943e90bee8_example_filtered.gt"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># To load the saved gen_tibble object, use the path to the saved .gt file</span></span></span>
 <span class="r-in"><span><span class="va">reloaded_gt</span> <span class="op">&lt;-</span> <span class="fu">gt_load</span><span class="op">(</span><span class="va">backing_files</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>

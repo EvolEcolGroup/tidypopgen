@@ -8,6 +8,8 @@
   Control](https://evolecolgroup.github.io/tidypopgen/dev/articles/a02_qc.md):
 - [Population genetic
   analysis](https://evolecolgroup.github.io/tidypopgen/dev/articles/a03_example_clustering_and_dapc.md):
+- [Missing genotypes: impute only when you
+  must](https://evolecolgroup.github.io/tidypopgen/dev/articles/missing_data.md):
 - [Working with aDNA
   pseudohaploids](https://evolecolgroup.github.io/tidypopgen/dev/articles/aDNA_pseudohaploids.md):
 - [Spatial interpolation of genetic

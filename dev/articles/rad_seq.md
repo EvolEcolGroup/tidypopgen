@@ -111,9 +111,9 @@ is the loci table, which is held in memory and saved in the `.gt` file:
 
 | options            | time_s | peak_memory_mb | loci_table_mb | bk_mb | gt_mb | sidecars_mb |
 |:-------------------|-------:|---------------:|--------------:|------:|------:|------------:|
-| default            |   37.7 |           3708 |          2846 |   924 |   165 |           0 |
-| names_as_int       |   19.9 |           2552 |          1756 |   924 |   108 |         748 |
-| chromosomes_as_int |   19.9 |           2410 |          1751 |   924 |   125 |         407 |
+| default            |   41.0 |           3708 |          2846 |   924 |   165 |           0 |
+| names_as_int       |   18.9 |           2552 |          1756 |   924 |   108 |         748 |
+| chromosomes_as_int |   19.1 |           2410 |          1751 |   924 |   125 |         407 |
 | both               |   12.7 |           1188 |           660 |   924 |    68 |        1155 |
 
 `time_s` is the time to read the VCF and save the `gen_tibble`;
@@ -158,7 +158,7 @@ is faster too:
 reloaded <- gt_load("./data/rad/rad_int.gt")
 ```
 
-This takes 3.1 s, against 18 s for the `gen_tibble` read with the
+This takes 3.1 s, against 19.1 s for the `gen_tibble` read with the
 default options (see the performance summary at the end).
 
 ## The sidecar files
@@ -199,13 +199,15 @@ for it, with the loci that they keep.
 ## Quality control
 
 We add the lineage of each sample, from the `strata` file of the
-dataset:
+dataset, and group the samples by lineage, so that the functions that
+use groups (such as the scan below) work within lineages:
 
 ``` r
 
 strata <- read.delim("./data/rad/discosnp.strata.tsv")
 rad_gt <- rad_gt %>%
-  mutate(population = strata$pop[match(id, strata$id)])
+  mutate(population = strata$pop[match(id, strata$id)]) %>%
+  group_by(population)
 table(rad_gt$population)
 #> 
 #> BS GS OG WA 
@@ -213,14 +215,17 @@ table(rad_gt$population)
 ```
 
 and remove the loci with more than 20% of missing genotypes, or with a
-minor allele frequency below 5%:
+minor allele frequency below 5%, over all samples
+([`select_loci_if()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/select_loci_if.md)
+ignores the groups):
 
 ``` r
 
-loci_missing <- loci_missingness(rad_gt, n_cores = n_cores)
-loci_freq <- loci_maf(rad_gt, n_cores = n_cores)
 rad_gt <- rad_gt %>%
-  select_loci(which(loci_missing <= 0.2 & loci_freq >= 0.05))
+  select_loci_if(
+    loci_missingness(genotypes, n_cores = n_cores) <= 0.2 &
+      loci_maf(genotypes, n_cores = n_cores) >= 0.05
+  )
 count_loci(rad_gt)
 #> [1] 3605716
 ```
@@ -233,7 +238,6 @@ most between two lineages, GS and BS:
 ``` r
 
 freq <- rad_gt %>%
-  group_by(population) %>%
   loci_alt_freq(n_cores = n_cores, type = "matrix")
 freq_diff <- abs(freq[, "GS"] - freq[, "BS"])
 ```
@@ -404,18 +408,18 @@ show_loci(rad_hits)
 
 | step                    | time_s | peak_memory_mb |
 |:------------------------|-------:|---------------:|
-| read_default            |  37.73 |           3708 |
-| read_names_as_int       |  19.89 |           2552 |
-| read_chromosomes_as_int |  19.93 |           2410 |
-| read_both_as_int        |  12.70 |           1188 |
-| load_default            |  18.00 |           3755 |
-| load_both_as_int        |   3.10 |           1272 |
-| loci_qc                 |   0.44 |           1786 |
-| scan                    |   0.08 |            811 |
-| lookup_first            |   0.65 |            798 |
-| lookup_again            |   0.11 |            800 |
-| lookup_chromosomes      |   0.02 |            865 |
-| restore                 |   0.37 |            879 |
+| read_default            |  41.03 |           3708 |
+| read_names_as_int       |  18.85 |           2552 |
+| read_chromosomes_as_int |  19.06 |           2410 |
+| read_both_as_int        |  12.68 |           1188 |
+| load_default            |  19.06 |           3755 |
+| load_both_as_int        |   3.07 |           1273 |
+| loci_qc                 |   0.42 |           1852 |
+| scan                    |   0.08 |            546 |
+| lookup_first            |   0.64 |            534 |
+| lookup_again            |   0.11 |            536 |
+| lookup_chromosomes      |   0.02 |            601 |
+| restore                 |   0.37 |            616 |
 
 `peak_memory_mb` is the memory used by R; the genotypes are in the
 backing files, on disk, and are read a block at a time by the functions

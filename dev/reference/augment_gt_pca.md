@@ -45,6 +45,7 @@ each observation's projection into PCA space.
 
 ## See also
 
+[`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca.md)
 [`gt_pca_autoSVD()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_autoSVD.md)
 [gt_pca_tidiers](https://evolecolgroup.github.io/tidypopgen/dev/reference/tidy_gt_pca.md)
 
@@ -59,12 +60,11 @@ lobsters <- gen_tibble(bed_file,
   quiet = TRUE
 )
 
-# Remove monomorphic loci and impute
+# Remove monomorphic loci
 lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
-lobsters <- gt_impute_simple(lobsters, method = "mode")
 
 # Create PCA object
-pca <- gt_pca_partialSVD(lobsters)
+pca <- gt_pca(lobsters)
 
 # Augment the gen_tibble with PCA scores
 augment(pca, data = lobsters)
@@ -72,16 +72,16 @@ augment(pca, data = lobsters)
 #> # A tibble:     176 × 14
 #>    id    population  genotypes .rownames .fittedPC1 .fittedPC2 .fittedPC3
 #>    <chr> <chr>      <vctr_SNP> <chr>          <dbl>      <dbl>      <dbl>
-#>  1 Ale04 Ale         [0,.,...] Ale04          3.43      -2.93      1.96  
-#>  2 Ale05 Ale         [1,0,...] Ale05          4.50      -0.306    -2.47  
-#>  3 Ale06 Ale         [.,0,...] Ale06          3.26      -2.58      3.51  
-#>  4 Ale08 Ale         [.,2,...] Ale08          2.47      -2.58      1.23  
-#>  5 Ale13 Ale         [0,.,...] Ale13          0.183     -2.49      2.29  
-#>  6 Ale15 Ale         [1,0,...] Ale15          2.93      -2.06      2.69  
-#>  7 Ale16 Ale         [0,.,...] Ale16          4.59      -3.10      2.60  
-#>  8 Ale17 Ale         [1,.,...] Ale17          4.18      -3.34      0.0791
-#>  9 Ale18 Ale         [0,0,...] Ale18          2.68      -4.09      0.987 
-#> 10 Ale19 Ale         [2,.,...] Ale19          4.83      -0.820     2.91  
+#>  1 Ale04 Ale         [0,.,...] Ale04          -8.17     -1.61      -1.23 
+#>  2 Ale05 Ale         [1,0,...] Ale05          -4.45      0.443     -2.97 
+#>  3 Ale06 Ale         [.,0,...] Ale06          -6.60     -3.83       2.18 
+#>  4 Ale08 Ale         [.,2,...] Ale08          -4.72     -2.87      -0.697
+#>  5 Ale13 Ale         [0,.,...] Ale13          -1.82     -4.83       1.18 
+#>  6 Ale15 Ale         [1,0,...] Ale15          -7.15     -3.59       2.30 
+#>  7 Ale16 Ale         [0,.,...] Ale16          -8.45     -4.87       2.13 
+#>  8 Ale17 Ale         [1,.,...] Ale17          -5.12     -2.72       0.254
+#>  9 Ale18 Ale         [0,0,...] Ale18          -3.78     -4.37       0.352
+#> 10 Ale19 Ale         [2,.,...] Ale19         -10.2       1.99       5.64 
 #> # ℹ 166 more rows
 #> # ℹ 7 more variables: .fittedPC4 <dbl>, .fittedPC5 <dbl>, .fittedPC6 <dbl>,
 #> #   .fittedPC7 <dbl>, .fittedPC8 <dbl>, .fittedPC9 <dbl>, .fittedPC10 <dbl>
@@ -92,15 +92,15 @@ augment(pca, data = lobsters, k = 2)
 #> # A tibble:     176 × 6
 #>    id    population  genotypes .rownames .fittedPC1 .fittedPC2
 #>    <chr> <chr>      <vctr_SNP> <chr>          <dbl>      <dbl>
-#>  1 Ale04 Ale         [0,.,...] Ale04          3.43      -2.93 
-#>  2 Ale05 Ale         [1,0,...] Ale05          4.50      -0.306
-#>  3 Ale06 Ale         [.,0,...] Ale06          3.26      -2.58 
-#>  4 Ale08 Ale         [.,2,...] Ale08          2.47      -2.58 
-#>  5 Ale13 Ale         [0,.,...] Ale13          0.183     -2.49 
-#>  6 Ale15 Ale         [1,0,...] Ale15          2.93      -2.06 
-#>  7 Ale16 Ale         [0,.,...] Ale16          4.59      -3.10 
-#>  8 Ale17 Ale         [1,.,...] Ale17          4.18      -3.34 
-#>  9 Ale18 Ale         [0,0,...] Ale18          2.68      -4.09 
-#> 10 Ale19 Ale         [2,.,...] Ale19          4.83      -0.820
+#>  1 Ale04 Ale         [0,.,...] Ale04          -8.17     -1.61 
+#>  2 Ale05 Ale         [1,0,...] Ale05          -4.45      0.443
+#>  3 Ale06 Ale         [.,0,...] Ale06          -6.60     -3.83 
+#>  4 Ale08 Ale         [.,2,...] Ale08          -4.72     -2.87 
+#>  5 Ale13 Ale         [0,.,...] Ale13          -1.82     -4.83 
+#>  6 Ale15 Ale         [1,0,...] Ale15          -7.15     -3.59 
+#>  7 Ale16 Ale         [0,.,...] Ale16          -8.45     -4.87 
+#>  8 Ale17 Ale         [1,.,...] Ale17          -5.12     -2.72 
+#>  9 Ale18 Ale         [0,0,...] Ale18          -3.78     -4.37 
+#> 10 Ale19 Ale         [2,.,...] Ale19         -10.2       1.99 
 #> # ℹ 166 more rows
 ```

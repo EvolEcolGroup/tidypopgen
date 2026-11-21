@@ -50,8 +50,10 @@ indiv_inbreeding(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
 
 a numeric vector of inbreeding coefficients. For a grouped
 [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md),
-a list of such vectors, one per group (the coefficients are computed
-within each group).
+a list of such vectors, one per group in the order of
+[`dplyr::group_keys()`](https://dplyr.tidyverse.org/reference/group_data.html)
+(the coefficients are computed within each group; an empty group gives
+an empty vector).
 
 ## Details
 
@@ -60,6 +62,13 @@ within each group).
 objects (grouped or not) and for their `genotypes` column. Other
 packages can add methods for their own classes (e.g. tibbles of genotype
 likelihoods).
+
+For a grouped
+[`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md),
+the coefficients are computed within each group, giving the same results
+as `group_map(.x, ~ indiv_inbreeding(.x))`, but much faster: the
+genotypes are read only once, and only the pairs of individuals within
+each group are compared.
 
 ## References
 

@@ -110,30 +110,32 @@ lobsters <- gen_tibble(bed_file,
   quiet = TRUE
 )
 
-# Remove monomorphic loci and impute
+# Remove monomorphic loci
 lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
-lobsters <- gt_impute_simple(lobsters, method = "mode")
 
-# Create PCA and run DAPC
-pca <- gt_pca_partialSVD(lobsters)
+# Create PCA and run DAPC (with missing genotypes, the loadings of the
+# loci need the genotypes, `data`)
+pca <- gt_pca(lobsters)
 populations <- as.factor(lobsters$population)
-dapc_res <- gt_dapc(pca, n_pca = 6, n_da = 2, pop = populations)
+dapc_res <- gt_dapc(pca,
+  n_pca = 6, n_da = 2, pop = populations, data = lobsters
+)
 
 # Tidy scores
 tidy(dapc_res, matrix = "scores")
 #> # A tibble: 352 × 3
-#>    row      LD  value
-#>    <chr> <dbl>  <dbl>
-#>  1 Ale04     1  3.87 
-#>  2 Ale04     2  0.132
-#>  3 Ale05     1  3.96 
-#>  4 Ale05     2 -0.402
-#>  5 Ale06     1  3.25 
-#>  6 Ale06     2 -0.801
-#>  7 Ale08     1  3.06 
-#>  8 Ale08     2  0.398
-#>  9 Ale13     1  1.60 
-#> 10 Ale13     2  1.05 
+#>    row      LD   value
+#>    <chr> <dbl>   <dbl>
+#>  1 Ale04     1  7.37  
+#>  2 Ale04     2  0.0636
+#>  3 Ale05     1  4.27  
+#>  4 Ale05     2 -0.303 
+#>  5 Ale06     1  5.73  
+#>  6 Ale06     2 -1.50  
+#>  7 Ale08     1  5.02  
+#>  8 Ale08     2  0.828 
+#>  9 Ale13     1  3.51  
+#> 10 Ale13     2  2.55  
 #> # ℹ 342 more rows
 
 # Tidy eigenvalues
@@ -141,25 +143,25 @@ tidy(dapc_res, matrix = "eigenvalues")
 #> # A tibble: 4 × 3
 #>      LD eigenvalue cumulative
 #>   <int>      <dbl>      <dbl>
-#> 1     1    225.          225.
-#> 2     2     33.4         259.
-#> 3     3      2.29        261.
-#> 4     4      0.283       261.
+#> 1     1    282.          282.
+#> 2     2     32.8         315.
+#> 3     3      1.27        316.
+#> 4     4      0.720       317.
 
 # Tidy loadings
 tidy(dapc_res, matrix = "loadings")
 #> # A tibble: 158 × 3
 #>    column LD       value
 #>    <chr>  <chr>    <dbl>
-#>  1 rs3441 LD1   -0.00389
-#>  2 rs3441 LD2   -0.00831
-#>  3 rs4173 LD1   -0.0157 
-#>  4 rs4173 LD2    0.0121 
-#>  5 rs6157 LD1    0.0122 
-#>  6 rs6157 LD2   -0.162  
-#>  7 rs7502 LD1    0.163  
-#>  8 rs7502 LD2    0.0172 
-#>  9 rs7892 LD1    0.0880 
-#> 10 rs7892 LD2    0.0206 
+#>  1 rs3441 LD1   -0.0198 
+#>  2 rs3441 LD2   -0.0318 
+#>  3 rs4173 LD1   -0.00908
+#>  4 rs4173 LD2    0.0639 
+#>  5 rs6157 LD1    0.0338 
+#>  6 rs6157 LD2   -0.152  
+#>  7 rs7502 LD1    0.196  
+#>  8 rs7502 LD2    0.0193 
+#>  9 rs7892 LD1    0.0927 
+#> 10 rs7892 LD2   -0.0383 
 #> # ℹ 148 more rows
 ```

@@ -45,6 +45,16 @@ ancient <- gen_tibble("./data/NearEastPublic/AncientLazaridis2016.geno",
 )
 ```
 
+Both datasets include many populations, so we group them by population
+straight away, so that the functions that use groups (such as the
+pairwise Fst below) work within populations:
+
+``` r
+
+ho_modern <- ho_modern %>% group_by(population)
+ancient <- ancient %>% group_by(population)
+```
+
 ## Assigning Pseudohaploid data
 
 Due to the damage associated with ancient DNA samples, genotype datasets
@@ -77,8 +87,10 @@ will tell us that this function only works on diploid data:
 ``` r
 
 indiv_inbreeding(ancient)
-#> Error in stopifnot_diploid(.x): this function only works on diploid data
 ```
+
+    ## Error in `stopifnot_diploid()`:
+    ## ! this function only works on diploid data
 
 ## PCA
 
@@ -109,27 +121,9 @@ west_eurasian_pops <- c(
 ho_modern <- ho_modern %>% filter(population %in% west_eurasian_pops)
 ```
 
-To run a PCA on the modern Eurasian individuals, we need to impute any
-missing genotypes. But as we have subset our `gen_tibble` object, first
-we need to update our backingfile:
-
-``` r
-
-ho_modern <- gt_update_backingfile(ho_modern,
-  quiet = TRUE
-)
-```
-
-And then we can impute, using:
-
-``` r
-
-ho_modern <- gt_impute_simple(ho_modern, method = "mean")
-```
-
-We should also remove any monomorphic loci from our data, as these loci
-are uninformative. Monomorphic markers must always be removed before a
-PCA is computed using any of the `gt_pca` functions.
+We should remove any monomorphic loci from our data, as these loci are
+uninformative. Monomorphic markers must always be removed before a PCA
+is computed using any of the `gt_pca` functions.
 
 To do this, we use the `select_loci_if` function together with
 `loci_maf` to select only genotypes where MAF is greater than 0:
@@ -143,7 +137,7 @@ Now we can create our PCA object from the modern data:
 
 ``` r
 
-modern_pca <- gt_pca_partialSVD(ho_modern, k = 2)
+modern_pca <- gt_pca(ho_modern, k = 2)
 ```
 
 We can then use `augment` to add the PCA coordinates for each individual
@@ -190,9 +184,9 @@ predicted <- predict(
 )
 ```
 
-Here, we use the “least_squares” argument to generate a least squares
-projection that will be comparable to the approach used in `smartpca`
-(also implemented in the R package `smartsnp`).
+Here, we use the default “least_squares” argument to generate a least
+squares projection that will be comparable to the approach used in
+`smartpca` (also implemented in the R package `smartsnp`).
 
 Finally, we can tidy up our data ready to plot by converting the
 `predicted` object to a data frame and adding the population names:
@@ -232,7 +226,6 @@ ggplot() +
     x = paste0("PC 1 (", round(pca_variance$percent[1], 2), "%)"),
     y = paste0("PC 2 (", round(pca_variance$percent[2], 2), "%)")
   )
-#> Warning: ggrepel: 247 unlabeled data points (too many overlaps). Consider increasing max.overlaps
 ```
 
 ![plot of chunk
@@ -245,37 +238,38 @@ plot of chunk pca_projected_aDNA
 Now let’s replicate the pairwise Fst analysis from Lazaridis et
 al. (2016).
 
-First we need to merge the ancient and modern data:
+First we need to merge the ancient and modern data (the merged
+`gen_tibble` is grouped by population, as `ho_modern`):
 
 ``` r
 
 ancient_modern <- rbind(ho_modern, ancient)
-#> harmonising loci between two datasets
-#> flip_strand =  FALSE  ; remove_ambiguous =  FALSE 
-#> -----------------------------
-#> dataset: reference 
-#> number of SNPs: 548749 reduced to 548749 
-#> ( 0 are ambiguous, of which 0  were removed)
-#> -----------------------------
-#> dataset: target 
-#> number of SNPs: 1233553 reduced to 548749 
-#> ( 0 were flipped to match the reference set)
-#> ( 36301 are ambiguous, of which 36301 were removed)
-#> 
-#> gen_tibble saved to /tmp/RtmpptKMxO/gt_merged_42bc4e3e7eb.gt
-#> using bigSNP file: /tmp/RtmpptKMxO/gt_merged_42bc4e3e7eb.rds
-#> with backing file: /tmp/RtmpptKMxO/gt_merged_42bc4e3e7eb.bk
-#> make sure that you do NOT delete those files!
-#> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpptKMxO/gt_merged_42bc4e3e7eb.gt')
 ```
 
-Then, we group the ancient and modern data by population:
+    ## harmonising loci between two datasets
+    ## flip_strand =  FALSE  ; remove_ambiguous =  FALSE 
+    ## -----------------------------
+    ## dataset: reference 
+    ## number of SNPs: 548749 reduced to 548749 
+    ## ( 0 are ambiguous, of which 0  were removed)
+    ## -----------------------------
+    ## dataset: target 
+    ## number of SNPs: 1233553 reduced to 548749 
+    ## ( 0 were flipped to match the reference set)
+    ## ( 36301 are ambiguous, of which 36301 were removed)
 
-``` r
+    ## 
+    ## gen_tibble saved to /tmp/RtmpCiUGZs/gt_merged_2a451c66a8d408.gt
 
-ancient_modern <- ancient_modern %>% group_by(population)
-```
+    ## using FBM RDS: /tmp/RtmpCiUGZs/gt_merged_2a451c66a8d408.rds
+
+    ## with FBM backing file: /tmp/RtmpCiUGZs/gt_merged_2a451c66a8d408.bk
+
+    ## make sure that you do NOT delete those files!
+
+    ## to reload the gen_tibble in another session, use:
+
+    ## gt_load('/tmp/RtmpCiUGZs/gt_merged_2a451c66a8d408.gt')
 
 As we are calculating Fst between populations, we will remove any
 populations that contain only one individual.
@@ -381,6 +375,8 @@ ggplot(pairwise_fst_tidy, aes(x = value, y = time_range_pop1)) +
   )) +
   labs(x = expression("F"[ST]), y = element_blank())
 ```
+
+    ## Warning: `label` cannot be a <ggplot2::element_blank> object.
 
 ![plot of chunk
 pairwise_fst](figure/aDNA_pseudohaploids/pairwise_fst-1.png)

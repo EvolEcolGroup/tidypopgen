@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9010</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9012</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,6 +42,7 @@
 <li><a class="dropdown-item" href="../articles/a01_overview.html">The grammar of population genetics</a></li>
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
     <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/missing_data.html">Missing genotypes: impute only when you must</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseudohaploids</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
     <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity</a></li>
@@ -93,7 +94,10 @@ an option of <code><a href="../reference/gen_tibble.html">gen_tibble()</a></code
 <p><em>Note</em> that tidypopgen only handles variant sites, so if you
 are using a whole-genome dataset make sure it has been previously
 subsetted to variant sites only. Think very carefully before merging
-this kind of data during your pipeline! # Getting the data</p>
+this kind of data during your pipeline!</p>
+<div class="section level2">
+<h2 id="getting-the-data">Getting the data<a class="anchor" aria-label="anchor" href="#getting-the-data"></a>
+</h2>
 <div class="section level3">
 <h3 id="downloading-the-sgdp-data">Downloading the SGDP data<a class="anchor" aria-label="anchor" href="#downloading-the-sgdp-data"></a>
 </h3>
@@ -145,10 +149,11 @@ libraries:</p>
 <span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
 <span><span class="co">#&gt; Loading required package: tibble</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></code></pre></div>
-<p>Because tidypopgen utilizes disk storage through file-backed matrices
-(FBM), we can run the following pipeline on a modern laptop without
-running out of RAM. Here, we use a machine with a GenuineIntel, 13th Gen
-Intel(R) Core(TM) i9-13900, 24 CPU and 126 GiB of RAM.</p>
+<p>Because tidypopgen keeps the genotypes on disk, in file-backed
+matrices (FBM), the following pipeline needs little RAM (see the peak
+memory of each step in the summary at the end), and also runs on a
+modern laptop. Here, we use a desktop machine with a GenuineIntel, 13th
+Gen Intel(R) Core(TM) i9-13900, 24 CPU and 126 GiB of RAM.</p>
 <p>Before we begin, we will limit the number of cores used by the
 parallelised BLAS library with
 <code><a href="https://rdrr.io/pkg/bigparallelr/man/get_blas_ncores.html" class="external-link">bigparallelr::set_blas_ncores()</a></code>, and by the package
@@ -223,9 +228,16 @@ set <code>chromosomes_as_int = TRUE</code> as well as
 only needs to be done once: the merged <code>gen_tibble</code> is saved
 alongside its backing file, and can be loaded again in a later session
 with <code><a href="../reference/gt_load.html">gt_load()</a></code>.</p>
+<p>We have added the population and the region of each individual, from
+the metadata of the SGDP. As we have only one or two individuals from
+each population, we group the individuals by region, so that quality
+control (e.g. the Hardy-Weinberg test of <code><a href="../reference/qc_report_loci.html">qc_report_loci()</a></code>)
+and the pairwise F<sub>ST</sub> below work within regions:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sgdp</span> <span class="op">&lt;-</span> <span class="va">sgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">region</span><span class="op">)</span></span></code></pre></div>
 <p>When we now call our loci tibble with <code><a href="../reference/show_loci.html">show_loci()</a></code>, we
 can see that the loci names are now integers:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/show_loci.html">show_loci</a></span><span class="op">(</span><span class="va">sgdp</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 20,761,293 × 7</span></span>
 <span><span class="co">#&gt;    big_index  name chromosome position genetic_dist allele_ref allele_alt</span></span>
@@ -244,9 +256,10 @@ can see that the loci names are now integers:</p>
 <p>The rsID’s of each SNP have been removed, but all other metadata
 (chromosome, position, genetic distance, and alleles) are retained. We
 can check the memory footprint of the gen_tibble using:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/object.size.html" class="external-link">object.size</a></span><span class="op">(</span><span class="va">sgdp</span><span class="op">)</span>, units <span class="op">=</span> <span class="st">"auto"</span>, digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "792.01 Mb"</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="quality-control-for-large-datasets">Quality control for large datasets<a class="anchor" aria-label="anchor" href="#quality-control-for-large-datasets"></a>
@@ -256,21 +269,19 @@ can check the memory footprint of the gen_tibble using:</p>
 </h3>
 <p>All the normal functionality of tidypopgen is preserved, as our
 <code>qc_report</code> functions exemplify:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sgdp_indiv_rep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/qc_report_indiv.html">qc_report_indiv</a></span><span class="op">(</span><span class="va">sgdp</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sgdp</span> <span class="op">&lt;-</span> <span class="va">sgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">Region</span><span class="op">)</span></span>
-<span><span class="va">sgdp_loci_rep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/qc_report_loci.html">qc_report_loci</a></span><span class="op">(</span><span class="va">sgdp</span><span class="op">)</span></span>
-<span><span class="va">sgdp</span> <span class="op">&lt;-</span> <span class="va">sgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">sgdp_indiv_rep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/qc_report_indiv.html">qc_report_indiv</a></span><span class="op">(</span><span class="va">sgdp</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sgdp_loci_rep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/qc_report_loci.html">qc_report_loci</a></span><span class="op">(</span><span class="va">sgdp</span><span class="op">)</span></span></code></pre></div>
 <p>However, it is important to be mindful that analyses on very large
 datasets will produce large outputs:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/object.size.html" class="external-link">object.size</a></span><span class="op">(</span><span class="va">sgdp_loci_rep</span><span class="op">)</span>, units <span class="op">=</span> <span class="st">"auto"</span>, digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "554.39 Mb"</span></span></code></pre></div>
 <p>In this case, a loci report on 20761293 loci for 50 individuals
 occupies approximately 554.39 Mb of memory.</p>
 <p>Let’s plot the overview of the loci report:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">sgdp_loci_rep</span>,</span>
 <span>  maf_threshold <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  miss_threshold <span class="op">=</span> <span class="fl">0.05</span></span>
@@ -286,13 +297,13 @@ private mutations).</p>
 sites absent from an individual’s VCF were set to homozygous reference
 when we merged the VCFs, there are no missing genotypes in this dataset.
 We can check the number of loci with any missing genotypes:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">sgdp_loci_rep</span><span class="op">$</span><span class="va">missingness</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 0</span></span></code></pre></div>
 <p>When objects are no longer needed, or once results outputs have been
 saved, we can remove them using <code><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm()</a></code> to keep memory usage
 under control:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span><span class="va">sgdp_loci_rep</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -301,20 +312,21 @@ under control:</p>
 <p>We can then proceed with basic data filtering in the same way as
 working with any other gen_tibble object.</p>
 <p>We filter for minor allele frequency, choosing to select loci with
-MAF greater than 5%:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+MAF greater than 5% (<code><a href="../reference/select_loci_if.html">select_loci_if()</a></code> ignores the groups:
+the MAF of each locus is computed over all individuals):</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sgdp</span> <span class="op">&lt;-</span> <span class="va">sgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_alt_freq.html">loci_maf</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0.05</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Loci remaining:"</span>, <span class="fu"><a href="../reference/count_loci.html">count_loci</a></span><span class="op">(</span><span class="va">sgdp</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Loci remaining: 7482060</span></span></code></pre></div>
 <p>With other datasets, we would also remove loci with too many missing
 genotypes (e.g. with
-<code>select_loci_if(loci_missingness(genotypes) &lt; 0.1)</code>), and
-then impute the remaining missing genotypes with
-<code><a href="../reference/gt_impute_simple.html">gt_impute_simple()</a></code>, as LD clumping and PCA do not accept
-missing values. Our dataset has no missing genotypes, so we can skip
-both steps. There is no need to rewrite the backing file with
-<code><a href="../reference/gt_update_backingfile.html">gt_update_backingfile()</a></code> after filtering: the following
+<code>select_loci_if(loci_missingness(genotypes) &lt; 0.1)</code>).
+There would be no need to impute the remaining missing genotypes: LD
+clumping, the PCA and the DAPC below use, for each locus (or pair of
+loci), the individuals genotyped at it (see the article on <a href="missing_data.html">missing genotypes</a>). Our dataset has no
+missing genotypes anyway. There is no need to rewrite the backing file
+with <code><a href="../reference/gt_update_backingfile.html">gt_update_backingfile()</a></code> after filtering: the following
 steps only use the loci that are left in the
 <code>gen_tibble</code>.</p>
 </div>
@@ -326,14 +338,14 @@ disequilibrium.</p>
 <p>With many loci, this step can be a little more time consuming, so it
 is important to remember to specify the <code>n_cores</code> parameter
 to speed things up:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sgdp</span> <span class="op">&lt;-</span> <span class="va">sgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_ld_clump.html">loci_ld_clump</a></span><span class="op">(</span><span class="va">genotypes</span>,</span>
 <span>    n_cores <span class="op">=</span> <span class="va">n_cores</span>,</span>
 <span>    thr_r2 <span class="op">=</span> <span class="fl">0.2</span></span>
 <span>  <span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Loci remaining:"</span>, <span class="fu"><a href="../reference/count_loci.html">count_loci</a></span><span class="op">(</span><span class="va">sgdp</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Loci remaining: 511652</span></span></code></pre></div>
+<span><span class="co">#&gt; Loci remaining: 511656</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -344,11 +356,11 @@ to speed things up:</p>
 </h3>
 <p>Now that we have a clean dataset, we can proceed with our analysis by
 plotting a PCA:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sgdp_pca</span> <span class="op">&lt;-</span> <span class="va">sgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/gt_pca_partialSVD.html">gt_pca_partialSVD</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sgdp_pca</span> <span class="op">&lt;-</span> <span class="va">sgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/gt_pca.html">gt_pca</a></span><span class="op">(</span>n_cores <span class="op">=</span> <span class="va">n_cores</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">sgdp_pca</span>, type <span class="op">=</span> <span class="st">"scores"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>colour <span class="op">=</span> <span class="va">sgdp</span><span class="op">$</span><span class="va">Region</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>colour <span class="op">=</span> <span class="va">sgdp</span><span class="op">$</span><span class="va">region</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"Region"</span><span class="op">)</span></span></code></pre></div>
 <div class="float">
 <img src="figure/big_data/PCA-1.png" alt="plot of chunk PCA"><div class="figcaption">plot of chunk PCA</div>
@@ -377,11 +389,11 @@ East Asian populations.</p>
 </h3>
 <p>We can also perform a discriminant analysis of principal components
 (DAPC) using <code>gt_dapc</code>.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sgdp_dapc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_dapc.html">gt_dapc</a></span><span class="op">(</span><span class="va">sgdp_pca</span>,</span>
-<span>  pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">sgdp</span><span class="op">$</span><span class="va">Region</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sgdp_dapc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_dapc.html">gt_dapc</a></span><span class="op">(</span><span class="va">sgdp_pca</span>,</span>
+<span>  pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">sgdp</span><span class="op">$</span><span class="va">region</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">sgdp_dapc</span>, type <span class="op">=</span> <span class="st">"components"</span><span class="op">)</span></span></code></pre></div>
 <div class="float">
 <img src="figure/big_data/DAPC_components_plot-1.png" alt="plot of chunk DAPC_components_plot"><div class="figcaption">plot of chunk DAPC_components_plot</div>
@@ -403,10 +415,10 @@ Oceanian populations in our sample.</p>
 <h2 id="pairwise-fst">Pairwise F<sub>ST</sub><a class="anchor" aria-label="anchor" href="#pairwise-fst"></a>
 </h2>
 <p>Finally, to examine the differentiation between regions, we can
-calculate pairwise F<sub>ST</sub>.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">grouped_sgdp</span> <span class="op">&lt;-</span> <span class="va">sgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">Region</span><span class="op">)</span></span>
-<span><span class="va">pairwise_fst</span> <span class="op">&lt;-</span> <span class="va">grouped_sgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/pairwise_pop_fst.html">pairwise_pop_fst</a></span><span class="op">(</span></span>
+calculate pairwise F<sub>ST</sub> between the regions that
+<code>sgdp</code> is grouped by.</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pairwise_fst</span> <span class="op">&lt;-</span> <span class="va">sgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/pairwise_pop_fst.html">pairwise_pop_fst</a></span><span class="op">(</span></span>
 <span>  n_cores <span class="op">=</span> <span class="va">n_cores</span>,</span>
 <span>  type <span class="op">=</span> <span class="st">"pairwise"</span></span>
 <span><span class="op">)</span></span>
@@ -449,15 +461,15 @@ large dataset, and of the peak memory used by R during each step (in MB,
 including the objects that were already in memory, such as the
 <code>gen_tibble</code> itself):</p>
 <pre><code><span><span class="co">#&gt;                              step time_s peak_memory_mb</span></span>
-<span><span class="co">#&gt; 1                      merge_vcfs  65.99           1991</span></span>
-<span><span class="co">#&gt; 2                    indiv_report   0.44           1115</span></span>
-<span><span class="co">#&gt; 3                     loci_report   0.28           1678</span></span>
-<span><span class="co">#&gt; 4                      maf_filter   0.37           1969</span></span>
-<span><span class="co">#&gt; 5                        ld_clump   8.56           2042</span></span>
-<span><span class="co">#&gt; 6                             pca   0.66            979</span></span>
-<span><span class="co">#&gt; 7                            dapc   0.03            415</span></span>
-<span><span class="co">#&gt; 8                    pairwise_fst   0.17            374</span></span>
-<span><span class="co">#&gt; 9 Total (time) / maximum (memory)  76.50           2042</span></span></code></pre>
+<span><span class="co">#&gt; 1                      merge_vcfs  67.69           1991</span></span>
+<span><span class="co">#&gt; 2                    indiv_report   0.45           1117</span></span>
+<span><span class="co">#&gt; 3                     loci_report   0.34           1676</span></span>
+<span><span class="co">#&gt; 4                      maf_filter   0.34           1969</span></span>
+<span><span class="co">#&gt; 5                        ld_clump   4.03           1636</span></span>
+<span><span class="co">#&gt; 6                             pca   0.15            511</span></span>
+<span><span class="co">#&gt; 7                            dapc   0.03            407</span></span>
+<span><span class="co">#&gt; 8                    pairwise_fst   0.17            372</span></span>
+<span><span class="co">#&gt; 9 Total (time) / maximum (memory)  73.19           1991</span></span></code></pre>
 <p>The memory is measured with <code><a href="https://rdrr.io/r/base/gc.html" class="external-link">gc()</a></code>, and only covers memory
 allocated by R. It does not include the genotypes, which stay in the
 backing file on disk (the operating system caches the parts that are

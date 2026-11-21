@@ -15,7 +15,9 @@ an option of
 *Note* that tidypopgen only handles variant sites, so if you are using a
 whole-genome dataset make sure it has been previously subsetted to
 variant sites only. Think very carefully before merging this kind of
-data during your pipeline! \# Getting the data
+data during your pipeline!
+
+## Getting the data
 
 ### Downloading the SGDP data
 
@@ -74,10 +76,11 @@ library(tidypopgen)
 library(ggplot2)
 ```
 
-Because tidypopgen utilizes disk storage through file-backed matrices
-(FBM), we can run the following pipeline on a modern laptop without
-running out of RAM. Here, we use a machine with a GenuineIntel, 13th Gen
-Intel(R) Core(TM) i9-13900, 24 CPU and 126 GiB of RAM.
+Because tidypopgen keeps the genotypes on disk, in file-backed matrices
+(FBM), the following pipeline needs little RAM (see the peak memory of
+each step in the summary at the end), and also runs on a modern laptop.
+Here, we use a desktop machine with a GenuineIntel, 13th Gen Intel(R)
+Core(TM) i9-13900, 24 CPU and 126 GiB of RAM.
 
 Before we begin, we will limit the number of cores used by the
 parallelised BLAS library with
@@ -171,6 +174,18 @@ needs to be done once: the merged `gen_tibble` is saved alongside its
 backing file, and can be loaded again in a later session with
 [`gt_load()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_load.md).
 
+We have added the population and the region of each individual, from the
+metadata of the SGDP. As we have only one or two individuals from each
+population, we group the individuals by region, so that quality control
+(e.g. the Hardy-Weinberg test of
+[`qc_report_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/qc_report_loci.md))
+and the pairwise F_(ST) below work within regions:
+
+``` r
+
+sgdp <- sgdp %>% group_by(region)
+```
+
 When we now call our loci tibble with
 [`show_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/show_loci.md),
 we can see that the loci names are now integers:
@@ -218,9 +233,7 @@ sgdp_indiv_rep <- qc_report_indiv(sgdp)
 
 ``` r
 
-sgdp <- sgdp %>% group_by(Region)
 sgdp_loci_rep <- qc_report_loci(sgdp)
-sgdp <- sgdp %>% ungroup()
 ```
 
 However, it is important to be mindful that analyses on very large
@@ -280,7 +293,10 @@ We can then proceed with basic data filtering in the same way as working
 with any other gen_tibble object.
 
 We filter for minor allele frequency, choosing to select loci with MAF
-greater than 5%:
+greater than 5%
+([`select_loci_if()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/select_loci_if.md)
+ignores the groups: the MAF of each locus is computed over all
+individuals):
 
 ``` r
 
@@ -292,12 +308,13 @@ cat("Loci remaining:", count_loci(sgdp))
 
 With other datasets, we would also remove loci with too many missing
 genotypes (e.g. with
-`select_loci_if(loci_missingness(genotypes) < 0.1)`), and then impute
-the remaining missing genotypes with
-[`gt_impute_simple()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_impute_simple.md),
-as LD clumping and PCA do not accept missing values. Our dataset has no
-missing genotypes, so we can skip both steps. There is no need to
-rewrite the backing file with
+`select_loci_if(loci_missingness(genotypes) < 0.1)`). There would be no
+need to impute the remaining missing genotypes: LD clumping, the PCA and
+the DAPC below use, for each locus (or pair of loci), the individuals
+genotyped at it (see the article on [missing
+genotypes](https://evolecolgroup.github.io/tidypopgen/dev/articles/missing_data.md)).
+Our dataset has no missing genotypes anyway. There is no need to rewrite
+the backing file with
 [`gt_update_backingfile()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_update_backingfile.md)
 after filtering: the following steps only use the loci that are left in
 the `gen_tibble`.
@@ -319,7 +336,7 @@ sgdp <- sgdp %>%
     thr_r2 = 0.2
   ))
 cat("Loci remaining:", count_loci(sgdp))
-#> Loci remaining: 511652
+#> Loci remaining: 511656
 ```
 
 ## Analysis
@@ -331,13 +348,13 @@ plotting a PCA:
 
 ``` r
 
-sgdp_pca <- sgdp %>% gt_pca_partialSVD()
+sgdp_pca <- sgdp %>% gt_pca(n_cores = n_cores)
 ```
 
 ``` r
 
 autoplot(sgdp_pca, type = "scores") +
-  aes(colour = sgdp$Region) +
+  aes(colour = sgdp$region) +
   labs(color = "Region")
 ```
 
@@ -372,7 +389,7 @@ We can also perform a discriminant analysis of principal components
 ``` r
 
 sgdp_dapc <- gt_dapc(sgdp_pca,
-  pop = as.factor(sgdp$Region)
+  pop = as.factor(sgdp$region)
 )
 ```
 
@@ -401,12 +418,11 @@ Oceanian populations in our sample.
 ## Pairwise F_(ST)
 
 Finally, to examine the differentiation between regions, we can
-calculate pairwise F_(ST).
+calculate pairwise F_(ST) between the regions that `sgdp` is grouped by.
 
 ``` r
 
-grouped_sgdp <- sgdp %>% group_by(Region)
-pairwise_fst <- grouped_sgdp %>% pairwise_pop_fst(
+pairwise_fst <- sgdp %>% pairwise_pop_fst(
   n_cores = n_cores,
   type = "pairwise"
 )
@@ -451,15 +467,15 @@ including the objects that were already in memory, such as the
 `gen_tibble` itself):
 
     #>                              step time_s peak_memory_mb
-    #> 1                      merge_vcfs  65.99           1991
-    #> 2                    indiv_report   0.44           1115
-    #> 3                     loci_report   0.28           1678
-    #> 4                      maf_filter   0.37           1969
-    #> 5                        ld_clump   8.56           2042
-    #> 6                             pca   0.66            979
-    #> 7                            dapc   0.03            415
-    #> 8                    pairwise_fst   0.17            374
-    #> 9 Total (time) / maximum (memory)  76.50           2042
+    #> 1                      merge_vcfs  67.69           1991
+    #> 2                    indiv_report   0.45           1117
+    #> 3                     loci_report   0.34           1676
+    #> 4                      maf_filter   0.34           1969
+    #> 5                        ld_clump   4.03           1636
+    #> 6                             pca   0.15            511
+    #> 7                            dapc   0.03            407
+    #> 8                    pairwise_fst   0.17            372
+    #> 9 Total (time) / maximum (memory)  73.19           1991
 
 The memory is measured with [`gc()`](https://rdrr.io/r/base/gc.html),
 and only covers memory allocated by R. It does not include the

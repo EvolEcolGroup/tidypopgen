@@ -91,6 +91,14 @@ Linkage disequilibrium is managed through clumping in `tidypopgen` with
 This option is similar to the –indep-pairwise flag in PLINK, but results
 in a more even distribution of loci when compared to LD pruning.
 
+| PLINK | `tidypopgen` |
+|----|----|
+| –indep-pairwise 50 5 0.2 | `loci_ld_prune(window_size = 50, step_size = 5, thr_r2 = 0.2)` |
+| –indep-pairwise 50kb 1 0.2 | `loci_ld_prune(window_size = 50, step_size = 1, thr_r2 = 0.2, window_in_kb = TRUE)` |
+
+Both handle missing genotypes as PLINK does (r^2 over the individuals
+genotyped at both loci).
+
 To explore why clumping is preferable to pruning, see
 <https://privefl.github.io/bigsnpr/articles/pruning-vs-clumping.html>
 

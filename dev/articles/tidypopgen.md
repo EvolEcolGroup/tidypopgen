@@ -2,11 +2,12 @@
 
 This vignette gives a short introduction on how to use the `tidypopgen`
 package to perform basic data cleaning and a PCA on a dataset of
-European lobsters (*Homarus gammarus*). The original data are available
-at <https://datadryad.org/dataset/doi:10.5061/dryad.2v1kr38>, but for
-the purpose of this vignette we will use a subset of the data stored as
-a .bed file, available in the `inst/extdata/lobster` directory of the
-package. To install `tidypopgen` from r-universe, use:
+European lobsters (*Homarus gammarus*) from Jenkins et al. (2019). The
+original data are available at
+<https://datadryad.org/dataset/doi:10.5061/dryad.2v1kr38> (released
+under CC0), but for the purpose of this vignette we will use a subset of
+the data stored as a .bed file, available in the `inst/extdata/lobster`
+directory of the package. To install `tidypopgen` from r-universe, use:
 
 ``` r
 
@@ -134,6 +135,18 @@ Now we have a `gen_tibble` to work with, we can start to clean the data.
 
 ## Quality control
 
+Our dataset contains several lobster populations, so we group it by
+population before quality control. The quality control functions then
+take the populations into account: for example, `qc_report_loci` tests
+Hardy-Weinberg equilibrium within each population (a test across
+populations would flag many loci only because their allele frequencies
+differ between populations).
+
+``` r
+
+lobsters <- lobsters %>% group_by(population)
+```
+
 Let’s start by checking the quality of the data for each individual
 lobster in our dataset. We can use the `qc_report_indiv` function to
 generate a report which contains information about missingness and
@@ -152,7 +165,7 @@ autoplot(indiv_qc_lobsters, type = "scatter")
 ```
 
 ![Scatter plot of missingness proportion and observed heterozygosity for
-each individual](tidypopgen_files/figure-html/unnamed-chunk-7-1.png)
+each individual](tidypopgen_files/figure-html/unnamed-chunk-8-1.png)
 
 We can see that most individuals have low missingness and
 heterozygosity, but there are a few individuals missing \>20% of their
@@ -174,21 +187,11 @@ allele frequency, and Hardy-Weinberg Equilibrium for each locus.
 loci_qc_lobsters <- lobsters %>% qc_report_loci()
 ```
 
-    ## This gen_tibble is not grouped. For Hardy-Weinberg equilibrium, `qc_report_loci()` will assume individuals are part of the same population and HWE test p-values will be calculated across all individuals. If you wish to calculate HWE p-values within populations or groups, please use`group_by()` before calling `qc_report_loci()`.
-
-Here, we get a message because the `qc_report_loci` function calculates
-Hardy-Weinberg equilibrium assuming that all individuals are part of a
-single population. As our dataset contains multiple lobster populations,
-we should group our data by population first:
-
-``` r
-
-lobsters <- lobsters %>% group_by(population)
-loci_qc_lobsters <- lobsters %>% qc_report_loci()
-```
-
-That’s better. Now, lets take a look at minor allele frequency for all
-loci:
+As `lobsters` is grouped, Hardy-Weinberg equilibrium is tested within
+each population (with a Bonferroni correction across populations), while
+the minor allele frequency and the missingness of each locus are
+computed over all lobsters. Let’s take a look at minor allele frequency
+for all loci:
 
 ``` r
 
@@ -210,7 +213,7 @@ autoplot(loci_qc_lobsters, type = "missing")
 ![Histogram of the proportion of missing
 data](tidypopgen_files/figure-html/unnamed-chunk-12-1.png) Our data
 mostly have low missingness, but we can see that some loci have \> 5%
-missingness across individuals, and we want to remove these individuals.
+missingness across individuals, and we want to remove these loci.
 
 In tidypopgen, there are two functions to subset the loci in a
 `gen_tibble` object: `select_loci` and `select_loci_if`. The function
@@ -226,53 +229,29 @@ the `genotypes` column of our `gen_tibble`.
 lobsters <- lobsters %>% select_loci_if(loci_missingness(genotypes) < 0.05)
 ```
 
+Note that `select_loci_if` ignores the groups: all populations share the
+same loci, so the missingness of each locus is computed over all
+lobsters, as in `qc_report_loci`. To select loci on statistics computed
+within each population, see the vignette ‘The grammar of population
+genetics’.
+
 Through our filtering, we have removed a few individuals and loci. Most
-functions work directly on the remaining data, but imputation depends on
-which individuals are included, so `gt_impute_simple` needs a backing
-file with only the individuals that are left. Because we have removed
-individuals and want to impute, we write a new backing file with
-`gt_update_backingfile`:
-
-``` r
-
-lobsters <- gt_update_backingfile(lobsters, backingfile = tempfile())
-```
-
-    ## 
-    ## gen_backing files updated, now
-
-    ## using FBM RDS: /tmp/Rtmpepdk3R/file2c607885fc85.rds
-
-    ## with FBM backing file: /tmp/Rtmpepdk3R/file2c607885fc85.bk
-
-    ## make sure that you do NOT delete those files!
-
-    ## to reload the gen_tibble in another session, use:
-
-    ## gt_load('/tmp/Rtmpepdk3R/file2c607885fc85.gt')
-
-After removing only loci, there would be no need to update the backing
-file. Now that our data are clean, we are ready to impute and create a
-PCA.
-
-## Impute
-
-First, we need to impute any remaining missing data using the
-`gt_impute_simple` function.
-
-``` r
-
-lobsters <- gt_impute_simple(lobsters, method = "random")
-```
+functions, including the PCA below, work directly on the remaining data.
 
 ## PCA
 
-Then we can run a PCA. There are a number of PCA algorithms, here, we
-will use the `gt_pca_partialSVD` function:
+There are a number of PCA algorithms in tidypopgen. Here, we will use
+the default method of the `gt_pca` function, which does not need the
+remaining missing genotypes to be imputed. Imputation (with
+`gt_impute_simple`) is required for some specific PCA methods. See the
+vignettes ‘The grammar of population genetics’ and ‘Quality Control’ for
+further details on imputing a `gen_tibble`.
+
+We can now run a PCA:
 
 ``` r
 
-partial_pca <- gt_pca_partialSVD(lobsters)
+partial_pca <- gt_pca(lobsters)
 ```
 
 And we can create a simple plot using `autoplot`:
@@ -283,7 +262,7 @@ autoplot(partial_pca, type = "scores")
 ```
 
 ![Score plot of individuals across the first and second Principal
-Components](tidypopgen_files/figure-html/unnamed-chunk-17-1.png)
+Components](tidypopgen_files/figure-html/unnamed-chunk-15-1.png)
 
 That was easy! The `autoplot` gives us a quick idea of the explained
 variance and rough distribution of the samples, but we need to see the
@@ -300,7 +279,7 @@ autoplot(partial_pca, type = "scores") +
 
 ![Score plot of individuals across the first and second Principal
 Components, with individual samples coloured by
-population](tidypopgen_files/figure-html/unnamed-chunk-18-1.png)
+population](tidypopgen_files/figure-html/unnamed-chunk-16-1.png)
 
 However, if we want to fully customise our plot, we can wrangle the data
 directly and use `ggplot2`.
@@ -347,7 +326,7 @@ ggplot(data = pcs, aes(x = .fittedPC1, y = .fittedPC2)) +
 
 ![Score plot of individuals across the first and second Principal
 Components, with individual samples coloured by
-population](tidypopgen_files/figure-html/unnamed-chunk-21-1.png)
+population](tidypopgen_files/figure-html/unnamed-chunk-19-1.png)
 
 Or we could create a labelled version of our PCA by determining the
 centre of each group to place the labels
@@ -390,9 +369,17 @@ ggplot(data = pcs, aes(x = .fittedPC1, y = .fittedPC2)) +
 Components. Individual samples are coloured by population, the centroid
 of points for each group is labelled with the population name, and lines
 are drawn from the centroid to each
-point.](tidypopgen_files/figure-html/unnamed-chunk-23-1.png)
+point.](tidypopgen_files/figure-html/unnamed-chunk-21-1.png)
 
 That’s it! There are more functions to run different types of analyses
 (DAPC, ADMIXTURE, f statistics with admixtools2, etc.); each resulting
 object has `autoplot`, `tidy`, and `augment` to explore the results and
 integrated into the information from the `gen_tibble`.
+
+### References
+
+Jenkins T.L., Ellis C.D., Triantafyllidis A. and Stevens J.R. (2019)
+Single nucleotide polymorphisms reveal a genetic cline across the
+north-east Atlantic and enable powerful population assignment in the
+European lobster. *Evolutionary Applications* 12: 1881-1899.
+<doi:10.1111/eva.12849>

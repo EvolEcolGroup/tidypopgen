@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9010</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9012</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -22,6 +22,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/a01_overview.html">The grammar of population genetics</a></li>
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
     <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/missing_data.html">Missing genotypes: impute only when you must</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseudohaploids</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
     <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity</a></li>
@@ -472,6 +473,13 @@
 
         <dt>
 
+          <code><a href="loci_ld_prune.html">loci_ld_prune()</a></code>
+
+        </dt>
+        <dd>Prune loci based on a Linkage Disequilibrium threshold, as PLINK</dd>
+
+        <dt>
+
           <code><a href="loci_missingness.html">loci_missingness()</a></code>
 
         </dt>
@@ -908,7 +916,7 @@
 
       <dl><dt>
 
-          <code><a href="gt_pca.html">gt_pca</a></code>
+          <code><a href="gt_pca.html">gt_pca()</a></code>
 
         </dt>
         <dd>Principal Component Analysis for <code>gen_tibble</code> objects</dd>
@@ -923,14 +931,14 @@
         <dt>
 
           <code><a href="gt_pca_partialSVD.html">gt_pca_partialSVD()</a></code>
-
+          <span class="badge lifecycle lifecycle-deprecated">deprecated</span>
         </dt>
         <dd>PCA for <code>gen_tibble</code> objects by partial SVD</dd>
 
         <dt>
 
           <code><a href="gt_pca_randomSVD.html">gt_pca_randomSVD()</a></code>
-
+          <span class="badge lifecycle lifecycle-deprecated">deprecated</span>
         </dt>
         <dd>PCA for <code>gen_tibble</code> objects by randomized partial SVD</dd>
 
@@ -1180,7 +1188,7 @@
       </dl></div><div class="section level2">
       <h2 id="example-data">Example data<a class="anchor" aria-label="anchor" href="#example-data"></a></h2>
 
-      <div class="section-desc"><p>Function for loading an example <code>gen_tibble</code>.</p></div>
+      <div class="section-desc"><p>Functions for loading an example <code>gen_tibble</code>, or simulating a toy one.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -1193,6 +1201,13 @@
 
         </dt>
         <dd>Load example gen_tibble</dd>
+
+        <dt>
+
+          <code><a href="gt_simulate_bn.html">gt_simulate_bn()</a></code>
+
+        </dt>
+        <dd>Simulate a toy dataset of unlinked loci</dd>
       </dl></div><div class="section level2">
       <h2 id="tidyverse-methods">tidyverse methods<a class="anchor" aria-label="anchor" href="#tidyverse-methods"></a></h2>
 

@@ -176,7 +176,9 @@ the package *ADMIXTOOLS 2*. It takes a
 [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md),
 computes allele frequencies and blocked f2-statistics, and writes the
 results to `outdir`. It is equivalent to
-[`admixtools::extract_f2()`](https://rdrr.io/pkg/admixtools/man/extract_f2.html).
+[`admixtools::extract_f2()`](https://rdrr.io/pkg/admixtools/man/extract_f2.html),
+from which its code is adapted (*admixtools* is by Robert Maier,
+released under GPL-3).
 
 ## Examples
 

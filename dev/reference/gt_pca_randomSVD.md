@@ -1,5 +1,12 @@
 # PCA for `gen_tibble` objects by randomized partial SVD
 
+**\[deprecated\]**
+
+This function is deprecated: use
+[`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca.md)
+with `method = "random"`, which runs the same algorithm (and needs
+complete or imputed genotypes).
+
 This function performs Principal Component Analysis on a `gen_tibble`,
 by randomised partial SVD based on the algorithm in RSpectra (by Yixuan
 Qiu and Jiali Mei).  
@@ -7,6 +14,17 @@ This algorithm is linear in time in all dimensions and is very
 memory-efficient. Thus, it can be used on very large big.matrices. This
 function is a wrapper for
 [`bigstatsr::big_randomSVD()`](https://privefl.github.io/bigstatsr/reference/big_randomSVD.html)
+
+With up to a few thousand individuals,
+[`gt_pca_partialSVD()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_partialSVD.md)
+is usually much faster: on 1,043 individuals and 643,733 loci, this
+function took about 175 s on one core (with the default `tol`), against
+about 31 s for
+[`gt_pca_partialSVD()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_partialSVD.md).
+This algorithm is most useful when there are too many individuals for
+[`gt_pca_partialSVD()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_partialSVD.md),
+whose memory grows with the square of the number of individuals. Using
+several cores (`n_cores`), or a larger `tol`, also reduces its time.
 
 ## Usage
 
@@ -55,7 +73,8 @@ gt_pca_randomSVD(
 
 - n_cores:
 
-  Number of cores used.
+  Number of cores used (see
+  [`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca.md)).
 
 - fun_prod:
 
@@ -106,19 +125,6 @@ with elements: A named list (an S3 class "big_SVD") of
 
 - `call`, the call that generated the object.
 
-## Details
-
-With up to a few thousand individuals,
-[`gt_pca_partialSVD()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_partialSVD.md)
-is usually much faster: on 1,043 individuals and 643,733 loci, this
-function took about 175 s on one core (with the default `tol`), against
-about 31 s for
-[`gt_pca_partialSVD()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_partialSVD.md).
-This algorithm is most useful when there are too many individuals for
-[`gt_pca_partialSVD()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_partialSVD.md),
-whose memory grows with the square of the number of individuals. Using
-several cores (`n_cores`), or a larger `tol`, also reduces its time.
-
 ## Note
 
 Rather than accessing these elements directly, it is better to use
@@ -135,7 +141,7 @@ attempting to scale.' indicates that monomorphic markers are present.
 which this function wraps.
 
 Other gt_pca_functions:
-[`gt_pca`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca.md),
+[`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca.md),
 [`gt_pca_autoSVD()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_autoSVD.md),
 [`gt_pca_partialSVD()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_partialSVD.md)
 
@@ -156,8 +162,12 @@ anole_gt <- gt_impute_simple(anole_gt, method = "mode")
 
 # Create PCA object, including total variance
 gt_pca_randomSVD(anole_gt, k = 10, total_var = TRUE)
+#> Warning: `gt_pca_randomSVD()` was deprecated in tidypopgen 1.1.0.
+#> ℹ Please use the `method` argument of `gt_pca()` instead.
 #>  === PCA of gen_tibble object ===
 #> Method: [1] "randomSVD"
+#> 
+#> Genotypes: imputed 
 #> 
 #> Call ($call):gt_pca_randomSVD(x = anole_gt, k = 10, total_var = TRUE)
 #> 

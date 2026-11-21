@@ -14,8 +14,7 @@ algorithm of PLINK 1.9 (`plink --homozyg`), with the same parameters and
 defaults, and gives the same runs. In this article, we look at the runs
 of homozygosity of the Human Genome Diversity Project (HGDP): 1,043
 individuals from 51 populations, typed at about 650k loci. We also time
-each step, on a laptop with a Intel(R) Core(TM) i7-10510U CPU @ 1.80GHz
-CPU.
+each step, on a machine with a 13th Gen Intel(R) Core(TM) i9-13900 CPU.
 
 ``` r
 
@@ -57,7 +56,8 @@ individuals by:
 
 meta_info <- readr::read_tsv("./data/hgdp/hgdp650_id_pop.txt",
   show_col_types = FALSE
-)
+) %>%
+  rename_with(tolower)
 regions <- c(
   Africa = "Africa", Middle_Est = "Middle East", Europe = "Europe",
   Central_South_Asia = "Central and South Asia", Est_Asia = "East Asia",
@@ -65,9 +65,9 @@ regions <- c(
 )
 hgdp <- hgdp %>%
   mutate(
-    population = meta_info$population[match(id, meta_info$Id)],
+    population = meta_info$population[match(id, meta_info$id)],
     region = factor(
-      regions[meta_info$Pop7Groups[match(id, meta_info$Id)]],
+      regions[meta_info$pop7groups[match(id, meta_info$id)]],
       levels = regions
     )
   ) %>%
@@ -76,18 +76,18 @@ hgdp
 #> # A gen_tibble: 643733 loci
 #> # A tibble:     1,043 × 5
 #> # Groups:       region [7]
-#>    id        phenotype  genotypes population    region
-#>    <chr>     <fct>     <vctr_SNP> <chr>         <fct> 
-#>  1 HGDP00448 control    [2,0,...] Biaka_Pygmies Africa
-#>  2 HGDP00479 control    [1,0,...] Biaka_Pygmies Africa
-#>  3 HGDP00985 control    [0,0,...] Biaka_Pygmies Africa
-#>  4 HGDP01094 control    [1,0,...] Biaka_Pygmies Africa
-#>  5 HGDP00982 control    [2,0,...] Mbuti_Pygmies Africa
-#>  6 HGDP00911 control    [1,0,...] Mandenka      Africa
-#>  7 HGDP01202 control    [2,0,...] Mandenka      Africa
-#>  8 HGDP00927 control    [2,0,...] Yoruba        Africa
-#>  9 HGDP00461 control    [2,0,...] Biaka_Pygmies Africa
-#> 10 HGDP00451 control    [2,0,...] Biaka_Pygmies Africa
+#>    id        phenotype  genotypes population region
+#>    <chr>     <fct>     <vctr_SNP> <chr>      <fct> 
+#>  1 HGDP00448 control    [2,0,...] Biaka_HG   Africa
+#>  2 HGDP00479 control    [1,0,...] Biaka_HG   Africa
+#>  3 HGDP00985 control    [0,0,...] Biaka_HG   Africa
+#>  4 HGDP01094 control    [1,0,...] Biaka_HG   Africa
+#>  5 HGDP00982 control    [2,0,...] Mbuti_HG   Africa
+#>  6 HGDP00911 control    [1,0,...] Mandenka   Africa
+#>  7 HGDP01202 control    [2,0,...] Mandenka   Africa
+#>  8 HGDP00927 control    [2,0,...] Yoruba     Africa
+#>  9 HGDP00461 control    [2,0,...] Biaka_HG   Africa
+#> 10 HGDP00451 control    [2,0,...] Biaka_HG   Africa
 #> # ℹ 1,033 more rows
 ```
 
@@ -110,7 +110,7 @@ hgdp_roh <- windows_indiv_roh(hgdp, n_cores = 1)
 hgdp_roh <- windows_indiv_roh(hgdp, n_cores = n_cores)
 ```
 
-On one core, this takes 3.8 s, and on 4 cores, 1.3 s. We get a tibble
+On one core, this takes 1.7 s, and on 4 cores, 0.5 s. We get a tibble
 with one row per run:
 
 ``` r
@@ -156,7 +156,7 @@ all(hgdp_roh$id == plink_roh$IID & hgdp_roh$start == plink_roh$POS1 &
 ```
 
 PLINK, run on the same machine with the default parameters, finds the
-same 45,910 runs in 3.6 s (reading the bed file from disk, and writing
+same 45,910 runs in 1.8 s (reading the bed file from disk, and writing
 the runs to a file). So
 [`windows_indiv_roh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_indiv_roh.md)
 is about as fast as PLINK on one core, and faster on several cores; and
@@ -385,9 +385,9 @@ likely to be in runs, whatever selection did.
 
 | Step | Time (s) |
 |:---|---:|
-| Read the bed file ([`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)) | 3.33 |
-| Find the runs ([`windows_indiv_roh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_indiv_roh.md), 1 core) | 3.77 |
-| Find the runs ([`windows_indiv_roh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_indiv_roh.md), 4 cores) | 1.29 |
-| PLINK `--homozyg` (1 thread) | 3.55 |
-| F_ROH ([`gt_roh_froh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_roh_froh.md)) | 0.03 |
-| ROH islands ([`gt_roh_islands()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_roh_islands.md)) | 2.43 |
+| Read the bed file ([`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)) | 1.44 |
+| Find the runs ([`windows_indiv_roh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_indiv_roh.md), 1 core) | 1.70 |
+| Find the runs ([`windows_indiv_roh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_indiv_roh.md), 4 cores) | 0.55 |
+| PLINK `--homozyg` (1 thread) | 1.83 |
+| F_ROH ([`gt_roh_froh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_roh_froh.md)) | 0.01 |
+| ROH islands ([`gt_roh_islands()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_roh_islands.md)) | 1.20 |

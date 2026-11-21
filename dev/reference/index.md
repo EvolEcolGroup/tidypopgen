@@ -248,6 +248,9 @@ Functions operating across loci.
 - [`loci_ld_clump()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_ld_clump.md)
   : Clump loci based on a Linkage Disequilibrium threshold
 
+- [`loci_ld_prune()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_ld_prune.md)
+  : Prune loci based on a Linkage Disequilibrium threshold, as PLINK
+
 - [`loci_missingness()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_missingness.md)
   : Estimate missingness at each locus
 
@@ -442,7 +445,7 @@ standard errors.
 
 Functions for performing Principal Component Analysis.
 
-- [`gt_pca`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca.md)
+- [`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca.md)
   :
 
   Principal Component Analysis for `gen_tibble` objects
@@ -453,12 +456,12 @@ Functions for performing Principal Component Analysis.
   PCA controlling for LD for `gen_tibble` objects
 
 - [`gt_pca_partialSVD()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_partialSVD.md)
-  :
+  **\[deprecated\]** :
 
   PCA for `gen_tibble` objects by partial SVD
 
 - [`gt_pca_randomSVD()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_randomSVD.md)
-  :
+  **\[deprecated\]** :
 
   PCA for `gen_tibble` objects by randomized partial SVD
 
@@ -597,10 +600,12 @@ Functions for other analyses within `R`.
 
 ## Example data
 
-Function for loading an example `gen_tibble`.
+Functions for loading an example `gen_tibble`, or simulating a toy one.
 
 - [`load_example_gt()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/load_example_gt.md)
   : Load example gen_tibble
+- [`gt_simulate_bn()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_simulate_bn.md)
+  : Simulate a toy dataset of unlinked loci
 
 ## tidyverse methods
 

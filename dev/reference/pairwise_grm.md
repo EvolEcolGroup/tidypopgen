@@ -1,10 +1,7 @@
 # Compute the Genomic Relationship Matrix for a `gen_tibble` object
 
-This function computes the Genomic Relationship Matrix (GRM). This is
-estimated by computing the pairwise kinship coefficients (coancestries)
-between all pairs of individuals from a matrix of Allele Sharing
-following the approach of Weir and Goudet 2017 based on beta
-estimators).
+This function computes the Genomic Relationship Matrix (GRM), with one
+of two estimators.
 
 ## Usage
 
@@ -13,7 +10,8 @@ pairwise_grm(
   x,
   allele_sharing_mat = NULL,
   block_size = bigstatsr::block_size(nrow(x)),
-  n_cores = bigstatsr::nb_cores()
+  n_cores = bigstatsr::nb_cores(),
+  method = c("WG17", "plink")
 )
 ```
 
@@ -34,7 +32,8 @@ pairwise_grm(
 - block_size:
 
   the size of the blocks to use for the computation of the allele
-  sharing matrix.
+  sharing matrix (with `method = "plink"`, blocks are chosen as in
+  [`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca.md)).
 
 - n_cores:
 
@@ -42,19 +41,42 @@ pairwise_grm(
   matrix, it defaults to
   [`bigstatsr::nb_cores()`](https://rdrr.io/pkg/bigparallelr/man/nb_cores.html)
 
+- method:
+
+  the estimator: `"WG17"` (Weir and Goudet 2017, the default) or
+  `"plink"` (PLINK 1.9's variance-standardised matrix).
+
 ## Value
 
 a matrix of GR between all pairs of individuals
 
 ## Details
 
-The GRM is twice the coancestry matrix (e.g. as estimated by
+With `method = "WG17"` (the default), the GRM is estimated by computing
+the pairwise kinship coefficients (coancestries) between all pairs of
+individuals from a matrix of Allele Sharing following the approach of
+Weir and Goudet 2017 based on beta estimators). The GRM is twice the
+coancestry matrix (e.g. as estimated by
 [`hierfstat::beta.dosage()`](https://rdrr.io/pkg/hierfstat/man/beta.dosage.html)
-with `inb=FALSE`).
+with `inb=FALSE`). Every locus has the same weight, and relatedness is
+measured relative to the average pair of individuals.
+
+With `method = "plink"`, the GRM is the variance-standardised
+relationship matrix of PLINK 1.9 (`plink --make-rel`), the matrix whose
+eigenvectors are the principal components of `plink --pca` and of
+[`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca.md):
+\\G\_{ij} = \sum_l z\_{il} z\_{jl} / n\_{ij}\\, with standardised
+genotypes \\z\_{il} = (g\_{il} - 2p_l) / \sqrt{2p_l(1-p_l)}\\ (so that
+rare variants count more), missing genotypes set to 0, and \\n\_{ij}\\
+the number of loci genotyped in both individuals. Pairs with no locus
+genotyped in both are `NaN`. See
+[`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca.md)
+for details.
 
 ## See also
 
-[`hierfstat::beta.dosage()`](https://rdrr.io/pkg/hierfstat/man/beta.dosage.html)
+[`hierfstat::beta.dosage()`](https://rdrr.io/pkg/hierfstat/man/beta.dosage.html),
+[`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca.md)
 
 ## Examples
 
@@ -103,4 +125,25 @@ example_gt %>% pairwise_grm(allele_sharing_mat = allele_sharing)
 #> g  0.5572519
 #> attr(,"class")
 #> [1] "pairwise_matrix" "pairwise_matrix" "matrix"          "array"          
+
+# The variance-standardised matrix of PLINK 1.9, as used by gt_pca()
+example_gt %>% pairwise_grm(method = "plink")
+#>            a          b          c           d          e           f
+#> a  0.2669109  0.1183883 -0.2244689  0.15262515  0.1589744 -0.29304029
+#> b  0.1183883  0.8612454  0.3003663  0.39267399 -0.4225641 -0.69963370
+#> c -0.2244689  0.3003663  0.7088645 -0.29304029  0.1107692 -0.12820513
+#> d  0.1526252  0.3926740 -0.2930403  0.72405372 -0.6410256  0.04981685
+#> e  0.1589744 -0.4225641  0.1107692 -0.64102564  1.1811966 -0.36923077
+#> f -0.2930403 -0.6996337 -0.1282051  0.04981685 -0.3692308  0.98315018
+#> g -0.2950916 -0.7879121 -0.5498168 -0.43223443 -0.1579487  0.36446886
+#>            g
+#> a -0.2950916
+#> b -0.7879121
+#> c -0.5498168
+#> d -0.4322344
+#> e -0.1579487
+#> f  0.3644689
+#> g  1.6638828
+#> attr(,"class")
+#> [1] "pairwise_matrix" "matrix"          "array"          
 ```

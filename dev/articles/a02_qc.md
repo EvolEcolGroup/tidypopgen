@@ -7,6 +7,15 @@ loci and across individuals: `qc_report_loci` and `qc_report_indiv`.
 This vignette uses a simulated data set to illustrate these methods of
 data cleaning.
 
+If your `gen_tibble` includes several populations, group it by
+population with
+[`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html) as
+soon as you have read it, before any quality control: `qc_report_loci`
+then tests Hardy-Weinberg equilibrium within each population, and
+`qc_report_indiv` estimates relatedness within each population (see
+[Grouping data](#grouping-data) below). The simulated data set that we
+use here is a single population.
+
 ## Read data into gen_tibble format
 
 ``` r
@@ -341,52 +350,27 @@ count_loci(data)
 ## Linkage Disequilibrium
 
 For further analyses, it may be necessary to control for linkage in the
-data set. tidypopgen provides LD clumping. This option is similar to the
-–indep-pairwise flag in plink, but results in a more even distribution
-of loci when compared to LD pruning.
+data set. tidypopgen provides LD clumping, with
+[`loci_ld_clump()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_ld_clump.md).
+This option is similar to the –indep-pairwise flag in plink, but results
+in a more even distribution of loci when compared to LD pruning.
+Pruning, as plink –indep-pairwise, is available with
+[`loci_ld_prune()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_ld_prune.md).
 
 To explore why clumping is preferable to pruning, see
 <https://privefl.github.io/bigsnpr/articles/pruning-vs-clumping.html>
 
-LD clumping requires a data set with no missingness. This means we need
-to create an imputed data set before LD pruning, which we can do quickly
-with `gt_impute_simple`.
-
-Because we have removed individuals through our filtering, we first need
-to update the backingfiles with:
-
-``` r
-
-data <- gt_update_backingfile(data)
-```
-
-    ## 
-    ## gen_backing files updated, now
-
-    ## using FBM RDS: /tmp/Rtmp45TTMa/file29e51350c0c0_v2.rds
-
-    ## with FBM backing file: /tmp/Rtmp45TTMa/file29e51350c0c0_v2.bk
-
-    ## make sure that you do NOT delete those files!
-
-    ## to reload the gen_tibble in another session, use:
-
-    ## gt_load('/tmp/Rtmp45TTMa/file29e51350c0c0_v2.gt')
-
-And then we can impute using:
-
-``` r
-
-imputed_data <- gt_impute_simple(data, method = "random")
-```
+Missing genotypes do not need to be imputed: the correlation between two
+loci is computed over the individuals genotyped at both (as in PLINK).
 
 In this example, if we want to remove SNPs with a correlation greater
-than 0.2 in windows of 10 SNPs at a time, we can set these parameters
-with `thr_r2` and `size` respectively.
+than 0.2 within windows of 10 kb, we can set these parameters with
+`thr_r2` and `size` respectively (with `use_positions = FALSE`, `size`
+would be a number of SNPs instead).
 
 ``` r
 
-to_keep_ld <- loci_ld_clump(imputed_data, thr_r2 = 0.2, size = 10)
+to_keep_ld <- loci_ld_clump(data, thr_r2 = 0.2, size = 10)
 head(to_keep_ld)
 ```
 
@@ -398,9 +382,21 @@ list to create a pruned version of our data:
 
 ``` r
 
-ld_data <- imputed_data %>%
+ld_data <- data %>%
   select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, size = 10))
 ```
+
+Pruning as `plink --indep-pairwise 10 1 0.2` (a window of 10 SNPs, moved
+by 1 SNP at a time) keeps this number of SNPs:
+
+``` r
+
+data %>%
+  loci_ld_prune(window_size = 10, step_size = 1, thr_r2 = 0.2) %>%
+  sum()
+```
+
+    ## [1] 203
 
 ## Save
 
@@ -416,21 +412,21 @@ gt_save(ld_data, file_name = tempfile())
 ```
 
     ## 
-    ## gen_tibble saved to /tmp/Rtmp45TTMa/file29e52296fff3.gt
+    ## gen_tibble saved to /tmp/RtmpUA3xmw/file2a7c54bfd9ca.gt
 
-    ## using FBM RDS: /tmp/Rtmp45TTMa/file29e51350c0c0_v2.rds
+    ## using FBM RDS: /tmp/RtmpUA3xmw/file2a7c21324c16.rds
 
-    ## with FBM backing file: /tmp/Rtmp45TTMa/file29e51350c0c0_v2.bk
+    ## with FBM backing file: /tmp/RtmpUA3xmw/file2a7c21324c16.bk
 
     ## make sure that you do NOT delete those files!
 
     ## to reload the gen_tibble in another session, use:
 
-    ## gt_load('/tmp/Rtmp45TTMa/file29e52296fff3.gt')
+    ## gt_load('/tmp/RtmpUA3xmw/file2a7c54bfd9ca.gt')
 
-    ## [1] "/tmp/Rtmp45TTMa/file29e52296fff3.gt"    
-    ## [2] "/tmp/Rtmp45TTMa/file29e51350c0c0_v2.rds"
-    ## [3] "/tmp/Rtmp45TTMa/file29e51350c0c0_v2.bk"
+    ## [1] "/tmp/RtmpUA3xmw/file2a7c54bfd9ca.gt" 
+    ## [2] "/tmp/RtmpUA3xmw/file2a7c21324c16.rds"
+    ## [3] "/tmp/RtmpUA3xmw/file2a7c21324c16.bk"
 
 ## Grouping data
 
@@ -445,12 +441,18 @@ First, lets add some imaginary population data to our gen_tibble:
 data <- data %>% mutate(population = c(rep("A", 4), rep("B", 4)))
 ```
 
-We can then group by population and run quality control on each group:
+We can then group by population:
 
 ``` r
 
-grouped_loci_report <- data %>%
-  group_by(population) %>%
+grouped_data <- data %>% group_by(population)
+```
+
+and run quality control on each group:
+
+``` r
+
+grouped_loci_report <- grouped_data %>%
   qc_report_loci()
 head(grouped_loci_report)
 ```
@@ -474,8 +476,7 @@ each population:
 
 ``` r
 
-grouped_individual_report <- data %>%
-  group_by(population) %>%
+grouped_individual_report <- grouped_data %>%
   qc_report_indiv(kings_threshold = 0.177)
 head(grouped_individual_report)
 ```
@@ -502,10 +503,28 @@ gen_tibbles.
 
 ``` r
 
-loci_maf_grouped <- data %>%
-  group_by(population) %>%
+loci_maf_grouped <- grouped_data %>%
   loci_maf()
 ```
 
 Grouped functions are built for efficiency and surpass the use of
 applying a function with `group_map`.
+
+Note that `select_loci_if` ignores the groups: all populations share the
+same loci, so a locus is kept or removed for all of them, and
+`select_loci_if(loci_maf(genotypes) > 0.02)` uses the minor allele
+frequency over all individuals, even on a grouped `gen_tibble` (as
+`qc_report_loci` does for the minor allele frequency and missingness).
+To filter on the frequencies within populations, we combine the results
+of the grouped `loci_maf` into one value per locus. For example, to keep
+the loci with a minor allele frequency above 2% in every population:
+
+``` r
+
+maf_by_pop <- grouped_data %>% loci_maf(type = "matrix")
+grouped_data_maf <- grouped_data %>%
+  select_loci_if(apply(maf_by_pop, 1, min) > 0.02)
+count_loci(grouped_data_maf)
+```
+
+    ## [1] 534

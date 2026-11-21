@@ -105,6 +105,11 @@ to remove them). If only one of them is phased, the phase of its
 genotypes is discarded (with a message), and the two datasets are merged
 as unphased data (swapping alleles as needed).
 
+If the first `gen_tibble` is grouped, the merged `gen_tibble` is grouped
+by the same variables (as with
+[`dplyr::bind_rows()`](https://dplyr.tidyverse.org/reference/bind_rows.html));
+the grouping of the second `gen_tibble` is ignored.
+
 ## Examples
 
 ``` r
@@ -151,12 +156,12 @@ merged_gt <- rbind(ref = example_gt, target = test_gt, flip_strand = TRUE)
 #> ( 0 were flipped to match the reference set)
 #> ( 4 are ambiguous, of which 4 were removed)
 #> 
-#> gen_tibble saved to /tmp/RtmpZHNEm1/gt_merged_1f1516c78a74.gt
-#> using FBM RDS: /tmp/RtmpZHNEm1/gt_merged_1f1516c78a74.rds
-#> with FBM backing file: /tmp/RtmpZHNEm1/gt_merged_1f1516c78a74.bk
+#> gen_tibble saved to /tmp/RtmpVFOvDK/gt_merged_1f9426893740.gt
+#> using FBM RDS: /tmp/RtmpVFOvDK/gt_merged_1f9426893740.rds
+#> with FBM backing file: /tmp/RtmpVFOvDK/gt_merged_1f9426893740.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpZHNEm1/gt_merged_1f1516c78a74.gt')
+#> gt_load('/tmp/RtmpVFOvDK/gt_merged_1f9426893740.gt')
 
 merged_gt
 #> # A gen_tibble: 2 loci

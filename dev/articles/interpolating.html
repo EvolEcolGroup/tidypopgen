@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9010</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9012</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,6 +42,7 @@
 <li><a class="dropdown-item" href="../articles/a01_overview.html">The grammar of population genetics</a></li>
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
     <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/missing_data.html">Missing genotypes: impute only when you must</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseudohaploids</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
     <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity</a></li>
@@ -85,13 +86,24 @@
 component scores across geographic space using the tidypopgen
 integration with the <code>sf</code> package.</p>
 <p>To do so, we will use a dataset of <em>Anolis punctatus</em> lizards
-from South America, introduced in the vignette ‘Population genetic
-analysis’. For a full analysis of this dataset using
+from South America (Prates et al. 2018, <em>Ecology and Evolution</em>
+8: 11932-11944, <a href="doi:10.1002/ece3.4650" class="uri">doi:10.1002/ece3.4650</a>), introduced in the vignette
+‘Population genetic analysis’. For a full analysis of this dataset using
 <code>tidypopgen</code>, and details on how to download the data, please
 refer to this previous vignette.</p>
 <p>Let’s begin by reading in the data and attaching the metadata:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/EvolEcolGroup/tidypopgen" class="external-link">tidypopgen</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; Loading required package: dplyr</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
+<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     filter, lag</span></span>
+<span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
+<span><span class="co">#&gt; Loading required package: tibble</span></span>
 <span><span class="va">vcf_path</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz"</span>,</span>
 <span>    package <span class="op">=</span> <span class="st">"tidypopgen"</span></span>
@@ -104,18 +116,24 @@ refer to this previous vignette.</p>
 <span><span class="op">)</span></span>
 <span><span class="va">pops</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">pops_path</span><span class="op">)</span></span>
 <span><span class="va">anole_gt</span> <span class="op">&lt;-</span> <span class="va">anole_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span><span class="va">pops</span>, by <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span></span></code></pre></div>
-<p>And we can check our data using:</p>
+<p>As the lizards come from two populations, we group the
+<code>gen_tibble</code> by population straight away, so that the
+functions that use groups take them into account:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">anole_gt</span> <span class="op">&lt;-</span> <span class="va">anole_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span></span></code></pre></div>
+<p>And we can check our data using:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">anole_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: 46</span></span>
 <span><span class="co">#&gt; Columns: 6</span></span>
 <span><span class="co">#&gt; A tibble: 46 × 6</span></span>
-<span><span class="co">#&gt; $ id         &lt;chr&gt; "punc_BM288", "punc_GN71", "punc_H1907", "punc_H1911", "punc_H2546", "punc_IBSPCRIB036…</span></span>
-<span><span class="co">#&gt; $ genotypes  &lt;vctr_SNP&gt; [0,0,...], [2,0,...], [0,2,...], [0,2,...], [0,1,...], [0,0,...], [0,0,...], [0,0…</span></span>
-<span><span class="co">#&gt; $ population &lt;chr&gt; "Amazonian_Forest", "Amazonian_Forest", "Amazonian_Forest", "Amazonian_Forest", "Amazo…</span></span>
-<span><span class="co">#&gt; $ longitude  &lt;dbl&gt; -51.8448, -54.6064, -64.8247, -64.8203, -65.3576, -46.0247, -36.2838, -40.5219, -40.52…</span></span>
-<span><span class="co">#&gt; $ latitude   &lt;dbl&gt; -3.3228, -9.7307, -9.4459, -9.4358, -9.5979, -23.7564, -9.8092, -20.2811, -19.9600, -1…</span></span>
-<span><span class="co">#&gt; $ pop        &lt;chr&gt; "Eam", "Eam", "Wam", "Wam", "Wam", "AF", "AF", "AF", "AF", "AF", "Wam", "Wam", "Eam", …</span></span></code></pre></div>
+<span><span class="co">#&gt; Groups: population [2]</span></span>
+<span><span class="co">#&gt; $ id         &lt;chr&gt; "punc_BM288", "punc_GN71", "punc_H1907", "punc_H1911", "pun…</span></span>
+<span><span class="co">#&gt; $ genotypes  &lt;vctr_SNP&gt; [0,0,...], [2,0,...], [0,2,...], [0,2,...], [0,1,...],…</span></span>
+<span><span class="co">#&gt; $ population &lt;chr&gt; "Amazonian_Forest", "Amazonian_Forest", "Amazonian_Forest",…</span></span>
+<span><span class="co">#&gt; $ longitude  &lt;dbl&gt; -51.8448, -54.6064, -64.8247, -64.8203, -65.3576, -46.0247,…</span></span>
+<span><span class="co">#&gt; $ latitude   &lt;dbl&gt; -3.3228, -9.7307, -9.4459, -9.4358, -9.5979, -23.7564, -9.8…</span></span>
+<span><span class="co">#&gt; $ pop        &lt;chr&gt; "Eam", "Eam", "Wam", "Wam", "Wam", "AF", "AF", "AF", "AF", …</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="map">Map<a class="anchor" aria-label="anchor" href="#map"></a>
 </h3>
@@ -125,7 +143,7 @@ begin, we can add <code>sf</code> geometry to our
 <code>gen_tibble</code> using <code><a href="../reference/gt_add_sf.html">gt_add_sf()</a></code>. We need to
 specify the names of the columns containing the longitude and latitude
 coordinates.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">anole_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_add_sf.html">gt_add_sf</a></span><span class="op">(</span><span class="va">anole_gt</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"longitude"</span>, <span class="st">"latitude"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">anole_gt</span></span>
 <span><span class="co">#&gt; Simple feature collection with 46 features and 6 fields</span></span>
@@ -135,23 +153,24 @@ coordinates.</p>
 <span><span class="co">#&gt; Geodetic CRS:  WGS 84</span></span>
 <span><span class="co">#&gt; # A gen_tibble: 3249 loci</span></span>
 <span><span class="co">#&gt; # A tibble:     46 × 7</span></span>
-<span><span class="co">#&gt;    id                 genotypes population       longitude latitude pop              geometry</span></span>
-<span><span class="co">#&gt;    &lt;chr&gt;             &lt;vctr_SNP&gt; &lt;chr&gt;                &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;         &lt;POINT [°]&gt;</span></span>
-<span><span class="co">#&gt;  1 punc_BM288         [0,0,...] Amazonian_Forest     -51.8    -3.32 Eam    (-51.8448 -3.3228)</span></span>
-<span><span class="co">#&gt;  2 punc_GN71          [2,0,...] Amazonian_Forest     -54.6    -9.73 Eam    (-54.6064 -9.7307)</span></span>
-<span><span class="co">#&gt;  3 punc_H1907         [0,2,...] Amazonian_Forest     -64.8    -9.45 Wam    (-64.8247 -9.4459)</span></span>
-<span><span class="co">#&gt;  4 punc_H1911         [0,2,...] Amazonian_Forest     -64.8    -9.44 Wam    (-64.8203 -9.4358)</span></span>
-<span><span class="co">#&gt;  5 punc_H2546         [0,1,...] Amazonian_Forest     -65.4    -9.60 Wam    (-65.3576 -9.5979)</span></span>
-<span><span class="co">#&gt;  6 punc_IBSPCRIB0361  [0,0,...] Atlantic_Forest      -46.0   -23.8  AF    (-46.0247 -23.7564)</span></span>
-<span><span class="co">#&gt;  7 punc_ICST764       [0,0,...] Atlantic_Forest      -36.3    -9.81 AF     (-36.2838 -9.8092)</span></span>
-<span><span class="co">#&gt;  8 punc_JFT459        [0,0,...] Atlantic_Forest      -40.5   -20.3  AF    (-40.5219 -20.2811)</span></span>
-<span><span class="co">#&gt;  9 punc_JFT773        [0,0,...] Atlantic_Forest      -40.5   -20.0  AF        (-40.52 -19.96)</span></span>
-<span><span class="co">#&gt; 10 punc_LG1299        [0,0,...] Atlantic_Forest      -39.1   -15.3  AF    (-39.0694 -15.2696)</span></span>
+<span><span class="co">#&gt; # Groups:       population [2]</span></span>
+<span><span class="co">#&gt;    id    genotypes population longitude latitude pop              geometry</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt; &lt;vctr_SN&gt; &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;         &lt;POINT [°]&gt;</span></span>
+<span><span class="co">#&gt;  1 punc… [0,0,...] Amazonian…     -51.8    -3.32 Eam    (-51.8448 -3.3228)</span></span>
+<span><span class="co">#&gt;  2 punc… [2,0,...] Amazonian…     -54.6    -9.73 Eam    (-54.6064 -9.7307)</span></span>
+<span><span class="co">#&gt;  3 punc… [0,2,...] Amazonian…     -64.8    -9.45 Wam    (-64.8247 -9.4459)</span></span>
+<span><span class="co">#&gt;  4 punc… [0,2,...] Amazonian…     -64.8    -9.44 Wam    (-64.8203 -9.4358)</span></span>
+<span><span class="co">#&gt;  5 punc… [0,1,...] Amazonian…     -65.4    -9.60 Wam    (-65.3576 -9.5979)</span></span>
+<span><span class="co">#&gt;  6 punc… [0,0,...] Atlantic_…     -46.0   -23.8  AF    (-46.0247 -23.7564)</span></span>
+<span><span class="co">#&gt;  7 punc… [0,0,...] Atlantic_…     -36.3    -9.81 AF     (-36.2838 -9.8092)</span></span>
+<span><span class="co">#&gt;  8 punc… [0,0,...] Atlantic_…     -40.5   -20.3  AF    (-40.5219 -20.2811)</span></span>
+<span><span class="co">#&gt;  9 punc… [0,0,...] Atlantic_…     -40.5   -20.0  AF        (-40.52 -19.96)</span></span>
+<span><span class="co">#&gt; 10 punc… [0,0,...] Atlantic_…     -39.1   -15.3  AF    (-39.0694 -15.2696)</span></span>
 <span><span class="co">#&gt; # ℹ 36 more rows</span></span></code></pre></div>
 <p>We can then create a map of South America using the
 <code>rnaturalearth</code> package. This will be the base map onto which
 we will plot our samples and interpolate our PC scores.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://docs.ropensci.org/rnaturalearth/" class="external-link">rnaturalearth</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span></span>
@@ -182,10 +201,11 @@ clusters across the range of the species. Suppose that we wanted to
 interpolate the first principal component across the range of the
 species to observe the change in genetic variation across space.</p>
 <p>Let’s run a PCA and augment the gen_tibble with the principal
-component scores.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">anole_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_impute_simple.html">gt_impute_simple</a></span><span class="op">(</span><span class="va">anole_gt</span>, method <span class="op">=</span> <span class="st">"mode"</span><span class="op">)</span></span>
-<span><span class="va">anole_pca</span> <span class="op">&lt;-</span> <span class="va">anole_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/gt_pca_partialSVD.html">gt_pca_partialSVD</a></span><span class="op">(</span>k <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span>
+component scores. There is no need to impute the missing genotypes
+first: <code><a href="../reference/gt_pca.html">gt_pca()</a></code> uses, for each pair of individuals, the
+loci genotyped in both (see the article on <a href="missing_data.html">missing genotypes</a>).</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">anole_pca</span> <span class="op">&lt;-</span> <span class="va">anole_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/gt_pca.html">gt_pca</a></span><span class="op">(</span>k <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span>
 <span><span class="va">anole_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment</a></span><span class="op">(</span><span class="va">anole_pca</span>, data <span class="op">=</span> <span class="va">anole_gt</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -196,24 +216,31 @@ interpolate the scores of the first principal component across the
 landscape.</p>
 <p>To begin with, we will need to load the <code>sf</code>,
 <code>terra</code>, and <code>tidyterra</code> packages.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/" class="external-link">sf</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; Linking to GEOS 3.12.2, GDAL 3.11.4, PROJ 9.4.1; sf_use_s2() is TRUE</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/" class="external-link">terra</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dieghernan.github.io/tidyterra/" class="external-link">tidyterra</a></span><span class="op">)</span></span></code></pre></div>
+<span><span class="co">#&gt; terra 1.9.50</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dieghernan.github.io/tidyterra/" class="external-link">tidyterra</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'tidyterra'</span></span>
+<span><span class="co">#&gt; The following object is masked from 'package:stats':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     filter</span></span></code></pre></div>
 <p>We will first prepare the map by unifying all geometries into a
 single polygon and casting it to “POLYGON” type.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">map</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_combine.html" class="external-link">st_union</a></span><span class="op">(</span><span class="va">map</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">st_sf</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">map</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_cast.html" class="external-link">st_cast</a></span><span class="op">(</span><span class="va">map</span>, <span class="st">"POLYGON"</span><span class="op">)</span></span></code></pre></div>
 <p>The, we need to create a grid of points covering the area of the
 map.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="va">map</span>, nrows <span class="op">=</span> <span class="fl">100</span>, ncols <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span><span class="va">xy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/xyCellFrom.html" class="external-link">xyFromCell</a></span><span class="op">(</span><span class="va">grid</span>, <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/dimensions.html" class="external-link">ncell</a></span><span class="op">(</span><span class="va">grid</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>By converting this grid to an <code>sf</code> object, we can then use
 <code><a href="https://r-spatial.github.io/sf/reference/st_join.html" class="external-link">st_filter()</a></code> to keep only the points that fall within the
 landmass.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">coop</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html" class="external-link">st_as_sf</a></span><span class="op">(</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">xy</span><span class="op">)</span>, coords <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"y"</span><span class="op">)</span>,</span>
 <span>                 crs <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="va">map</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">coop</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_join.html" class="external-link">st_filter</a></span><span class="op">(</span><span class="va">coop</span>, <span class="va">map</span><span class="op">)</span></span></code></pre></div>
@@ -226,7 +253,7 @@ points.</p>
 <p>We remove the genotypes from our <code>gen_tibble</code>, as
 <code>gstat</code> does not accept a <code>gen_tibble</code> object, and
 then run the interpolation:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">anole_sf_obj</span> <span class="op">&lt;-</span> <span class="va">anole_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="st">"genotypes"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-spatial/gstat/" class="external-link">gstat</a></span><span class="op">)</span></span>
@@ -239,11 +266,11 @@ then run the interpolation:</p>
 <span><span class="va">resp</span><span class="op">$</span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_coordinates.html" class="external-link">st_coordinates</a></span><span class="op">(</span><span class="va">resp</span><span class="op">)</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span></span>
 <span><span class="va">resp</span><span class="op">$</span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_coordinates.html" class="external-link">st_coordinates</a></span><span class="op">(</span><span class="va">resp</span><span class="op">)</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span></span></code></pre></div>
 <p>We can rasterize the interpolated values:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/rasterize.html" class="external-link">rasterize</a></span><span class="op">(</span><span class="va">resp</span>, <span class="va">grid</span>, field <span class="op">=</span> <span class="st">"var1.pred"</span>, fun <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span></span></code></pre></div>
 <p>And for a publication-ready figure, we can use <code>ggplot2</code>
 and the <code>tidyterra</code> package to plot:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span>  <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">map</span>, fill <span class="op">=</span> <span class="st">"grey95"</span><span class="op">)</span>  <span class="op">+</span></span>
 <span>  <span class="fu">geom_spatraster</span><span class="op">(</span>data <span class="op">=</span> <span class="va">pred</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="va">mean</span><span class="op">)</span><span class="op">)</span><span class="op">+</span></span>
@@ -261,9 +288,10 @@ and the <code>tidyterra</code> package to plot:</p>
 </div>
 <p>From our interpolated map, we can see the clear gradient in the first
 principal component scores across the range of <em>Anolis
-punctatus</em>, with the highest scores among Atlantic forest
-populations in the east, and the lowest scores clustered among Amazonian
-populations in the west.</p>
+punctatus</em>, with the highest scores clustered among Amazonian
+populations in the west, and the lowest scores among Atlantic forest
+populations in the east (the sign of a principal component is arbitrary,
+so only the gradient matters).</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

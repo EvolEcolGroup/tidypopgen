@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9010</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9012</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,6 +42,7 @@
 <li><a class="dropdown-item" href="../articles/a01_overview.html">The grammar of population genetics</a></li>
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
     <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/missing_data.html">Missing genotypes: impute only when you must</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseudohaploids</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
     <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity</a></li>
@@ -196,7 +197,7 @@ file:</p>
 <tbody>
 <tr class="odd">
 <td align="left">default</td>
-<td align="right">37.7</td>
+<td align="right">41.0</td>
 <td align="right">3708</td>
 <td align="right">2846</td>
 <td align="right">924</td>
@@ -205,7 +206,7 @@ file:</p>
 </tr>
 <tr class="even">
 <td align="left">names_as_int</td>
-<td align="right">19.9</td>
+<td align="right">18.9</td>
 <td align="right">2552</td>
 <td align="right">1756</td>
 <td align="right">924</td>
@@ -214,7 +215,7 @@ file:</p>
 </tr>
 <tr class="odd">
 <td align="left">chromosomes_as_int</td>
-<td align="right">19.9</td>
+<td align="right">19.1</td>
 <td align="right">2410</td>
 <td align="right">1751</td>
 <td align="right">924</td>
@@ -266,7 +267,7 @@ is read.</p>
 <code>gen_tibble</code> in a new session is faster too:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">reloaded</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_load.html">gt_load</a></span><span class="op">(</span><span class="st">"./data/rad/rad_int.gt"</span><span class="op">)</span></span></code></pre></div>
-<p>This takes 3.1 s, against 18 s for the <code>gen_tibble</code> read
+<p>This takes 3.1 s, against 19.1 s for the <code>gen_tibble</code> read
 with the default options (see the performance summary at the end).</p>
 </div>
 <div class="section level2">
@@ -301,22 +302,26 @@ sidecars for it, with the loci that they keep.</p>
 <h2 id="quality-control">Quality control<a class="anchor" aria-label="anchor" href="#quality-control"></a>
 </h2>
 <p>We add the lineage of each sample, from the <code>strata</code> file
-of the dataset:</p>
+of the dataset, and group the samples by lineage, so that the functions
+that use groups (such as the scan below) work within lineages:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">strata</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.delim</a></span><span class="op">(</span><span class="st">"./data/rad/discosnp.strata.tsv"</span><span class="op">)</span></span>
 <span><span class="va">rad_gt</span> <span class="op">&lt;-</span> <span class="va">rad_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>population <span class="op">=</span> <span class="va">strata</span><span class="op">$</span><span class="va">pop</span><span class="op">[</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">id</span>, <span class="va">strata</span><span class="op">$</span><span class="va">id</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>population <span class="op">=</span> <span class="va">strata</span><span class="op">$</span><span class="va">pop</span><span class="op">[</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">id</span>, <span class="va">strata</span><span class="op">$</span><span class="va">id</span><span class="op">)</span><span class="op">]</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">rad_gt</span><span class="op">$</span><span class="va">population</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; BS GS OG WA </span></span>
 <span><span class="co">#&gt; 18 18  3 17</span></span></code></pre></div>
 <p>and remove the loci with more than 20% of missing genotypes, or with
-a minor allele frequency below 5%:</p>
+a minor allele frequency below 5%, over all samples
+(<code><a href="../reference/select_loci_if.html">select_loci_if()</a></code> ignores the groups):</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">loci_missing</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/loci_missingness.html">loci_missingness</a></span><span class="op">(</span><span class="va">rad_gt</span>, n_cores <span class="op">=</span> <span class="va">n_cores</span><span class="op">)</span></span>
-<span><span class="va">loci_freq</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/loci_alt_freq.html">loci_maf</a></span><span class="op">(</span><span class="va">rad_gt</span>, n_cores <span class="op">=</span> <span class="va">n_cores</span><span class="op">)</span></span>
-<span><span class="va">rad_gt</span> <span class="op">&lt;-</span> <span class="va">rad_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/select_loci.html">select_loci</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">loci_missing</span> <span class="op">&lt;=</span> <span class="fl">0.2</span> <span class="op">&amp;</span> <span class="va">loci_freq</span> <span class="op">&gt;=</span> <span class="fl">0.05</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">rad_gt</span> <span class="op">&lt;-</span> <span class="va">rad_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="../reference/loci_missingness.html">loci_missingness</a></span><span class="op">(</span><span class="va">genotypes</span>, n_cores <span class="op">=</span> <span class="va">n_cores</span><span class="op">)</span> <span class="op">&lt;=</span> <span class="fl">0.2</span> <span class="op">&amp;</span></span>
+<span>      <span class="fu"><a href="../reference/loci_alt_freq.html">loci_maf</a></span><span class="op">(</span><span class="va">genotypes</span>, n_cores <span class="op">=</span> <span class="va">n_cores</span><span class="op">)</span> <span class="op">&gt;=</span> <span class="fl">0.05</span></span>
+<span>  <span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/count_loci.html">count_loci</a></span><span class="op">(</span><span class="va">rad_gt</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 3605716</span></span></code></pre></div>
 </div>
@@ -327,7 +332,6 @@ a minor allele frequency below 5%:</p>
 differ most between two lineages, GS and BS:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">freq</span> <span class="op">&lt;-</span> <span class="va">rad_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/loci_alt_freq.html">loci_alt_freq</a></span><span class="op">(</span>n_cores <span class="op">=</span> <span class="va">n_cores</span>, type <span class="op">=</span> <span class="st">"matrix"</span><span class="op">)</span></span>
 <span><span class="va">freq_diff</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">freq</span><span class="op">[</span>, <span class="st">"GS"</span><span class="op">]</span> <span class="op">-</span> <span class="va">freq</span><span class="op">[</span>, <span class="st">"BS"</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <p>The loci table gives the integer names and chromosome codes of the
@@ -470,63 +474,63 @@ options, for the loci that are kept):</p>
 <tbody>
 <tr class="odd">
 <td align="left">read_default</td>
-<td align="right">37.73</td>
+<td align="right">41.03</td>
 <td align="right">3708</td>
 </tr>
 <tr class="even">
 <td align="left">read_names_as_int</td>
-<td align="right">19.89</td>
+<td align="right">18.85</td>
 <td align="right">2552</td>
 </tr>
 <tr class="odd">
 <td align="left">read_chromosomes_as_int</td>
-<td align="right">19.93</td>
+<td align="right">19.06</td>
 <td align="right">2410</td>
 </tr>
 <tr class="even">
 <td align="left">read_both_as_int</td>
-<td align="right">12.70</td>
+<td align="right">12.68</td>
 <td align="right">1188</td>
 </tr>
 <tr class="odd">
 <td align="left">load_default</td>
-<td align="right">18.00</td>
+<td align="right">19.06</td>
 <td align="right">3755</td>
 </tr>
 <tr class="even">
 <td align="left">load_both_as_int</td>
-<td align="right">3.10</td>
-<td align="right">1272</td>
+<td align="right">3.07</td>
+<td align="right">1273</td>
 </tr>
 <tr class="odd">
 <td align="left">loci_qc</td>
-<td align="right">0.44</td>
-<td align="right">1786</td>
+<td align="right">0.42</td>
+<td align="right">1852</td>
 </tr>
 <tr class="even">
 <td align="left">scan</td>
 <td align="right">0.08</td>
-<td align="right">811</td>
+<td align="right">546</td>
 </tr>
 <tr class="odd">
 <td align="left">lookup_first</td>
-<td align="right">0.65</td>
-<td align="right">798</td>
+<td align="right">0.64</td>
+<td align="right">534</td>
 </tr>
 <tr class="even">
 <td align="left">lookup_again</td>
 <td align="right">0.11</td>
-<td align="right">800</td>
+<td align="right">536</td>
 </tr>
 <tr class="odd">
 <td align="left">lookup_chromosomes</td>
 <td align="right">0.02</td>
-<td align="right">865</td>
+<td align="right">601</td>
 </tr>
 <tr class="even">
 <td align="left">restore</td>
 <td align="right">0.37</td>
-<td align="right">879</td>
+<td align="right">616</td>
 </tr>
 </tbody>
 </table>

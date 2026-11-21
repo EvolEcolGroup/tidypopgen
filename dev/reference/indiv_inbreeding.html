@@ -9,7 +9,7 @@ on the beta estimate from Weir and Goudet (2017)."><meta property="og:image" con
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9010</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9012</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,6 +24,7 @@ on the beta estimate from Weir and Goudet (2017)."><meta property="og:image" con
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/a01_overview.html">The grammar of population genetics</a></li>
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
     <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/missing_data.html">Missing genotypes: impute only when you must</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseudohaploids</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
     <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity</a></li>
@@ -97,8 +98,9 @@ It is not possible to use this with grouped tibbles.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>a numeric vector of inbreeding coefficients. For a grouped
-<code><a href="gen_tibble.html">gen_tibble</a></code>, a list of such vectors, one per group (the coefficients
-are computed within each group).</p>
+<code><a href="gen_tibble.html">gen_tibble</a></code>, a list of such vectors, one per group in the order of
+<code><a href="https://dplyr.tidyverse.org/reference/group_data.html" class="external-link">dplyr::group_keys()</a></code> (the coefficients are computed within each group;
+an empty group gives an empty vector).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -106,6 +108,11 @@ are computed within each group).</p>
 objects (grouped or not) and for their <code>genotypes</code> column. Other packages
 can add methods for their own classes (e.g. tibbles of genotype
 likelihoods).</p>
+<p>For a grouped <code><a href="gen_tibble.html">gen_tibble</a></code>, the coefficients are computed within each
+group, giving the same results as
+<code>group_map(.x, ~ indiv_inbreeding(.x))</code>, but much faster: the genotypes are
+read only once, and only the pairs of individuals within each group are
+compared.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

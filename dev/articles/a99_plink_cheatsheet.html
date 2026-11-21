@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9010</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9012</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,6 +42,7 @@
 <li><a class="dropdown-item" href="../articles/a01_overview.html">The grammar of population genetics</a></li>
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
     <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/missing_data.html">Missing genotypes: impute only when you must</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseudohaploids</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
     <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity</a></li>
@@ -203,6 +204,28 @@ alternatively:</p>
 <p>This option is similar to the –indep-pairwise flag in PLINK, but
 results in a more even distribution of loci when compared to LD
 pruning.</p>
+<table class="table">
+<colgroup>
+<col width="40%">
+<col width="59%">
+</colgroup>
+<thead><tr class="header">
+<th>PLINK</th>
+<th><code>tidypopgen</code></th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>–indep-pairwise 50 5 0.2</td>
+<td><code>loci_ld_prune(window_size = 50, step_size = 5, thr_r2 = 0.2)</code></td>
+</tr>
+<tr class="even">
+<td>–indep-pairwise 50kb 1 0.2</td>
+<td><code>loci_ld_prune(window_size = 50, step_size = 1, thr_r2 = 0.2, window_in_kb = TRUE)</code></td>
+</tr>
+</tbody>
+</table>
+<p>Both handle missing genotypes as PLINK does (r^2 over the individuals
+genotyped at both loci).</p>
 <p>To explore why clumping is preferable to pruning, see <a href="https://privefl.github.io/bigsnpr/articles/pruning-vs-clumping.html" class="external-link uri">https://privefl.github.io/bigsnpr/articles/pruning-vs-clumping.html</a></p>
 </div>
 <div class="section level2">

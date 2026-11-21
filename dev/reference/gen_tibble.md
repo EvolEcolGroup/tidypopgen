@@ -132,7 +132,8 @@ gen_tibble(
   the genotypes are parsed in parallel, and a *.vcf.gz* file compressed
   with `bgzip` (as most are) is also decompressed in parallel (other
   gzipped files are decompressed on a single core). For a PLINK *.ped*
-  file, the lines are split and the genotypes coded in parallel. It is
+  file, the lines are split and the genotypes coded in parallel, and for
+  a PLINK *.bed* file the genotypes are decoded in parallel. It is
   ignored for other formats and for `parser = "vcfR"`.
 
 - chunk_size:

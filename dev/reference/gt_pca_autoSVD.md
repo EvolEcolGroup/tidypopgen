@@ -91,6 +91,12 @@ gt_pca_autoSVD(
 
   Number of cores used. Default doesn't use parallelism. You may use
   [`bigstatsr::nb_cores()`](https://rdrr.io/pkg/bigparallelr/man/nb_cores.html).
+  As the randomised SVD of
+  [`bigsnpr::snp_autoSVD()`](https://privefl.github.io/bigsnpr/reference/snp_autoSVD.html)
+  runs one more process than its number of cores (to coordinate the
+  others), it is given `n_cores - 1` cores (or one, with fewer than 3
+  cores), so that at most `n_cores` are used; its clumping also runs on
+  these cores.
 
 - verbose:
 
@@ -126,7 +132,17 @@ with elements: A named list (an S3 class "big_SVD") of
 
 - `loci`, the loci used after long range LD removal.
 
+and the attributes `imputed` and `missing` (see
+[`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca.md)).
+
 ## Details
+
+The genotypes must be complete or imputed (see
+[`gt_impute_simple()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_impute_simple.md);
+imputed genotypes are used automatically). Missing genotypes give an
+error (with a custom `fun_scaling` that does not depend on the
+genotypes, they are only looked for in a sample of them, as in
+`bigsnpr`).
 
 Using gt_pca_autoSVD requires a reasonably large dataset, as the
 function iteratively removes regions of long range LD. If you encounter:
@@ -150,7 +166,7 @@ attempting to scale.' indicates that monomorphic markers are present.
 which this function wraps.
 
 Other gt_pca_functions:
-[`gt_pca`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca.md),
+[`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca.md),
 [`gt_pca_partialSVD()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_partialSVD.md),
 [`gt_pca_randomSVD()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_randomSVD.md)
 
@@ -189,6 +205,8 @@ gt_pca_autoSVD(lobsters,
 #>  === PCA of gen_tibble object ===
 #> Method: [1] "autoSVD"
 #> 
+#> Genotypes: imputed 
+#> 
 #> Call ($call):gt_pca_autoSVD(x = lobsters, k = 10, roll_size = 20, total_var = TRUE)
 #> 
 #> Eigenvalues ($d):
@@ -217,6 +235,8 @@ gt_pca_autoSVD(lobsters,
 #> Converged!
 #>  === PCA of gen_tibble object ===
 #> Method: [1] "autoSVD"
+#> 
+#> Genotypes: imputed 
 #> 
 #> Call ($call):gt_pca_autoSVD(x = lobsters, k = 5, roll_size = 20, total_var = FALSE)
 #> 
