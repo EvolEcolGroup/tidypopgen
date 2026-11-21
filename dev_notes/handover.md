@@ -1,6 +1,7 @@
 # tidypopgen: handover
 
-Updated 2026-11-21 (laptopX1, `pca_missing` merged into `grouping`). For the next session: read this and
+Updated 2026-11-21 (laptopX1: #235 and #231 merged into `dev`; the
+package split planned and deferred). For the next session: read this and
 `summary.md` first. History is in `progress.md`; designs are in the topic
 documents listed in `README.md`.
 
@@ -8,12 +9,14 @@ documents listed in `README.md`.
 
 | branch | purpose | base | pushed | merged |
 |---|---|---|---|---|
-| `pca_missing` | `gt_pca()` with missing genotypes as PLINK, projections; with #232 (checks, DAPC and pcadapt) and #233 (LD clumping and pruning); CI fix, re-rendered articles, the fixes of the review of #232/#233 (`code_review_2026-11_pca_missing.md`); grouped `pairwise_king()` and the faster bit-packed kernel (`53843683` to `e39cdf49`), grouped `indiv_inbreeding()` in one pass and the KING fallback removed (`f6110412`, `5718c15c`; `pairwise_bitpacked.md`); the parallel `.bed` reader with its size checks (PR #234, `58821fab`; `bed_reader.md`) | `dev` | yes | no (PR #231) |
-| `grouping` | vignettes and articles group by population early; lower-case metadata columns; grouped `rbind()` and `gt_add_sf()` fixed; `select_loci_if()` documents that groups are ignored; precompiled articles re-rendered (`84417a3b`..`87c75ea4`); readable a03 figures and tidy HGDP filters (`7a543b59`..`afbaf023`, laptop); HGDP benchmark re-rendered with the settled filters and the missing_data article grouped (`f364012d`..`fce9b263`, desktop); `pca_missing` merged in on 21 Nov (conflicts only in the dev notes); worktree `~/claude_work/tidypopgen/wt_grouping` on manica01. Andrea's uncommitted edits of `a02_qc.Rmd` and `benchmark_hgdp.Rmd.orig` (and the lower-case edits) are also still uncommitted in `~/git/tidypopgen`: discard them there before merging this branch into `pca_missing` | `pca_missing` at `dd7a251d`, then merged up to `672ec441` | yes (20 Nov) | no (PR #235 into `pca_missing`) |
+| `pca_missing` | squash-merged into `dev` as #231 (`e20145a2`, 21 Nov, Andrea): `gt_pca()` with missing genotypes as PLINK, projections, DAPC, pcadapt, LD clumping and pruning, grouped `pairwise_king()` and `indiv_inbreeding()`, the parallel `.bed` reader, and (through #235, `af7fed7e`) the vignettes and articles grouped early; delete once Andrea agrees | `dev` | yes | yes (21 Nov) |
 | `merge_vcf_speed` | three prototypes speeding up `gt_merge_vcfs()` (`d3b982d0` keep the genotypes of pass 1, `bc6856b6` parallel line parsing, `6982994c` raw alleles), outputs identical; 1.6x on sgdp and many (laptop, 4 threads; desktop, 8 threads), 1.1-1.25x on pops; worktree `/media/andrea/Elements1/tmp/claude/tidypopgen/merge_vcf/wt` (`vcf_merge.md`) | `pca_missing` at `5e207d78` | yes (20 Nov) | no PR |
 | `king_plink_ideas` | KING ideas from PLINK 2: `72377615` tiles + 64-word chunks (1.35x), `ef1c0b4c` AVX2 KING kernel, `e2692136` two paths (full matrix on the desktop: AVX2 1.76x, 1.4x faster than PLINK 2; scalar 1.3x); outputs identical, tests pass with and without AVX2; worktree `/media/andrea/Elements1/tmp/claude/tidypopgen/plink_king/wt` (`pairwise_bitpacked.md`) | `pca_missing` at `b8255226` | yes (20 Nov) | no |
 | `bed_reader` | the parallel `.bed` reader; squash-merged into `pca_missing` (PR #234, `58821fab`), its last notes commit cherry-picked there; deleted locally with its work folder (20 Nov, Andrea); still on origin | `pca_missing` | yes | yes (20 Nov) |
 | `king_simd_packing` | SIMD packing of the bit-packed kernel (`9853e055`), not merged: below the 1.5x bar (`pairwise_bitpacked.md`) | `pca_missing` at `c7c09c67` | no | no |
+
+`grouping` was squash-merged into `pca_missing` (#235, `af7fed7e`) and
+deleted, locally and on origin.
 
 About 19 other local branches on the laptop look unmerged to git (`git branch
 --no-merged origin/dev`), but many were squash-merged; see the clean-up task.
@@ -26,42 +29,16 @@ once the branches are no longer needed).
 
 ## Next tasks
 
-### 1. **P1** [review] Review the fixes and merge PR #231
-
-- **Read first:** `code_review_2026-11_pca_missing.md` ("Changes in
-  behaviour to check before merging", "Fixes by area"; Andrea ticks the
-  boxes), and `pairwise_bitpacked.md` for the grouped `pairwise_king()` and
-  `indiv_inbreeding()` (they used to ignore groups or use `group_map()`).
-- **State:** CI at `b8255226` passes on all R-CMD-check jobs, lint, pkgdown
-  and test-coverage; codecov fails on coverage only (patch 94.68% against a
-  95.50% target, project -0.08%). Later commits touch only `dev_notes/`.
-- **Before merging:** review PR #235, branch `grouping` (vignettes grouped
-  early, lower-case metadata, grouped `rbind()` and `gt_add_sf()` fixes,
-  `select_loci_if()` docs; full test suite passes on an -O2 build) and merge
-  it into `pca_missing`. The desktop job of 20 Nov has pushed, and
-  `pca_missing` (`672ec441`) is merged into `grouping` (21 Nov), so the PR
-  has no conflicts.
-  First discard the same edits, still uncommitted, in `~/git/tidypopgen`
-  (Andrea's `a02_qc.Rmd` and `benchmark_hgdp.Rmd.orig`, and the lower-case
-  edits). The precompiled articles were re-rendered on the branch
-  (`87c75ea4`, 20 Nov) with indicative timings: re-time them on a quiet
-  machine before a release (the laptop section of the HGDP benchmark is
-  older still, with an "impute" step).
-- **HGDP benchmark:** re-rendered on the desktop (`f364012d`, `cbd25afa`,
-  quiet machine, 20 threads): loci are filtered on the columns of
-  `loci_report` (no recomputing), individuals on the ungrouped `gen_tibble`
-  (Andrea's choices); printed results unchanged, total 3.5 s.
-- **Done when:** #231 is merged into `dev` (squash).
-
-### 2. **P2** [desktop] Re-time on the P-cores
+### 1. **P2** [desktop] Re-time on the P-cores
 
 - The VCF merge and KING were timed on 20 Nov (job `vcf_merge_king`;
   `vcf_merge.md`, `pairwise_bitpacked.md`). Left: the HGDP650
   PCA/DAPC/pcadapt/LD timings, not set up yet (desktop queue).
 
-### 3. **P2** [claude] Make `merge_vcf_speed` ready for a PR
+### 2. **P2** [claude] Make `merge_vcf_speed` ready for a PR
 
-- **Branch:** `merge_vcf_speed` (rebase or merge onto `dev` after #231).
+- **Branch:** `merge_vcf_speed` (rebase or merge onto `dev`, now that #231
+  is merged).
 - **Read first:** `vcf_merge.md` ("How it works", "Open questions").
 - **To do:** name the file in the genotype errors raised in pass 1 (P1's
   regression); a test that the cache and the re-read give the same result
@@ -69,9 +46,9 @@ once the branches are no longer needed).
   `gen_tibble()` on one large VCF for P3 (-O2 builds only); NEWS.
 - **Done when:** a PR into `dev`, with the desktop timings of `vcf_merge.md`.
 
-### 4. **P2** [claude] Keep optimising (Andrea)
+### 3. **P2** [claude] Keep optimising (Andrea)
 
-- **Branch:** a new branch from `dev`, after #231 is merged; for KING,
+- **Branch:** a new branch from `dev`; for KING,
   `king_plink_ideas`.
 - **Read first:** `gt_pca.md` ("Breakdown by operation", "Open questions"),
   `ld_missing.md`, `pairwise_bitpacked.md` ("Comparison with PLINK 2").
@@ -95,18 +72,28 @@ once the branches are no longer needed).
   manica01.
 - **Done when:** faster by more than 5%, with identical outputs.
 
-### 5. **P2** [review] Release 1.1.0 (from claude_jobs#5, 15 Nov; not rechecked)
+### 4. **P2** [review] Release 1.1.0 (from claude_jobs#5, 15 Nov; not rechecked)
 
-- After #231: set the version, merge `dev` into `main` (pkgdown then publishes
+- #231 is merged (21 Nov): set the version, merge `dev` into `main` (pkgdown
+  then publishes
   `rad_seq.html`), re-run `urlchecker::url_check()` and submit;
   `cran-comments.md` gives the intermittent failures as the reason for the
   early resubmission.
+- Before submitting, re-time the precompiled articles on a quiet machine:
+  they were re-rendered on 20 Nov (`87c75ea4`) with indicative timings, and
+  the laptop section of the HGDP benchmark still times the old pipeline
+  (with imputation; see the backlog).
 
-### 6. **P3** [cleanup] Branches and scratch files
+### 5. **P3** [cleanup] Branches and scratch files
 
-- Delete `pca_missing` once #231 is merged, `king_simd_packing` and
+- Delete `pca_missing` (merged as #231), `king_simd_packing` and
   `king_plink_ideas` once decided, `merge_vcf_speed` once its PR is merged;
   review the other local branches on the laptop (many squash-merged).
+- On manica01: remove the worktree `~/claude_work/tidypopgen/wt_grouping`
+  (`grouping` is merged and deleted), and discard Andrea's uncommitted
+  edits of `a02_qc.Rmd` and `benchmark_hgdp.Rmd.orig` (and the lower-case
+  edits) in `~/git/tidypopgen`, which are in `dev` through #235, before
+  pulling there.
 - `bed_reader` is merged (PR #234); the local branch and
   `~/claude_work/tidypopgen/bed_reader/` were deleted on 20 Nov (Andrea);
   the branch is still on origin. To re-time the `.bed` reader, use the full
@@ -135,7 +122,7 @@ sessions first (the benchmarking skill, "Unattended desktop jobs").
 
 ### HGDP650 timings of `gt_pca()`, DAPC, pcadapt, clumping and pruning
 
-- **Branch and set-up:** `pca_missing` (or `dev` after #231); the HGDP650
+- **Branch and set-up:** `dev` (with #231); the HGDP650
   files of `vignettes/articles/data/hgdp/`; the scripts are on the laptop in
   `bench_dapc/scripts/` and `bench_ld/scripts/` (paths to adapt); the masked
   data are made by `bench_dapc/scripts/mask_dev.R`; PLINK 1.9 is at
@@ -171,6 +158,14 @@ The job `vcf_merge_king` ran them on 20 Nov (results in `vcf_merge.md` and
 
 ## Backlog
 
+- **P3** [decide] Look into the package split when ready: tidypopgen as an
+  umbrella over tidypopcore, tidypopstats and tidygenclust
+  (`package_split.md`, deferred by Andrea on 21 Nov; its open questions;
+  the file map in `package_split/`). Its Phase 0 starts after 1.1.0.
+- [claude] Remove RcppArmadillo, unused by any source file: drop it from
+  `LinkingTo`, drop the `-DARMA_*` flags in `src/Makevars`, re-run
+  `compileAttributes()`; lighter `RcppExports.cpp`; independent of the
+  split (`package_split.md`, C++).
 - [claude] Large PLINK files with locus names: 116 s for the `.bim` of 91M
   loci (fread 84 s, then the loci table 32 s: GCs over 91M strings) against
   17.5 s with `names_as_int = TRUE`; recommend `names_as_int` in the docs

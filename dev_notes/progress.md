@@ -4,6 +4,25 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-21 (laptopX1): plan for splitting tidypopgen, deferred
+
+- **Done:** surveyed the module boundaries (internal calls, C++, tests,
+  data, docs) and the packages that use tidypopgen, and wrote the plan
+  `package_split.md`, with a map of every tracked file to its package
+  (`package_split/modules.csv`, built by `make_modules.R`). Notes only, on
+  `dev`; no code changed.
+- **Decisions (Andrea):** tidypopgen 2.0.0 as an umbrella that Depends on
+  tidypopcore, tidypopstats and tidygenclust, with a frozen re-export of
+  the 1.x functions; clustering moves to tidygenclust, and 2.0.0 waits for
+  it to be on CRAN; one combined website; the work is deferred ("we won't
+  do it now"). Proposed by Claude, to confirm: one repository per package,
+  dotted names for core's developer API, no C++ shared between packages.
+- **Found:** core calls stats only in `gen_tibble()` and
+  `gt_pseudohaploid()` (both replaceable by `bigstatsr::big_counts()`);
+  RcppArmadillo is used by no source file (backlog item).
+- Andrea merged #235 into `pca_missing` and #231 into `dev` meanwhile;
+  `handover.md` and `summary.md` updated for both.
+
 ## 2026-11-20 (manica01): desktop timings of the VCF merge and KING prototypes
 
 - **Done:** the unattended job `vcf_merge_king` (19:30-20:38) timed the

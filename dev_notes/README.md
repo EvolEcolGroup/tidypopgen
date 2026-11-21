@@ -50,3 +50,10 @@ They were in `data-raw/dev_notes/` until 19 Nov 2026. Start with
 | `sfs_plan.md` | The plan for the site frequency spectra (implemented in #221). |
 | `cran_checks_2026-11-07.md` | The pre-submission checks for CRAN of version 1.0.0: what was fixed, what needs a decision, and a draft of `cran-comments.md`. |
 | `lea_snmf_seed_issue.md` | A draft issue for LEA: the seed of `R_sNMF()` is read and written as a `long long` (not posted). |
+
+## Package split
+
+| File | What it is |
+|---|---|
+| `package_split.md` | A plan, deferred (21 Nov 2026), for making tidypopgen an umbrella over tidypopcore (gen_tibble, accessors, input and output), tidypopstats (statistics, PCA, DAPC) and tidygenclust (clustering): decisions, module boundaries, developer API, phases, risks, open questions. |
+| `package_split/` | `modules.csv`, the package each tracked file would go to, and `make_modules.R`, which builds it (and stops on unassigned files). |
