@@ -38,7 +38,7 @@ The update also brings:
 - R-hub (R-devel): linux, macos-arm64, windows, m1-san
 - win-builder: r-devel
 
-<!-- TODO: win-builder result (emailed to the maintainer), and m1-san -->
+<!-- TODO: win-builder result (emailed to the maintainer) -->
 
 ## R CMD check results
 
