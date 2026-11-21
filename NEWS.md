@@ -45,8 +45,6 @@
 * faster `select_loci()`, and faster `gt_as_vcf()`, `gt_update_backingfile()`
   and `gt_order_loci()` with many chromosomes; `gt_as_genlight()` uses less
   memory
-* the authors of code adapted from other software are credited in
-  `DESCRIPTION`, with their copyrights and licences in `inst/COPYRIGHTS`
 * new article on large RAD-seq datasets; the big data article uses
   `gt_merge_vcfs()`
 
