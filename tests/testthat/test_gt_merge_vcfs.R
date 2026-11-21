@@ -284,7 +284,9 @@ test_that("gt_merge_vcfs checks the samples and genotypes of each file", {
   bk <- tempfile()
   expect_error(
     gt_merge_vcfs(c(vcf_a, vcf_short), backingfile = bk, quiet = TRUE),
-    paste("the VCF", vcf_short, "has fewer genotypes than individuals"),
+    # (the error names the file by its normalised path, which differs from
+    # vcf_short on macOS and Windows)
+    paste0(basename(vcf_short), " has fewer genotypes than individuals"),
     fixed = TRUE
   )
   expect_false(any(file.exists(paste0(bk, c(".bk", ".rds")))))
