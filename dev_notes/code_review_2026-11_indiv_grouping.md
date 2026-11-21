@@ -1,0 +1,137 @@
+# Review: the indiv_* and loci_* families on grouped gen_tibbles (2026-11)
+
+## Summary
+
+- **Branch:** `indiv_grouping` (local, not pushed), from `vignette_filtering`
+  at `cb2fe55b` (which is itself a few commits behind `dev`: it lacks
+  #239-#241).
+- **Commits:** 11: 6 code fixes (one of them fixes a regression of another,
+  found by the verifying agent; one is the DESCRIPTION), 5 documentation
+  commits (vignette text; two typos and a trailing space in the new
+  vignette text of `vignette_filtering`; wording).
+- **Findings not fixed:** 3 (one needs a decision).
+- **Scope:** Andrea asked (21 Nov) whether the `indiv_*` family is
+  consistent on grouped tibbles. The `loci_*` family was surveyed too.
+
+## Verification
+
+| Check | Result |
+|---|---|
+| `R CMD check --run-donttest` (with `NOT_CRAN=true`: full test suite, Rd examples incl. `\donttest`, vignettes) on `7c58224d` (the tip but for the whitespace commit `d9fbfad6`), laptop, R 4.6.2 | 0 errors, 0 warnings, 2 notes, both local: `.git` (the check ran in a git worktree, where `.git` is a file) and the `-mno-omit-leaf-frame-pointer` flag of the Ubuntu R build; tests 5.5 min, all pass |
+| `lintr::lint_package()` on `7c58224d` | 2 lints: a trailing space in the new vignette code of `vignette_filtering` (fixed in `d9fbfad6`; the file then lints clean), and an `object_usage_linter` false positive for `read_bed_to_fbm` in `R/gen_tibble_bed.R` (defined in `R/RcppExports.R`; not touched by this branch) |
+| `spelling::spell_check_package()` on the tip | no errors |
+| Each new or changed test fails before its fix and passes after | yes, for all 5 code commits with tests (checked by a separate agent for `34e34394`, `1db53cc8`, `2653506a`, `54f7566e`, and by me for `609927d4`); see the exceptions below |
+
+Exceptions to "each test fails before the fix":
+
+- `2653506a`: on the old code only the `as.data.frame()` checks fail (no
+  method); the grouped checks already passed, as the old `tbl_df` method
+  gave the same values for these group-independent statistics. The grouped
+  methods are for consistency, as decided by Andrea.
+- `b62f8301` (DESCRIPTION), `d17bbc16`, `a27e8225`, `91848742`, `7c58224d`,
+  `d9fbfad6` (documentation only) have no test.
+
+## How the review was done
+
+- Each function of both families was run on a small grouped `gen_tibble`
+  (groups interleaved in the rows) directly, and within `mutate()`,
+  `filter()`, `summarise()`, `reframe()` and `select_loci_if()`, with an -O2
+  build of `dev`; the output shape and values were compared with the
+  ungrouped call.
+- Andrea decided (21 Nov): grouped `indiv_inbreeding()` returns a named
+  vector in row order, `type = "list"` deprecated; grouped methods for the
+  other three `indiv_*` functions, plus a note on the cost of a grouped
+  `mutate()`; all before 1.1.0.
+- A separate agent verified the first four code commits (fails before,
+  passes after, and a review of each diff); it found the regression fixed
+  in `609927d4`.
+
+## Changes in behaviour to check before merging
+
+- **Grouped `indiv_inbreeding()` returns a named vector in the order of the
+  rows**, not a list per group (the output of 1.0.0). Code written for 1.0.0
+  that indexes the list (`res[[g]]`) now gets the value of the g-th
+  individual, silently; `type = "list"` gives the old list, with a
+  deprecation warning. The change is in NEWS.
+- `indiv_inbreeding(genotypes)` (the genotypes column, e.g. within
+  `mutate()`) now computes the coefficients instead of stopping.
+- Grouped `loci_pi()` with a single individual returns the tidy tibble (or
+  the list or matrix asked for), not a plain vector; the old test expected
+  the vector and was updated.
+- Merging into `dev`: `NEWS.md` may conflict, as `dev` changed the pairwise
+  speed bullet; the new bullets were added as separate items to limit this.
+
+## Fixes by area
+
+### indiv_inbreeding()
+
+- [ ] `34e34394` · `indiv_inbreeding()` grouped method — returned a list of
+  vectors in group order, unlike every other `indiv_*` output; now one
+  value per individual in row order, named by ids; `type = "list"`
+  deprecated *[behaviour change]*
+- [ ] `1db53cc8` · `indiv_inbreeding.vctrs_bigSNP()` — stopped unless given
+  `allele_sharing_mat`; now computes it from the column, so it works within
+  `mutate()` and within groups *[new use, no breaking change]*
+- [ ] `b62f8301` · DESCRIPTION — `lifecycle (>= 1.0.2)`, needed for `I()` in
+  the deprecation of `type = "list"` *[dependency]*
+
+### Other indiv_* functions
+
+- [ ] `2653506a` · `indiv_het_obs()`, `indiv_missingness()`,
+  `indiv_ploidy()` — no grouped methods, no fallback for data frames that
+  lost their class; added `grouped_gen_tbl` (one pass, row order) and
+  `data.frame` methods, and a note on the cost of a grouped `mutate()`
+  *[consistency]*
+- [ ] `609927d4` · the same three — the `grouped_df` methods of `2653506a`
+  made grouped tibbles of extension packages (e.g. tidypopgl's
+  `grouped_gl_tbl`) fail with "no method"; dropped, so these use the
+  `tbl_df` method as before *[regression of `2653506a`, never released]*
+
+### loci_* functions
+
+- [ ] `54f7566e` · `loci_pi()` grouped method — a single individual gave a
+  plain vector whatever `type` *[edge case]*
+
+### Documentation
+
+- [ ] `d17bbc16` · overview vignette — with `example_gt` now grouped, the
+  "efficient" `mutate()` example read the genotypes once per population;
+  it now computes on the ungrouped data *[docs]*
+- [ ] `a27e8225` · NEWS wording of the `loci_pi()` item; `@return` of
+  `indiv_inbreeding()` on names with a given `allele_sharing_mat` *[docs]*
+- [ ] `91848742`, `7c58224d` · typos in the new vignette text of
+  `vignette_filtering` ("ungrop", "inbuild"), flagged by the spelling check
+  *[docs]*
+- [ ] `d9fbfad6` · a trailing space in the new code of the getting started
+  vignette, flagged by lintr *[docs]*
+
+## Findings not fixed
+
+### Decision needed
+
+- **Grouped `loci_alt_freq(as_counts = TRUE)` ignores `type`:** it always
+  returns a list of two matrices (`n_alt`, `n_valid`), while grouped
+  `loci_missingness(as_counts = TRUE)` follows `type`. A tidy version would
+  need two value columns (or a `count` column); **Decision needed:** keep
+  the list for counts (and document it), or follow `type`?
+
+### Performance (documented, not fixable in a method)
+
+- Within a grouped `mutate()` or `summarise()`, `dplyr` calls the
+  `indiv_*` functions once per group, on the slice of the genotypes column,
+  so the genotypes are read once per group (20 calls and ~3x the time of a
+  single call, 1000 individuals x 100k loci in 20 groups, laptop,
+  indicative). The docs and the overview vignette now point to the direct
+  call on the grouped tibble, or to computing before grouping.
+
+### Design notes (no change proposed)
+
+- Functions that describe the loci themselves (`loci_names()`,
+  `loci_chromosomes()`, `loci_transitions()`, `loci_transversions()`), LD
+  clumping and pruning, and `select_loci_if()` ignore the groups (global
+  values), as expected.
+- `indiv_inbreeding()` and the `loci_*` functions still have `grouped_df`
+  fallbacks: a grouped tibble of an extension package without its own
+  grouped method gets "no method" from them. That is right for these
+  group-dependent statistics (they need a grouped kernel), unlike the three
+  group-independent `indiv_*` functions.
