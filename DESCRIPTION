@@ -52,7 +52,7 @@ Imports:
     data.table,
     foreach,
     generics,
-    lifecycle,
+    lifecycle (>= 1.0.2),
     ggplot2 (>= 3.5.0),
     methods,
     MASS,
