@@ -247,7 +247,7 @@ gt_merge_vcfs <- function(
       # (otherwise, they are read again from the VCF)
       cache_swap_ok[f] <- is.na(scan$min_alleles) ||
         (scan$min_alleles == scan$max_alleles &&
-          all(scan$ploidy == scan$max_alleles))
+           all(scan$ploidy == scan$max_alleles))
     }
     # check the samples as soon as possible
     merge_vcfs_sample_names(sample_names[seq_len(f)], force_samples)
