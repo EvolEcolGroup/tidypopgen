@@ -1084,6 +1084,9 @@ List vcf_to_bk(std::string filename, std::string bk_file,
     // known)
     size_t offset = genotypes.size();
     genotypes.resize(offset + snp_lines.size() * n_individuals);
+    // (a pointer, not genotypes[offset], which is out of bounds when there
+    // are no individuals and the vector is empty)
+    unsigned char* chunk_genotypes = genotypes.data() + offset;
     unsigned char this_missing = ploidy_known ? missing_value :
       provisional_missing;
     long n_snp_lines = snp_lines.size();
@@ -1099,7 +1102,7 @@ List vcf_to_bk(std::string filename, std::string bk_file,
         size_t l = snp_lines[k];
         size_t bad_indiv;
         int line_status = phased_genotype_bytes(
-          line_start[l], line_len[l], &genotypes[offset + k * n_individuals],
+          line_start[l], line_len[l], chunk_genotypes + k * n_individuals,
           n_individuals, this_missing, phased_bytes, bad_indiv);
         status = std::max(status, line_status);
       }
@@ -1114,7 +1117,7 @@ List vcf_to_bk(std::string filename, std::string bk_file,
       for (long k = 0; k < n_snp_lines; k++) {
         size_t l = snp_lines[k];
         int line_status = count_alt_alleles(
-          line_start[l], line_len[l], &genotypes[offset + k * n_individuals],
+          line_start[l], line_len[l], chunk_genotypes + k * n_individuals,
           n_individuals, this_missing, '1', chunk_max_alleles,
           chunk_min_alleles);
         status = std::max(status, line_status);
