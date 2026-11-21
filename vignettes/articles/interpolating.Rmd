@@ -19,6 +19,16 @@ Let's begin by reading in the data and attaching the metadata:
 
 ``` r
 library(tidypopgen)
+#> Loading required package: dplyr
+#> 
+#> Attaching package: 'dplyr'
+#> The following objects are masked from 'package:stats':
+#> 
+#>     filter, lag
+#> The following objects are masked from 'package:base':
+#> 
+#>     intersect, setdiff, setequal, union
+#> Loading required package: tibble
 vcf_path <-
   system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
     package = "tidypopgen"
@@ -33,6 +43,15 @@ pops <- read.csv(pops_path)
 anole_gt <- anole_gt %>% left_join(pops, by = "id")
 ```
 
+As the lizards come from two populations, we group the `gen_tibble` by
+population straight away, so that the functions that use groups take them
+into account:
+
+
+``` r
+anole_gt <- anole_gt %>% group_by(population)
+```
+
 And we can check our data using:
 
 
@@ -41,6 +60,7 @@ anole_gt %>% glimpse()
 #> Rows: 46
 #> Columns: 6
 #> A tibble: 46 × 6
+#> Groups: population [2]
 #> $ id         <chr> "punc_BM288", "punc_GN71", "punc_H1907", "punc_H1911", "pun…
 #> $ genotypes  <vctr_SNP> [0,0,...], [2,0,...], [0,2,...], [0,2,...], [0,1,...],…
 #> $ population <chr> "Amazonian_Forest", "Amazonian_Forest", "Amazonian_Forest",…
@@ -64,6 +84,7 @@ anole_gt
 #> Geodetic CRS:  WGS 84
 #> # A gen_tibble: 3249 loci
 #> # A tibble:     46 × 7
+#> # Groups:       population [2]
 #>    id    genotypes population longitude latitude pop              geometry
 #>    <chr> <vctr_SN> <chr>          <dbl>    <dbl> <chr>         <POINT [°]>
 #>  1 punc… [0,0,...] Amazonian…     -51.8    -3.32 Eam    (-51.8448 -3.3228)
@@ -129,8 +150,15 @@ To begin with, we will need to load the `sf`, `terra`, and `tidyterra` packages.
 
 ``` r
 library(sf)
+#> Linking to GEOS 3.12.2, GDAL 3.11.4, PROJ 9.4.1; sf_use_s2() is TRUE
 library(terra)
+#> terra 1.9.50
 library(tidyterra)
+#> 
+#> Attaching package: 'tidyterra'
+#> The following object is masked from 'package:stats':
+#> 
+#>     filter
 ```
 
 We will first prepare the map by unifying all geometries into a single polygon and casting it to "POLYGON" type.

@@ -353,6 +353,23 @@ example_gt %>%
   loci_maf(type = "matrix")
 ```
 
+Note that `select_loci_if()` ignores groups. Unlike in `reframe()`, where
+`genotypes` refers to the individuals of each group, in `select_loci_if()`
+`genotypes` always refers to all individuals: as all populations share the
+same loci, a locus is either kept or dropped for all of them. So, on a grouped
+`gen_tibble`, `select_loci_if(loci_maf(genotypes) > 0.2)` uses the minor
+allele frequency over all individuals. To select loci on statistics computed
+within each population, we combine the per-population results of the grouped
+method into one value per locus. For example, to keep only the loci that are
+polymorphic in every population:
+```{r}
+grouped_gt <- example_gt %>% group_by(population)
+maf_by_pop <- grouped_gt %>% loci_maf(type = "matrix")
+grouped_gt %>%
+  select_loci_if(apply(maf_by_pop, 1, min) > 0) %>%
+  show_loci()
+```
+
 Certain metrics and analyses are naturally defined by a grouped tibble as they
 refer to populations, such as
 population-specific Fst. For example:

@@ -100,6 +100,17 @@ Merging the VCFs is the slowest step of this article (see the [performance summa
 
 
 
+We have added the population and the region of each individual, from the
+metadata of the SGDP. As we have only one or two individuals from each
+population, we group the individuals by region, so that quality control (e.g.
+the Hardy-Weinberg test of `qc_report_loci()`) and the pairwise F~ST~ below
+work within regions:
+
+
+``` r
+sgdp <- sgdp %>% group_by(region)
+```
+
 When we now call our loci tibble with `show_loci()`, we can see that the loci names are now integers:
 
 
@@ -142,9 +153,7 @@ sgdp_indiv_rep <- qc_report_indiv(sgdp)
 
 
 ``` r
-sgdp <- sgdp %>% group_by(Region)
 sgdp_loci_rep <- qc_report_loci(sgdp)
-sgdp <- sgdp %>% ungroup()
 ```
 
 However, it is important to be mindful that analyses on very large datasets will produce large outputs:
@@ -190,7 +199,7 @@ rm(sgdp_loci_rep)
 
 We can then proceed with basic data filtering in the same way as working with any other gen_tibble object.
 
-We filter for minor allele frequency, choosing to select loci with MAF greater than 5%:
+We filter for minor allele frequency, choosing to select loci with MAF greater than 5% (`select_loci_if()` ignores the groups: the MAF of each locus is computed over all individuals):
 
 
 ``` r
@@ -233,7 +242,7 @@ sgdp_pca <- sgdp %>% gt_pca(n_cores = n_cores)
 
 ``` r
 autoplot(sgdp_pca, type = "scores") +
-  aes(colour = sgdp$Region) +
+  aes(colour = sgdp$region) +
   labs(color = "Region")
 ```
 
@@ -248,7 +257,7 @@ We can also perform a discriminant analysis of principal components (DAPC) using
 
 ``` r
 sgdp_dapc <- gt_dapc(sgdp_pca,
-  pop = as.factor(sgdp$Region)
+  pop = as.factor(sgdp$region)
 )
 ```
 
@@ -263,12 +272,11 @@ Our DAPC autoplot shows that most individuals are assigned to their own region's
 
 # Pairwise F~ST~
 
-Finally, to examine the differentiation between regions, we can calculate pairwise F~ST~.
+Finally, to examine the differentiation between regions, we can calculate pairwise F~ST~ between the regions that `sgdp` is grouped by.
 
 
 ``` r
-grouped_sgdp <- sgdp %>% group_by(Region)
-pairwise_fst <- grouped_sgdp %>% pairwise_pop_fst(
+pairwise_fst <- sgdp %>% pairwise_pop_fst(
   n_cores = n_cores,
   type = "pairwise"
 )
@@ -301,15 +309,15 @@ Here is a summary of the time taken (in seconds) by each step on our large datas
 
 ```
 #>                              step time_s peak_memory_mb
-#> 1                      merge_vcfs  68.42           1991
-#> 2                    indiv_report   0.49           1116
-#> 3                     loci_report   0.32           1678
-#> 4                      maf_filter   0.37           1969
-#> 5                        ld_clump   4.05           1636
-#> 6                             pca   0.17            511
+#> 1                      merge_vcfs  67.69           1991
+#> 2                    indiv_report   0.45           1117
+#> 3                     loci_report   0.34           1676
+#> 4                      maf_filter   0.34           1969
+#> 5                        ld_clump   4.03           1636
+#> 6                             pca   0.15            511
 #> 7                            dapc   0.03            407
 #> 8                    pairwise_fst   0.17            372
-#> 9 Total (time) / maximum (memory)  74.03           1991
+#> 9 Total (time) / maximum (memory)  73.19           1991
 ```
 
 The memory is measured with `gc()`, and only covers memory allocated by R. It does not include the genotypes, which stay in the backing file on disk (the operating system caches the parts that are read, but this cache can be freed whenever memory is needed), nor memory allocated directly by compiled code (for example, by the VCF parser while it reads the file).

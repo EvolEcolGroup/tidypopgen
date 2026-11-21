@@ -7,6 +7,17 @@
 #'
 #' Note that the `select_loci_if` verb does not modify the backing FBM files,
 #' but rather it subsets the list of loci to be used stored in the `gen_tibble`.
+#'
+#' Groups are ignored: all individuals share the same loci, so a locus is kept
+#' or dropped for all groups at once, and `.sel_logical` is evaluated once,
+#' on all the individuals of the `gen_tibble`, even if it is grouped (e.g.
+#' `loci_maf(genotypes)` is the minor allele frequency over all individuals,
+#' not within each group). This is also how [qc_report_loci()] computes the
+#' minor allele frequency and missingness of a grouped `gen_tibble` (only
+#' Hardy-Weinberg equilibrium is tested within groups). To select loci on
+#' statistics computed within each group, compute them on the grouped
+#' `gen_tibble` (e.g. `loci_maf(type = "matrix")`, with one column per group),
+#' and combine them into one logical value per locus (see the examples).
 #' @param .data a `gen_tibble`
 #' @param .sel_logical a logical vector of length equal to the number of loci,
 #' or an expression that will tidy evaluate to such a vector. Only loci
@@ -26,6 +37,20 @@
 #' example_gt_subset <- example_gt %>%
 #'   select_loci_if(loci_maf(genotypes) > 0.2)
 #' show_loci(example_gt_subset)
+#'
+#' # Groups are ignored: this also selects loci with a minor allele frequency
+#' # above 0.2 over all individuals
+#' grouped_gt <- example_gt %>% group_by(population)
+#' grouped_gt_subset <- grouped_gt %>%
+#'   select_loci_if(loci_maf(genotypes) > 0.2)
+#' show_loci(grouped_gt_subset)
+#'
+#' # To select loci with a minor allele frequency above 0.2 in every
+#' # population, compute it within populations (one column per population)
+#' maf_by_pop <- grouped_gt %>% loci_maf(type = "matrix")
+#' grouped_gt_subset <- grouped_gt %>%
+#'   select_loci_if(apply(maf_by_pop, 1, min) > 0.2)
+#' show_loci(grouped_gt_subset)
 #'
 select_loci_if <- function(.data, .sel_logical) {
   # defuse the boolean argument

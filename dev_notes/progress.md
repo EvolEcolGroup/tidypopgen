@@ -36,6 +36,57 @@ files, SFS, CRAN checks) is described in the topic documents listed in
 - **Notes changed:** `bed_reader.md` ("The baboon fileset"), `handover.md`,
   `summary.md`.
 
+## 2026-11-20 (manica01): HGDP benchmark article re-rendered on grouping
+
+- **Done:** pulled `grouping` (`88eaed6e`) and re-knitted
+  `benchmark_hgdp.Rmd` with `precompile_hgdp_benchmark.R` (-O2 install of the
+  branch, 20 threads, quiet machine; laptop section re-appended unchanged).
+- **Where:** `grouping`, `f364012d`, `cbd25afa`.
+- **Result:** printed results unchanged. The grouped `filter()` of
+  individuals called `indiv_missingness()` once per population (1.66 s);
+  Andrea chose to ungroup for that step (0.19 s), and to filter loci on the
+  `maf` and `missingness` columns of `loci_report` (0.10 -> 0.02 s). Total
+  3.52 s.
+- **Notes changed:** `handover.md`, `summary.md`.
+
+## 2026-11-20 (laptopX1): vignette fixes on grouping, PR #235 into pca_missing
+
+- **Done:** a03: the coloured PCA scores plot and the map of DAPC clusters get
+  6 x 4.5 in figures (at the `html_vignette` default of 3 x 3 in, bigstatsr's
+  `coord_fixed()` and the legend squashed the panel; already so in v0.4.4);
+  legend at the bottom; Andrea's tidier DAPC and ADMIXTURE code. HGDP
+  benchmark: tidy filters (`select_loci_if(loci_maf() & loci_missingness())`,
+  `filter(indiv_missingness(genotypes) < 0.01)`), and a count of the
+  individuals kept and lost (1041 kept, 2 lost).
+- **Where:** `grouping`, `7a543b59`..`afbaf023`, pushed; PR #235 into
+  `pca_missing`.
+- **Result:** same loci (570,257, same order) and individuals as before. The
+  rendered HGDP article was patched by hand (Andrea's choice): `filter_loci`
+  and `filter_indiv` are not timed (HTML comments; the summary table keeps
+  the old times) until `precompile_hgdp_benchmark.R` is re-run on the desktop.
+- **Notes changed:** `handover.md`, `summary.md`.
+
+## 2026-11-20 (manica01): vignettes group by population early; grouped rbind() and gt_add_sf() fixed
+
+- **Done:** every vignette and article with several populations groups the
+  `gen_tibble` as soon as the populations are added (Andrea's request, from
+  their edits of a02 and the HGDP benchmark); metadata column names are
+  lower case (`plot_order_punctatus_n46.csv` header `id`; HGDP and SGDP
+  metadata lower-cased on reading); `rbind()` of grouped `gen_tibble`s fixed
+  (it went to dplyr's method); `gt_add_sf()` no longer messages on grouped
+  data; `select_loci_if()` documents that groups are ignored.
+- **Where:** branch `grouping` (from `pca_missing` at `dd7a251d`),
+  `84417a3b`..`87c75ea4` (with the re-rendered precompiled articles,
+  indicative timings), pushed; worktree
+  `~/claude_work/tidypopgen/wt_grouping`.
+- **Result:** on HGDP650, grouping changes only the HWE p-values (loci with
+  p < 0.01: 405,493 ungrouped, 2,744 within populations); all articles knit
+  with identical printed results; full test suite run on the branch build.
+- **Decisions:** `select_loci_if()` keeps evaluating on all individuals of a
+  grouped `gen_tibble` (documented, with examples of selecting on
+  per-group statistics) (Andrea asked to clarify it).
+- **Notes changed:** `handover.md`.
+
 ## 2026-11-20 (manica01): `.gt` alleles as codes not adopted
 
 - **Decision (Andrea):** the faster `.gt` format (alleles as codes:

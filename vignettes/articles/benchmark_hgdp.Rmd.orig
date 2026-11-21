@@ -65,11 +65,13 @@ download.file(download_url, download_path, method = "wget")
 
 In the following vignette, we place these files into the subdirectory
 `data/hgdp/`, and we will use the paths to the bed file `hgdp650.qc.hg19.bed`
-and the metadata file `hgdp650_id_pop.txt` to read in our data.
+and the metadata file `hgdp650_id_pop.txt` to read in our data. We make the
+column names of the metadata lower case, as are those of the `gen_tibble`:
 
 ```{r}
 bed_path <- "./data/hgdp/hgdp650.qc.hg19.bed"
-meta_info <- readr::read_tsv("./data/hgdp/hgdp650_id_pop.txt")
+meta_info <- readr::read_tsv("./data/hgdp/hgdp650_id_pop.txt") %>%
+  rename_with(tolower)
 ```
 
 # Create gen_tibble object
@@ -89,8 +91,8 @@ Add metadata
 
 ```{r}
 hgdp <- hgdp %>% mutate(
-  population = meta_info$population[match(hgdp$id, meta_info$Id)],
-  region = meta_info$Region[match(hgdp$id, meta_info$Id)]
+  population = meta_info$population[match(hgdp$id, meta_info$id)],
+  region = meta_info$region[match(hgdp$id, meta_info$id)]
 )
 ```
 
@@ -100,10 +102,23 @@ Let's confirm that we have read all the expected information:
 hgdp
 ```
 
+As this dataset includes information from multiple populations, we want to
+group the gen_tibble, so that quality control and the population statistics
+below work within populations:
+
+```{r}
+hgdp <- hgdp %>%
+  group_by(population)
+```
+
+
 # Loci Report
 
 We can then call `qc_report_loci`. This function supplies minor allele
 frequency, rate of missingness, and a Hardy-Weinberg exact p-value for each SNP.
+As `hgdp` is grouped, Hardy-Weinberg equilibrium is tested within each
+population (with a Bonferroni correction across populations), while the minor
+allele frequency and the missingness are computed over all individuals.
 
 ```{r loci_report, benchmark = TRUE}
 loci_report <- qc_report_loci(hgdp)
@@ -116,13 +131,14 @@ autoplot(loci_report, type = "all")
 
 # Filter Loci
 
-Following this, we filter the loci to only including those with a minor allele
-frequency over 0.05, and a missingness rate below 0.05.
+Following this, we filter the loci to only include those with a minor allele
+frequency over 0.05, and a missingness rate below 0.05 (over all individuals).
+We do not need to compute them again: the loci report has one row per locus,
+in the same order as the loci of `hgdp`, so we can filter on its columns:
 
 ```{r filter_loci, benchmark = TRUE}
-to_keep_loci <-
-  subset(loci_report, loci_report$maf > 0.05 & loci_report$missingness < 0.05)
-hgdp <- hgdp %>% select_loci(to_keep_loci$snp_id)
+hgdp <- hgdp %>%
+  select_loci_if(loci_report$maf > 0.05 & loci_report$missingness < 0.05)
 ```
 
 
@@ -143,11 +159,23 @@ autoplot(indiv_report, type = "scatter")
 # Filter individuals
 
 And we can filter individuals down to only include those with less than 1% of
-their genotypes missing.
+their genotypes missing. The individual report tells us how many individuals
+we would keep and lose with this threshold:
+
+```{r n_indiv_lost}
+indiv_report %>% count(lost = missingness >= 0.01)
+```
+
+The missingness of an individual does not depend on its group, but `filter()`
+on a grouped `gen_tibble` evaluates its condition one group at a time (here,
+one pass over the genotypes for each of the 51 populations). We thus ungroup
+to filter, and group again afterwards:
 
 ```{r filter_indiv, benchmark = TRUE}
-to_keep_indiv <- which(indiv_report$missingness < 0.01)
-hgdp <- hgdp[to_keep_indiv, ]
+hgdp <- hgdp %>%
+  ungroup() %>%
+  filter(indiv_missingness(genotypes) < 0.01) %>%
+  group_by(population)
 ```
 
 A few missing genotypes remain after filtering. We do not need to impute
@@ -206,11 +234,10 @@ autoplot(test_dapc, type = "scores")
 # Calculate Fst
 
 To examine the differentiation between populations in the global HGDP set, we
-calculate pairwise Fst.
+calculate pairwise Fst between the populations that `hgdp` is grouped by.
 
 ```{r pairwise_fst, benchmark = TRUE}
-grouped_hgdp <- hgdp %>% group_by(population)
-pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(
+pairwise_fsts <- hgdp %>% pairwise_pop_fst(
   n_cores = n_cores,
   type = "pairwise"
 )
@@ -220,8 +247,8 @@ Plot pairwise Fst:
 
 ```{r pairwise_fst_plot}
 # Order by continents
-grouped_hgdp_order <- grouped_hgdp %>% arrange(region, population)
-regional_order <- unique(grouped_hgdp_order$population)
+hgdp_order <- hgdp %>% arrange(region, population)
+regional_order <- unique(hgdp_order$population)
 
 autoplot(pairwise_fsts, order = regional_order) +
   scale_fill_viridis_c() +

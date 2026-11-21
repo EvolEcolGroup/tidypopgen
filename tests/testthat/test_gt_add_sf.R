@@ -320,9 +320,12 @@ test_that("gt_add_sf works with group_by", {
   )
   test_gt <- test_gt %>%
     dplyr::group_by(population)
-  test_gt_group_sf <- gt_add_sf(
-    x = test_gt,
-    coords = c("longitude", "latitude"),
+  # without a message about the grouping variables
+  expect_silent(
+    test_gt_group_sf <- gt_add_sf(
+      x = test_gt,
+      coords = c("longitude", "latitude"),
+    )
   )
   expect_equal(
     class(test_gt_group_sf),
@@ -349,4 +352,9 @@ test_that("gt_add_sf works with group_by", {
 
   # The two should end up as the same class
   expect_equal(class(test_gt_group_sf), class(test_gt_sf_group))
+  # and with the same geometry
+  expect_equal(
+    sf::st_geometry(test_gt_group_sf),
+    sf::st_geometry(test_gt_sf_group)
+  )
 })

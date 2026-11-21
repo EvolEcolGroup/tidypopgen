@@ -73,7 +73,8 @@ of the HGDP. We use seven broad regions, which we group the individuals by:
 ```{r}
 meta_info <- readr::read_tsv("./data/hgdp/hgdp650_id_pop.txt",
   show_col_types = FALSE
-)
+) %>%
+  rename_with(tolower)
 regions <- c(
   Africa = "Africa", Middle_Est = "Middle East", Europe = "Europe",
   Central_South_Asia = "Central and South Asia", Est_Asia = "East Asia",
@@ -81,9 +82,9 @@ regions <- c(
 )
 hgdp <- hgdp %>%
   mutate(
-    population = meta_info$population[match(id, meta_info$Id)],
+    population = meta_info$population[match(id, meta_info$id)],
     region = factor(
-      regions[meta_info$Pop7Groups[match(id, meta_info$Id)]],
+      regions[meta_info$pop7groups[match(id, meta_info$id)]],
       levels = regions
     )
   ) %>%

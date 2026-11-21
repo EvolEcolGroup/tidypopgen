@@ -363,6 +363,39 @@ test_that("as_is is deprecated and ignored by rbind", {
   expect_identical(show_genotypes(merged_as_is), show_genotypes(merged))
 })
 
+test_that("rbind keeps the grouping of the first gen_tibble", {
+  # a grouped gen_tibble used to be sent to dplyr's rbind method, and fail
+  merged_grouped <- rbind(
+    pop_b_gt %>% group_by(population),
+    pop_a_gt,
+    flip_strand = TRUE,
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  expect_s3_class(merged_grouped, "grouped_gen_tbl")
+  expect_equal(dplyr::group_vars(merged_grouped), "population")
+  # the same merge as without groups
+  expect_identical(merged_grouped$id, merged_gen$id)
+  expect_identical(loci_names(merged_grouped), loci_names(merged_gen))
+  expect_identical(
+    show_genotypes(merged_grouped),
+    show_genotypes(merged_gen)
+  )
+  # the grouping of the second gen_tibble is ignored (as in bind_rows())
+  merged_target_grouped <- rbind(
+    pop_b_gt,
+    pop_a_gt %>% group_by(population),
+    flip_strand = TRUE,
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  expect_false(inherits(merged_target_grouped, "grouped_df"))
+  expect_identical(
+    show_genotypes(merged_target_grouped),
+    show_genotypes(merged_gen)
+  )
+})
+
 test_that("rbind fails if gen_tibbles contain same ID", {
   pop_a_gt$id[1] <- "A"
   pop_b_gt$id[1] <- "A"

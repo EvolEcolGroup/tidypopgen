@@ -1,6 +1,6 @@
 # tidypopgen: summary
 
-Updated 2026-11-20 (manica01, desktop timings session). One section: the package's issue in
+Updated 2026-11-21 (laptopX1, `pca_missing` merged into `grouping`). One section: the package's issue in
 dramanica/claude_jobs, with the single list of its tasks. Its first
 paragraph, status and next steps are copied into the issue
 (`scripts/sync_issue.py`).
@@ -9,7 +9,7 @@ paragraph, status and next steps are copied into the issue
 
 Population genetics with `gen_tibble`s: faster input (VCF reading in `dev`, merging of VCFs prototyped), analyses with missing genotypes without imputation (PCA, DAPC, pcadapt, LD clumping and pruning), and fast kinship and inbreeding within groups.
 
-**Status.** PR #231 (`pca_missing` into `dev`, with #232 and #233, the review fixes, and grouped `pairwise_king()` and `indiv_inbreeding()` in one pass) passes CI except codecov (patch coverage 94.7%, target 95.5%), and waits for Andrea's review. Prototypes on `merge_vcf_speed` make `gt_merge_vcfs()` 1.6x faster on many single-sample files with identical outputs (desktop, sgdp-like, 8 threads, 16.7 -> 10.5 s), and on `king_plink_ideas` a two-path KING kernel makes the full matrix 1.76x faster on the desktop with AVX2 (6.56 -> 3.72 s on 1 thread, 1.4x faster than PLINK 2) and 1.3x faster without, outputs identical; for large PLINK files, the parallel `.bed` reader with size checks (PR #234) is merged into `pca_missing`. Handover: `dev_notes/handover.md` on `pca_missing`; `vcf_merge.md`, `pairwise_bitpacked.md`, `bed_reader.md`, `gt_save_speed.md`.
+**Status.** PR #231 (`pca_missing` into `dev`, with #232 and #233, the review fixes, and grouped `pairwise_king()` and `indiv_inbreeding()` in one pass) passes CI except codecov (patch coverage 94.7%, target 95.5%), and waits for Andrea's review; PR #235 (`grouping` into `pca_missing`: vignettes grouped early, grouped `rbind()` and `gt_add_sf()` fixed) is open, without conflicts. Prototypes on `merge_vcf_speed` make `gt_merge_vcfs()` 1.6x faster on many single-sample files with identical outputs (desktop, sgdp-like, 8 threads, 16.7 -> 10.5 s), and on `king_plink_ideas` a two-path KING kernel makes the full matrix 1.76x faster on the desktop with AVX2 (6.56 -> 3.72 s on 1 thread, 1.4x faster than PLINK 2) and 1.3x faster without, outputs identical; for large PLINK files, the parallel `.bed` reader with size checks (PR #234) is merged into `pca_missing`. Handover: `dev_notes/handover.md` on `pca_missing`; `vcf_merge.md`, `pairwise_bitpacked.md`, `bed_reader.md`, `gt_save_speed.md`.
 
 With missing genotypes, imputation pulls individuals with many missing
 genotypes together and makes missingness an axis of the PCA (on HGDP650, PC1
@@ -40,7 +40,7 @@ but Andrea judged it not worth the complexity (with that many loci
 `names_as_int = TRUE` is needed anyway): it is kept as a patch in the notes.
 
 **Next steps**
-- [ ] **P1** [review] Review the fixes (boxes of the review report) and the grouped `pairwise_king()` and `indiv_inbreeding()`, and merge PR #231: done when #231 is in `dev`.
+- [ ] **P1** [review] Review and merge PR #235 (`grouping` into `pca_missing`), then review the fixes (boxes of the review report) and the grouped `pairwise_king()` and `indiv_inbreeding()`, and merge PR #231: done when #231 is in `dev`.
 - [ ] **P2** [desktop] Re-time the HGDP650 PCA/DAPC/pcadapt/LD benchmarks on the P-cores (not set up): medians in `gt_pca.md`, `ld_missing.md`.
 - [ ] **P2** [claude] Make `merge_vcf_speed` ready for a PR (file names in pass-1 errors, a cache-vs-reread test, full suite, `gen_tibble()` timing): done when a PR into `dev` is open, after #231.
 - [ ] **P2** [claude] Keep optimising: pcadapt's t-scores, the GRM's count of shared loci, the DAPC regression, KING: check a build of the two-path kernel without AVX2 (`king_plink_ideas` `e2692136`; 1.76x on the desktop), then a PR if Andrea agrees: done when >5% faster with identical outputs.
@@ -48,9 +48,11 @@ but Andrea judged it not worth the complexity (with that many loci
 - [ ] **P3** [cleanup] Delete merged branches (`bed_reader` on origin, `pca_missing`, then `merge_vcf_speed`, `king_*` once decided); review the other local branches on the laptop; ask before deleting the benchmark data on the laptop's annex and in `~/claude_work/tidypopgen/` on the desktop.
 
 **Done**
-- PR #234 (parallel `.bed` reader) merged into `pca_missing` (`58821fab`); the redownloaded baboon `.bim` and `.fam` checked against the `.bed` (all 166M loci) and put in place; local `bed_reader` branch and its work folder (14 GB) deleted: 20 Nov.
-- Parallel `.bed` reader with size and magic checks (PR #234; `.bed` step 1.5x on 8 cores from an SSD, none from a hard disk), on the baboon data; `.gt` alleles as codes prototyped and not adopted (Andrea; patch in `dev_notes/gt_save_speed/`): 20 Nov.
+- `pca_missing` merged into `grouping` (conflicts only in the dev notes): 21 Nov.
 - Desktop timings of the VCF merge and KING prototypes, 1 and 8 threads, against bcftools, plink2 and PLINK 2 (job `vcf_merge_king`; outputs identical): 20 Nov.
+- PR #234 (parallel `.bed` reader) merged into `pca_missing` (`58821fab`); the redownloaded baboon `.bim` and `.fam` checked against the `.bed` (all 166M loci) and put in place; local `bed_reader` branch and its work folder (14 GB) deleted: 20 Nov.
+- Readable a03 figures and tidy HGDP benchmark filters on `grouping` (re-rendered on the desktop), PR #235 opened: 20 Nov.
+- Parallel `.bed` reader with size and magic checks (PR #234; `.bed` step 1.5x on 8 cores from an SSD, none from a hard disk), on the baboon data; `.gt` alleles as codes prototyped and not adopted (Andrea; patch in `dev_notes/gt_save_speed/`): 20 Nov.
 - Balanced laptop timings of the VCF merge prototypes (4 threads) and of the KING prototypes against PLINK 2 (1 and 4 threads), written up: 20 Nov.
 - VCF merge prototypes and PLINK 2 KING comparison written up, both branches pushed after the annex failure (`git fsck` clean): 20 Nov.
 - Grouped `indiv_inbreeding()` in one pass (4.4 -> 0.44 s by population), KING fallback removed: 19 Nov (`5718c15c`, `f6110412`).

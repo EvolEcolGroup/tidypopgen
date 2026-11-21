@@ -17,6 +17,8 @@ library(ggplot2)
 
 tidypopgen has two key functions to examine the quality of data across loci and across individuals: `qc_report_loci` and `qc_report_indiv`. This vignette uses a simulated data set to illustrate these methods of data cleaning.
 
+If your `gen_tibble` includes several populations, group it by population with `group_by()` as soon as you have read it, before any quality control: `qc_report_loci` then tests Hardy-Weinberg equilibrium within each population, and `qc_report_indiv` estimates relatedness within each population (see [Grouping data](#grouping-data) below). The simulated data set that we use here is a single population.
+
 # Read data into gen_tibble format
 
 ```{r}
@@ -227,11 +229,16 @@ First, lets add some imaginary population data to our gen_tibble:
 data <- data %>% mutate(population = c(rep("A", 4), rep("B", 4)))
 ```
 
-We can then group by population and run quality control on each group:
+We can then group by population:
 
 ```{r}
-grouped_loci_report <- data %>%
-  group_by(population) %>%
+grouped_data <- data %>% group_by(population)
+```
+
+and run quality control on each group:
+
+```{r}
+grouped_loci_report <- grouped_data %>%
   qc_report_loci()
 head(grouped_loci_report)
 ```
@@ -241,8 +248,7 @@ The loci report that we receive here will calculate Hardy-Weinberg equilibrium f
 Similarly, we can run a quality control report for individuals within each population:
 
 ```{r}
-grouped_individual_report <- data %>%
-  group_by(population) %>%
+grouped_individual_report <- grouped_data %>%
   qc_report_indiv(kings_threshold = 0.177)
 head(grouped_individual_report)
 ```
@@ -254,9 +260,17 @@ This is important when we have related individuals, as background population str
 It is also possible to run `loci` and `indiv` functions on grouped data. This is useful when you want to run the same quality control on each group of data, but don't want to split the data into separate gen_tibbles.
 
 ```{r}
-loci_maf_grouped <- data %>%
-  group_by(population) %>%
+loci_maf_grouped <- grouped_data %>%
   loci_maf()
 ```
 
-Grouped functions are built for efficiency and surpass the use of applying a function with `group_map`. 
+Grouped functions are built for efficiency and surpass the use of applying a function with `group_map`.
+
+Note that `select_loci_if` ignores the groups: all populations share the same loci, so a locus is kept or removed for all of them, and `select_loci_if(loci_maf(genotypes) > 0.02)` uses the minor allele frequency over all individuals, even on a grouped `gen_tibble` (as `qc_report_loci` does for the minor allele frequency and missingness). To filter on the frequencies within populations, we combine the results of the grouped `loci_maf` into one value per locus. For example, to keep the loci with a minor allele frequency above 2% in every population:
+
+```{r}
+maf_by_pop <- grouped_data %>% loci_maf(type = "matrix")
+grouped_data_maf <- grouped_data %>%
+  select_loci_if(apply(maf_by_pop, 1, min) > 0.02)
+count_loci(grouped_data_maf)
+```

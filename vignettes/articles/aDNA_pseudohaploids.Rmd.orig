@@ -54,6 +54,14 @@ ancient <- gen_tibble("./data/NearEastPublic/AncientLazaridis2016.geno",
 )
 ```
 
+Both datasets include many populations, so we group them by population
+straight away, so that the functions that use groups (such as the pairwise
+Fst below) work within populations:
+```{r}
+ho_modern <- ho_modern %>% group_by(population)
+ancient <- ancient %>% group_by(population)
+```
+
 # Assigning Pseudohaploid data
 
 Due to the damage associated with ancient DNA samples, genotype datasets of
@@ -204,14 +212,10 @@ ggplot() +
 
 Now let's replicate the pairwise Fst analysis from Lazaridis et al. (2016).
 
-First we need to merge the ancient and modern data:
+First we need to merge the ancient and modern data (the merged `gen_tibble`
+is grouped by population, as `ho_modern`):
 ```{r}
 ancient_modern <- rbind(ho_modern, ancient)
-```
-
-Then, we group the ancient and modern data by population:
-```{r}
-ancient_modern <- ancient_modern %>% group_by(population)
 ```
 
 As we are calculating Fst between populations, we will remove any populations that contain only one individual.

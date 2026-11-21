@@ -1,6 +1,6 @@
 # tidypopgen: handover
 
-Updated 2026-11-20 (manica01, desktop timings session). For the next session: read this and
+Updated 2026-11-21 (laptopX1, `pca_missing` merged into `grouping`). For the next session: read this and
 `summary.md` first. History is in `progress.md`; designs are in the topic
 documents listed in `README.md`.
 
@@ -9,6 +9,7 @@ documents listed in `README.md`.
 | branch | purpose | base | pushed | merged |
 |---|---|---|---|---|
 | `pca_missing` | `gt_pca()` with missing genotypes as PLINK, projections; with #232 (checks, DAPC and pcadapt) and #233 (LD clumping and pruning); CI fix, re-rendered articles, the fixes of the review of #232/#233 (`code_review_2026-11_pca_missing.md`); grouped `pairwise_king()` and the faster bit-packed kernel (`53843683` to `e39cdf49`), grouped `indiv_inbreeding()` in one pass and the KING fallback removed (`f6110412`, `5718c15c`; `pairwise_bitpacked.md`); the parallel `.bed` reader with its size checks (PR #234, `58821fab`; `bed_reader.md`) | `dev` | yes | no (PR #231) |
+| `grouping` | vignettes and articles group by population early; lower-case metadata columns; grouped `rbind()` and `gt_add_sf()` fixed; `select_loci_if()` documents that groups are ignored; precompiled articles re-rendered (`84417a3b`..`87c75ea4`); readable a03 figures and tidy HGDP filters (`7a543b59`..`afbaf023`, laptop); HGDP benchmark re-rendered with the settled filters and the missing_data article grouped (`f364012d`..`fce9b263`, desktop); `pca_missing` merged in on 21 Nov (conflicts only in the dev notes); worktree `~/claude_work/tidypopgen/wt_grouping` on manica01. Andrea's uncommitted edits of `a02_qc.Rmd` and `benchmark_hgdp.Rmd.orig` (and the lower-case edits) are also still uncommitted in `~/git/tidypopgen`: discard them there before merging this branch into `pca_missing` | `pca_missing` at `dd7a251d`, then merged up to `672ec441` | yes (20 Nov) | no (PR #235 into `pca_missing`) |
 | `merge_vcf_speed` | three prototypes speeding up `gt_merge_vcfs()` (`d3b982d0` keep the genotypes of pass 1, `bc6856b6` parallel line parsing, `6982994c` raw alleles), outputs identical; 1.6x on sgdp and many (laptop, 4 threads; desktop, 8 threads), 1.1-1.25x on pops; worktree `/media/andrea/Elements1/tmp/claude/tidypopgen/merge_vcf/wt` (`vcf_merge.md`) | `pca_missing` at `5e207d78` | yes (20 Nov) | no PR |
 | `king_plink_ideas` | KING ideas from PLINK 2: `72377615` tiles + 64-word chunks (1.35x), `ef1c0b4c` AVX2 KING kernel, `e2692136` two paths (full matrix on the desktop: AVX2 1.76x, 1.4x faster than PLINK 2; scalar 1.3x); outputs identical, tests pass with and without AVX2; worktree `/media/andrea/Elements1/tmp/claude/tidypopgen/plink_king/wt` (`pairwise_bitpacked.md`) | `pca_missing` at `b8255226` | yes (20 Nov) | no |
 | `bed_reader` | the parallel `.bed` reader; squash-merged into `pca_missing` (PR #234, `58821fab`), its last notes commit cherry-picked there; deleted locally with its work folder (20 Nov, Andrea); still on origin | `pca_missing` | yes | yes (20 Nov) |
@@ -34,6 +35,22 @@ once the branches are no longer needed).
 - **State:** CI at `b8255226` passes on all R-CMD-check jobs, lint, pkgdown
   and test-coverage; codecov fails on coverage only (patch 94.68% against a
   95.50% target, project -0.08%). Later commits touch only `dev_notes/`.
+- **Before merging:** review PR #235, branch `grouping` (vignettes grouped
+  early, lower-case metadata, grouped `rbind()` and `gt_add_sf()` fixes,
+  `select_loci_if()` docs; full test suite passes on an -O2 build) and merge
+  it into `pca_missing`. The desktop job of 20 Nov has pushed, and
+  `pca_missing` (`672ec441`) is merged into `grouping` (21 Nov), so the PR
+  has no conflicts.
+  First discard the same edits, still uncommitted, in `~/git/tidypopgen`
+  (Andrea's `a02_qc.Rmd` and `benchmark_hgdp.Rmd.orig`, and the lower-case
+  edits). The precompiled articles were re-rendered on the branch
+  (`87c75ea4`, 20 Nov) with indicative timings: re-time them on a quiet
+  machine before a release (the laptop section of the HGDP benchmark is
+  older still, with an "impute" step).
+- **HGDP benchmark:** re-rendered on the desktop (`f364012d`, `cbd25afa`,
+  quiet machine, 20 threads): loci are filtered on the columns of
+  `loci_report` (no recomputing), individuals on the ungrouped `gen_tibble`
+  (Andrea's choices); printed results unchanged, total 3.5 s.
 - **Done when:** #231 is merged into `dev` (squash).
 
 ### 2. **P2** [desktop] Re-time on the P-cores

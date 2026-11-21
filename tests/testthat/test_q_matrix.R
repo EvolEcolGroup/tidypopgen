@@ -164,7 +164,7 @@ if (rlang::is_installed("readr")) {
     pops <- readr::read_csv(pops_path, show_col_types = FALSE)
     anole_gt <- anole_gt %>% mutate(id = gsub("punc_", "", .data$id, ))
     anole_gt <- anole_gt %>%
-      mutate(population = pops$pop[match(pops$ID, .data$id)])
+      mutate(population = pops$pop[match(pops$id, .data$id)])
 
     # tidy without group info
     tidy_q <- tidy(anolis_q_k3_mat, anole_gt)
