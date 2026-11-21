@@ -9,17 +9,18 @@ documents listed in `README.md`.
 
 | branch | purpose | base | pushed | merged |
 |---|---|---|---|---|
-| `pca_missing` | squash-merged into `dev` as #231 (`e20145a2`, 21 Nov, Andrea): `gt_pca()` with missing genotypes as PLINK, projections, DAPC, pcadapt, LD clumping and pruning, grouped `pairwise_king()` and `indiv_inbreeding()`, the parallel `.bed` reader, and (through #235, `af7fed7e`) the vignettes and articles grouped early; delete once Andrea agrees | `dev` | yes | yes (21 Nov) |
 | `split_plan` | dev notes only: the plan for the package split (`package_split.md`, `package_split/`) and these updated living documents; merge into `dev` (no code, `[skip ci]`) | `dev` at `e20145a2` | yes (21 Nov) | no |
-| `cran_test_time` | PR #237: 13 slow test blocks skipped on CRAN, one commit per file (`671bc2da`..`0891844f`; `test_times_2026-11.md`), and the concise 1.1.0 NEWS (`5ed6faa1`, `06602b35`) | `dev` at `e20145a2` | yes (21 Nov) | no |
 | `remove_armadillo` | RcppArmadillo removed (`bffb3460`): no source file used it; dropped from `LinkingTo`, the `-DARMA_*` flags gone from `src/Makevars`, `RcppExports.cpp` regenerated; compiles, full suite passes (5912, `NOT_CRAN=true`) | `dev` at `e20145a2` | no | no |
 | `merge_vcf_speed` | three prototypes speeding up `gt_merge_vcfs()` (`d3b982d0` keep the genotypes of pass 1, `bc6856b6` parallel line parsing, `6982994c` raw alleles), outputs identical; 1.6x on sgdp and many (laptop, 4 threads; desktop, 8 threads), 1.1-1.25x on pops; worktree `/media/andrea/Elements1/tmp/claude/tidypopgen/merge_vcf/wt` (`vcf_merge.md`) | `pca_missing` at `5e207d78` | yes (20 Nov) | no PR |
 | `king_plink_ideas` | KING ideas from PLINK 2: `72377615` tiles + 64-word chunks (1.35x), `ef1c0b4c` AVX2 KING kernel, `e2692136` two paths (full matrix on the desktop: AVX2 1.76x, 1.4x faster than PLINK 2; scalar 1.3x); outputs identical, tests pass with and without AVX2; worktree `/media/andrea/Elements1/tmp/claude/tidypopgen/plink_king/wt` (`pairwise_bitpacked.md`) | `pca_missing` at `b8255226` | yes (20 Nov) | no |
-| `bed_reader` | the parallel `.bed` reader; squash-merged into `pca_missing` (PR #234, `58821fab`), its last notes commit cherry-picked there; deleted locally with its work folder (20 Nov, Andrea); still on origin | `pca_missing` | yes | yes (20 Nov) |
-| `king_simd_packing` | SIMD packing of the bit-packed kernel (`9853e055`), not merged: below the 1.5x bar (`pairwise_bitpacked.md`) | `pca_missing` at `c7c09c67` | no | no |
 
-`grouping` was squash-merged into `pca_missing` (#235, `af7fed7e`) and
-deleted, locally and on origin.
+Deleted on 21 Nov (Andrea): `pca_missing` (#231), `cran_test_time` (#237),
+`bed_reader` (#234), `big_data_article`, `adm_plot_ordering` and `pedigree`
+(all superseded by `dev`). `king_simd_packing` (rejected, below the 1.5x bar)
+is no longer in the laptop's repository (never pushed). Still to decide:
+`as_fbm`, `skill`, `feature/pop-tajimas-d-polyploid` (superseded by `dev`).
+`merge_vcf_speed` and `king_plink_ideas` were rechecked on 21 Nov: their
+prototype commits are not in `dev`.
 
 About 19 other local branches on the laptop look unmerged to git (`git branch
 --no-merged origin/dev`), but many were squash-merged; see the clean-up task.
