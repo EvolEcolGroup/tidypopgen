@@ -47,7 +47,8 @@
   memory
 * `indiv_inbreeding()` on a grouped `gen_tibble` returns one value per
   individual, in the order of the rows (computed within each group); the
-  list of one vector per group (`type = "list"`) is deprecated
+  list of one vector per group (`type = "list"`) is deprecated. It also
+  works on the `genotypes` column, e.g. within `mutate()`
 * new article on large RAD-seq datasets; the big data article uses
   `gt_merge_vcfs()`
 

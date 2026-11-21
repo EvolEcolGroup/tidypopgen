@@ -17,11 +17,18 @@
 #' individual, in the order of the rows, so that it can be added as a column
 #' (e.g. `grouped_gt$inbreeding <- indiv_inbreeding(grouped_gt)`).
 #'
+#' The method for the `genotypes` column computes the matrix of allele
+#' sharing of the individuals in the column, so that `indiv_inbreeding()` can
+#' be used within `dplyr` verbs, e.g.
+#' `mutate(inbreeding = indiv_inbreeding(genotypes))`. Within a grouped
+#' `mutate()`, `dplyr` calls it on the individuals of each group in turn, so
+#' it gives the same values as the method for a grouped [`gen_tibble`], but
+#' it reads the genotypes once for each group.
+#'
 #' @references Weir, BS and Goudet J (2017) A Unified Characterization of
 #'   Population Structure and Relatedness. Genetics (2017) 206:2085
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
-#'   a [`gen_tibble`] object), or a [`gen_tibble`]. The method for the
-#'   `genotypes` column needs `allele_sharing_mat`.
+#'   a [`gen_tibble`] object), or a [`gen_tibble`].
 #' @param method currently only "WG17" (for Weir and Goudet 2017).
 #' @param allele_sharing_mat optional and only relevant for "WG17", the matrix
 #'   of Allele Sharing returned by [pairwise_allele_sharing()] with
@@ -82,14 +89,9 @@ indiv_inbreeding.vctrs_bigSNP <- function(
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
   if (is.null(allele_sharing_mat)) {
-    # TODO deal with the fact that allele sharing can only be computed
-    # for the gen_tibble
-    # TODO modify allele sharing code to be able to create a matrix just
-    # from the genotype column
-    stop(paste(
-      "this method has to be applied to a gen_tibble, not just",
-      "the genotype column"
-    ))
+    # the matrix of allele sharing of the individuals in this column (e.g. of
+    # one group, within a grouped mutate()), labelled with their ids
+    allele_sharing_mat <- pairwise_allele_sharing(.x, as_matrix = TRUE)
   }
 
   # taken from beta.dosage in hierfstat

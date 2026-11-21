@@ -23,8 +23,7 @@ indiv_inbreeding(.x, ...)
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of
-a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}. The method for the
-\code{genotypes} column needs \code{allele_sharing_mat}.}
+a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}.}
 
 \item{...}{other arguments passed to specific methods, currently unused.}
 
@@ -65,6 +64,14 @@ read only once, and only the pairs of individuals within each group are
 compared. As for an ungrouped \code{\link{gen_tibble}}, the result has one value per
 individual, in the order of the rows, so that it can be added as a column
 (e.g. \code{grouped_gt$inbreeding <- indiv_inbreeding(grouped_gt)}).
+
+The method for the \code{genotypes} column computes the matrix of allele
+sharing of the individuals in the column, so that \code{indiv_inbreeding()} can
+be used within \code{dplyr} verbs, e.g.
+\code{mutate(inbreeding = indiv_inbreeding(genotypes))}. Within a grouped
+\code{mutate()}, \code{dplyr} calls it on the individuals of each group in turn, so
+it gives the same values as the method for a grouped \code{\link{gen_tibble}}, but
+it reads the genotypes once for each group.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

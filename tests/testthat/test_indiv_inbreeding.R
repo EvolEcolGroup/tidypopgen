@@ -93,12 +93,26 @@ test_that("indiv_inbreeding and allele sharing work with a single individual", {
 test_that("indiv_inbreeding is a generic with methods for gen_tibbles", {
   inbreed_gt <- indiv_inbreeding(test_gt)
   ashare <- pairwise_allele_sharing(test_gt, as_matrix = TRUE)
-  # the method for the genotypes column needs the matrix of allele sharing
+  # the method for the genotypes column takes the matrix of allele sharing, or
+  # computes it
   expect_identical(
     indiv_inbreeding(test_gt$genotypes, allele_sharing_mat = ashare),
     inbreed_gt
   )
-  expect_error(indiv_inbreeding(test_gt$genotypes), "applied to a gen_tibble")
+  expect_equal(indiv_inbreeding(test_gt$genotypes), inbreed_gt)
+  # so it works within mutate(), and within each group of a grouped
+  # gen_tibble (populations interleaved in the rows)
+  expect_equal(
+    mutate(test_gt, inb = indiv_inbreeding(genotypes))$inb,
+    inbreed_gt,
+    ignore_attr = TRUE
+  )
+  grouped_gt <- test_gt %>% group_by(population)
+  expect_equal(
+    mutate(grouped_gt, inb = indiv_inbreeding(genotypes))$inb,
+    indiv_inbreeding(grouped_gt),
+    ignore_attr = TRUE
+  )
   # arguments are matched by the methods, also by position
   expect_identical(indiv_inbreeding(test_gt, "WG17", ashare), inbreed_gt)
   expect_error(indiv_inbreeding(test_gt, foo = 1), "must be empty")
