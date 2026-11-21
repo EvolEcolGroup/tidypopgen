@@ -284,11 +284,30 @@ test_that("gt_merge_vcfs checks the samples and genotypes of each file", {
   bk <- tempfile()
   expect_error(
     gt_merge_vcfs(c(vcf_a, vcf_short), backingfile = bk, quiet = TRUE),
-    "has fewer genotypes than individuals"
+    # (the error names the file by its normalised path, which differs from
+    # vcf_short on macOS and Windows)
+    paste0(basename(vcf_short), " has fewer genotypes than individuals"),
+    fixed = TRUE
   )
   expect_false(any(file.exists(paste0(bk, c(".bk", ".rds")))))
   # a genotype with more alleles than the ploidy (from the first variant)
   vcf_haploid <- write_merge_vcf("b", loci, rbind("1", "0/1"))
+  expect_error(
+    gt_merge_vcfs(c(vcf_a, vcf_haploid),
+      backingfile = tempfile(), quiet = TRUE
+    ),
+    "has more than max_ploidy alleles"
+  )
+  # the same errors when the genotypes are read again in the second pass
+  # (without the cache of the first pass)
+  withr::local_options(tidypopgen.merge_cache = FALSE)
+  bk <- tempfile()
+  expect_error(
+    gt_merge_vcfs(c(vcf_a, vcf_short), backingfile = bk, quiet = TRUE),
+    paste0(basename(vcf_short), " has fewer genotypes than individuals"),
+    fixed = TRUE
+  )
+  expect_false(any(file.exists(paste0(bk, c(".bk", ".rds")))))
   expect_error(
     gt_merge_vcfs(c(vcf_a, vcf_haploid),
       backingfile = tempfile(), quiet = TRUE
@@ -338,6 +357,23 @@ test_that("gt_merge_vcfs merges files with many loci", {
     variants = "union", backingfile = tempfile(), quiet = TRUE
   )
   expect_identical(show_loci(merged)$position, 1:1200)
+  # the same on 2 cores (the loci of each chunk parsed in parallel)
+  merged_2 <- gt_merge_vcfs(c(vcf_a, vcf_b),
+    variants = "union", backingfile = tempfile(), quiet = TRUE, n_cores = 2
+  )
+  expect_identical(show_loci(merged_2), show_loci(merged))
+  expect_identical(show_genotypes(merged_2), show_genotypes(merged))
+  # positions with 10 digits (read by the slower general parser)
+  vcf_c <- write_merge_vcf("c",
+    data.frame(
+      chrom = "1", pos = c(5, 1234567890), id = ".", ref = "A", alt = "C"
+    ),
+    genotypes = rbind("0/1", "1/1")
+  )
+  merged <- gt_merge_vcfs(c(vcf_a, vcf_c),
+    variants = "union", backingfile = tempfile(), quiet = TRUE
+  )
+  expect_identical(tail(show_loci(merged)$position, 1), 1234567890L)
 })
 
 test_that("gt_merge_vcfs keeps loci at the same position in a file apart", {
@@ -476,6 +512,46 @@ test_that("gt_merge_vcfs swaps genotypes with fewer alleles than the ploidy", {
   expect_equal(show_genotypes(merged), rbind(c(1, 2), c(1, 1), c(0, 0)))
 })
 
+test_that("gt_merge_vcfs gives the same result with and without its cache", {
+  # the genotypes kept from the first pass (the default) and those read
+  # again from the VCFs (option tidypopgen.merge_cache = FALSE)
+  loci_a <- data.frame(
+    chrom = "1", pos = c(100, 200, 300), id = ".", ref = c("A", "G", "C"),
+    alt = c("C", "T", "G")
+  )
+  vcf_a <- write_merge_vcf(c("a1", "a2"), loci_a,
+    genotypes = rbind(c("0/1", "1/1"), c("./.", "0/1"), c("0/0", "1/1"))
+  )
+  # REF and ALT swapped at the first two loci, with diploid genotypes only
+  loci_b <- data.frame(
+    chrom = "1", pos = c(100, 200, 400), id = ".", ref = c("C", "T", "A"),
+    alt = c("A", "G", "T")
+  )
+  vcf_b <- write_merge_vcf("b", loci_b,
+    genotypes = rbind("0/1", "1/1", "0/0")
+  )
+  # swapped too, with a haploid genotype in diploids (read again)
+  vcf_c <- write_merge_vcf(c("c1", "c2"), loci_b,
+    genotypes = rbind(c("0/1", "1/1"), c("0", "1"), c("./.", "0/1"))
+  )
+  merge_both_ways <- function(...) {
+    cached <- gt_merge_vcfs(..., backingfile = tempfile(), quiet = TRUE)
+    withr::local_options(tidypopgen.merge_cache = FALSE)
+    reread <- gt_merge_vcfs(..., backingfile = tempfile(), quiet = TRUE)
+    expect_identical(show_genotypes(cached), show_genotypes(reread))
+    expect_identical(show_loci(cached), show_loci(reread))
+    expect_identical(cached$id, reread$id)
+    expect_identical(indiv_ploidy(cached), indiv_ploidy(reread))
+  }
+  merge_both_ways(c(vcf_a, vcf_b, vcf_c),
+    ref_mismatch = "swap", variants = "union"
+  )
+  merge_both_ways(c(vcf_a, vcf_b, vcf_c),
+    ref_mismatch = "swap", variants = "intersection"
+  )
+  merge_both_ways(c(vcf_1, vcf_2), variants = "union")
+})
+
 test_that("the C++ merge helpers check their inputs", {
   # (these inputs are always consistent when they come from gt_merge_vcfs()
   # or gt_concat_vcfs())
@@ -543,4 +619,57 @@ test_that("the C++ merge helpers check their inputs", {
   short_path <- tempfile(fileext = ".vcf")
   writeLines(c(readLines(vcf_path), "1\t300\ts3\tA"), short_path)
   expect_error(merge_genotypes(path = short_path), "fewer than 5 fields")
+
+  # the genotypes kept by the first pass (one byte per genotype, the
+  # individuals of each SNP in turn): one individual and two SNPs
+  cache_path <- tempfile(fileext = ".bk")
+  writeBin(as.raw(c(1, 2)), cache_path)
+  fbm_2 <- bigstatsr::FBM.code256(2, 2,
+    code = code256, backingfile = tempfile()
+  )
+  merge_cache <- function(cache = cache_path, row_offset = 0L,
+                          row = integer(0), col = c(0L, 1L),
+                          swap = logical(0), ploidy = 2L,
+                          cache_missing = 3L, missing_value = 3L,
+                          n_threads = 1L) {
+    bk_merge_genotypes(cache,
+      BM = fbm_2, row_offset = row_offset, row = row, col = col,
+      swap = swap, ploidy = ploidy, cache_missing = cache_missing,
+      missing_value = missing_value, n_threads = n_threads
+    )
+  }
+  merge_cache(row = 1L)
+  # the second SNP swapped: 2 ALT alleles are 0 REF alleles
+  merge_cache(swap = c(FALSE, TRUE))
+  expect_equal(fbm_2[, ], rbind(c(1, 0), c(1, 2)))
+  # a different value for missing genotypes in the cache
+  writeBin(as.raw(c(5, 2)), cache_path)
+  merge_cache(cache_missing = 5L)
+  expect_equal(fbm_2[1, ], c(NA, 2))
+  # no individuals: nothing to copy
+  expect_silent(merge_cache(ploidy = integer(0)))
+  expect_error(merge_cache(n_threads = 0L), "positive integer")
+  expect_error(merge_cache(row = c(0L, 1L)), "one value per individual")
+  expect_error(merge_cache(row = 2L), "'row' is out of the bounds")
+  expect_error(merge_cache(row_offset = 2L), "does not have enough rows")
+  expect_error(merge_cache(col = c(0L, 2L)), "'col' is out of the bounds")
+  expect_error(merge_cache(swap = TRUE), "one value per biallelic snp")
+  expect_error(merge_cache(cache_missing = 0L), "between 1 and 255")
+  expect_error(merge_cache(cache = tempfile()), "could not open")
+  # the cache must have as many SNPs as the loci
+  expect_error(merge_cache(col = c(0L, 1L, -1L)), "are truncated")
+  expect_error(merge_cache(col = 0L), "more snps than its loci")
+  # a haploid genotype can not be swapped in a diploid
+  writeBin(as.raw(c(1, 2)), cache_path)
+  expect_error(
+    merge_cache(ploidy = 1L, swap = c(FALSE, TRUE)),
+    "can not be swapped"
+  )
+  # the alleles of a file are character or raw vectors
+  expect_error(
+    merge_sites_add_file(sites,
+      chromosome = 1L, position = 3L, allele_ref = 1L, allele_alt = 2L
+    ),
+    "character or a raw vector"
+  )
 })

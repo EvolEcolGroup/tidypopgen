@@ -70,6 +70,14 @@ public:
     }
   }
   void tab() { buffer.push_back('\t'); }
+  // append whole lines (ending with a newline), writing the buffer to the
+  // file once it is large enough
+  void add_lines(const std::string &x) {
+    buffer.append(x);
+    if (buffer.size() >= flush_size) {
+      flush();
+    }
+  }
   // end a line, writing the buffer to the file once it is large enough
   void end_line() {
     buffer.push_back('\n');

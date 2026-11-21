@@ -102,10 +102,13 @@ This function reads several \emph{VCF} files with different samples (e.g. one
 per population, or per sequencing batch) into a single \code{\link{gen_tibble}}, as
 \verb{bcftools merge} would, followed by \code{\link[=gen_tibble]{gen_tibble()}}. It is much faster than
 reading each file with \code{\link[=gen_tibble]{gen_tibble()}} and merging them with
-\link[=rbind.gen_tbl]{rbind()} (one pair at a time), and needs no space on disk
-beyond the merged \code{gen_tibble}: each file is read twice, once for its loci
-(to match them across files) and once for its genotypes, which are written
-straight into the merged backing file.
+\link[=rbind.gen_tbl]{rbind()} (one pair at a time). Each file is read once:
+its loci are matched across files, and its genotypes are kept in a
+temporary backing file next to the merged one (one byte per genotype,
+deleted at the end), then copied into the merged backing file. With little
+space on disk, \code{options(tidypopgen.merge_cache = FALSE)} reads each file
+twice instead (once for its loci and once for its genotypes), which is
+slower but needs no space beyond the merged \code{gen_tibble}.
 }
 \details{
 As with \code{\link[=gen_tibble]{gen_tibble()}}, only biallelic SNPs are read from each file. Loci
