@@ -1125,6 +1125,8 @@ test_that("gen_tibble from a bigSNP rds does not overwrite the rds", {
 })
 
 test_that("functions writing to the FBM leave the bigSNP files untouched", {
+  # slow (~4 s): skipped on CRAN to keep its check short
+  skip_on_cran()
   # a dataset with missing genotypes, so that imputation writes into the FBM
   bed_path <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
   bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile())

@@ -36,6 +36,8 @@ test_gt <- gen_tibble(
 
 if (rlang::is_installed("vcfR")) {
   test_that("test gentibble from VCF with missingness issue", {
+    # reads several files (~3 s): skipped on CRAN to keep its check short
+    skip_on_cran()
     ########################
     # PLINK BED files
     ########################
@@ -161,6 +163,8 @@ if (rlang::is_installed("vcfR")) {
 
 if (rlang::is_installed("vcfR")) {
   test_that("gen_tibble from files", {
+    # reads several files (~3 s): skipped on CRAN to keep its check short
+    skip_on_cran()
     # test invalid file names
     expect_error(
       gen_tibble("non_existent_file.blah", quiet = TRUE),
@@ -280,6 +284,8 @@ if (rlang::is_installed("vcfR")) {
 
 if (rlang::is_installed("vcfR")) {
   test_that("gen_tibble from files with missingness", {
+    # reads several files (~3 s): skipped on CRAN to keep its check short
+    skip_on_cran()
     ########################
     # PLINK BED files
     ########################

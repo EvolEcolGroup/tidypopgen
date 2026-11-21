@@ -45,6 +45,8 @@ test_that("impute and use the imputation", {
 })
 
 test_that("gt_impute_xgboost works with loci out of order", {
+  # trains xgboost (~1.5 s): skipped on CRAN to keep its check short
+  skip_on_cran()
   set.seed(42)
   n_ind <- 100
   n_loci <- 80
@@ -125,6 +127,8 @@ test_that("error imputing an already imputed set", {
 })
 
 test_that("n_cores can be set", {
+  # trains xgboost (~3 s): skipped on CRAN to keep its check short
+  skip_on_cran()
   bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
   missing_gt <- gen_tibble(
     bed_file,
@@ -145,6 +149,8 @@ test_that("n_cores can be set", {
 })
 
 test_that("append_error correct dimensions", {
+  # trains xgboost (~3 s): skipped on CRAN to keep its check short
+  skip_on_cran()
   bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
   missing_gt <- gen_tibble(
     bed_file,

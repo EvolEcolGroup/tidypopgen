@@ -186,6 +186,9 @@ test_that("homozygotes for the alternate allele are homozygous", {
 })
 
 test_that("windows_indiv_roh follows the algorithm of PLINK --homozyg", {
+  # slow comparison with PLINK's algorithm (~5 s): skipped on CRAN to keep
+  # its check short
+  skip_on_cran()
   # compare with an R transcription of PLINK's code (helper_plink_homozyg.R)
   # on random genotypes, with parameters that make its edge cases common
   # (short chromosomes, gaps, heterozygous genotypes in runs)

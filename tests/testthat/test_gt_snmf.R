@@ -87,6 +87,8 @@ test_that("gt_snmf error messages", {
 })
 
 test_that("gt_snmf from file and from gen_tibble are the same", {
+  # runs sNMF twice (~12 s): skipped on CRAN to keep its check short
+  skip_on_cran()
   # using.geno file
   input_file <- gt_as_geno_lea(anole_gt)
   capture.output(anole_snmf_file <- gt_snmf(
