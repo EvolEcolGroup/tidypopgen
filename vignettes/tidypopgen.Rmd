@@ -127,7 +127,7 @@ then re-group the data by population.
 
 
 ```{r}
-lobsters <- lobsters %>% 
+lobsters <- lobsters %>%
   ungroup %>%
   filter(indiv_qc_lobsters$missingness < 0.2) %>%
   group_by(population)
