@@ -32,6 +32,8 @@ resampled_gt <- function(sim, block_id, weights) {
 }
 
 test_that("each replicate is the spectrum of the resampled blocks", {
+  # slow (~3 s): skipped on CRAN to keep its check short
+  skip_on_cran()
   block_id <- .jackknife_block_ids(show_loci(sim$gt),
     block_size = 10,
     size_unit = "snp"
