@@ -148,10 +148,36 @@ output paths (`test_gen_tibble_vcf.R`, `test_loci_sidecar.R`,
 in part, or making their inputs smaller. The examples (up to 182 s on CRAN)
 and the vignettes (up to 171 s) also count towards the check time.
 
+## After the skips
+
+Andrea chose to skip all eight candidates on CRAN (21 Nov 2026): branch
+`cran_test_time` from `dev` (`671bc2da`..`0891844f`, one commit per file;
+13 `test_that()` blocks; in `test_gt_impute_xgboost.R` the main imputation
+test and the two error tests still run on CRAN, and in `test_vcf_int.R` the
+run with integer names). Re-timed the same way (tests of `0891844f` against
+the -O2 build of `e20145a2`, whose package code is the same; 10:45–10:50,
+load about 1.2):
+
+| measure | before | after |
+|---|---|---|
+| files run on CRAN, elapsed (CPU) | 214 s (221 s) | 163 s (166 s): 24% less |
+| the eight edited files | 80.7 s | 29.8 s |
+| the other files run on CRAN (a noise check) | 133.6 s | 133.5 s |
+| all 103 files | 271 s | 223 s |
+
+With `NOT_CRAN=true`, as on GitHub, none of the 13 blocks is skipped and all
+pass. On CRAN's slower flavours, where the tests took 4–11 minutes, this
+should take off 1–3 minutes. The slowest files run on CRAN are now
+`test_gen_tibble_phased.R` (8.2 s), `test_gen_tibble_vcf.R` (8.1 s),
+`test_loci_sidecar.R` (7.8 s), `test_gen_tibble.R` (7.1 s),
+`test_gt_tibble_vcf.R` (5.4 s) and `test_gt_order_loci.R` (5.4 s). Raw
+tables: `test_times/*_after_skips.*`.
+
 ## Open questions
 
-- Which candidates to skip on CRAN, and whether to make some inputs smaller
-  instead (Andrea).
+- Shorten further? The next candidates are the input/output files above
+  (smaller inputs, or partial skips), and the examples (up to 182 s on
+  CRAN).
 - Whether CRAN installs admixtools from `Additional_repositories` (if it
   does, `test_gt_extract_f2.R` runs there too).
 - Re-time on the desktop (P-cores, an SSD) for numbers that are not

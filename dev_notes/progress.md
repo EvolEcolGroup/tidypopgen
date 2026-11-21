@@ -15,7 +15,9 @@ files, SFS, CRAN checks) is described in the topic documents listed in
   8–17 min); on the laptop 271 s, of which CRAN runs 214 s; the 10 slowest
   files hold 46%, 13 blocks over 2 s hold 24%; core's tests are the slowest
   (117 s). Eight `skip_on_cran()` candidates would save about 24%.
-- **Next:** Andrea picks the skips before 1.1.0.
+- **Then:** Andrea chose all eight; branch `cran_test_time` (one commit
+  per file, pushed): CRAN-mode tests 214 -> 163 s, nothing skipped with
+  `NOT_CRAN=true`.
 
 ## 2026-11-21 (laptopX1): plan for splitting tidypopgen, deferred
 

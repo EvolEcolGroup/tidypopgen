@@ -11,6 +11,7 @@ documents listed in `README.md`.
 |---|---|---|---|---|
 | `pca_missing` | squash-merged into `dev` as #231 (`e20145a2`, 21 Nov, Andrea): `gt_pca()` with missing genotypes as PLINK, projections, DAPC, pcadapt, LD clumping and pruning, grouped `pairwise_king()` and `indiv_inbreeding()`, the parallel `.bed` reader, and (through #235, `af7fed7e`) the vignettes and articles grouped early; delete once Andrea agrees | `dev` | yes | yes (21 Nov) |
 | `split_plan` | dev notes only: the plan for the package split (`package_split.md`, `package_split/`) and these updated living documents; merge into `dev` (no code, `[skip ci]`) | `dev` at `e20145a2` | yes (21 Nov) | no |
+| `cran_test_time` | 13 slow test blocks skipped on CRAN, one commit per file (`671bc2da`..`0891844f`; `test_times_2026-11.md`) | `dev` at `e20145a2` | yes (21 Nov) | no |
 | `merge_vcf_speed` | three prototypes speeding up `gt_merge_vcfs()` (`d3b982d0` keep the genotypes of pass 1, `bc6856b6` parallel line parsing, `6982994c` raw alleles), outputs identical; 1.6x on sgdp and many (laptop, 4 threads; desktop, 8 threads), 1.1-1.25x on pops; worktree `/media/andrea/Elements1/tmp/claude/tidypopgen/merge_vcf/wt` (`vcf_merge.md`) | `pca_missing` at `5e207d78` | yes (20 Nov) | no PR |
 | `king_plink_ideas` | KING ideas from PLINK 2: `72377615` tiles + 64-word chunks (1.35x), `ef1c0b4c` AVX2 KING kernel, `e2692136` two paths (full matrix on the desktop: AVX2 1.76x, 1.4x faster than PLINK 2; scalar 1.3x); outputs identical, tests pass with and without AVX2; worktree `/media/andrea/Elements1/tmp/claude/tidypopgen/plink_king/wt` (`pairwise_bitpacked.md`) | `pca_missing` at `b8255226` | yes (20 Nov) | no |
 | `bed_reader` | the parallel `.bed` reader; squash-merged into `pca_missing` (PR #234, `58821fab`), its last notes commit cherry-picked there; deleted locally with its work folder (20 Nov, Andrea); still on origin | `pca_missing` | yes | yes (20 Nov) |
@@ -73,22 +74,18 @@ once the branches are no longer needed).
   manica01.
 - **Done when:** faster by more than 5%, with identical outputs.
 
-### 4. **P2** [decide] Shorten the tests on CRAN, before 1.1.0
+### 4. **P2** [review] Merge `cran_test_time`, before 1.1.0
 
-- **Why:** on CRAN, 1.0.0's tests take 4–11 minutes on the slower flavours,
-  and the whole check 8–17 minutes against the guideline of about 10; the
-  suite is as long on `dev` (`test_times_2026-11.md`).
-- **Read first:** `test_times_2026-11.md` ("Candidates for
-  `skip_on_cran()`": 8 candidates, about 51 s of the 214 s CRAN runs on the
-  laptop, 24%; halving needs some input files made smaller or the slower
-  input/output files partly skipped). Raw tables in `test_times/`.
-- **Andrea decides** which to skip; then a branch from `dev`, one commit
-  per file, with the skipped blocks still run on GitHub (`NOT_CRAN=true`
-  there).
-- **Check:** re-time with `test_times/time_test_files.R` on an -O2 build
-  (CRAN mode), and compare the totals.
-- **Done when:** the skips are merged into `dev`, before the 1.1.0
-  submission.
+- **What:** on CRAN, 1.0.0's tests take 4–11 minutes on the slower
+  flavours (the whole check 8–17 minutes). Andrea chose to skip on CRAN the
+  eight candidates of `test_times_2026-11.md`: 13 `test_that()` blocks in
+  eight files, one commit per file (`671bc2da`..`0891844f`), pushed.
+- **Result:** the tests CRAN runs take 163 s instead of 214 s on the laptop
+  (-O2, CRAN mode); the other files did not change (133.6 vs 133.5 s).
+  With `NOT_CRAN=true` (GitHub) nothing is skipped and all pass.
+- **Next:** a PR into `dev` (or merge), then re-check CRAN's times after
+  1.1.0 is published. Further cuts, if needed: smaller inputs for the
+  slowest input/output test files (listed in the report).
 
 ### 5. **P2** [review] Release 1.1.0 (from claude_jobs#5, 15 Nov; not rechecked)
 
