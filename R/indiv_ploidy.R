@@ -36,13 +36,9 @@ indiv_ploidy.grouped_gen_tbl <- function(.x, ...) {
   indiv_ploidy(.x$genotypes, ...)
 }
 
-# a grouped data frame that has lost the class of its tibble (e.g. a grouped
-# gen_tibble returned by summarise()): restore the class and dispatch again
-#' @export
-#' @noRd
-indiv_ploidy.grouped_df <- function(.x, ...) {
-  indiv_ploidy(restore_genotypes_tbl(.x, "indiv_ploidy"), ...)
-}
+# (no method for grouped_df: ploidy does not depend on the groups, so other
+# grouped tibbles, including those of other packages built on tidypopgen, use
+# the tbl_df method, which hands their genotypes column over to its method)
 
 # a data frame that has lost the class of its tibble (e.g. a gen_tibble
 # returned by pick() or reframe()): restore the class and dispatch again

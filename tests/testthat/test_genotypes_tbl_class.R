@@ -309,3 +309,34 @@ test_that("tbl_df methods hand any known genotypes column over", {
   expect_identical(show_loci(as_tibble(test_gt)), show_loci(test_gt))
   expect_identical(count_loci(as_tibble(test_gt)), count_loci(test_gt))
 })
+
+test_that("indiv_* generics hand grouped tibbles of other packages over", {
+  # a package that builds its own tibbles on tidypopgen, with methods only for
+  # its genotypes column: these statistics do not depend on the groups, so
+  # its grouped tibbles reach the tbl_df methods, which hand the genotypes
+  # column over to those methods
+  registerS3method(
+    "genotypes_tbl_class", "ext_genotypes",
+    function(genotypes, ...) "ext_tbl",
+    envir = asNamespace("tidypopgen")
+  )
+  for (generic in c("indiv_het_obs", "indiv_missingness", "indiv_ploidy")) {
+    registerS3method(
+      generic, "ext_genotypes",
+      function(.x, ...) seq_along(.x) / 10,
+      envir = asNamespace("tidypopgen")
+    )
+  }
+  ext_tbl <- tibble(
+    id = c("a", "b", "c"),
+    population = c("x", "y", "x"),
+    genotypes = structure(1:3, class = "ext_genotypes")
+  )
+  grouped_ext <- group_by(ext_tbl, population)
+  class(grouped_ext) <- c(
+    "grouped_ext_tbl", "grouped_df", "ext_tbl", class(ext_tbl)
+  )
+  expect_equal(indiv_het_obs(grouped_ext), c(0.1, 0.2, 0.3))
+  expect_equal(indiv_missingness(grouped_ext), c(0.1, 0.2, 0.3))
+  expect_equal(indiv_ploidy(grouped_ext), c(0.1, 0.2, 0.3))
+})

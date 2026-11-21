@@ -61,13 +61,10 @@ indiv_het_obs.grouped_gen_tbl <- function(.x, as_counts = FALSE, ...) {
   indiv_het_obs(.x$genotypes, as_counts = as_counts, ...)
 }
 
-# a grouped data frame that has lost the class of its tibble (e.g. a grouped
-# gen_tibble returned by summarise()): restore the class and dispatch again
-#' @export
-#' @noRd
-indiv_het_obs.grouped_df <- function(.x, ...) {
-  indiv_het_obs(restore_genotypes_tbl(.x, "indiv_het_obs"), ...)
-}
+# (no method for grouped_df: heterozygosity does not depend on the groups, so
+# other grouped tibbles, including those of other packages built on
+# tidypopgen, use the tbl_df method, which hands their genotypes column over
+# to its method)
 
 # a data frame that has lost the class of its tibble (e.g. a gen_tibble
 # returned by pick() or reframe()): restore the class and dispatch again
