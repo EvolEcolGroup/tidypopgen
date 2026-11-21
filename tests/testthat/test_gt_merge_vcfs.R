@@ -298,6 +298,22 @@ test_that("gt_merge_vcfs checks the samples and genotypes of each file", {
     ),
     "has more than max_ploidy alleles"
   )
+  # the same errors when the genotypes are read again in the second pass
+  # (without the cache of the first pass)
+  withr::local_options(tidypopgen.merge_cache = FALSE)
+  bk <- tempfile()
+  expect_error(
+    gt_merge_vcfs(c(vcf_a, vcf_short), backingfile = bk, quiet = TRUE),
+    paste0(basename(vcf_short), " has fewer genotypes than individuals"),
+    fixed = TRUE
+  )
+  expect_false(any(file.exists(paste0(bk, c(".bk", ".rds")))))
+  expect_error(
+    gt_merge_vcfs(c(vcf_a, vcf_haploid),
+      backingfile = tempfile(), quiet = TRUE
+    ),
+    "has more than max_ploidy alleles"
+  )
 })
 
 test_that("gt_merge_vcfs skips loci that are not biallelic SNPs", {
