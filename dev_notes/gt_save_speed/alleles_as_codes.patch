@@ -1,0 +1,378 @@
+From 332f54057218b521be96156e09b42143312ec47c Mon Sep 17 00:00:00 2001
+From: Andrea Manica <am315@cam.ac.uk>
+Date: Fri, 20 Nov 2026 09:48:59 +0000
+Subject: [PATCH] Save the alleles of the loci as codes in .gt files (4x faster
+ gt_load())
+
+Saving and loading a character vector costs a call for each element, and
+loading creates or finds the CHARSXP of each element: with tens of millions
+of loci, the two allele columns took two thirds of the time of saving and
+loading a .gt file. save_gt_file() now replaces them (in the copy saved)
+with a code per locus (raw, or integer with more than 255 distinct alleles)
+into the distinct alleles, found by the address of their CHARSXP
+(encode_alleles_cpp()); gt_load() turns them back into the same strings
+(restore_loci_alleles(), decode_alleles_cpp()), in their columns' place.
+The allele columns are removed from the saved table, so that older versions
+stop with an error rather than use wrong alleles; .gt files of older
+versions load as before.
+
+Baboon data (486 individuals x 91.2M loci, names_as_int), manica01, one
+P-core, -O2 installs, 3 balanced runs: gt_load() 17.21 -> 4.13 s, saving
+the .gt 20.89 -> 7.25 s, file 305 -> 225 MB; the loaded loci tables are
+identical.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ R/RcppExports.R                            |   8 ++
+ R/gt_load.R                                |   2 +
+ R/gt_save.R                                |  57 +++++++++-
+ man/gt_save.Rd                             |   5 +-
+ src/RcppExports.cpp                        |  26 +++++
+ src/strings_in_cpp.cpp                     | 119 +++++++++++++++++++++
+ tests/testthat/test_gen_tibble_save_load.R |  34 ++++++
+ 7 files changed, 247 insertions(+), 4 deletions(-)
+
+diff --git a/R/RcppExports.R b/R/RcppExports.R
+index b8b1ab28..15b648af 100644
+--- a/R/RcppExports.R
++++ b/R/RcppExports.R
+@@ -233,6 +233,14 @@ any_duplicated_strings_cpp <- function(x) {
+     .Call(`_tidypopgen_any_duplicated_strings_cpp`, x)
+ }
+ 
++encode_alleles_cpp <- function(ref, alt) {
++    .Call(`_tidypopgen_encode_alleles_cpp`, ref, alt)
++}
++
++decode_alleles_cpp <- function(codes, levels) {
++    .Call(`_tidypopgen_decode_alleles_cpp`, codes, levels)
++}
++
+ tajimas_d_window_sums_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, locus_first, locus_last, n_windows, ncores, block_size) {
+     .Call(`_tidypopgen_tajimas_d_window_sums_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, locus_first, locus_last, n_windows, ncores, block_size)
+ }
+diff --git a/R/gt_load.R b/R/gt_load.R
+index ac23f5cc..59b7cbb2 100644
+--- a/R/gt_load.R
++++ b/R/gt_load.R
+@@ -54,6 +54,8 @@ gt_load <- function(file = NULL, reattach_to = NULL) {
+   }
+ 
+   x <- readRDS(file)
++  # restore the alleles of the loci, saved as codes (see save_gt_file())
++  x <- restore_loci_alleles(x)
+   # update if we have old objects
+   x <- update_old_bigsnp(x)
+ 
+diff --git a/R/gt_save.R b/R/gt_save.R
+index aed07a7d..ea1431f4 100644
+--- a/R/gt_save.R
++++ b/R/gt_save.R
+@@ -9,7 +9,10 @@
+ #' full dataset. To reload a `gen_tibble`, you can pass the name of the *.gt*
+ #' file with [gt_load()]. The *.gt* file is compressed with gzip at its
+ #' fastest level, as saving the information on millions of loci with the
+-#' default level of [saveRDS()] is slow.
++#' default level of [saveRDS()] is slow; for the same reason, the alleles of
++#' the loci are saved as codes, which [gt_load()] turns back into strings
++#' (so *.gt* files saved by versions of tidypopgen from 1.1.0 can not be
++#' loaded by older versions).
+ #'
+ #' If the names of the loci are integers (`names_as_int = TRUE`), their
+ #' original names are in a sidecar file next to the *.bk* file (*.loci.tsv*,
+@@ -147,10 +150,58 @@ fbm_file_names <- function(x) {
+ 
+ # save a gen_tibble to its .gt file with saveRDS(), compressed with gzip at
+ # level 1: compared with the default level of saveRDS() (6), this halves the
+-# time to save millions of loci, for a file about 20% larger, and the file
+-# is read by readRDS() as any .rds file
++# time to save millions of loci, for a file about 20% larger. The alleles of
++# the loci table are saved as codes (see compact_loci_alleles()), which
++# gt_load() turns back into strings (restore_loci_alleles())
+ save_gt_file <- function(x, file_name) {
++  x <- compact_loci_alleles(x)
+   file_con <- gzfile(file_name, open = "wb", compression = 1)
+   on.exit(close(file_con))
+   saveRDS(x, file_con)
+ }
++
++# Replace the allele columns of the loci table of a gen_tibble (to be saved)
++# by codes: saving a character vector (and loading it) costs a call for each
++# element, which took two thirds of the time of saving and of loading a .gt
++# file with tens of millions of loci. The codes (raw, or integer with more
++# than 255 distinct alleles) and the distinct alleles are kept in the
++# attribute "compact_alleles" of the loci table, with the names of its
++# columns (to restore their order), and the allele columns are removed (so
++# that older versions of tidypopgen, which do not restore them, stop with an
++# error rather than use wrong alleles). The gen_tibble in memory is not
++# changed (the loci table of the copy saved shares its other columns).
++compact_loci_alleles <- function(x) {
++  loci <- attr(x$genotypes, "loci")
++  allele_cols <- c("allele_ref", "allele_alt")
++  if (!all(allele_cols %in% names(loci)) ||
++        !is.character(loci$allele_ref) || !is.character(loci$allele_alt)) {
++    return(x)
++  }
++  codes <- encode_alleles_cpp(loci$allele_ref, loci$allele_alt)
++  compact <- list(
++    columns = names(loci),
++    allele_ref = codes$ref,
++    allele_alt = codes$alt,
++    levels = codes$levels
++  )
++  loci <- loci[setdiff(names(loci), allele_cols)]
++  attr(loci, "compact_alleles") <- compact
++  attr(x$genotypes, "loci") <- loci
++  x
++}
++
++# Restore the allele columns of the loci table of a gen_tibble read from a
++# .gt file (saved by compact_loci_alleles()); gen_tibbles saved by older
++# versions are returned unchanged
++restore_loci_alleles <- function(x) {
++  loci <- attr(x$genotypes, "loci")
++  compact <- attr(loci, "compact_alleles")
++  if (is.null(compact)) {
++    return(x)
++  }
++  attr(loci, "compact_alleles") <- NULL
++  loci$allele_ref <- decode_alleles_cpp(compact$allele_ref, compact$levels)
++  loci$allele_alt <- decode_alleles_cpp(compact$allele_alt, compact$levels)
++  attr(x$genotypes, "loci") <- loci[compact$columns]
++  x
++}
+diff --git a/man/gt_save.Rd b/man/gt_save.Rd
+index abd105e1..adc08a21 100644
+--- a/man/gt_save.Rd
++++ b/man/gt_save.Rd
+@@ -29,7 +29,10 @@ full dataset we are interested in, whilst the \emph{.rds} and \emph{.bk} file st
+ full dataset. To reload a \code{gen_tibble}, you can pass the name of the \emph{.gt}
+ file with \code{\link[=gt_load]{gt_load()}}. The \emph{.gt} file is compressed with gzip at its
+ fastest level, as saving the information on millions of loci with the
+-default level of \code{\link[=saveRDS]{saveRDS()}} is slow.
++default level of \code{\link[=saveRDS]{saveRDS()}} is slow; for the same reason, the alleles of
++the loci are saved as codes, which \code{\link[=gt_load]{gt_load()}} turns back into strings
++(so \emph{.gt} files saved by versions of tidypopgen from 1.1.0 can not be
++loaded by older versions).
+ }
+ \details{
+ If the names of the loci are integers (\code{names_as_int = TRUE}), their
+diff --git a/src/RcppExports.cpp b/src/RcppExports.cpp
+index 1c8fda39..3d21bd45 100644
+--- a/src/RcppExports.cpp
++++ b/src/RcppExports.cpp
+@@ -960,6 +960,30 @@ BEGIN_RCPP
+     return rcpp_result_gen;
+ END_RCPP
+ }
++// encode_alleles_cpp
++List encode_alleles_cpp(const CharacterVector& ref, const CharacterVector& alt);
++RcppExport SEXP _tidypopgen_encode_alleles_cpp(SEXP refSEXP, SEXP altSEXP) {
++BEGIN_RCPP
++    Rcpp::RObject rcpp_result_gen;
++    Rcpp::RNGScope rcpp_rngScope_gen;
++    Rcpp::traits::input_parameter< const CharacterVector& >::type ref(refSEXP);
++    Rcpp::traits::input_parameter< const CharacterVector& >::type alt(altSEXP);
++    rcpp_result_gen = Rcpp::wrap(encode_alleles_cpp(ref, alt));
++    return rcpp_result_gen;
++END_RCPP
++}
++// decode_alleles_cpp
++CharacterVector decode_alleles_cpp(SEXP codes, const CharacterVector& levels);
++RcppExport SEXP _tidypopgen_decode_alleles_cpp(SEXP codesSEXP, SEXP levelsSEXP) {
++BEGIN_RCPP
++    Rcpp::RObject rcpp_result_gen;
++    Rcpp::RNGScope rcpp_rngScope_gen;
++    Rcpp::traits::input_parameter< SEXP >::type codes(codesSEXP);
++    Rcpp::traits::input_parameter< const CharacterVector& >::type levels(levelsSEXP);
++    rcpp_result_gen = Rcpp::wrap(decode_alleles_cpp(codes, levels));
++    return rcpp_result_gen;
++END_RCPP
++}
+ // tajimas_d_window_sums_cpp
+ List tajimas_d_window_sums_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, int ngroups, const NumericVector& ploidy, bool is_pseudohaploid, const IntegerVector& locus_first, const IntegerVector& locus_last, int n_windows, int ncores, int block_size);
+ RcppExport SEXP _tidypopgen_tajimas_d_window_sums_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP is_pseudohaploidSEXP, SEXP locus_firstSEXP, SEXP locus_lastSEXP, SEXP n_windowsSEXP, SEXP ncoresSEXP, SEXP block_sizeSEXP) {
+@@ -1174,6 +1198,8 @@ static const R_CallMethodDef CallEntries[] = {
+     {"_tidypopgen_all_in_cpp", (DL_FUNC) &_tidypopgen_all_in_cpp, 2},
+     {"_tidypopgen_which_in_cpp", (DL_FUNC) &_tidypopgen_which_in_cpp, 2},
+     {"_tidypopgen_any_duplicated_strings_cpp", (DL_FUNC) &_tidypopgen_any_duplicated_strings_cpp, 1},
++    {"_tidypopgen_encode_alleles_cpp", (DL_FUNC) &_tidypopgen_encode_alleles_cpp, 2},
++    {"_tidypopgen_decode_alleles_cpp", (DL_FUNC) &_tidypopgen_decode_alleles_cpp, 2},
+     {"_tidypopgen_tajimas_d_window_sums_cpp", (DL_FUNC) &_tidypopgen_tajimas_d_window_sums_cpp, 12},
+     {"_tidypopgen_vcf_gt_dosages_cpp", (DL_FUNC) &_tidypopgen_vcf_gt_dosages_cpp, 2},
+     {"_tidypopgen_merge_sites_new", (DL_FUNC) &_tidypopgen_merge_sites_new, 3},
+diff --git a/src/strings_in_cpp.cpp b/src/strings_in_cpp.cpp
+index f720fd88..efbcac9a 100644
+--- a/src/strings_in_cpp.cpp
++++ b/src/strings_in_cpp.cpp
+@@ -193,3 +193,122 @@ double any_duplicated_strings_cpp(const CharacterVector& x) {
+ }
+ 
+ /******************************************************************************/
++
++/******************************************************************************/
++// The alleles of the loci table in a compact form, to save the .gt file (see
++// save_gt_file() and restore_loci_alleles()).
++//
++// Saving and loading a character vector costs a call for each element (and
++// loading creates or finds the CHARSXP of each, in the global cache of
++// strings), which made two thirds of the time of saving and loading a .gt
++// file with tens of millions of loci. The alleles take few distinct values, so
++// they are saved as a code per locus (raw, or integer with more than 255
++// distinct alleles) into a vector of their distinct strings.
++//
++// The distinct alleles are the distinct CHARSXPs (found by their address in a
++// hash table, as in any_duplicated_strings_cpp()): the same text in two
++// encodings gives two levels, so decoding gives back the very same CHARSXPs.
++// NA is a level like any other.
++
++// [[Rcpp::export]]
++List encode_alleles_cpp(const CharacterVector& ref,
++                        const CharacterVector& alt) {
++  const R_xlen_t n = ref.size();
++  if (alt.size() != n) {
++    stop("allele_ref and allele_alt should have the same length");
++  }
++  const SEXP* columns[2] = {STRING_PTR_RO(ref), STRING_PTR_RO(alt)};
++  // the codes (1-based) of each column, and the distinct CHARSXPs
++  std::vector<int> codes[2];
++  codes[0].resize(n);
++  codes[1].resize(n);
++  std::vector<SEXP> levels;
++  // a hash table of 2^k slots, at most half full, holding the code of each
++  // distinct CHARSXP (0 for an empty slot), grown as needed
++  int k = 6;
++  std::vector<uint32_t> slots((size_t) 1 << k, 0);
++  for (int c = 0; c < 2; c++) {
++    const SEXP* p = columns[c];
++    int* out = codes[c].data();
++    SEXP last = NULL;  // (consecutive alleles are often the same)
++    int last_code = 0;
++    for (R_xlen_t i = 0; i < n; i++) {
++      SEXP s = p[i];
++      if (s == last) {
++        out[i] = last_code;
++        continue;
++      }
++      uint64_t mask = ((uint64_t) 1 << k) - 1;
++      uint64_t h = string_address_hash(s) >> (64 - k);
++      while (slots[h] != 0 && levels[slots[h] - 1] != s) {
++        h = (h + 1) & mask;
++      }
++      if (slots[h] == 0) {
++        // a new level
++        levels.push_back(s);
++        slots[h] = (uint32_t) levels.size();
++        if (levels.size() * 2 > slots.size()) {
++          // grow the table, and insert the levels again
++          k++;
++          std::vector<uint32_t>((size_t) 1 << k, 0).swap(slots);
++          mask = ((uint64_t) 1 << k) - 1;
++          for (size_t l = 0; l < levels.size(); l++) {
++            uint64_t g = string_address_hash(levels[l]) >> (64 - k);
++            while (slots[g] != 0) g = (g + 1) & mask;
++            slots[g] = (uint32_t)(l + 1);
++          }
++          h = string_address_hash(s) >> (64 - k);
++          while (levels[slots[h] - 1] != s) h = (h + 1) & mask;
++        }
++      }
++      last = s;
++      last_code = (int) slots[h];
++      out[i] = last_code;
++    }
++  }
++  CharacterVector res_levels(levels.size());
++  for (size_t l = 0; l < levels.size(); l++) {
++    SET_STRING_ELT(res_levels, l, levels[l]);
++  }
++  // codes as raw vectors if they fit in a byte (a quarter of the size)
++  List res(2);
++  for (int c = 0; c < 2; c++) {
++    if (levels.size() <= 255) {
++      RawVector v(n);
++      for (R_xlen_t i = 0; i < n; i++) v[i] = (Rbyte) codes[c][i];
++      res[c] = v;
++    } else {
++      IntegerVector v(codes[c].begin(), codes[c].end());
++      res[c] = v;
++    }
++    std::vector<int>().swap(codes[c]);
++  }
++  return List::create(_["ref"] = res[0], _["alt"] = res[1],
++                      _["levels"] = res_levels);
++}
++
++// The alleles from their codes (raw or integer, 1-based) and levels, as
++// returned by encode_alleles_cpp()
++// [[Rcpp::export]]
++CharacterVector decode_alleles_cpp(SEXP codes, const CharacterVector& levels) {
++  const R_xlen_t n = Rf_xlength(codes);
++  const R_xlen_t n_levels = levels.size();
++  CharacterVector res(n);
++  const SEXP* lev = STRING_PTR_RO(levels);
++  if (TYPEOF(codes) == RAWSXP) {
++    const Rbyte* p = RAW(codes);
++    for (R_xlen_t i = 0; i < n; i++) {
++      if (p[i] == 0 || p[i] > n_levels) stop("invalid allele code");
++      SET_STRING_ELT(res, i, lev[p[i] - 1]);
++    }
++  } else if (TYPEOF(codes) == INTSXP) {
++    const int* p = INTEGER(codes);
++    for (R_xlen_t i = 0; i < n; i++) {
++      if (p[i] < 1 || p[i] > n_levels) stop("invalid allele code");
++      SET_STRING_ELT(res, i, lev[p[i] - 1]);
++    }
++  } else {
++    stop("allele codes should be raw or integer");
++  }
++  return res;
++}
+diff --git a/tests/testthat/test_gen_tibble_save_load.R b/tests/testthat/test_gen_tibble_save_load.R
+index 53e35209..edce3405 100644
+--- a/tests/testthat/test_gen_tibble_save_load.R
++++ b/tests/testthat/test_gen_tibble_save_load.R
+@@ -52,6 +52,40 @@ test_that("gt files are gzip compressed and load back identical", {
+   expect_identical(show_loci(gt_load(vcf_gt_file)), show_loci(vcf_gt))
+ })
+ 
++test_that("the alleles are saved as codes, and load back identical", {
++  # alleles with NAs, and more than 255 distinct alleles (integer codes)
++  n_loci <- 300
++  many_loci <- data.frame(
++    name = paste0("rs", seq_len(n_loci)),
++    chromosome = "chr1",
++    position = seq_len(n_loci),
++    genetic_dist = 0,
++    allele_ref = strrep("A", seq_len(n_loci)),
++    allele_alt = c(NA, rep(c("C", "G"), length.out = n_loci - 1))
++  )
++  many_gt <- gen_tibble(
++    x = matrix(rep(c(0, 1, 2), length.out = 2 * n_loci), nrow = 2),
++    loci = many_loci,
++    indiv_meta = data.frame(id = c("a", "b"), population = "pop1"),
++    valid_alleles = unique(c(many_loci$allele_ref, "C", "G")),
++    quiet = TRUE
++  )
++  for (x_gt in list(test_gt, many_gt)) {
++    loci_before <- show_loci(x_gt)
++    gt_file <- paste0(tempfile(), ".gt")
++    gt_save(x_gt, file_name = gt_file, quiet = TRUE)
++    # the file holds the codes, not the allele columns
++    saved_loci <- attr(readRDS(gt_file)$genotypes, "loci")
++    expect_false(any(c("allele_ref", "allele_alt") %in% names(saved_loci)))
++    expect_false(is.null(attr(saved_loci, "compact_alleles")))
++    # the gen_tibble in memory is unchanged, and loads back identical
++    expect_identical(show_loci(x_gt), loci_before)
++    expect_identical(show_loci(gt_load(gt_file)), loci_before)
++  }
++  # (with more than 255 distinct alleles, the codes are integers)
++  expect_type(attr(saved_loci, "compact_alleles")$allele_ref, "integer")
++})
++
+ # this also tests show_genotypes and show_loci
+ test_that("save and load gt", {
+   expect_true(inherits(test_gt, "gen_tbl"))
+-- 
+2.43.0
+

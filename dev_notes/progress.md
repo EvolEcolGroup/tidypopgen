@@ -4,6 +4,38 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-20 (manica01): desktop timings of the VCF merge and KING prototypes
+
+- **Done:** the unattended job `vcf_merge_king` (19:30-20:38) timed the
+  four `gt_merge_vcfs()` versions at 1 and 8 threads, bcftools and plink2
+  at 8, and KING (base, p1, p3, p3s, PLINK 2) at 1 and 8 threads; outputs
+  identical to the laptop's. plink2's sgdp merge ran out of memory with
+  `--memory 4000`: re-run with 32000 as a new phase (`9819a0f9`).
+- **Results:** VCF base -> P4 1.6x on sgdp (1 and 8 threads) and many
+  (8 threads), 1.1-1.25x on pops; P4 3.4-7.1x faster than bcftools, on a
+  par with plink2 on pops and 3.5-4.4x faster on single-sample files. KING
+  full matrix: p3 1.76x over base on 1 thread (3.72 s), 1.53x on 8, 1.4x
+  faster than PLINK 2 on 1 thread; scalar p3s 1.3x.
+- **Notes changed:** `vcf_merge.md`, `pairwise_bitpacked.md` (desktop
+  tables; the KING set-up moved there from the handover), `handover.md`,
+  `summary.md`.
+
+## 2026-11-20 (manica01): PR #234 merged; baboon `.bim` and `.fam` redownloaded
+
+- **Done:** Andrea merged PR #234 (the parallel `.bed` reader) into
+  `pca_missing` (`58821fab`); the last notes commit of `bed_reader` was
+  cherry-picked onto `pca_missing`.
+- **Checked:** the redownloaded baboon `.bim` and `.fam` match the `.bed`:
+  166,099,533 loci, the old `.bim` an exact prefix of the new one, every
+  locus ending where 486 individuals say, A1 the minor allele at every locus
+  (so the rows match). At Andrea's request they replaced the old files in
+  `phase2_plink/` (the old `.bim` kept as `plink.biallelic.bim.truncated`).
+- **Clean-up (Andrea):** the local branch `bed_reader` and
+  `~/claude_work/tidypopgen/bed_reader/` (14 GB) deleted; the branch is
+  still on origin.
+- **Notes changed:** `bed_reader.md` ("The baboon fileset"), `handover.md`,
+  `summary.md`.
+
 ## 2026-11-20 (manica01): HGDP benchmark article re-rendered on grouping
 
 - **Done:** pulled `grouping` (`88eaed6e`) and re-knitted
@@ -54,6 +86,36 @@ files, SFS, CRAN checks) is described in the topic documents listed in
   grouped `gen_tibble` (documented, with examples of selecting on
   per-group statistics) (Andrea asked to clarify it).
 - **Notes changed:** `handover.md`.
+
+## 2026-11-20 (manica01): `.gt` alleles as codes not adopted
+
+- **Decision (Andrea):** the faster `.gt` format (alleles as codes:
+  `gt_load()` 17.2 -> 4.1 s, saving 20.9 -> 7.3 s on 91M loci) is not worth
+  the extra complexity; with that many loci `names_as_int = TRUE` is needed
+  anyway. PR #234 (the `.bed` reader) stays as it is.
+- **Done:** the prototype is kept as a patch
+  (`dev_notes/gt_save_speed/alleles_as_codes.patch`), with its notes,
+  scripts and logs, on `bed_reader`; the local branch `gt_save_speed` and
+  its worktree were deleted.
+- **Notes changed:** `gt_save_speed.md` (moved to `bed_reader`),
+  `bed_reader.md`, `README.md`, `handover.md`, `summary.md`.
+
+## 2026-11-20 (manica01): parallel `.bed` reader (PR #234), and `.gt` alleles as codes
+
+- **Done:** where `gen_tibble()` spends its time on large PLINK files (the
+  baboon data, 486 x 166M SNPs, Andrea's target); a reader of `.bed` files
+  replacing bigsnpr's `readbina()`, in parallel with `n_cores`, which checks
+  the size and magic number (branch `bed_reader`, PR #234 into
+  `pca_missing`); the alleles of `.gt` files saved as codes (branch
+  `gt_save_speed`, local).
+- **Results:** `.bed` step 43.7 -> 28.3 s on 8 cores from an SSD (91M loci),
+  5% on 1 core, nothing from a hard disk (disk-bound); `gt_load()`
+  17.2 -> 4.1 s, saving 20.9 -> 7.3 s. The baboon `.bim` is truncated (91M
+  of 166M loci): it used to give only a warning.
+- **Decisions (Andrea):** below 30 s is not worth improving; PR of the
+  reader; a size mismatch is an error. The `.gt` format change waits.
+- **Notes changed:** `bed_reader.md` (new), `gt_save_speed.md` (new, on
+  `gt_save_speed`), `README.md`, `handover.md`, `summary.md`.
 
 ## 2026-11-20 (manica01): desktop set-up of the VCF merge and KING timings, scheduled
 
