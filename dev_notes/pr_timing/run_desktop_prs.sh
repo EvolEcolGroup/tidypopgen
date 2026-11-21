@@ -97,7 +97,8 @@ phase() {
   settle || { say "not started: $name (machine busy)"; return 1; }
   say "start $name (load $(load))"
   local t0=$SECONDS
-  if "$@" >> "$LOGS/phase_$name.log" 2>&1; then
+  # (in a subshell, so that set -e in a phase does not reach this script)
+  if ("$@") >> "$LOGS/phase_$name.log" 2>&1; then
     touch "$DONE/$name"; say "done $name ($(( (SECONDS - t0) / 60 )) min)"
   else
     say "FAILED $name ($(( (SECONDS - t0) / 60 )) min), see logs/phase_$name.log"

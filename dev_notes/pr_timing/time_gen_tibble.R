@@ -15,7 +15,10 @@ load1 <- strsplit(readLines("/proc/loadavg"), " ")[[1]][1]
 bk <- tempfile("gt_")
 timing <- system.time(
   gt <- gen_tibble(vcf,
-    parser = "cpp", backingfile = bk, n_cores = n_cores, quiet = TRUE
+    parser = "cpp", backingfile = bk, n_cores = n_cores, quiet = TRUE,
+    # (the test VCFs have duplicated IDs; integer names, as gt_merge_vcfs()
+    # uses by default and large datasets need)
+    names_as_int = TRUE
   )
 )
 md5 <- unname(substr(tools::md5sum(paste0(bk, ".bk")), 1, 8))
@@ -30,5 +33,5 @@ utils::write.table(row, out,
   sep = "\t", quote = FALSE, row.names = FALSE,
   col.names = !file.exists(out), append = file.exists(out)
 )
-unlink(paste0(bk, c(".bk", ".rds", ".gt", ".loci.tsv")))
+unlink(paste0(bk, c(".bk", ".rds", ".gt", ".loci.tsv", ".chromosomes.tsv")))
 cat(label, basename(vcf), n_cores, timing[["elapsed"]], md5, "\n")
