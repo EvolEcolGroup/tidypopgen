@@ -7,9 +7,10 @@
 #'
 #' Internally, this function uses the `snp_pcadapt` function from the `bigsnpr`
 #' package.
-#' @references Luu, K., Bazin, E., Blum, M. G. B., & François, O. (2017).
-#'   pcadapt: an R package for genome scans for selection based on principal
+#' @references Luu, K., Bazin, E., & Blum, M. G. B. (2017). pcadapt: an R
+#'   package to perform genome scans for selection based on principal
 #'   component analysis. Molecular Ecology Resources, 17(1), 67–77.
+#'   \doi{10.1111/1755-0998.12592}
 #' @param x A `gen_tibble` object.
 #' @param pca a [`gt_pca`] object, as returned by [gt_pca_partialSVD()] or
 #'   [gt_pca_randomSVD()].

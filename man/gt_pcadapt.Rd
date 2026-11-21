@@ -56,9 +56,10 @@ gt_pcadapt(lobsters, pca, k = 2)
 \dontshow{\}) # examplesIf}
 }
 \references{
-Luu, K., Bazin, E., Blum, M. G. B., & François, O. (2017).
-pcadapt: an R package for genome scans for selection based on principal
+Luu, K., Bazin, E., & Blum, M. G. B. (2017). pcadapt: an R
+package to perform genome scans for selection based on principal
 component analysis. Molecular Ecology Resources, 17(1), 67–77.
+\doi{10.1111/1755-0998.12592}
 }
 \seealso{
 \code{\link[bigsnpr:snp_pcadapt]{bigsnpr::snp_pcadapt()}} which this function wraps.
