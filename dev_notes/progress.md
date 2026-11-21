@@ -4,6 +4,18 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-21 (laptopX1): #239 and #240 merged; 1.1.0 prepared for CRAN
+
+- #239 (`12a6aa5e`) and #240 (`b4f81b26`, after merging `dev` into it) merged
+  with the desktop timings in their descriptions.
+- CRAN checks (`submit-to-cran` skill; `cran_checks_2026-11-21.md`): 3 fixes
+  (WORDLIST, README link to `missing_data.html`, `Rplots.pdf` in
+  `.Rbuildignore`) and `cran-comments.md`, merged as #241 (`bf933ac1`).
+  Local check 0/0/4 expected notes; R-hub 4 platforms OK; win-builder
+  submitted; mac-builder down (502).
+- Reverse dependency `dartR.base` 1.3.0: same results with 1.0.0 and `dev`.
+- Version left at 1.0.0.9014 (Andrea: the bump rebuilds the website).
+
 ## 2026-11-21 (manica01, unattended): desktop timings of PRs #239 and #240
 
 - Job `tpg_pr_timing` (`dev_notes/pr_timing/`), after the tidypopgl timings;

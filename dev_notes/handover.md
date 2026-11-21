@@ -1,8 +1,7 @@
 # tidypopgen: handover
 
-Updated 2026-11-21 (laptopX1: #237 and #238 merged; PRs #239 (KING AVX2)
-and #240 (faster `gt_merge_vcfs()`) open; merged and superseded branches
-deleted). For the next session: read this and `summary.md` first. History
+Updated 2026-11-21 (laptopX1: #237-#241 merged; 1.1.0 ready for CRAN but
+for the version; merged and superseded branches deleted). For the next session: read this and `summary.md` first. History
 is in `progress.md`; designs are in the topic documents listed in
 `README.md`.
 
@@ -30,31 +29,28 @@ now that the branches are pushed or merged).
 
 ## Next tasks
 
-### 1. **P2** [review] Merge PR #239 (KING AVX2), then PR #240 (VCF merge)
+### 1. **P1** [andrea] Release 1.1.0: everything is done but the version
 
-- **#239** (`king_avx2`): HGDP650 full KING on the desktop 1.76x on 1
-  thread with AVX2, 1.31x scalar; outputs identical; tests pass with AVX2,
-  with `TIDYPOPGEN_NO_AVX2=1` and with the x86 code compiled out. Andrea's
-  call: ~120 lines of x86-only code (run-time dispatch, no compiler flags).
-- **#240** (`vcf_merge_speed`): 1.6x on single-sample merges, 1.14-1.25x on
-  pops; outputs identical. After #239 is merged, rebase it on `dev` (only
-  `DESCRIPTION`'s version conflicts; keep 1.0.0.9014) and push.
-- Full suites passed locally on both (5908 and 5918, `NOT_CRAN=true`).
-- **Then:** delete `king_avx2`, `vcf_merge_speed`, `king_plink_ideas` and
-  `merge_vcf_speed`.
-
-### 2. **P2** [review] Release 1.1.0 (after #239 and #240)
-
-- Set the version, merge `dev` into `main` (pkgdown then publishes
-  `rad_seq.html`), re-run `urlchecker::url_check()` and submit;
-  `cran-comments.md` gives the intermittent failures as the reason for the
-  early resubmission. #237 (CRAN test skips) and #238 (no RcppArmadillo)
-  are in `dev`.
-- Before submitting, re-time the precompiled articles on a quiet machine:
-  they were re-rendered on 20 Nov (`87c75ea4`) with indicative timings, and
-  the laptop section of the HGDP benchmark still times the old pipeline
-  (with imputation; see the backlog).
+- `dev` at `bf933ac1` has #237-#241: CRAN test skips, no RcppArmadillo,
+  KING AVX2, faster VCF merge, and the pre-submission fixes and
+  `cran-comments.md` (#241; report `dev_notes/cran_checks_2026-11-21.md`).
+- Checks on 21 Nov: local `R CMD check --as-cran` 0/0/4 notes (all
+  expected); R-hub linux, macos-arm64, windows, m1-san: Status OK (run
+  44933614344, branch `cran_submission` at `66e62aa5`); win-builder r-devel
+  submitted (result emailed to Andrea, not yet in `cran-comments.md`);
+  mac-builder down (HTTP 502), not run; reverse dependency `dartR.base`
+  1.3.0: identical results with 1.0.0 and the new `dev` (laptop, scratch
+  library `/media/andrea/annex/tmp/claude/tidypopgen/revdep/`).
+- **Order:** set the version to 1.1.0; merge `dev` into `main` (pkgdown
+  rebuilds the site, so `articles/missing_data.html` and `rad_seq.html`
+  exist); re-run `urlchecker::url_check()`; add the win-builder result to
+  `cran-comments.md` (and mac-builder if it is back); submit
+  (`devtools::submit_cran()`); after acceptance tag the release and
+  `usethis::use_dev_version()`. Then delete the branch `cran_submission`.
 - After publication, re-check CRAN's test times (`test_times_2026-11.md`).
+- Precompiled articles: re-time on a quiet machine before or after the
+  release (their timings were rendered on 20 Nov; the laptop section of the
+  HGDP benchmark still times the old pipeline; see the backlog).
 
 ### 3. **P2** [desktop] Re-time on the P-cores
 

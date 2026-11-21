@@ -43,16 +43,15 @@ but Andrea judged it not worth the complexity (with that many loci
 
 **Next steps**
 - [ ] **P2** [desktop] Re-time the HGDP650 PCA/DAPC/pcadapt/LD benchmarks on the P-cores (not set up): medians in `gt_pca.md`, `ld_missing.md`.
-- [ ] **P2** [review] Merge PR #239 (KING AVX2 kernel: full matrix 1.76x on the desktop, outputs identical; ~120 lines of x86-only code), then rebase and merge PR #240 (`gt_merge_vcfs()` 1.6x on single-sample merges): done when both are in `dev`, before 1.1.0.
 - [ ] **P2** [claude] Keep optimising: pcadapt's t-scores, the GRM's count of shared loci, the DAPC regression, the other KING and VCF merge ideas: done when >5% faster with identical outputs.
-- [ ] **P2** [review] Release 1.1.0 (after #239 and #240): set the version, re-time the precompiled articles on a quiet machine, merge `dev` into `main`, re-run `urlchecker::url_check()` and submit.
+- [ ] **P1** [andrea] Release 1.1.0 (all checks done, `dev` at `bf933ac1`): set the version, merge `dev` into `main` (site rebuild fixes two article links), re-run `urlchecker::url_check()`, add the win-builder result to `cran-comments.md`, submit.
 - [ ] **P3** [decide] Look into the package split when ready (`package_split.md`: decisions, phases, open questions; Phase 0 after 1.1.0).
-- [ ] **P3** [cleanup] After #239 and #240, delete `king_avx2`, `vcf_merge_speed`, `king_plink_ideas`, `merge_vcf_speed`; ask before deleting the benchmark data on the laptop's annex and in `~/claude_work/tidypopgen/` on the desktop.
+- [ ] **P3** [cleanup] After the release, delete the branch `cran_submission`; ask before deleting the benchmark data on the laptop's annex and in `~/claude_work/tidypopgen/` (incl. `pr_timing/`) on the desktop.
 
 **Done**
 - PR #235 merged into `pca_missing` (`af7fed7e`), then #231 into `dev` (`e20145a2`): 21 Nov (Andrea).
 - Andrea chose to skip all eight candidates on CRAN; done on `cran_test_time` (pushed): 21 Nov.
 - #237 (CRAN test skips, concise NEWS) and #238 (RcppArmadillo removed) merged: 21 Nov.
-- PRs #239 (KING AVX2) and #240 (faster VCF merge) opened; merged and superseded branches deleted: 21 Nov.
+- #239 (KING AVX2) and #240 (faster VCF merge) merged with desktop timings; CRAN pre-submission checks and fixes merged as #241: 21 Nov.
 - Test times measured: on CRAN (1.0.0, from its logs) and per test file on the laptop (-O2, CRAN mode: 214 s, the 10 slowest files 46%): 21 Nov.
 - Plan for the package split written and deferred (`package_split.md`, file map in `package_split/`; Andrea's decisions on the umbrella, names, clustering and website): 21 Nov.
