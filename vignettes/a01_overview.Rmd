@@ -310,16 +310,24 @@ example_gt %>%
   summarise(n = n(), mean_het = mean(indiv_het_obs(genotypes)))
 ```
 
-However, note that this is somewhat inefficient, as computing the pop averages
-requires multiple access to the data. A more efficient approach is to:
+However, note that this is somewhat inefficient: on a grouped tibble,
+`summarise()` (and `mutate()`) call `indiv_het_obs()` on each population in
+turn, so the genotypes are read once per population. A more efficient
+approach is to compute the heterozygosities on the ungrouped data, and then
+group them again:
 ```{r}
 example_gt %>%
+  ungroup() %>%
   mutate(het_obs = indiv_het_obs(genotypes)) %>%
+  group_by(population) %>%
   summarise(n = n(), mean_het = mean(het_obs))
 ```
 
 In this way, we compute all individual heterozygosities in one go (optimising
-our file access time), and then generate the population summaries.
+our file access time), and then generate the population summaries. Calling
+`indiv_het_obs()` directly on the grouped tibble also reads the genotypes
+only once, and returns one value per individual, in the order of the rows
+(e.g. `example_gt$het_obs <- indiv_het_obs(example_gt)`).
 
 When working with loci, functions have inbuilt grouped methods that return
 the information for each verb by group; for example, if we use `loci_maf()` on a grouped tibble, we get the MAF for each locus in each population:
