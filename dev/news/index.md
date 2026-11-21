@@ -4,54 +4,49 @@
 
 ### New features and changes
 
-- the authors of code adapted from other software are credited in
-  `DESCRIPTION`, and their copyrights and licences listed in
-  `inst/COPYRIGHTS`
 - new
   [`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca.md)
-  computes PCAs: `method = "partial"` (the default) handles missing
-  genotypes as `plink --pca` (PLINK 1.9) does, without imputation, and
-  uses an optimised BLAS when there is one, and Eigen otherwise;
-  `method = "random"` is for very large numbers of individuals
-- `gt_pca` objects record whether they used imputed genotypes and
-  whether their genotypes had missing values (attributes `imputed` and
-  `missing`)
-- [`gt_pcadapt()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pcadapt.md)
-  works with missing genotypes, testing each locus on its genotyped
-  individuals as `pcadapt` does (new argument `max_missing`)
-- [`loci_ld_clump()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_ld_clump.md)
-  works with missing genotypes, without imputation: r^2 is computed over
-  the individuals genotyped at both loci, as in PLINK (new arguments
-  `min_shared` and `insufficient`); it uses imputed genotypes only if
-  the `gen_tibble` is set to use them
-- new
-  [`loci_ld_prune()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_ld_prune.md)
-  prunes loci as `plink --indep-pairwise` (PLINK 1.9), also with missing
-  genotypes
-- [`gt_dapc()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_dapc.md)
-  works on a PCA of missing genotypes (new arguments `data`,
-  `max_missing` and `n_cores`): the loadings of each locus come from its
-  genotyped individuals, not imputed ones (`NA` above `max_missing`)
-- errors on missing genotypes name the function and say how to impute
-  them; `gt_pca(method = "random")` no longer reads the genotypes an
-  extra time to look for them
-- [`gt_pca_partialSVD()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_partialSVD.md)
+  computes PCAs, by default with missing genotypes handled as
+  `plink --pca` (PLINK 1.9), without imputation;
+  [`gt_pca_partialSVD()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_partialSVD.md)
   and
   [`gt_pca_randomSVD()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_randomSVD.md)
-  are deprecated in favour of
-  [`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca.md)
-- [`predict()`](https://rspatial.github.io/terra/reference/predict.html)
-  of a `gt_pca` now uses `project_method = "least_squares"` on all the
-  components by default, which does not shrink the scores of individuals
-  with missing genotypes; projections are 2-3 times faster
-- new `predict(project_method = "plink")` projects as PLINK 1.9
-  (`--pca-cluster-names`)
-- `pairwise_grm(method = "plink")` gives PLINK 1.9’s
-  variance-standardised relationship matrix
+  are deprecated
+- [`gt_pcadapt()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pcadapt.md),
+  [`gt_dapc()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_dapc.md)
+  and
+  [`loci_ld_clump()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_ld_clump.md)
+  work with missing genotypes without imputation, using the individuals
+  genotyped at each locus (as `pcadapt` and PLINK)
 - new
-  [`gt_simulate_bn()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_simulate_bn.md)
-  simulates toy datasets of unlinked loci (Balding-Nichols model) for
-  quick checks
+  [`loci_ld_prune()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_ld_prune.md)
+  prunes loci as `plink --indep-pairwise` (PLINK 1.9)
+- [`predict()`](https://rspatial.github.io/terra/reference/predict.html)
+  of a `gt_pca` uses `project_method = "least_squares"` on all
+  components by default, and is 2-3 times faster; new
+  `project_method = "plink"` projects as PLINK 1.9
+- `pairwise_grm(method = "plink")` gives PLINK 1.9’s relationship matrix
+- `pairwise_ibs(missing_correction = "allele_freq")` corrects for
+  missing genotypes as PLINK 1.9’s `--distance`
+- new
+  [`pairwise_dist()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_dist.md)
+  computes genetic distances between individuals as ngsDist, e.g. for
+  neighbour-joining trees
+- [`pairwise_king()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_king.md)
+  on a grouped `gen_tibble` computes kinship within each group (it used
+  to ignore the groups)
+- [`pairwise_king()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_king.md),
+  [`pairwise_ibs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_ibs.md),
+  [`pairwise_allele_sharing()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_allele_sharing.md),
+  [`pairwise_dist()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_dist.md),
+  [`indiv_inbreeding()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_inbreeding.md)
+  and
+  [`windows_indiv_roh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_indiv_roh.md)
+  are S3 generics, so that other packages can add methods
+- new
+  [`bootstrap_blocks()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/bootstrap_blocks.md),
+  for developers: the blocks of the block bootstrap, so that other
+  packages can resample the same blocks
 - new
   [`gt_merge_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.md)
   and
@@ -64,12 +59,7 @@
   ([`gt_lookup_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md),
   [`gt_restore_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
   and
-  [`gt_lookup_chromosomes()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)),
-  which
-  [`gt_get_file_names()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_get_file_names.md)
-  and
-  [`gt_save()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_save.md)
-  list
+  [`gt_lookup_chromosomes()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md))
 - phased genotypes (experimental): `gen_tibble(phased = TRUE)` reads
   phased VCF files;
   [`is_phased()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/is_phased.md)
@@ -78,111 +68,59 @@
   give the phase,
   [`gt_as_vcf()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_as_vcf.md)
   writes it, and [`rbind()`](https://rdrr.io/r/base/cbind.html) keeps it
-- `pairwise_ibs(missing_correction = "allele_freq")` corrects for
-  missing genotypes as PLINK 1.9’s `--distance` without `flat-missing`
+- new
+  [`gt_simulate_bn()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_simulate_bn.md)
+  simulates toy datasets (Balding-Nichols model)
 - `qc_report_loci(hwe = FALSE)` gives the MAF and missingness of loci in
   a single pass
+- [`gt_impute_simple()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_impute_simple.md)
+  works after removing loci (but not individuals)
+- faster input and output: VCF and *.bed* files are read in parallel
+  (`n_cores`), *.ped* files are read faster, and *.gt* files are saved
+  twice as fast
 - faster
   [`pairwise_king()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_king.md),
   [`pairwise_ibs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_ibs.md)
   and
-  [`pairwise_allele_sharing()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_allele_sharing.md)
-  (about 20%), and `qc_report_indiv(kings_threshold = )` on grouped data
-  (4-5 times)
-- [`pairwise_king()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_king.md)
-  on a grouped `gen_tibble` computes kinship within each group (it used
-  to ignore the groups), 10-30 times faster than
-  [`group_map()`](https://dplyr.tidyverse.org/reference/group_map.html)
-- faster
+  [`pairwise_allele_sharing()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_allele_sharing.md),
+  and much faster
   [`indiv_inbreeding()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_inbreeding.md)
-  on a grouped `gen_tibble` (about 10 times with many groups), reading
-  the genotypes once for all groups
-- faster VCF reading (in parallel with `n_cores`), and faster reading of
-  *.ped* files straight into the backing file
-- PLINK *.bed* files are read in parallel with `n_cores`
+  and
+  [`qc_report_indiv()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/qc_report_indiv.md)
+  on grouped data
 - faster
+  [`select_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/select_loci.md),
+  and faster
   [`gt_as_vcf()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_as_vcf.md),
   [`gt_update_backingfile()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_update_backingfile.md)
   and
   [`gt_order_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_order_loci.md)
   with many chromosomes;
   [`gt_as_genlight()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_as_genlight.md)
-  works in chunks of loci
-- faster
-  [`select_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/select_loci.md)
-  with variables and function calls; `.engine = "tidyselect"` always
-  uses `tidyselect`
-- [`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
-  and
-  [`gt_save()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_save.md)
-  save the *.gt* file twice as fast
-- [`gt_impute_simple()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_impute_simple.md)
-  works after removing loci (but not individuals)
+  uses less memory
 - new article on large RAD-seq datasets; the big data article uses
   [`gt_merge_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.md)
-- new
-  [`bootstrap_blocks()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/bootstrap_blocks.md),
-  for developers (not in the reference index): the blocks of loci of the
-  block bootstrap and the blocks drawn by each replicate, so that other
-  packages can resample the same blocks as the bootstrap functions of
-  tidypopgen
-- new
-  [`pairwise_dist()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_dist.md):
-  genetic distances between individuals, as ngsDist, with the genotype
-  or nucleotide score, corrected for saturation (`-log(1 - d)` by
-  default, Jukes-Cantor, or none), e.g. to build neighbour-joining
-  trees; an S3 generic, so that other packages (e.g. for genotype
-  likelihoods) can add methods
-- [`pairwise_king()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_king.md),
-  [`pairwise_ibs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_ibs.md),
-  [`pairwise_allele_sharing()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_allele_sharing.md)
-  (with methods for `gen_tibble` objects and their `genotypes` column)
-  and
-  [`windows_indiv_roh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_indiv_roh.md)
-  (with a method for `gen_tibble` objects) are now S3 generics, and the
-  generic
-  [`indiv_inbreeding()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_inbreeding.md)
-  only has the arguments `.x` and `...` (its method for `gen_tibble`
-  objects is a `gen_tbl` method), so that other packages can provide
-  methods for their own objects, with their own arguments.
-  [`windows_indiv_roh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_indiv_roh.md)
-  now also works on `gen_tibble` objects that lost their class
-  (e.g. with
-  [`as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html)),
-  as the other generics do
 
 ### Bug fixes
 
-- [`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md):
-  fix *.bed* files whose size does not match the *.bim* and *.fam* files
-  (e.g. one of them truncated), and individual-major *.bed* files, which
-  were read without an error
+- fix occasional “File ‘…bk’ already exists” errors from functions using
+  temporary backing files (PCA, LD clumping, KING, IBS and allele
+  sharing)
+- [`loci_ld_clump()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_ld_clump.md),
+  [`gt_pcadapt()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pcadapt.md)
+  and the PCA functions: fix false “You can’t have missing values”
+  errors (or hangs) after removing loci or individuals with missing
+  genotypes
+- `gt_pca(method = "random")` and
+  [`gt_pca_autoSVD()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_autoSVD.md):
+  fix hangs or cryptic errors with a custom `fun_scaling` and missing
+  genotypes, and use at most `n_cores` cores
 - [`gt_pcadapt()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pcadapt.md):
-  a clear error, naming them, for loci with the same genotype in every
-  individual (e.g. all heterozygous after heavy imputation), instead of
-  “You can’t have missing values in ‘U’”
+  clear error for loci with the same genotype in every individual
   ([\#179](https://github.com/EvolEcolGroup/tidypopgen/issues/179))
-- fix false “You can’t have missing values” errors (or hangs, with
-  `n_cores > 1`) in
-  [`loci_ld_clump()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_ld_clump.md),
-  [`gt_pcadapt()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pcadapt.md),
-  the PCA functions and `predict(project_method = "none")` after
-  removing loci or individuals with missing genotypes: only the
-  genotypes in use are checked
-- `gt_pca(method = "random")` and
-  [`gt_pca_autoSVD()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_autoSVD.md)
-  with a custom `fun_scaling`: fix hangs (with `n_cores > 1`) or cryptic
-  errors on missing genotypes
-- `gt_pca(method = "random")` and
-  [`gt_pca_autoSVD()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_autoSVD.md)
-  use at most `n_cores` cores (bigstatsr’s parallel SVD started one more
-  process)
-- functions using temporary backing files (PCA, LD clumping, KING, IBS
-  and allele sharing) delete them, fixing occasional “File ‘…bk’ already
-  exists” errors
-- [`windows_indiv_roh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_indiv_roh.md)
-  and the `gt_roh_*()` functions give chromosome names with
-  `chromosomes_as_int`
+- [`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md):
+  error on *.bed* files whose size does not match the *.bim* and *.fam*
+  files, and on individual-major *.bed* files
 - [`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
   on *.ped* files: a third allele always flags the locus as
   multi-allelic
@@ -193,13 +131,9 @@
 - [`gt_as_vcf()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_as_vcf.md):
   fix loci with missing chromosomes (now written as “.”)
 - [`loci_ld_clump()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_ld_clump.md):
-  `exclude` values that are not indices of loci (out of range, negative,
-  not whole numbers, or names) give an error, rather than excluding
-  nothing or the wrong loci
+  error on `exclude` values that are not indices of loci
 - [`rbind()`](https://rdrr.io/r/base/cbind.html): fix grouped
-  `gen_tibble`s (an error from
-  [`bind_rows()`](https://dplyr.tidyverse.org/reference/bind_rows.html));
-  the merged `gen_tibble` keeps the grouping of the first one
+  `gen_tibble`s, which now keep the grouping of the first one
 - [`gt_add_sf()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_add_sf.md):
   no “Adding missing grouping variables” message on grouped
   `gen_tibble`s

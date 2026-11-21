@@ -51,74 +51,49 @@
 <h2 class="pkg-version" data-toc-text="1.1.0" id="tidypopgen-110">tidypopgen 1.1.0<a class="anchor" aria-label="anchor" href="#tidypopgen-110"></a></h2>
 <div class="section level3">
 <h3 id="new-features-and-changes-1-1-0">New features and changes<a class="anchor" aria-label="anchor" href="#new-features-and-changes-1-1-0"></a></h3>
-<ul><li>the authors of code adapted from other software are credited in <code>DESCRIPTION</code>, and their copyrights and licences listed in <code>inst/COPYRIGHTS</code>
+<ul><li>new <code><a href="../reference/gt_pca.html">gt_pca()</a></code> computes PCAs, by default with missing genotypes handled as <code>plink --pca</code> (PLINK 1.9), without imputation; <code><a href="../reference/gt_pca_partialSVD.html">gt_pca_partialSVD()</a></code> and <code><a href="../reference/gt_pca_randomSVD.html">gt_pca_randomSVD()</a></code> are deprecated</li>
+<li>
+<code><a href="../reference/gt_pcadapt.html">gt_pcadapt()</a></code>, <code><a href="../reference/gt_dapc.html">gt_dapc()</a></code> and <code><a href="../reference/loci_ld_clump.html">loci_ld_clump()</a></code> work with missing genotypes without imputation, using the individuals genotyped at each locus (as <code>pcadapt</code> and PLINK)</li>
+<li>new <code><a href="../reference/loci_ld_prune.html">loci_ld_prune()</a></code> prunes loci as <code>plink --indep-pairwise</code> (PLINK 1.9)</li>
+<li>
+<code><a href="https://rspatial.github.io/terra/reference/predict.html" class="external-link">predict()</a></code> of a <code>gt_pca</code> uses <code>project_method = "least_squares"</code> on all components by default, and is 2-3 times faster; new <code>project_method = "plink"</code> projects as PLINK 1.9</li>
+<li>
+<code>pairwise_grm(method = "plink")</code> gives PLINK 1.9’s relationship matrix</li>
+<li>
+<code>pairwise_ibs(missing_correction = "allele_freq")</code> corrects for missing genotypes as PLINK 1.9’s <code>--distance</code>
 </li>
-<li>new <code><a href="../reference/gt_pca.html">gt_pca()</a></code> computes PCAs: <code>method = "partial"</code> (the default) handles missing genotypes as <code>plink --pca</code> (PLINK 1.9) does, without imputation, and uses an optimised BLAS when there is one, and Eigen otherwise; <code>method = "random"</code> is for very large numbers of individuals</li>
+<li>new <code><a href="../reference/pairwise_dist.html">pairwise_dist()</a></code> computes genetic distances between individuals as ngsDist, e.g. for neighbour-joining trees</li>
 <li>
-<code>gt_pca</code> objects record whether they used imputed genotypes and whether their genotypes had missing values (attributes <code>imputed</code> and <code>missing</code>)</li>
+<code><a href="../reference/pairwise_king.html">pairwise_king()</a></code> on a grouped <code>gen_tibble</code> computes kinship within each group (it used to ignore the groups)</li>
 <li>
-<code><a href="../reference/gt_pcadapt.html">gt_pcadapt()</a></code> works with missing genotypes, testing each locus on its genotyped individuals as <code>pcadapt</code> does (new argument <code>max_missing</code>)</li>
-<li>
-<code><a href="../reference/loci_ld_clump.html">loci_ld_clump()</a></code> works with missing genotypes, without imputation: r^2 is computed over the individuals genotyped at both loci, as in PLINK (new arguments <code>min_shared</code> and <code>insufficient</code>); it uses imputed genotypes only if the <code>gen_tibble</code> is set to use them</li>
-<li>new <code><a href="../reference/loci_ld_prune.html">loci_ld_prune()</a></code> prunes loci as <code>plink --indep-pairwise</code> (PLINK 1.9), also with missing genotypes</li>
-<li>
-<code><a href="../reference/gt_dapc.html">gt_dapc()</a></code> works on a PCA of missing genotypes (new arguments <code>data</code>, <code>max_missing</code> and <code>n_cores</code>): the loadings of each locus come from its genotyped individuals, not imputed ones (<code>NA</code> above <code>max_missing</code>)</li>
-<li>errors on missing genotypes name the function and say how to impute them; <code>gt_pca(method = "random")</code> no longer reads the genotypes an extra time to look for them</li>
-<li>
-<code><a href="../reference/gt_pca_partialSVD.html">gt_pca_partialSVD()</a></code> and <code><a href="../reference/gt_pca_randomSVD.html">gt_pca_randomSVD()</a></code> are deprecated in favour of <code><a href="../reference/gt_pca.html">gt_pca()</a></code>
-</li>
-<li>
-<code><a href="https://rspatial.github.io/terra/reference/predict.html" class="external-link">predict()</a></code> of a <code>gt_pca</code> now uses <code>project_method = "least_squares"</code> on all the components by default, which does not shrink the scores of individuals with missing genotypes; projections are 2-3 times faster</li>
-<li>new <code>predict(project_method = "plink")</code> projects as PLINK 1.9 (<code>--pca-cluster-names</code>)</li>
-<li>
-<code>pairwise_grm(method = "plink")</code> gives PLINK 1.9’s variance-standardised relationship matrix</li>
-<li>new <code><a href="../reference/gt_simulate_bn.html">gt_simulate_bn()</a></code> simulates toy datasets of unlinked loci (Balding-Nichols model) for quick checks</li>
+<code><a href="../reference/pairwise_king.html">pairwise_king()</a></code>, <code><a href="../reference/pairwise_ibs.html">pairwise_ibs()</a></code>, <code><a href="../reference/pairwise_allele_sharing.html">pairwise_allele_sharing()</a></code>, <code><a href="../reference/pairwise_dist.html">pairwise_dist()</a></code>, <code><a href="../reference/indiv_inbreeding.html">indiv_inbreeding()</a></code> and <code><a href="../reference/windows_indiv_roh.html">windows_indiv_roh()</a></code> are S3 generics, so that other packages can add methods</li>
+<li>new <code><a href="../reference/bootstrap_blocks.html">bootstrap_blocks()</a></code>, for developers: the blocks of the block bootstrap, so that other packages can resample the same blocks</li>
 <li>new <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code> and <code><a href="../reference/gt_concat_vcfs.html">gt_concat_vcfs()</a></code> read several VCF files into a single <code>gen_tibble</code>, as <code>bcftools merge</code> and <code>bcftools concat</code>
 </li>
-<li>integer chromosomes (<code>chromosomes_as_int</code>) for datasets with many chromosomes; the original names of integer loci and chromosomes are kept in sidecar files (<code><a href="../reference/gt_lookup_loci.html">gt_lookup_loci()</a></code>, <code><a href="../reference/gt_lookup_loci.html">gt_restore_loci()</a></code> and <code><a href="../reference/gt_lookup_loci.html">gt_lookup_chromosomes()</a></code>), which <code><a href="../reference/gt_get_file_names.html">gt_get_file_names()</a></code> and <code><a href="../reference/gt_save.html">gt_save()</a></code> list</li>
+<li>integer chromosomes (<code>chromosomes_as_int</code>) for datasets with many chromosomes; the original names of integer loci and chromosomes are kept in sidecar files (<code><a href="../reference/gt_lookup_loci.html">gt_lookup_loci()</a></code>, <code><a href="../reference/gt_lookup_loci.html">gt_restore_loci()</a></code> and <code><a href="../reference/gt_lookup_loci.html">gt_lookup_chromosomes()</a></code>)</li>
 <li>phased genotypes (experimental): <code>gen_tibble(phased = TRUE)</code> reads phased VCF files; <code><a href="../reference/is_phased.html">is_phased()</a></code> and <code><a href="../reference/show_haplotypes.html">show_haplotypes()</a></code> give the phase, <code><a href="../reference/gt_as_vcf.html">gt_as_vcf()</a></code> writes it, and <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code> keeps it</li>
-<li>
-<code>pairwise_ibs(missing_correction = "allele_freq")</code> corrects for missing genotypes as PLINK 1.9’s <code>--distance</code> without <code>flat-missing</code>
-</li>
+<li>new <code><a href="../reference/gt_simulate_bn.html">gt_simulate_bn()</a></code> simulates toy datasets (Balding-Nichols model)</li>
 <li>
 <code>qc_report_loci(hwe = FALSE)</code> gives the MAF and missingness of loci in a single pass</li>
-<li>faster <code><a href="../reference/pairwise_king.html">pairwise_king()</a></code>, <code><a href="../reference/pairwise_ibs.html">pairwise_ibs()</a></code> and <code><a href="../reference/pairwise_allele_sharing.html">pairwise_allele_sharing()</a></code> (about 20%), and <code>qc_report_indiv(kings_threshold = )</code> on grouped data (4-5 times)</li>
-<li>
-<code><a href="../reference/pairwise_king.html">pairwise_king()</a></code> on a grouped <code>gen_tibble</code> computes kinship within each group (it used to ignore the groups), 10-30 times faster than <code><a href="https://dplyr.tidyverse.org/reference/group_map.html" class="external-link">group_map()</a></code>
-</li>
-<li>faster <code><a href="../reference/indiv_inbreeding.html">indiv_inbreeding()</a></code> on a grouped <code>gen_tibble</code> (about 10 times with many groups), reading the genotypes once for all groups</li>
-<li>faster VCF reading (in parallel with <code>n_cores</code>), and faster reading of <em>.ped</em> files straight into the backing file</li>
-<li>PLINK <em>.bed</em> files are read in parallel with <code>n_cores</code>
-</li>
-<li>faster <code><a href="../reference/gt_as_vcf.html">gt_as_vcf()</a></code>, <code><a href="../reference/gt_update_backingfile.html">gt_update_backingfile()</a></code> and <code><a href="../reference/gt_order_loci.html">gt_order_loci()</a></code> with many chromosomes; <code><a href="../reference/gt_as_genlight.html">gt_as_genlight()</a></code> works in chunks of loci</li>
-<li>faster <code><a href="../reference/select_loci.html">select_loci()</a></code> with variables and function calls; <code>.engine = "tidyselect"</code> always uses <code>tidyselect</code>
-</li>
-<li>
-<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code> and <code><a href="../reference/gt_save.html">gt_save()</a></code> save the <em>.gt</em> file twice as fast</li>
 <li>
 <code><a href="../reference/gt_impute_simple.html">gt_impute_simple()</a></code> works after removing loci (but not individuals)</li>
+<li>faster input and output: VCF and <em>.bed</em> files are read in parallel (<code>n_cores</code>), <em>.ped</em> files are read faster, and <em>.gt</em> files are saved twice as fast</li>
+<li>faster <code><a href="../reference/pairwise_king.html">pairwise_king()</a></code>, <code><a href="../reference/pairwise_ibs.html">pairwise_ibs()</a></code> and <code><a href="../reference/pairwise_allele_sharing.html">pairwise_allele_sharing()</a></code>, and much faster <code><a href="../reference/indiv_inbreeding.html">indiv_inbreeding()</a></code> and <code><a href="../reference/qc_report_indiv.html">qc_report_indiv()</a></code> on grouped data</li>
+<li>faster <code><a href="../reference/select_loci.html">select_loci()</a></code>, and faster <code><a href="../reference/gt_as_vcf.html">gt_as_vcf()</a></code>, <code><a href="../reference/gt_update_backingfile.html">gt_update_backingfile()</a></code> and <code><a href="../reference/gt_order_loci.html">gt_order_loci()</a></code> with many chromosomes; <code><a href="../reference/gt_as_genlight.html">gt_as_genlight()</a></code> uses less memory</li>
 <li>new article on large RAD-seq datasets; the big data article uses <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code>
 </li>
-<li>new <code><a href="../reference/bootstrap_blocks.html">bootstrap_blocks()</a></code>, for developers (not in the reference index): the blocks of loci of the block bootstrap and the blocks drawn by each replicate, so that other packages can resample the same blocks as the bootstrap functions of tidypopgen</li>
-<li>new <code><a href="../reference/pairwise_dist.html">pairwise_dist()</a></code>: genetic distances between individuals, as ngsDist, with the genotype or nucleotide score, corrected for saturation (<code>-log(1 - d)</code> by default, Jukes-Cantor, or none), e.g. to build neighbour-joining trees; an S3 generic, so that other packages (e.g. for genotype likelihoods) can add methods</li>
-<li>
-<code><a href="../reference/pairwise_king.html">pairwise_king()</a></code>, <code><a href="../reference/pairwise_ibs.html">pairwise_ibs()</a></code>, <code><a href="../reference/pairwise_allele_sharing.html">pairwise_allele_sharing()</a></code> (with methods for <code>gen_tibble</code> objects and their <code>genotypes</code> column) and <code><a href="../reference/windows_indiv_roh.html">windows_indiv_roh()</a></code> (with a method for <code>gen_tibble</code> objects) are now S3 generics, and the generic <code><a href="../reference/indiv_inbreeding.html">indiv_inbreeding()</a></code> only has the arguments <code>.x</code> and <code>...</code> (its method for <code>gen_tibble</code> objects is a <code>gen_tbl</code> method), so that other packages can provide methods for their own objects, with their own arguments. <code><a href="../reference/windows_indiv_roh.html">windows_indiv_roh()</a></code> now also works on <code>gen_tibble</code> objects that lost their class (e.g. with <code><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble()</a></code>), as the other generics do</li>
 </ul></div>
 <div class="section level3">
 <h3 id="bug-fixes-1-1-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-1-0"></a></h3>
-<ul><li>
-<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code>: fix <em>.bed</em> files whose size does not match the <em>.bim</em> and <em>.fam</em> files (e.g. one of them truncated), and individual-major <em>.bed</em> files, which were read without an error</li>
+<ul><li>fix occasional “File ‘…bk’ already exists” errors from functions using temporary backing files (PCA, LD clumping, KING, IBS and allele sharing)</li>
 <li>
-<code><a href="../reference/gt_pcadapt.html">gt_pcadapt()</a></code>: a clear error, naming them, for loci with the same genotype in every individual (e.g. all heterozygous after heavy imputation), instead of “You can’t have missing values in ‘U’” (<a href="https://github.com/EvolEcolGroup/tidypopgen/issues/179" class="external-link">#179</a>)</li>
-<li>fix false “You can’t have missing values” errors (or hangs, with <code>n_cores &gt; 1</code>) in <code><a href="../reference/loci_ld_clump.html">loci_ld_clump()</a></code>, <code><a href="../reference/gt_pcadapt.html">gt_pcadapt()</a></code>, the PCA functions and <code>predict(project_method = "none")</code> after removing loci or individuals with missing genotypes: only the genotypes in use are checked</li>
+<code><a href="../reference/loci_ld_clump.html">loci_ld_clump()</a></code>, <code><a href="../reference/gt_pcadapt.html">gt_pcadapt()</a></code> and the PCA functions: fix false “You can’t have missing values” errors (or hangs) after removing loci or individuals with missing genotypes</li>
 <li>
-<code>gt_pca(method = "random")</code> and <code><a href="../reference/gt_pca_autoSVD.html">gt_pca_autoSVD()</a></code> with a custom <code>fun_scaling</code>: fix hangs (with <code>n_cores &gt; 1</code>) or cryptic errors on missing genotypes</li>
+<code>gt_pca(method = "random")</code> and <code><a href="../reference/gt_pca_autoSVD.html">gt_pca_autoSVD()</a></code>: fix hangs or cryptic errors with a custom <code>fun_scaling</code> and missing genotypes, and use at most <code>n_cores</code> cores</li>
 <li>
-<code>gt_pca(method = "random")</code> and <code><a href="../reference/gt_pca_autoSVD.html">gt_pca_autoSVD()</a></code> use at most <code>n_cores</code> cores (bigstatsr’s parallel SVD started one more process)</li>
-<li>functions using temporary backing files (PCA, LD clumping, KING, IBS and allele sharing) delete them, fixing occasional “File ‘…bk’ already exists” errors</li>
+<code><a href="../reference/gt_pcadapt.html">gt_pcadapt()</a></code>: clear error for loci with the same genotype in every individual (<a href="https://github.com/EvolEcolGroup/tidypopgen/issues/179" class="external-link">#179</a>)</li>
 <li>
-<code><a href="../reference/windows_indiv_roh.html">windows_indiv_roh()</a></code> and the <code>gt_roh_*()</code> functions give chromosome names with <code>chromosomes_as_int</code>
-</li>
+<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code>: error on <em>.bed</em> files whose size does not match the <em>.bim</em> and <em>.fam</em> files, and on individual-major <em>.bed</em> files</li>
 <li>
 <code><a href="../reference/gen_tibble.html">gen_tibble()</a></code> on <em>.ped</em> files: a third allele always flags the locus as multi-allelic</li>
 <li>
@@ -126,9 +101,9 @@
 <li>
 <code><a href="../reference/gt_as_vcf.html">gt_as_vcf()</a></code>: fix loci with missing chromosomes (now written as “.”)</li>
 <li>
-<code><a href="../reference/loci_ld_clump.html">loci_ld_clump()</a></code>: <code>exclude</code> values that are not indices of loci (out of range, negative, not whole numbers, or names) give an error, rather than excluding nothing or the wrong loci</li>
+<code><a href="../reference/loci_ld_clump.html">loci_ld_clump()</a></code>: error on <code>exclude</code> values that are not indices of loci</li>
 <li>
-<code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code>: fix grouped <code>gen_tibble</code>s (an error from <code><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows()</a></code>); the merged <code>gen_tibble</code> keeps the grouping of the first one</li>
+<code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code>: fix grouped <code>gen_tibble</code>s, which now keep the grouping of the first one</li>
 <li>
 <code><a href="../reference/gt_add_sf.html">gt_add_sf()</a></code>: no “Adding missing grouping variables” message on grouped <code>gen_tibble</code>s</li>
 </ul></div>
