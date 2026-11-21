@@ -79,7 +79,7 @@ The original version of `tidypopgen` relied on imputing missing genotypes
 for a number of analyses, but the latest version can now handle missing
 genotypes in most workflows, including PCA, Fst and site frequency spectra.
 See the
-['missing genotypes' article](https://evolecolgroup.github.io/tidypopgen/articles/missing_genotypes.html)
+['missing genotypes' article](https://evolecolgroup.github.io/tidypopgen/articles/missing_data.html)
 for an explanation of why it is better to keep missing genotypes rather than 
 imputing them, and how to do so in `tidypopgen`.
 
