@@ -79,7 +79,8 @@
   (`n_cores`), *.ped* files are read faster, and *.gt* files are saved
   twice as fast
 - faster
-  [`pairwise_king()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_king.md),
+  [`pairwise_king()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_king.md)
+  (up to 1.8 times on CPUs with AVX2),
   [`pairwise_ibs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_ibs.md)
   and
   [`pairwise_allele_sharing()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_allele_sharing.md),
