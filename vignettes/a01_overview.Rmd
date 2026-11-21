@@ -345,7 +345,7 @@ example_gt %>%
   reframe(loci_hwe = loci_hwe(genotypes))
 ```
 
-These inbuild grouped methods are coded in C++ to be very efficient, and they
+These inbuilt grouped methods are coded in C++ to be very efficient, and they
 should be
 preferred to the `reframe()` option. By default, their outputs will return a
 tidy tibble, with one row per locus per population (i.e. the same as we
