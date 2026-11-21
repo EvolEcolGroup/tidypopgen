@@ -27,9 +27,10 @@
 #'
 #' Loci with the same genotype in every individual genotyped can not be
 #' tested, and give an error.
-#' @references Luu, K., Bazin, E., Blum, M. G. B., & François, O. (2017).
-#'   pcadapt: an R package for genome scans for selection based on principal
+#' @references Luu, K., Bazin, E., & Blum, M. G. B. (2017). pcadapt: an R
+#'   package to perform genome scans for selection based on principal
 #'   component analysis. Molecular Ecology Resources, 17(1), 67–77.
+#'   \doi{10.1111/1755-0998.12592}
 #' @param x A `gen_tibble` object.
 #' @param pca a [`gt_pca`] object, as returned by [gt_pca()], of the
 #'   individuals of `x` (see Details for missing genotypes).
