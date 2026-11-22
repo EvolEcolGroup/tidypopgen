@@ -1,7 +1,7 @@
 # tidypopgen: summary
 
-Updated 2026-11-22 (laptopX1: #242 merged; the CRAN checks re-run on the
-final `dev`, all clean; 1.1.0 waits only for the version and Andrea's
+Updated 2026-11-22 (laptopX1: the timed articles re-knitted on a quiet
+manica01 and pushed to `dev`; 1.1.0 waits only for the version and Andrea's
 release steps). One section: the package's issue in
 dramanica/claude_jobs, with the single list of its tasks. Its first
 paragraph, status and next steps are copied into the issue
@@ -11,7 +11,7 @@ paragraph, status and next steps are copied into the issue
 
 Population genetics with `gen_tibble`s: faster input (VCF reading in `dev`, merging of VCFs prototyped), analyses with missing genotypes without imputation (PCA, DAPC, pcadapt, LD clumping and pruning), and fast kinship and inbreeding within groups.
 
-**Status.** `dev` (`cb7a526e`, 22 Nov) holds everything for 1.1.0 (#231, #237-#242: missing genotypes without imputation, KING 1.8x faster with AVX2, `gt_merge_vcfs()` 1.6x faster, grouped `indiv_*` functions made consistent). The CRAN checks re-run on it are clean (local 0/0/4 expected notes, R-hub on 4 platforms, `dartR.base` unchanged), so the release waits only for the version bump and Andrea's steps; a plan for splitting the package is written and deferred (`package_split.md`). Handover: `dev_notes/handover.md` on `split_plan`; `cran_checks_2026-11-21.md` (on `dev`), `vcf_merge.md`, `pairwise_bitpacked.md`.
+**Status.** `dev` (`eaf4d861`, 22 Nov, with the timed articles re-knitted on a quiet desktop) holds everything for 1.1.0 (#231, #237-#242: missing genotypes without imputation, KING 1.8x faster with AVX2, `gt_merge_vcfs()` 1.6x faster, grouped `indiv_*` functions made consistent). The CRAN checks re-run on it are clean (local 0/0/4 expected notes, R-hub on 4 platforms, `dartR.base` unchanged), so the release waits only for the version bump and Andrea's steps; a plan for splitting the package is written and deferred (`package_split.md`). Handover: `dev_notes/handover.md` on `split_plan`; `cran_checks_2026-11-21.md` (on `dev`), `vcf_merge.md`, `pairwise_bitpacked.md`.
 
 With missing genotypes, imputation pulls individuals with many missing
 genotypes together and makes missingness an axis of the PCA (on HGDP650, PC1
@@ -45,9 +45,10 @@ but Andrea judged it not worth the complexity (with that many loci
 - [ ] **P2** [desktop] Re-time the HGDP650 PCA/DAPC/pcadapt/LD benchmarks on the P-cores (not set up): medians in `gt_pca.md`, `ld_missing.md`.
 - [ ] **P2** [claude] Keep optimising: pcadapt's t-scores, the GRM's count of shared loci, the DAPC regression, the other KING and VCF merge ideas: done when >5% faster with identical outputs.
 - [ ] **P3** [decide] Look into the package split when ready (`package_split.md`: decisions, phases, open questions; Phase 0 after 1.1.0).
-- [ ] **P3** [cleanup] Delete `vignette_filtering` once Andrea has switched his checkout; after the release, `cran_submission` and `revdep/` on the laptop's annex; ask before deleting the benchmark data and prototypes on the laptop's annex (`bench_*`, `test_timing/`, `proj_proto/`, `ld_src/`) and in `~/claude_work/tidypopgen/` (incl. `pr_timing/`) on the desktop.
+- [ ] **P3** [cleanup] Delete `vignette_filtering` once Andrea has switched his checkout; after the release, `cran_submission` and `revdep/` on the laptop's annex; ask before deleting the benchmark data and prototypes on the laptop's annex (`bench_*`, `test_timing/`, `proj_proto/`, `ld_src/`) and in `~/claude_work/tidypopgen/` (incl. `pr_timing/`, `articles_2026-11-22/`) on the desktop.
 
 **Done**
+- Timed articles (`benchmark_hgdp`, `big_data`, `rad_seq`, `roh_hgdp`) re-knitted on a quiet manica01 and pushed to `dev` (`eaf4d861`; `big_data` 160.9 -> 51.7 s, as its last knit was on the laptop): 22 Nov.
 - #242 merged (`8f51a5ca`; grouped `indiv_*` functions, `loci_*` edge cases; CodeRabbit's three points fixed): 22 Nov (Andrea).
 - Roxygen link warnings of the `select_loci()` helpers fixed, pushed straight to `dev` (`cb7a526e`): 22 Nov.
 - CRAN checks re-run on the final `dev` (local, R-hub, win-builder, `dartR.base`): 22 Nov.

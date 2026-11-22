@@ -4,6 +4,17 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-22 (manica01, from laptopX1): timed articles re-knitted on a quiet desktop
+
+- `benchmark_hgdp`, `big_data`, `rad_seq`, `roh_hgdp` knitted twice with an
+  -O2 build of `dev` (`e812c8d3`), the tidypopgl jobs paused by their
+  sessions (SIGSTOP), each knit at a 1-minute load below 1; the second knit
+  pushed to `dev` (`eaf4d861`), as Andrea asked, to update the site.
+- The knits agree within ~3%, except `rad_seq`'s first VCF read (41.8 vs
+  35.3 s: the 27 GB VCF partly out of the page cache in the first).
+- `big_data` was last knitted on the laptop: 160.9 -> 51.7 s. Figures
+  byte-identical. Numbers in `article_timings_speed_vs_big_data_article.md`.
+
 ## 2026-11-22 (laptopX1): #242 merged; CRAN checks re-run on the final dev
 
 - CodeRabbit on #242: grouping variables called `n_alt`/`n_valid` kept

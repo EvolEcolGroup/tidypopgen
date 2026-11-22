@@ -39,7 +39,7 @@ They were in `data-raw/dev_notes/` until 19 Nov 2026. Start with
 | `vcf_merge.md` | Where `gt_merge_vcfs()` spends its time, three prototypes up to 1.66x faster (branch `merge_vcf_speed`), and `bcftools merge` and plink2 compared. Scripts and result tables in `vcf_merge/`. |
 | `bed_reader.md` | Where `gen_tibble()` spends its time on large PLINK filesets (the baboon file: 486 x 91M loci), and a parallel `.bed` reader with size and magic checks (branch `bed_reader`: 1.5x on the `.bed` step with 8 cores on an SSD, none from an HDD). Scripts and logs in `bed_reader/`. |
 | `gt_save_speed.md` | Saving and loading *.gt* files with tens of millions of loci: the allele strings cost most; a prototype saving them as codes (4.2x faster loading, 2.9x saving on 91M loci) was not adopted, and is kept as a patch in `gt_save_speed/`. |
-| `article_timings_speed_vs_big_data_article.md` | Timings of the big data article before and after the speed work. |
+| `article_timings_speed_vs_big_data_article.md` | Timings of the big data article before and after the speed work; how the timed articles were re-knitted on 22 Nov 2026 (`article_timings/render_desktop.sh`). |
 
 ## Features and releases
 

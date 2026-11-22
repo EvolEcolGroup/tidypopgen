@@ -165,3 +165,40 @@ measurement, which takes about 0.3 s on both builds.
   Their small differences in the knits did not reproduce when the same steps
   were run outside knitr (`filter_loci` 1.51 s vs 1.48 s, `dapc` 0.04 s vs
   0.03 s).
+
+## Re-timed on a quiet desktop (22 Nov 2026)
+
+The four timed articles were re-knitted on manica01 with an -O2 build of
+`dev` at `e812c8d3` (version 1.0.0.9014, installed into its own library),
+and pushed to `dev` as `eaf4d861`.
+
+- **Set-up:** every other job on the machine paused (the tidypopgl
+  sessions stopped theirs with SIGSTOP); each knit started when the
+  1-minute load had been below 1 at three checks 30 s apart. The script is
+  `article_timings/render_desktop.sh`. The articles keep their own thread
+  settings (`n_cores` 20 for HGDP and big data, 4 for RAD-seq and ROH).
+- **Two knits of each article.** The second is committed. They agree within
+  about 3%, except `rad_seq`'s first, default read of the 27 GB VCF
+  (41.8 s, then 35.3 s): in the first knit part of the VCF was not in the
+  page cache, while the other three reads always come from the cache.
+- **Outputs:** every figure is byte-identical to the previous knit; only
+  timings and a temporary path change. `big_data` now shows dplyr's
+  start-up messages under `library(tidypopgen)`, as a fresh session does
+  (the previous knit, on Andrea's laptop, did not).
+- **Not re-run:** the laptop section of `benchmark_hgdp` (it needs the
+  laptop; it still times the pipeline with imputation).
+
+| article | step totals, before (s) | 22 Nov, knit 1 / knit 2 (s) | whole knit (s) | peak RSS |
+|---|---:|---:|---:|---:|
+| `benchmark_hgdp` | 3.52 (desktop, 20 Nov) | 3.29 / 3.32 | 8.0 / 6.7 | 1.9 GB |
+| `big_data` | 160.92 (laptop) | 50.81 / 51.74 | 54.9 / 56.0 | 4.8 GB |
+| `rad_seq`, default read | 41.03 (desktop, 20 Nov) | 41.82 / 35.33 | 143.2 / 136.4 | 4.0 GB |
+| `roh_hgdp`, ROH on 1 / 4 cores | 1.70 / 0.55 | 1.67 / 0.53, then 1.66 / 0.54 | 10.0 / 9.8 | 1.6 GB |
+
+- `big_data`: merging the 50 VCFs takes 46.4 s (146.6 s on the laptop),
+  LD clumping 4.0 s (10.4 s).
+- `roh_hgdp`: PLINK 1.9 `--homozyg` takes 1.85 s and finds the same 45,910
+  runs.
+- The work folder on manica01 is
+  `~/claude_work/tidypopgen/articles_2026-11-22/` (build, clone, logs, and
+  both knits in `pass1/` and `pass2/`).

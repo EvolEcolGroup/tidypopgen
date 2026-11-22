@@ -1,7 +1,8 @@
 # tidypopgen: handover
 
-Updated 2026-11-22 (laptopX1: #242 merged; CRAN checks re-run on the final
-`dev`, all clean; 1.1.0 waits only for Andrea's release steps). For the next session: read this and `summary.md` first. History
+Updated 2026-11-22 (laptopX1: the timed articles re-knitted on a quiet
+manica01 and pushed to `dev`, `eaf4d861`; 1.1.0 waits only for Andrea's
+release steps). For the next session: read this and `summary.md` first. History
 is in `progress.md`; designs are in the topic documents listed in
 `README.md`.
 
@@ -30,10 +31,11 @@ Deleted on 22 Nov: `indiv_grouping` (#242) and `roxygen_links`
 
 ### 1. **P1** [andrea] Release 1.1.0: everything is done but the version
 
-- `dev` at `cb7a526e` has #231 and #237-#242 (missing genotypes without
+- `dev` at `eaf4d861` has #231 and #237-#242 (missing genotypes without
   imputation, CRAN test skips, no RcppArmadillo, KING AVX2, faster VCF
   merge, pre-submission fixes and `cran-comments.md`, grouped `indiv_*`
-  functions made consistent) and the roxygen link fix.
+  functions made consistent), the roxygen link fix, `CLAUDE.md` moved to
+  `.claude/`, and the re-timed articles (no code after `cb7a526e`).
 - Checks re-run on the final `dev` (22 Nov, `8f51a5ca`; the last commit
   changes comments only; report `dev_notes/cran_checks_2026-11-21.md` on
   `dev`, section "Re-run on the final `dev`"): local `R CMD check
@@ -50,9 +52,10 @@ Deleted on 22 Nov: `indiv_grouping` (#242) and `roxygen_links`
   (`devtools::submit_cran()`); after acceptance tag the release and
   `usethis::use_dev_version()`. Then delete the branch `cran_submission`.
 - After publication, re-check CRAN's test times (`test_times_2026-11.md`).
-- Precompiled articles: re-time on a quiet machine before or after the
-  release (their timings were rendered on 20 Nov; the laptop section of the
-  HGDP benchmark still times the old pipeline; see the backlog).
+- Precompiled articles: re-timed on a quiet manica01 on 22 Nov
+  (`eaf4d861`; `article_timings_speed_vs_big_data_article.md`, last
+  section). Only the laptop section of the HGDP benchmark still times the
+  old pipeline (see the backlog).
 
 ### 3. **P2** [desktop] Re-time on the P-cores
 
@@ -110,11 +113,22 @@ Deleted on 22 Nov: `indiv_grouping` (#242) and `roxygen_links`
   data, bcftools, builds and outputs of the VCF job; `plink_king/`, ~1.2 GB:
   plink2, the PLINK input, builds and outputs of the KING job; `bench_inb/`:
   symlinks; `run_desktop.sh`: the copy the job ran; keep them while the
-  prototypes may be re-timed); the NearEast data in
+  prototypes may be re-timed; `articles_2026-11-22/`: the -O2 build of
+  `e812c8d3`, its clone, `render.sh`, logs and both knits of the timed
+  articles, can go); the NearEast data in
   `vignettes/articles/data/NearEastPublic/` (git-ignored, needed to
   re-render aDNA_pseudohaploids).
 
 ## Desktop queue
+
+### Done: the timed articles re-knitted (job `tpg_pr_timing_articles`, 22 Nov 11:43-12:04)
+
+- `benchmark_hgdp`, `big_data`, `rad_seq`, `roh_hgdp`, two knits each with
+  the -O2 build of `e812c8d3`, the other jobs paused by their sessions;
+  the second knit pushed to `dev` (`eaf4d861`). To repeat:
+  `dev_notes/article_timings/render_desktop.sh` (paths at its top), run as
+  a systemd user unit named `tpg_pr_timing*`, so that the tidypopgl queue
+  on manica01 holds its phases.
 
 ### Done: PRs #239 and #240 against `dev` (job `tpg_pr_timing`, 21 Nov 15:53-17:01)
 
