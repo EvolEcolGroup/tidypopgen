@@ -5,8 +5,8 @@
 - **Branch:** `indiv_grouping` (PR #242), from `vignette_filtering`
   at `cb2fe55b` (which is itself a few commits behind `dev`: it lacks
   #239-#241).
-- **Commits:** 14: 8 code fixes (one of them fixes a regression of another,
-  found by the verifying agent; one is the DESCRIPTION), 6 documentation
+- **Commits:** 15: 8 code fixes (one of them fixes a regression of another,
+  found by the verifying agent; one is the DESCRIPTION), 7 documentation
   commits (vignette text; two typos and a trailing space in the new
   vignette text of `vignette_filtering`; wording).
 - **Findings not fixed:** 2 (no decision needed).
@@ -31,7 +31,7 @@ Exceptions to "each test fails before the fix":
   gave the same values for these group-independent statistics. The grouped
   methods are for consistency, as decided by Andrea.
 - `b62f8301` (DESCRIPTION), `d17bbc16`, `a27e8225`, `91848742`, `7c58224d`,
-  `d9fbfad6`, `43c1ad2d` (documentation only) have no test.
+  `d9fbfad6`, `43c1ad2d`, `b311d07c` (documentation only) have no test.
 
 ## How the review was done
 
@@ -123,6 +123,10 @@ Exceptions to "each test fails before the fix":
   used columns of the report as positional vectors in `filter()`, which
   fails on a grouped `gen_tibble` (as the vignette now recommends); they
   now filter on the ids to keep (raised by CodeRabbit) *[docs]*
+- [ ] `b311d07c` · QC vignette — of the two ways to filter loci in separate
+  steps, only a new `qc_report_loci()` tests Hardy-Weinberg equilibrium
+  within populations on a grouped `gen_tibble` (`select_loci_if()` ignores
+  the groups); one sentence says so (raised by CodeRabbit) *[docs]*
 
 ## Findings not fixed
 
