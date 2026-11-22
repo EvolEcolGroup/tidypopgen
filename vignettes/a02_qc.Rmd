@@ -187,7 +187,7 @@ data <- data %>% select_loci_if(loci_missingness(genotypes) < 0.05)
 data <- data %>% select_loci_if(loci_hwe(genotypes) > 0.01)
 ```
 
-Or we can create a new report with `qc_report_loci()` after each step, so that it matches the reduced `gen_tibble`.
+Or we can create a new report with `qc_report_loci()` after each step, so that it matches the reduced `gen_tibble`. On a grouped `gen_tibble`, only the second option tests Hardy-Weinberg equilibrium within each population: `select_loci_if` evaluates its condition on all the individuals, ignoring the groups, so `loci_hwe(genotypes)` within it tests all the individuals together (see [Grouping data](#grouping-data)).
 
 # Linkage Disequilibrium
 
