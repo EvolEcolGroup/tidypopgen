@@ -57,7 +57,7 @@ vignettes and `dev_notes/` point to some of these files.
 | `profile_rcpp_vcf.R` | Profiles the cpp VCF parser with Rgperftools (the path to the VCF is hard-coded). |
 | `benchmark_ibs.R` | Times IBS on `data/hgdp_100k` (an HGDP subset of 100k loci, not tracked). Outdated: it calls `snp_ibs_loop()`, which no longer exists. |
 
-Remember to time installed (-O2) builds, not `load_all()` (see `CLAUDE.md`).
+Remember to time installed (-O2) builds, not `load_all()` (see `.claude/CLAUDE.md`).
 
 ### `validate/`
 

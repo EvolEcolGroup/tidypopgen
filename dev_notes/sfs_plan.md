@@ -86,7 +86,7 @@ projections and options, the spectra match easySFS's output.
 
 **Benchmark.** The data were 1000 diploids x 100k loci, 10 groups of 100,
 with 5% missing genotypes. The branch was installed at -O2 in its own
-library, as `CLAUDE.md` requires.
+library, as `.claude/CLAUDE.md` requires.
 
 | Function | 1 core | 4 cores |
 |---|---|---|
@@ -466,7 +466,7 @@ recomputes the full spectrum for each `p`.
 Stage 1 is a grouped `alt_valid_counts()` pass plus small per-block work, so
 it should run close to `loci_alt_freq()` on grouped data. The extra cost for
 pairwise is G(G-1)/2 hash updates per locus, spread across threads by
-spectrum. Benchmark it on HGDP-sized data, following `CLAUDE.md`:
+spectrum. Benchmark it on HGDP-sized data, following `.claude/CLAUDE.md`:
 
 - never time a plain `load_all()`;
 - use `clean_dll()`, then `compile_dll(debug = FALSE)`, then

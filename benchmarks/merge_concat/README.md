@@ -42,7 +42,7 @@ Rscript summarise.R    # a markdown table of the best repetition of each step
 ```
 
 `setup.sh` installs tidypopgen with `R CMD INSTALL` (at -O2): never time a
-`load_all()` build, which compiles the C++ code at -O0 (see `CLAUDE.md`).
+`load_all()` build, which compiles the C++ code at -O0 (see `.claude/CLAUDE.md`).
 Each step runs in its own R process, timed with `/usr/bin/time` (wall time,
 including starting R and loading tidypopgen, and peak RSS). `gt_step.R` also
 records the peak memory used by R (`gc()`): the peak RSS includes the pages

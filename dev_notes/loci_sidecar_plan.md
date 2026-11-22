@@ -433,7 +433,7 @@ under review).
 
 ## 7. Performance checks
 
-All timings use -O2 builds, as `CLAUDE.md` requires:
+All timings use -O2 builds, as `.claude/CLAUDE.md` requires:
 
 - `pkgbuild::clean_dll()`;
 - `compile_dll(debug = FALSE)`;
