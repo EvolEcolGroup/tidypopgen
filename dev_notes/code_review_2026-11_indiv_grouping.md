@@ -2,11 +2,11 @@
 
 ## Summary
 
-- **Branch:** `indiv_grouping` (local, not pushed), from `vignette_filtering`
+- **Branch:** `indiv_grouping` (PR #242), from `vignette_filtering`
   at `cb2fe55b` (which is itself a few commits behind `dev`: it lacks
   #239-#241).
-- **Commits:** 12: 7 code fixes (one of them fixes a regression of another,
-  found by the verifying agent; one is the DESCRIPTION), 5 documentation
+- **Commits:** 14: 8 code fixes (one of them fixes a regression of another,
+  found by the verifying agent; one is the DESCRIPTION), 6 documentation
   commits (vignette text; two typos and a trailing space in the new
   vignette text of `vignette_filtering`; wording).
 - **Findings not fixed:** 2 (no decision needed).
@@ -21,7 +21,8 @@
 | `lintr::lint_package()` on `7c58224d` | 2 lints: a trailing space in the new vignette code of `vignette_filtering` (fixed in `d9fbfad6`; the file then lints clean), and an `object_usage_linter` false positive for `read_bed_to_fbm` in `R/gen_tibble_bed.R` (defined in `R/RcppExports.R`; not touched by this branch) |
 | `spelling::spell_check_package()` on the tip | no errors |
 | After the full check: `a96e6f67` (grouped counts follow `type`) | its test files (`test_loci_freq.R`, `test_genotypes_tbl_class.R`, `test_empty_groups.R`, `test_gt_pseudohaploid.R`) pass, and lintr is clean on the changed files; the full suite runs again on CI |
-| Each new or changed test fails before its fix and passes after | yes, for all 6 code commits with tests (checked by a separate agent for `34e34394`, `1db53cc8`, `2653506a`, `54f7566e`, and by me for `609927d4` and `a96e6f67`); see the exceptions below |
+| After the CodeRabbit review of #242: `45406cd2`, `43c1ad2d` | `test_loci_freq.R` passes, the code of the QC vignette runs (and its two filters on a grouped copy of the data), lintr is clean on the changed files; the full suite runs again on CI |
+| Each new or changed test fails before its fix and passes after | yes, for all 6 code commits with tests (checked by a separate agent for `34e34394`, `1db53cc8`, `2653506a`, `54f7566e`, and by me for `609927d4`, `a96e6f67` and `45406cd2`); see the exceptions below |
 
 Exceptions to "each test fails before the fix":
 
@@ -30,7 +31,7 @@ Exceptions to "each test fails before the fix":
   gave the same values for these group-independent statistics. The grouped
   methods are for consistency, as decided by Andrea.
 - `b62f8301` (DESCRIPTION), `d17bbc16`, `a27e8225`, `91848742`, `7c58224d`,
-  `d9fbfad6` (documentation only) have no test.
+  `d9fbfad6`, `43c1ad2d` (documentation only) have no test.
 
 ## How the review was done
 
@@ -100,6 +101,11 @@ Exceptions to "each test fails before the fix":
   "tidy" (default: `n_alt` and `n_valid` columns), "list" (as `group_map()`)
   or "matrix" (the two matrices of before, named) *[behaviour change,
   decided by Andrea]*
+- [ ] `45406cd2` · `loci_alt_freq(as_counts = TRUE)` grouped method, tidy
+  output — a grouping variable called `n_valid` had its values replaced by
+  the counts (one called `n_alt` gave two columns with that name); the
+  clashing columns are now renamed with a message, as by `bind_cols()`
+  (raised by CodeRabbit) *[edge case of `a96e6f67`, never released]*
 
 ### Documentation
 
@@ -113,6 +119,10 @@ Exceptions to "each test fails before the fix":
   *[docs]*
 - [ ] `d9fbfad6` · a trailing space in the new code of the getting started
   vignette, flagged by lintr *[docs]*
+- [ ] `43c1ad2d` · QC vignette — the missingness and relatedness filters
+  used columns of the report as positional vectors in `filter()`, which
+  fails on a grouped `gen_tibble` (as the vignette now recommends); they
+  now filter on the ids to keep (raised by CodeRabbit) *[docs]*
 
 ## Findings not fixed
 
