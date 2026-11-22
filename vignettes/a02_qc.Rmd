@@ -57,10 +57,11 @@ autoplot(individual_report)
 
 Here, the red line indicates a threshold for proportion of missing loci, which is set as 5% by default, and can be altered using the `miss_threshold` argument. Similarly, the blue lines are drawn at 2 (inner) and 3 (outer) standard deviations from the mean observed heterozygosity. These thresholds can be used to visualise outliers and consider how to filter datasets.
 
-We can see above that most individuals have low missingness, none are above the default 5% threshold. However, if we wanted to filter individuals to remove those with more than 4.5% of their genotypes missing, we can use `filter`.
+We can see above that most individuals have low missingness, none are above the default 5% threshold. However, if we wanted to filter individuals to remove those with more than 4.5% of their genotypes missing, we can use `filter`. The report has one row per individual, in the same order as `data`, so we take the ids of the individuals to keep and filter on them; this also works on a grouped `gen_tibble`, where `filter` works on one group at a time.
 
 ```{r}
-data <- data %>% filter(individual_report$missingness < 0.045)
+keep_ids <- data$id[individual_report$missingness < 0.045]
+data <- data %>% filter(id %in% keep_ids)
 nrow(data)
 ```
 
@@ -91,7 +92,7 @@ We can then remove the recommended individuals by using:
 
 ```{r}
 data <- data %>%
-  filter(id %in% individual_report$id & individual_report$to_keep == TRUE)
+  filter(id %in% individual_report$id[individual_report$to_keep])
 ```
 
 We can now view a summary of our cleaned data set again, showing that our data has reduced from the original; 12 individuals, to 8.
