@@ -128,10 +128,10 @@ which is held in memory and saved in the `.gt` file:
 
 |options            | time_s| peak_memory_mb| loci_table_mb| bk_mb| gt_mb| sidecars_mb|
 |:------------------|------:|--------------:|-------------:|-----:|-----:|-----------:|
-|default            |   41.0|           3708|          2846|   924|   165|           0|
-|names_as_int       |   18.9|           2552|          1756|   924|   108|         748|
-|chromosomes_as_int |   19.1|           2410|          1751|   924|   125|         407|
-|both               |   12.7|           1188|           660|   924|    68|        1155|
+|default            |   35.3|           3708|          2846|   924|   165|           0|
+|names_as_int       |   19.0|           2552|          1756|   924|   108|         748|
+|chromosomes_as_int |   19.7|           2410|          1751|   924|   125|         407|
+|both               |   13.1|           1188|           660|   924|    68|        1155|
 
 
 
@@ -183,7 +183,7 @@ reloaded <- gt_load("./data/rad/rad_int.gt")
 
 
 This takes 3.1 s, against
-19.1 s for the `gen_tibble` read
+17.8 s for the `gen_tibble` read
 with the default options (see the performance summary at the end).
 
 # The sidecar files
@@ -424,18 +424,18 @@ show_loci(rad_hits)
 
 |step                    | time_s| peak_memory_mb|
 |:-----------------------|------:|--------------:|
-|read_default            |  41.03|           3708|
-|read_names_as_int       |  18.85|           2552|
-|read_chromosomes_as_int |  19.06|           2410|
-|read_both_as_int        |  12.68|           1188|
-|load_default            |  19.06|           3755|
-|load_both_as_int        |   3.07|           1273|
-|loci_qc                 |   0.42|           1852|
-|scan                    |   0.08|            546|
-|lookup_first            |   0.64|            534|
+|read_default            |  35.33|           3708|
+|read_names_as_int       |  19.05|           2552|
+|read_chromosomes_as_int |  19.65|           2410|
+|read_both_as_int        |  13.09|           1188|
+|load_default            |  17.82|           3755|
+|load_both_as_int        |   3.08|           1273|
+|loci_qc                 |   0.43|           1852|
+|scan                    |   0.07|            546|
+|lookup_first            |   0.69|            534|
 |lookup_again            |   0.11|            536|
 |lookup_chromosomes      |   0.02|            601|
-|restore                 |   0.37|            616|
+|restore                 |   0.40|            617|
 
 
 

@@ -374,11 +374,11 @@ be in runs, whatever selection did.
 
 |Step                                           | Time (s)|
 |:----------------------------------------------|--------:|
-|Read the bed file (`gen_tibble()`)             |     1.44|
-|Find the runs (`windows_indiv_roh()`, 1 core)  |     1.70|
-|Find the runs (`windows_indiv_roh()`, 4 cores) |     0.55|
-|PLINK `--homozyg` (1 thread)                   |     1.83|
+|Read the bed file (`gen_tibble()`)             |     1.39|
+|Find the runs (`windows_indiv_roh()`, 1 core)  |     1.66|
+|Find the runs (`windows_indiv_roh()`, 4 cores) |     0.54|
+|PLINK `--homozyg` (1 thread)                   |     1.85|
 |F_ROH (`gt_roh_froh()`)                        |     0.01|
-|ROH islands (`gt_roh_islands()`)               |     1.20|
+|ROH islands (`gt_roh_islands()`)               |     1.11|
 
 

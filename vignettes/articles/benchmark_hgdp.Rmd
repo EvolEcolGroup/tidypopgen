@@ -99,7 +99,7 @@ hgdp <- gen_tibble(bed_path,
 )
 ```
 
-read_plink: 1.2s
+read_plink: 1s
 
 Add metadata
 
@@ -157,7 +157,7 @@ allele frequency and the missingness are computed over all individuals.
 loci_report <- qc_report_loci(hgdp)
 ```
 
-loci_report: 133ms
+loci_report: 134ms
 The resulting report can be observed using `autoplot`.
 
 
@@ -180,7 +180,7 @@ hgdp <- hgdp %>%
   select_loci_if(loci_report$maf > 0.05 & loci_report$missingness < 0.05)
 ```
 
-filter_loci: 18ms
+filter_loci: 17ms
 
 
 # Individual Report
@@ -194,7 +194,7 @@ individual, and rate of missingness per individual.
 indiv_report <- qc_report_indiv(hgdp)
 ```
 
-indiv_report: 199ms
+indiv_report: 178ms
 
 
 ``` r
@@ -232,7 +232,7 @@ hgdp <- hgdp %>%
   group_by(population)
 ```
 
-filter_indiv: 194ms
+filter_indiv: 188ms
 
 A few missing genotypes remain after filtering. We do not need to impute
 them: LD clumping, the PCA and the DAPC below use, for each locus (or pair of
@@ -251,7 +251,7 @@ hgdp <- hgdp %>%
   select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, n_cores = n_cores))
 ```
 
-ld_clumping: 464ms
+ld_clumping: 445ms
 
 # PCA
 
@@ -263,7 +263,7 @@ and LD clumped dataset.
 test_pca <- hgdp %>% gt_pca(n_cores = n_cores)
 ```
 
-pca: 951ms
+pca: 999ms
 
 Plot PCA:
 
@@ -291,7 +291,7 @@ test_dapc <- gt_dapc(test_pca,
 )
 ```
 
-dapc: 133ms
+dapc: 131ms
 
 Plot DAPC:
 
@@ -315,7 +315,7 @@ pairwise_fsts <- hgdp %>% pairwise_pop_fst(
 )
 ```
 
-pairwise_fst: 54ms
+pairwise_fst: 50ms
 
 Plot pairwise Fst:
 
@@ -351,10 +351,10 @@ gt_as_plink(hgdp,
   type = "bed",
   overwrite = TRUE
 )
-#> [1] "/tmp/RtmpPCGAJL/file2dbbf612ed7a7a.bed"
+#> [1] "/tmp/RtmptYuzhk/file313a93ae8a12.bed"
 ```
 
-plink_save: 161ms
+plink_save: 162ms
 
 # Summary
 
@@ -363,17 +363,17 @@ Here is a summary of the time taken (in seconds) to perform each step of the ana
 
 ```
 #>            step time
-#> 1    read_plink 1.23
+#> 1    read_plink 1.02
 #> 2   loci_report 0.13
 #> 3   filter_loci 0.02
-#> 4  indiv_report  0.2
+#> 4  indiv_report 0.18
 #> 5  filter_indiv 0.19
-#> 6   ld_clumping 0.46
-#> 7           pca 0.95
+#> 6   ld_clumping 0.44
+#> 7           pca    1
 #> 8          dapc 0.13
 #> 9  pairwise_fst 0.05
 #> 10   plink_save 0.16
-#> 11        Total 3.52
+#> 11        Total 3.32
 ```
 # Running the benchmark on a laptop
 We will now run this benchmark on a laptop 
