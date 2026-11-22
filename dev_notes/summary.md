@@ -42,6 +42,7 @@ but Andrea judged it not worth the complexity (with that many loci
 
 **Next steps**
 - [ ] **P1** [andrea] Release 1.1.0 (CRAN checks re-run on the final `dev`, 22 Nov, all clean): set the version, merge `dev` into `main` (site rebuild fixes two article links), re-run `urlchecker::url_check()`, add the win-builder result (emailed; upload again if none came) to `cran-comments.md`, submit.
+- [ ] **P2** [decide] Move `CLAUDE.md` to `.claude/CLAUDE.md`, so that pkgdown stops publishing it (`/CLAUDE.html` on the release and dev sites; pkgdown ignores `.Rbuildignore`)? Recommended yes, on `dev` before merging into `main` for 1.1.0, then delete the old `CLAUDE.html` pages from `gh-pages` (the deploy uses `clean: false`).
 - [ ] **P2** [desktop] Re-time the HGDP650 PCA/DAPC/pcadapt/LD benchmarks on the P-cores (not set up): medians in `gt_pca.md`, `ld_missing.md`.
 - [ ] **P2** [claude] Keep optimising: pcadapt's t-scores, the GRM's count of shared loci, the DAPC regression, the other KING and VCF merge ideas: done when >5% faster with identical outputs.
 - [ ] **P3** [decide] Look into the package split when ready (`package_split.md`: decisions, phases, open questions; Phase 0 after 1.1.0).
