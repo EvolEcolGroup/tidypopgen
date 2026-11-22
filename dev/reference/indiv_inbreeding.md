@@ -15,7 +15,13 @@ indiv_inbreeding(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
 indiv_inbreeding(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
 
 # S3 method for class 'grouped_gen_tbl'
-indiv_inbreeding(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
+indiv_inbreeding(
+  .x,
+  method = c("WG17"),
+  allele_sharing_mat = NULL,
+  type = c("vector", "list"),
+  ...
+)
 ```
 
 ## Arguments
@@ -26,7 +32,6 @@ indiv_inbreeding(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
   [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
   object), or a
   [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md).
-  The method for the `genotypes` column needs `allele_sharing_mat`.
 
 - ...:
 
@@ -46,14 +51,23 @@ indiv_inbreeding(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
   pre-compute this matrix. It is not possible to use this with grouped
   tibbles.
 
+- type:
+
+  only for a grouped
+  [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md):
+  "vector" (the default), one value per individual, in the order of the
+  rows; or "list" (deprecated), one vector per group, in the order of
+  [`dplyr::group_keys()`](https://dplyr.tidyverse.org/reference/group_data.html).
+
 ## Value
 
-a numeric vector of inbreeding coefficients. For a grouped
+a numeric vector of inbreeding coefficients, one per individual in the
+order of the rows, named by the ids of the individuals (when
+`allele_sharing_mat` is given, by its row names). For a grouped
 [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md),
-a list of such vectors, one per group in the order of
-[`dplyr::group_keys()`](https://dplyr.tidyverse.org/reference/group_data.html)
-(the coefficients are computed within each group; an empty group gives
-an empty vector).
+the coefficients are computed within each group (with `type = "list"`,
+deprecated, they are returned as a list of vectors, one per group; an
+empty group gives an empty vector).
 
 ## Details
 
@@ -65,10 +79,24 @@ likelihoods).
 
 For a grouped
 [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md),
-the coefficients are computed within each group, giving the same results
+the coefficients are computed within each group (the beta estimate is
+relative to the other individuals of the group), giving the same values
 as `group_map(.x, ~ indiv_inbreeding(.x))`, but much faster: the
 genotypes are read only once, and only the pairs of individuals within
-each group are compared.
+each group are compared. As for an ungrouped
+[`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md),
+the result has one value per individual, in the order of the rows, so
+that it can be added as a column (e.g.
+`grouped_gt$inbreeding <- indiv_inbreeding(grouped_gt)`).
+
+The method for the `genotypes` column computes the matrix of allele
+sharing of the individuals in the column, so that `indiv_inbreeding()`
+can be used within `dplyr` verbs, e.g.
+`mutate(inbreeding = indiv_inbreeding(genotypes))`. Within a grouped
+`mutate()`, `dplyr` calls it on the individuals of each group in turn,
+so it gives the same values as the method for a grouped
+[`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md),
+but it reads the genotypes once for each group.
 
 ## References
 

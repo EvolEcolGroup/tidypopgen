@@ -77,6 +77,9 @@ freely).</p>
 <span><span class="co"># S3 method for class 'tbl_df'</span></span>
 <span><span class="fu">indiv_het_obs</span><span class="op">(</span><span class="va">.x</span>, as_counts <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># S3 method for class 'grouped_gen_tbl'</span></span>
+<span><span class="fu">indiv_het_obs</span><span class="op">(</span><span class="va">.x</span>, as_counts <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># S3 method for class 'vctrs_bigSNP'</span></span>
 <span><span class="fu">indiv_het_obs</span><span class="op">(</span><span class="va">.x</span>, as_counts <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -87,7 +90,7 @@ freely).</p>
 
 <dl><dt id="arg--x">.x<a class="anchor" aria-label="anchor" href="#arg--x"></a></dt>
 <dd><p>a vector of class <code>vctrs_bigSNP</code> (usually the <code>genotype</code> column of
-a <code><a href="gen_tibble.html">gen_tibble</a></code> object), or a <code><a href="gen_tibble.html">gen_tibble</a></code>.</p></dd>
+a <code><a href="gen_tibble.html">gen_tibble</a></code> object), or a <code><a href="gen_tibble.html">gen_tibble</a></code> (grouped or not).</p></dd>
 
 
 <dt id="arg-as-counts">as_counts<a class="anchor" aria-label="anchor" href="#arg-as-counts"></a></dt>
@@ -108,6 +111,17 @@ quantities.</p></dd>
 loci for each individual and the second is the number of missing values
 for each individual</p></li>
 </ul></div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>On a grouped <code><a href="gen_tibble.html">gen_tibble</a></code>, heterozygosity is computed for all the
+individuals in a single pass over the genotypes (it does not depend on the
+groups), and returned in the order of the rows. Within a grouped
+<code>mutate()</code> or <code>summarise()</code>, <code>dplyr</code> calls <code>indiv_het_obs()</code> on the
+genotypes of each group in turn: this gives the same values, but reads the
+genotypes once for each group. With many groups and large datasets,
+compute it on the whole grouped tibble instead (e.g.
+<code>grouped_gt$het_obs &lt;- indiv_het_obs(grouped_gt)</code>), or before grouping.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>

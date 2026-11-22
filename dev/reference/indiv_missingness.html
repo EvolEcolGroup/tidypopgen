@@ -67,6 +67,14 @@ genotypes in an individual).</p>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># S3 method for class 'grouped_gen_tbl'</span></span>
+<span><span class="fu">indiv_missingness</span><span class="op">(</span></span>
+<span>  <span class="va">.x</span>,</span>
+<span>  as_counts <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  block_size <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://privefl.github.io/bigstatsr/reference/block_size.html" class="external-link">block_size</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">.x</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># S3 method for class 'vctrs_bigSNP'</span></span>
 <span><span class="fu">indiv_missingness</span><span class="op">(</span></span>
 <span>  <span class="va">.x</span>,</span>
@@ -82,7 +90,7 @@ genotypes in an individual).</p>
 
 <dl><dt id="arg--x">.x<a class="anchor" aria-label="anchor" href="#arg--x"></a></dt>
 <dd><p>a vector of class <code>vctrs_bigSNP</code> (usually the <code>genotype</code> column of
-a <code><a href="gen_tibble.html">gen_tibble</a></code> object), or a <code><a href="gen_tibble.html">gen_tibble</a></code>.</p></dd>
+a <code><a href="gen_tibble.html">gen_tibble</a></code> object), or a <code><a href="gen_tibble.html">gen_tibble</a></code> (grouped or not).</p></dd>
 
 
 <dt id="arg-as-counts">as_counts<a class="anchor" aria-label="anchor" href="#arg-as-counts"></a></dt>
@@ -103,6 +111,18 @@ default).</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>a vector of missingness, one per individuals in the
 <code><a href="gen_tibble.html">gen_tibble</a></code></p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>On a grouped <code><a href="gen_tibble.html">gen_tibble</a></code>, missingness is computed for all the
+individuals in a single pass over the genotypes (it does not depend on the
+groups), and returned in the order of the rows. Within a grouped
+<code>mutate()</code> or <code>summarise()</code>, <code>dplyr</code> calls <code>indiv_missingness()</code> on the
+genotypes of each group in turn: this gives the same values, but reads the
+genotypes once for each group. With many groups and large datasets,
+compute it on the whole grouped tibble instead (e.g.
+<code>grouped_gt$missingness &lt;- indiv_missingness(grouped_gt)</code>), or before
+grouping.</p>
     </div>
 
     <div class="section level2">

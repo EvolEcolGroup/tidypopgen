@@ -137,7 +137,15 @@ loci_maf(
 
 a vector of frequencies, one per locus, if `as_counts = FALSE`; else a
 matrix of two columns, the count of alternate alleles and the count
-valid alleles (i.e. the sum of alternate and reference)
+valid alleles (i.e. the sum of alternate and reference). For a grouped
+[`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md),
+the values of each group, as given by `type`: a tibble with one row per
+locus and group ("tidy"), a list with one element per group ("list"), or
+a matrix with loci in rows and groups in columns ("matrix"). With
+`as_counts = TRUE`, the tibble has the columns `n_alt` and `n_valid`
+instead of `value`, each element of the list is the two-column matrix of
+its group, and "matrix" gives a list of two matrices, `n_alt` and
+`n_valid`.
 
 ## Examples
 

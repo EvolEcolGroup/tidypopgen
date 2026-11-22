@@ -106,11 +106,15 @@ consider how to filter datasets.
 We can see above that most individuals have low missingness, none are
 above the default 5% threshold. However, if we wanted to filter
 individuals to remove those with more than 4.5% of their genotypes
-missing, we can use `filter`.
+missing, we can use `filter`. The report has one row per individual, in
+the same order as `data`, so we take the ids of the individuals to keep
+and filter on them; this also works on a grouped `gen_tibble`, where
+`filter` works on one group at a time.
 
 ``` r
 
-data <- data %>% filter(indiv_missingness(genotypes) < 0.045)
+keep_ids <- data$id[individual_report$missingness < 0.045]
+data <- data %>% filter(id %in% keep_ids)
 nrow(data)
 ```
 
@@ -167,7 +171,7 @@ We can then remove the recommended individuals by using:
 ``` r
 
 data <- data %>%
-  filter(id %in% individual_report$id & individual_report$to_keep == TRUE)
+  filter(id %in% individual_report$id[individual_report$to_keep])
 ```
 
 We can now view a summary of our cleaned data set again, showing that
@@ -274,8 +278,14 @@ and a histogram of significant HWE exact test
 p-values](a02_qc_files/figure-html/unnamed-chunk-13-1.png)
 
 We can then begin to consider how to quality control this raw data set.
-Let’s start by filtering SNPs according to their minor allele frequency.
-We can visualise the MAF distribution using:
+The loci report already contains the minor allele frequency (`maf`), the
+rate of missingness (`missingness`) and the Hardy-Weinberg exact p-value
+(`hwe_p`) of every SNP, so we can use it to decide which SNPs to keep
+without calculating these statistics again. First, let’s look at each
+measure in turn to choose our thresholds.
+
+Let’s start with the minor allele frequency. We can visualise the MAF
+distribution using:
 
 ``` r
 
@@ -285,22 +295,13 @@ autoplot(loci_report, type = "maf")
 ![Histogram of minor allele
 frequency](a02_qc_files/figure-html/unnamed-chunk-14-1.png)
 
-Here we can see there are some monomorphic SNPs in the data set. Let’s
-filter out loci with a minor allele frequency lower than 2%, by using
-`select_loci_if`. Here, we select all SNPs with a MAF greater than 2%.
-This operation is equivalent to plink –maf 0.02.
+Here we can see there are some monomorphic SNPs in the data set. We will
+remove loci with a minor allele frequency lower than 2%, which is
+equivalent to using plink –maf 0.02.
 
-``` r
-
-data <- data %>% select_loci_if(loci_maf(genotypes) > 0.02)
-count_loci(data)
-```
-
-    ## [1] 929
-
-Following this, we can remove SNPs with a high rate of missingness. Lets
-say we want to remove SNPs that are missing in more than 5% of
-individuals, equivalent to using plink –geno 0.05
+Next, we can look at the rate of missingness. Lets say we want to remove
+SNPs that are missing in more than 5% of individuals, equivalent to
+using plink –geno 0.05
 
 ``` r
 
@@ -308,19 +309,10 @@ autoplot(loci_report, type = "missing", miss_threshold = 0.05)
 ```
 
 ![Histogram of the proportion of missing
-data](a02_qc_files/figure-html/unnamed-chunk-16-1.png)
+data](a02_qc_files/figure-html/unnamed-chunk-15-1.png)
 
 We can see here that most SNPs have low missingness, under our 5%
-threshold, some do, however, have missingness over our threshold. To
-remove these SNPs, we can again use `select_loci_if`.
-
-``` r
-
-data <- data %>% select_loci_if(loci_missingness(genotypes) < 0.05)
-count_loci(data)
-```
-
-    ## [1] 693
+threshold, some do, however, have missingness over our threshold.
 
 Finally, we may want to remove SNPs that show significant deviation from
 Hardy-Weinberg equilibrium, if our study design requires. To visualise
@@ -333,19 +325,61 @@ autoplot(loci_report, type = "significant hwe", hwe_p = 0.01)
 ```
 
 ![Histogram of significant HWE exact test
-p-values](a02_qc_files/figure-html/unnamed-chunk-18-1.png)
+p-values](a02_qc_files/figure-html/unnamed-chunk-16-1.png)
 
 None of the SNPs in our data are significant, however there may be
 circumstances where we would want to cut out the most extreme cases, if
 these data were real, these cases could indicate genotyping errors.
 
+Now that we have chosen our thresholds, we can apply all three in one
+go, using the `loci_report` we have just created. Each column of the
+report has one value per SNP, in the same order as the loci in our
+`gen_tibble`. We can therefore combine the three conditions into a
+single logical vector, which is `TRUE` for the SNPs that we want to
+keep, and pass it to `select_loci_if`:
+
 ``` r
 
-data <- data %>% select_loci_if(loci_hwe(genotypes) > 0.01)
+loci_to_keep <- loci_report$maf > 0.02 &
+  loci_report$missingness < 0.05 &
+  loci_report$hwe_p > 0.01
+
+data <- data %>% select_loci_if(loci_to_keep)
 count_loci(data)
 ```
 
     ## [1] 693
+
+Note that we need to apply all of the filters at once. The `loci_report`
+was calculated on a `gen_tibble` with 961 SNPs, so it has one row for
+each of those 961 SNPs. As soon as `select_loci_if` has removed some
+SNPs, `data` has fewer loci than the `loci_report` has rows, and the two
+no longer match: a logical vector built from the old report
+(e.g. `loci_report$missingness < 0.05`) would have the wrong length for
+the reduced `gen_tibble`. For the same reason, a report cannot be reused
+to filter a `gen_tibble` that has since been reduced. The report also
+describes the data as it was when it was created, so its values would be
+out of date for the reduced data anyway.
+
+If we want to apply the filters in separate steps, there are two
+options. We can calculate the statistics again within `select_loci_if`,
+which always operates on the current loci of the `gen_tibble`:
+
+``` r
+
+data <- data %>% select_loci_if(loci_maf(genotypes) > 0.02)
+data <- data %>% select_loci_if(loci_missingness(genotypes) < 0.05)
+data <- data %>% select_loci_if(loci_hwe(genotypes) > 0.01)
+```
+
+Or we can create a new report with
+[`qc_report_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/qc_report_loci.md)
+after each step, so that it matches the reduced `gen_tibble`. On a
+grouped `gen_tibble`, only the second option tests Hardy-Weinberg
+equilibrium within each population: `select_loci_if` evaluates its
+condition on all the individuals, ignoring the groups, so
+`loci_hwe(genotypes)` within it tests all the individuals together (see
+[Grouping data](#grouping-data)).
 
 ## Linkage Disequilibrium
 
@@ -412,21 +446,21 @@ gt_save(ld_data, file_name = tempfile())
 ```
 
     ## 
-    ## gen_tibble saved to /tmp/RtmpuceJ3W/file2a4816ac49c3.gt
+    ## gen_tibble saved to /tmp/RtmpjUm0xr/file2abd780f95ae.gt
 
-    ## using FBM RDS: /tmp/RtmpuceJ3W/file2a486effdb07.rds
+    ## using FBM RDS: /tmp/RtmpjUm0xr/file2abd261826e8.rds
 
-    ## with FBM backing file: /tmp/RtmpuceJ3W/file2a486effdb07.bk
+    ## with FBM backing file: /tmp/RtmpjUm0xr/file2abd261826e8.bk
 
     ## make sure that you do NOT delete those files!
 
     ## to reload the gen_tibble in another session, use:
 
-    ## gt_load('/tmp/RtmpuceJ3W/file2a4816ac49c3.gt')
+    ## gt_load('/tmp/RtmpjUm0xr/file2abd780f95ae.gt')
 
-    ## [1] "/tmp/RtmpuceJ3W/file2a4816ac49c3.gt" 
-    ## [2] "/tmp/RtmpuceJ3W/file2a486effdb07.rds"
-    ## [3] "/tmp/RtmpuceJ3W/file2a486effdb07.bk"
+    ## [1] "/tmp/RtmpjUm0xr/file2abd780f95ae.gt" 
+    ## [2] "/tmp/RtmpjUm0xr/file2abd261826e8.rds"
+    ## [3] "/tmp/RtmpjUm0xr/file2abd261826e8.bk"
 
 ## Grouping data
 

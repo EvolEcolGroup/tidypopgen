@@ -213,9 +213,15 @@ function:</p>
 heterozygosity, but there are a few individuals missing &gt;20% of their
 genotypes. We can remove these individuals using the <code>filter</code>
 function, specifying to keep only individuals with missingness under
-20%.</p>
+20%. Note that <code>filter</code> can clash with grouped data, so we
+need to ungroup (so that we can use a vector for all individuals, rather
+than a vector for each population) before filtering, and then re-group
+the data by population.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">lobsters</span> <span class="op">&lt;-</span> <span class="va">lobsters</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="../reference/indiv_missingness.html">indiv_missingness</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">0.2</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">lobsters</span> <span class="op">&lt;-</span> <span class="va">lobsters</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="va">ungroup</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">indiv_qc_lobsters</span><span class="op">$</span><span class="va">missingness</span> <span class="op">&lt;</span> <span class="fl">0.2</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span></span></code></pre></div>
 <p>Now lets check our loci. We can use the <code>qc_report_loci</code>
 function to generate a report of the loci quality. This function will
 return another <code>qc_report</code> object, which contains information
@@ -235,9 +241,9 @@ allele frequency for all loci:</p>
 <p>Now let’s look at missingness.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">loci_qc_lobsters</span>, type <span class="op">=</span> <span class="st">"missing"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="tidypopgen_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="Histogram of the proportion of missing data" width="700">
-Our data mostly have low missingness, but we can see that some loci have
-&gt; 5% missingness across individuals, and we want to remove these
+<p><img src="tidypopgen_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="Histogram of the proportion of missing data" width="700"></p>
+<p>Our data mostly have low missingness, but we can see that some loci
+have &gt; 5% missingness across individuals, and we want to remove these
 loci.</p>
 <p>In tidypopgen, there are two functions to subset the loci in a
 <code>gen_tibble</code> object: <code>select_loci</code> and
@@ -250,7 +256,8 @@ this case, we want to remove loci with &gt;5% missingness, so we can use
 function, operating on the <code>genotypes</code> column of our
 <code>gen_tibble</code>.</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">lobsters</span> <span class="op">&lt;-</span> <span class="va">lobsters</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_missingness.html">loci_missingness</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">0.05</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">lobsters</span> <span class="op">&lt;-</span> <span class="va">lobsters</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="va">loci_qc_lobsters</span><span class="op">$</span><span class="va">missingness</span> <span class="op">&lt;</span> <span class="fl">0.05</span><span class="op">)</span></span></code></pre></div>
 <p>Note that <code>select_loci_if</code> ignores the groups: all
 populations share the same loci, so the missingness of each locus is
 computed over all lobsters, as in <code>qc_report_loci</code>. To select
@@ -353,7 +360,7 @@ centre of each group to place the labels</p>
 <p>That’s it! There are more functions to run different types of
 analyses (DAPC, ADMIXTURE, f statistics with admixtools2, etc.); each
 resulting object has <code>autoplot</code>, <code>tidy</code>, and
-<code>augment</code> to explore the results and integrated into the
+<code>augment</code> to explore the results and integrate it into the
 information from the <code>gen_tibble</code>.</p>
 <div class="section level3">
 <h3 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

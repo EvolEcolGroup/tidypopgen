@@ -138,22 +138,12 @@ merge the VCFs directly in R, with tidypopgen.</p>
 libraries:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/EvolEcolGroup/tidypopgen" class="external-link">tidypopgen</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; Loading required package: dplyr</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     filter, lag</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
-<span><span class="co">#&gt; Loading required package: tibble</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></code></pre></div>
 <p>Because tidypopgen keeps the genotypes on disk, in file-backed
 matrices (FBM), the following pipeline needs little RAM (see the peak
 memory of each step in the summary at the end), and also runs on a
-modern laptop. Here, we use a desktop machine with a GenuineIntel, 13th
-Gen Intel(R) Core(TM) i9-13900, 24 CPU and 126 GiB of RAM.</p>
+modern laptop. Here, we use a desktop machine with a GenuineIntel,
+Intel(R) Core(TM) Ultra 7 155H, 22 CPU and 31 GiB of RAM.</p>
 <p>Before we begin, we will limit the number of cores used by the
 parallelised BLAS library with
 <code><a href="https://rdrr.io/pkg/bigparallelr/man/get_blas_ncores.html" class="external-link">bigparallelr::set_blas_ncores()</a></code>, and by the package
@@ -300,11 +290,6 @@ We can check the number of loci with any missing genotypes:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">sgdp_loci_rep</span><span class="op">$</span><span class="va">missingness</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 0</span></span></code></pre></div>
-<p>When objects are no longer needed, or once results outputs have been
-saved, we can remove them using <code><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm()</a></code> to keep memory usage
-under control:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span><span class="va">sgdp_loci_rep</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="filtering">Filtering<a class="anchor" aria-label="anchor" href="#filtering"></a>
@@ -314,9 +299,9 @@ working with any other gen_tibble object.</p>
 <p>We filter for minor allele frequency, choosing to select loci with
 MAF greater than 5% (<code><a href="../reference/select_loci_if.html">select_loci_if()</a></code> ignores the groups:
 the MAF of each locus is computed over all individuals):</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sgdp</span> <span class="op">&lt;-</span> <span class="va">sgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_alt_freq.html">loci_maf</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0.05</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="va">sgdp_loci_rep</span><span class="op">$</span><span class="va">maf</span> <span class="op">&gt;</span> <span class="fl">0.05</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Loci remaining:"</span>, <span class="fu"><a href="../reference/count_loci.html">count_loci</a></span><span class="op">(</span><span class="va">sgdp</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Loci remaining: 7482060</span></span></code></pre></div>
 <p>With other datasets, we would also remove loci with too many missing
@@ -329,6 +314,11 @@ missing genotypes anyway. There is no need to rewrite the backing file
 with <code><a href="../reference/gt_update_backingfile.html">gt_update_backingfile()</a></code> after filtering: the following
 steps only use the loci that are left in the
 <code>gen_tibble</code>.</p>
+<p>When objects are no longer needed, or once results outputs have been
+saved, we can remove them using <code><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm()</a></code> to keep memory usage
+under control:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span><span class="va">sgdp_loci_rep</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="ld-clumping">LD clumping<a class="anchor" aria-label="anchor" href="#ld-clumping"></a>
@@ -461,15 +451,15 @@ large dataset, and of the peak memory used by R during each step (in MB,
 including the objects that were already in memory, such as the
 <code>gen_tibble</code> itself):</p>
 <pre><code><span><span class="co">#&gt;                              step time_s peak_memory_mb</span></span>
-<span><span class="co">#&gt; 1                      merge_vcfs  67.69           1991</span></span>
-<span><span class="co">#&gt; 2                    indiv_report   0.45           1117</span></span>
-<span><span class="co">#&gt; 3                     loci_report   0.34           1676</span></span>
-<span><span class="co">#&gt; 4                      maf_filter   0.34           1969</span></span>
-<span><span class="co">#&gt; 5                        ld_clump   4.03           1636</span></span>
-<span><span class="co">#&gt; 6                             pca   0.15            511</span></span>
-<span><span class="co">#&gt; 7                            dapc   0.03            407</span></span>
-<span><span class="co">#&gt; 8                    pairwise_fst   0.17            372</span></span>
-<span><span class="co">#&gt; 9 Total (time) / maximum (memory)  73.19           1991</span></span></code></pre>
+<span><span class="co">#&gt; 1                      merge_vcfs 146.60           2065</span></span>
+<span><span class="co">#&gt; 2                    indiv_report   0.98           1176</span></span>
+<span><span class="co">#&gt; 3                     loci_report   0.99           1729</span></span>
+<span><span class="co">#&gt; 4                      maf_filter   0.52           2220</span></span>
+<span><span class="co">#&gt; 5                        ld_clump  10.38           1694</span></span>
+<span><span class="co">#&gt; 6                             pca   0.42            567</span></span>
+<span><span class="co">#&gt; 7                            dapc   0.26            474</span></span>
+<span><span class="co">#&gt; 8                    pairwise_fst   0.77            439</span></span>
+<span><span class="co">#&gt; 9 Total (time) / maximum (memory) 160.92           2220</span></span></code></pre>
 <p>The memory is measured with <code><a href="https://rdrr.io/r/base/gc.html" class="external-link">gc()</a></code>, and only covers memory
 allocated by R. It does not include the genotypes, which stay in the
 backing file on disk (the operating system caches the parts that are

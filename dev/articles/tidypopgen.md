@@ -170,11 +170,18 @@ each individual](tidypopgen_files/figure-html/unnamed-chunk-8-1.png)
 We can see that most individuals have low missingness and
 heterozygosity, but there are a few individuals missing \>20% of their
 genotypes. We can remove these individuals using the `filter` function,
-specifying to keep only individuals with missingness under 20%.
+specifying to keep only individuals with missingness under 20%. Note
+that `filter` can clash with grouped data, so we need to ungroup (so
+that we can use a vector for all individuals, rather than a vector for
+each population) before filtering, and then re-group the data by
+population.
 
 ``` r
 
-lobsters <- lobsters %>% filter(indiv_missingness(genotypes) < 0.2)
+lobsters <- lobsters %>%
+  ungroup %>%
+  filter(indiv_qc_lobsters$missingness < 0.2) %>%
+  group_by(population)
 ```
 
 Now lets check our loci. We can use the `qc_report_loci` function to
@@ -211,9 +218,10 @@ autoplot(loci_qc_lobsters, type = "missing")
 ```
 
 ![Histogram of the proportion of missing
-data](tidypopgen_files/figure-html/unnamed-chunk-12-1.png) Our data
-mostly have low missingness, but we can see that some loci have \> 5%
-missingness across individuals, and we want to remove these loci.
+data](tidypopgen_files/figure-html/unnamed-chunk-12-1.png)
+
+Our data mostly have low missingness, but we can see that some loci have
+\> 5% missingness across individuals, and we want to remove these loci.
 
 In tidypopgen, there are two functions to subset the loci in a
 `gen_tibble` object: `select_loci` and `select_loci_if`. The function
@@ -226,7 +234,8 @@ the `genotypes` column of our `gen_tibble`.
 
 ``` r
 
-lobsters <- lobsters %>% select_loci_if(loci_missingness(genotypes) < 0.05)
+lobsters <- lobsters %>%
+  select_loci_if(loci_qc_lobsters$missingness < 0.05)
 ```
 
 Note that `select_loci_if` ignores the groups: all populations share the
@@ -374,7 +383,7 @@ point.](tidypopgen_files/figure-html/unnamed-chunk-21-1.png)
 That’s it! There are more functions to run different types of analyses
 (DAPC, ADMIXTURE, f statistics with admixtools2, etc.); each resulting
 object has `autoplot`, `tidy`, and `augment` to explore the results and
-integrated into the information from the `gen_tibble`.
+integrate it into the information from the `gen_tibble`.
 
 ### References
 

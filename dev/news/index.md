@@ -99,6 +99,22 @@
   with many chromosomes;
   [`gt_as_genlight()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_as_genlight.md)
   uses less memory
+- [`indiv_inbreeding()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_inbreeding.md)
+  on a grouped `gen_tibble` returns one value per individual, in the
+  order of the rows (computed within each group); the list of one vector
+  per group (`type = "list"`) is deprecated. It also works on the
+  `genotypes` column, e.g. within
+  [`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html)
+- [`indiv_het_obs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_het_obs.md),
+  [`indiv_missingness()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_missingness.md)
+  and
+  [`indiv_ploidy()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_ploidy.md)
+  have methods for grouped `gen_tibble`s (all individuals in one pass,
+  in the order of the rows) and for tibbles that lost their class
+- `loci_alt_freq(as_counts = TRUE)` on a grouped `gen_tibble` follows
+  `type`: by default a tibble with the columns `n_alt` and `n_valid`;
+  `type = "matrix"` gives the two matrices of before, now with loci and
+  group names
 - new article on large RAD-seq datasets; the big data article uses
   [`gt_merge_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.md)
 
@@ -138,6 +154,9 @@
 - [`gt_add_sf()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_add_sf.md):
   no “Adding missing grouping variables” message on grouped
   `gen_tibble`s
+- [`loci_pi()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_pi.md)
+  on a grouped `gen_tibble` with a single individual: fix the output,
+  which was a plain vector whatever `type`
 
 ## tidypopgen 1.0.0
 

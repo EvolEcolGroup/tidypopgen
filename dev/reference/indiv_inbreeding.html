@@ -66,7 +66,13 @@ on the beta estimate from Weir and Goudet (2017).</p>
 <span><span class="fu">indiv_inbreeding</span><span class="op">(</span><span class="va">.x</span>, method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"WG17"</span><span class="op">)</span>, allele_sharing_mat <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'grouped_gen_tbl'</span></span>
-<span><span class="fu">indiv_inbreeding</span><span class="op">(</span><span class="va">.x</span>, method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"WG17"</span><span class="op">)</span>, allele_sharing_mat <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">indiv_inbreeding</span><span class="op">(</span></span>
+<span>  <span class="va">.x</span>,</span>
+<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"WG17"</span><span class="op">)</span>,</span>
+<span>  allele_sharing_mat <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vector"</span>, <span class="st">"list"</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -75,8 +81,7 @@ on the beta estimate from Weir and Goudet (2017).</p>
 
 <dl><dt id="arg--x">.x<a class="anchor" aria-label="anchor" href="#arg--x"></a></dt>
 <dd><p>a vector of class <code>vctrs_bigSNP</code> (usually the <code>genotype</code> column of
-a <code><a href="gen_tibble.html">gen_tibble</a></code> object), or a <code><a href="gen_tibble.html">gen_tibble</a></code>. The method for the
-<code>genotypes</code> column needs <code>allele_sharing_mat</code>.</p></dd>
+a <code><a href="gen_tibble.html">gen_tibble</a></code> object), or a <code><a href="gen_tibble.html">gen_tibble</a></code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -94,13 +99,21 @@ of Allele Sharing returned by <code><a href="pairwise_allele_sharing.html">pairw
 Sharing matrix, it is sometimes more efficient to pre-compute this matrix.
 It is not possible to use this with grouped tibbles.</p></dd>
 
+
+<dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
+<dd><p>only for a grouped <code><a href="gen_tibble.html">gen_tibble</a></code>: "vector" (the default), one
+value per individual, in the order of the rows; or "list" (deprecated),
+one vector per group, in the order of <code><a href="https://dplyr.tidyverse.org/reference/group_data.html" class="external-link">dplyr::group_keys()</a></code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>a numeric vector of inbreeding coefficients. For a grouped
-<code><a href="gen_tibble.html">gen_tibble</a></code>, a list of such vectors, one per group in the order of
-<code><a href="https://dplyr.tidyverse.org/reference/group_data.html" class="external-link">dplyr::group_keys()</a></code> (the coefficients are computed within each group;
-an empty group gives an empty vector).</p>
+    <p>a numeric vector of inbreeding coefficients, one per individual in
+the order of the rows, named by the ids of the individuals (when
+<code>allele_sharing_mat</code> is given, by its row names). For a grouped
+<code><a href="gen_tibble.html">gen_tibble</a></code>, the coefficients are computed within each group (with
+<code>type = "list"</code>, deprecated, they are returned as a list of vectors, one
+per group; an empty group gives an empty vector).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -109,10 +122,20 @@ objects (grouped or not) and for their <code>genotypes</code> column. Other pack
 can add methods for their own classes (e.g. tibbles of genotype
 likelihoods).</p>
 <p>For a grouped <code><a href="gen_tibble.html">gen_tibble</a></code>, the coefficients are computed within each
-group, giving the same results as
+group (the beta estimate is relative to the other individuals of the
+group), giving the same values as
 <code>group_map(.x, ~ indiv_inbreeding(.x))</code>, but much faster: the genotypes are
 read only once, and only the pairs of individuals within each group are
-compared.</p>
+compared. As for an ungrouped <code><a href="gen_tibble.html">gen_tibble</a></code>, the result has one value per
+individual, in the order of the rows, so that it can be added as a column
+(e.g. <code>grouped_gt$inbreeding &lt;- indiv_inbreeding(grouped_gt)</code>).</p>
+<p>The method for the <code>genotypes</code> column computes the matrix of allele
+sharing of the individuals in the column, so that <code>indiv_inbreeding()</code> can
+be used within <code>dplyr</code> verbs, e.g.
+<code>mutate(inbreeding = indiv_inbreeding(genotypes))</code>. Within a grouped
+<code>mutate()</code>, <code>dplyr</code> calls it on the individuals of each group in turn, so
+it gives the same values as the method for a grouped <code><a href="gen_tibble.html">gen_tibble</a></code>, but
+it reads the genotypes once for each group.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

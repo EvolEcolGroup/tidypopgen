@@ -198,7 +198,14 @@ output is sorted or plotted.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>a vector of frequencies, one per locus, if <code>as_counts = FALSE</code>;
 else a matrix of two columns, the count of alternate alleles and the count
-valid alleles (i.e. the sum of alternate and reference)</p>
+valid alleles (i.e. the sum of alternate and reference). For a grouped
+<code><a href="gen_tibble.html">gen_tibble</a></code>, the values of each group, as given by <code>type</code>: a tibble with
+one row per locus and group ("tidy"), a list with one element per group
+("list"), or a matrix with loci in rows and groups in columns ("matrix").
+With <code>as_counts = TRUE</code>, the tibble has the columns <code>n_alt</code> and <code>n_valid</code>
+instead of <code>value</code>, each element of the list is the two-column matrix of
+its group, and "matrix" gives a list of two matrices, <code>n_alt</code> and
+<code>n_valid</code>.</p>
     </div>
 
     <div class="section level2">
