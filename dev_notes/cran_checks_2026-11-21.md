@@ -18,13 +18,22 @@ The only commit since, `cb7a526e`, changes comments only.
 | `spelling::spell_check_package()` | no errors |
 | URLs | the same two 404s as on 21 Nov (`articles/missing_data.html`, `articles/rad_seq.html`): they exist once the site is rebuilt from `main` |
 | Rd sections, non-ASCII, data, top-level files | as on 21 Nov, nothing to fix; non-ASCII characters are in roxygen references (with `Encoding: UTF-8`) and comments, and the PDF manual builds |
-| `devtools::check(remote = TRUE, manual = TRUE)` | 0 errors, 0 warnings, 4 notes, as on 21 Nov: version components, admixtools in `Additional_repositories` and the two URLs (incoming); `-mno-omit-leaf-frame-pointer` and V8 unavailable (local). INFO installed size 46.6 Mb. Tests 6.3 min, examples 1.6 min (1.4 min with `--run-donttest`), vignettes 0.8 min |
+| `devtools::check(remote = TRUE, manual = TRUE)` | 0 errors, 0 warnings, 4 notes: CRAN incoming (version components, admixtools in `Additional_repositories`, the two URLs); hidden file `.git` (an artefact of checking in a git worktree, see below; first reported here as part of the incoming note, by mistake); `-mno-omit-leaf-frame-pointer` and V8 unavailable (local). INFO installed size 46.6 Mb. Tests 6.3 min, examples 1.6 min (1.4 min with `--run-donttest`), vignettes 0.8 min |
 | R-hub, `rhub::rhub_check(branch = "dev")` (run 44992007326) | linux, windows, macos-arm64, m1-san (R-devel): Status OK, no notes |
-| win-builder r-devel, `devtools::check_win_devel()` | uploaded at about 06:00 UTC (a retry got FTP 550, as the file was already queued); the result is emailed to the maintainer |
+| win-builder r-devel, `devtools::check_win_devel()` (R-devel 2026-11-17 r90926 ucrt) | 2 NOTEs: CRAN incoming (version components, admixtools, the two URLs) and hidden file `.git`; tests 4.5 min, examples 2 min, check 12 min |
 | `dartR.base` 1.3.0, the only reverse dependency (`revdep/revdep_dev.sh` in the scratch folder) | the same as with 1.0.0: 27 failures in its own plotting and report tests, and an example that needs HardyWeinberg (not installed in the scratch library); no new problems. It only calls `gen_tibble()`, `show_loci()` and `show_genotypes()` |
 
-`cran-comments.md` needs no change from these results; it still needs the
-win-builder result and the days since the last update at submission.
+**The hidden `.git` NOTE** comes from building in a git worktree, where
+`.git` is a file: `R CMD build` leaves out `.git` directories only. A
+tarball built from a worktree of `dev` contains `tidypopgen/.git`, one built
+from a clone of the same commit does not (checked on 22 Nov). So build the
+submission (and any win-builder upload) from a normal clone; the NOTE was
+probably the unexplained fourth local NOTE of 21 Nov too.
+
+`cran-comments.md` needs no change from these results; at submission it
+needs the win-builder result of the final commit (built from a clone, it
+should show only the incoming NOTE, and after the version bump and the site
+rebuild not even that) and the days since the last update.
 
 ## Summary (21 Nov)
 
