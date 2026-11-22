@@ -4,6 +4,18 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-22 (laptopX1): #242 merged; CRAN checks re-run on the final dev
+
+- CodeRabbit on #242: grouping variables called `n_alt`/`n_valid` kept
+  (renamed as by `bind_cols()`), QC vignette filters by id (works when
+  grouped), a sentence on HWE within populations; merged by Andrea
+  (`8f51a5ca`).
+- CRAN checks on `8f51a5ca` (`cran_checks_2026-11-21.md`, re-run section):
+  local 0/0/4 expected notes; R-hub run 44992007326 on `dev`; win-builder
+  r-devel uploaded; `dartR.base` same as with 1.0.0.
+- 7 roxygen link warnings (`@noRd` helpers of `select_loci()`) fixed and
+  pushed straight to `dev` (`cb7a526e`, Andrea).
+
 ## 2026-11-21 (laptopX1): grouped indiv_* functions made consistent; PR #242
 
 - Survey of the `indiv_*` and `loci_*` families on grouped `gen_tibble`s:

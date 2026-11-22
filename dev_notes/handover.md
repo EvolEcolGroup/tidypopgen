@@ -1,7 +1,7 @@
 # tidypopgen: handover
 
-Updated 2026-11-21 (laptopX1: #237-#241 merged; 1.1.0 ready for CRAN but
-for the version; merged and superseded branches deleted). For the next session: read this and `summary.md` first. History
+Updated 2026-11-22 (laptopX1: #242 merged; CRAN checks re-run on the final
+`dev`, all clean; 1.1.0 waits only for Andrea's release steps). For the next session: read this and `summary.md` first. History
 is in `progress.md`; designs are in the topic documents listed in
 `README.md`.
 
@@ -9,16 +9,17 @@ is in `progress.md`; designs are in the topic documents listed in
 
 | branch | purpose | base | pushed | merged |
 |---|---|---|---|---|
-| `indiv_grouping` | PR #242: consistent grouped behaviour of the `indiv_*` functions (grouped `indiv_inbreeding()` returns a row-order vector, `type = "list"` deprecated; grouped methods for the other three) and `loci_*` edge cases (`loci_pi()` one individual, `loci_alt_freq(as_counts)` follows `type`); report `dev_notes/code_review_2026-11_indiv_grouping.md`; worktree `/media/andrea/annex/tmp/claude/tidypopgen/wt_indiv` | `vignette_filtering` at `cb2fe55b` (Andrea's vignette edits) | yes (21 Nov) | no |
-| `split_plan` | dev notes only: the plan for the package split (`package_split.md`, `package_split/`) and these updated living documents; merge into `dev` (no code, `[skip ci]`) | `dev` at `e20145a2` | yes (21 Nov) | no |
-| `king_avx2` | PR #239: the KING ideas of `king_plink_ideas` cherry-picked onto `dev` (tiles; AVX2 kernel and scalar fallback, squashed), a warning fix for non-x86 builds, a test of both kernels; version 1.0.0.9013 and NEWS | `dev` at `ce748638` | yes (21 Nov) | no |
-| `vcf_merge_speed` | PR #240: the three prototypes of `merge_vcf_speed` cherry-picked onto `dev`, pass-1 errors naming the file, a cache-vs-reread test, docs; version 1.0.0.9014 (rebase on `DESCRIPTION` after #239) | `dev` at `ce748638` | yes (21 Nov) | no |
-| `merge_vcf_speed` | the original prototypes (`vcf_merge.md`); superseded by `vcf_merge_speed`: delete once #240 is merged | `pca_missing` at `5e207d78` | yes | no |
-| `king_plink_ideas` | the original KING prototypes (`pairwise_bitpacked.md`); superseded by `king_avx2`: delete once #239 is merged | `pca_missing` at `b8255226` | yes | no |
-| `as_fbm`, `skill` | `gt_as_fbm()` (Aug) and tooling to build a Claude skill (Oct); not in `dev`, kept (Andrea, 21 Nov) | old `dev` | yes | no |
+| `split_plan` | dev notes only: the plan for the package split (`package_split.md`, `package_split/`) and these living documents; merge into `dev` (no code, `[skip ci]`) | `dev` at `e20145a2` | yes | no |
+| `cran_submission` | the commit R-hub checked on 21 Nov (`66e62aa5`); its content is in `dev` (#241): delete after the release | `dev` at `b4f81b26` | yes | squashed in #241 |
+| `vignette_filtering` | Andrea's vignette edits, the base of #242 (Andrea's checkout is on it): delete once he has switched | `dev` | yes | squashed in #242 |
+| `indiv_grouping` | #242, local only (deleted on GitHub); worktree `/media/andrea/annex/tmp/claude/tidypopgen/wt_indiv` now on `roxygen_links` | `vignette_filtering` | gone | yes (#242, `8f51a5ca`) |
+| `roxygen_links` | `cb7a526e` (roxygen link warnings), pushed straight to `dev` by fast-forward (Andrea, 22 Nov); local only | `dev` at `8f51a5ca` | as `dev` | yes |
+| `as_fbm`, `skill` | `gt_as_fbm()` (Aug) and tooling to build a Claude skill (Oct); not in `dev`, kept (Andrea, 21 Nov); `skill` has one local commit not pushed (not Claude's) | old `dev` | yes | no |
 
 Deleted on 21 Nov (Andrea): `pca_missing` (#231), `cran_test_time` (#237),
-`remove_armadillo` (#238, merged), `bed_reader` (#234), `big_data_article`,
+`remove_armadillo` (#238, merged), `king_avx2` (#239), `vcf_merge_speed`
+(#240), `merge_vcf_speed`, `king_plink_ideas`, `cran-fixes-2026-11-21`
+(#241), `bed_reader` (#234), `big_data_article`,
 `adm_plot_ordering`, `pedigree` and `feature/pop-tajimas-d-polyploid` (all
 superseded by `dev`). `king_simd_packing` (rejected, below the 1.5x bar) is
 no longer in the laptop's repository (never pushed). The Elements HDD now
@@ -30,38 +31,25 @@ now that the branches are pushed or merged).
 
 ## Next tasks
 
-### 1. **P1** [review] Merge PR #242 (`indiv_grouping`), before 1.1.0
+### 1. **P1** [andrea] Release 1.1.0: everything is done but the version
 
-- Andrea asked (21 Nov) whether the `indiv_*` family is consistent on grouped
-  tibbles; decisions: grouped `indiv_inbreeding()` returns a named vector in
-  row order (`type = "list"` deprecated), grouped methods for
-  `indiv_het_obs()`, `indiv_missingness()` and `indiv_ploidy()` plus a note
-  on grouped `mutate()`, grouped `loci_alt_freq(as_counts = TRUE)` follows
-  `type`; all before 1.1.0.
-- It is built on `vignette_filtering` (Andrea's vignette edits), so the PR
-  carries them too. Checks: fails-before tests (a separate agent and
-  Claude), `R CMD check` clean on `7c58224d`; CI on the PR.
-- After the merge, the CRAN checks of `cran_checks_2026-11-21.md` were run
-  before these changes: re-run `devtools::check(remote = TRUE, manual =
-  TRUE)` and R-hub/win-builder on the final `dev` before submitting. Then
-  delete `indiv_grouping`, `vignette_filtering` and the worktree.
-
-### 1b. **P1** [andrea] Release 1.1.0: everything is done but the version
-
-- `dev` at `bf933ac1` has #237-#241: CRAN test skips, no RcppArmadillo,
-  KING AVX2, faster VCF merge, and the pre-submission fixes and
-  `cran-comments.md` (#241; report `dev_notes/cran_checks_2026-11-21.md`).
-- Checks on 21 Nov: local `R CMD check --as-cran` 0/0/4 notes (all
-  expected); R-hub linux, macos-arm64, windows, m1-san: Status OK (run
-  44933614344, branch `cran_submission` at `66e62aa5`); win-builder r-devel
-  submitted (result emailed to Andrea, not yet in `cran-comments.md`);
-  mac-builder down (HTTP 502), not run; reverse dependency `dartR.base`
-  1.3.0: identical results with 1.0.0 and the new `dev` (laptop, scratch
-  library `/media/andrea/annex/tmp/claude/tidypopgen/revdep/`).
+- `dev` at `cb7a526e` has #231 and #237-#242 (missing genotypes without
+  imputation, CRAN test skips, no RcppArmadillo, KING AVX2, faster VCF
+  merge, pre-submission fixes and `cran-comments.md`, grouped `indiv_*`
+  functions made consistent) and the roxygen link fix.
+- Checks re-run on the final `dev` (22 Nov, `8f51a5ca`; the last commit
+  changes comments only; report `dev_notes/cran_checks_2026-11-21.md` on
+  `dev`, section "Re-run on the final `dev`"): local `R CMD check
+  --as-cran` 0/0/4 notes (all expected: version, admixtools, two URLs,
+  local flags); R-hub linux, windows, m1-san, macos-arm64 (run
+  44992007326, on `dev`): Status OK, no notes; win-builder r-devel uploaded
+  (result emailed to Andrea; a retry got FTP 550, i.e. already queued: if
+  no email came, upload again with `devtools::check_win_devel()`);
+  `dartR.base` 1.3.0: same results as with 1.0.0.
 - **Order:** set the version to 1.1.0; merge `dev` into `main` (pkgdown
   rebuilds the site, so `articles/missing_data.html` and `rad_seq.html`
-  exist); re-run `urlchecker::url_check()`; add the win-builder result to
-  `cran-comments.md` (and mac-builder if it is back); submit
+  exist); re-run `urlchecker::url_check()`; add the win-builder result and
+  the days since the last update to `cran-comments.md`; submit
   (`devtools::submit_cran()`); after acceptance tag the release and
   `usethis::use_dev_version()`. Then delete the branch `cran_submission`.
 - After publication, re-check CRAN's test times (`test_times_2026-11.md`).
@@ -97,7 +85,14 @@ now that the branches are pushed or merged).
 
 ### 5. **P3** [cleanup] Branches and scratch files
 
-- After #239 and #240: the branches listed in task 1.
+- Branches: `indiv_grouping` and `roxygen_links` (local, merged), then
+  `vignette_filtering` (once Andrea has switched his checkout), and
+  `cran_submission` after the release. Worktrees on the laptop's annex:
+  `wt_cran` (detached at `8f51a5ca`, the CRAN checks), `wt_indiv` (on
+  `roxygen_links`), `wt_notes` (on `split_plan`).
+- Scratch of the CRAN checks, under `/media/andrea/annex/tmp/claude/tidypopgen/`:
+  `check_dev/`, `check*/`, `revdep/` (the scratch library with `dartR.data`
+  and the `dartR.base` checks; keep until the release), `rtmp/`.
 - On manica01: remove the worktree `~/claude_work/tidypopgen/wt_grouping`
   (`grouping` is merged and deleted), and discard Andrea's uncommitted
   edits of `a02_qc.Rmd` and `benchmark_hgdp.Rmd.orig` (and the lower-case
@@ -130,7 +125,8 @@ now that the branches are pushed or merged).
   8, same outputs; `gen_tibble()` on one VCF 0.99-1.02x on 1 thread,
   1.06-1.10x on 8 (files of ~1 s).
 - Left on manica01: `~/claude_work/tidypopgen/pr_timing/` (the three -O2
-  libraries, the clone, logs; keep until the PRs are merged).
+  libraries, the clone, logs; the PRs are merged, so it can go: ask
+  Andrea).
 
 ### HGDP650 timings of `gt_pca()`, DAPC, pcadapt, clumping and pruning
 
