@@ -118,13 +118,13 @@ select_loci <- function(.data, .sel_arg, .engine = c("auto", "tidyselect")) {
 #'   `(` and unary `-` (e.g. `c(1, 5, 2)`, `1:100`, `-5`, `-(1:10)`);
 #' - values, optionally negated: literals (e.g. `5` or `"rs1"`), vectors
 #'   injected with `!!`, and the values of function calls (e.g. `which(...)`),
-#'   which [select_loci_eval_call()] puts in place of the calls. They are
+#'   which `select_loci_eval_call()` puts in place of the calls. They are
 #'   used as the argument of `all_of()`;
 #' - bare variables (e.g. `idx` in `select_loci(x, idx)`), optionally
 #'   negated, that are not loci names and hold a vector of positions or
-#'   names (see [select_loci_symbol_value()]): their value is used as the
+#'   names (see `select_loci_symbol_value()`): their value is used as the
 #'   argument of `all_of()`, with the deprecation warning of `tidyselect`
-#'   (see [warn_external_vector()]).
+#'   (see `warn_external_vector()`).
 #'
 #' Anything else, or anything unusual (missing values, zeros in literals,
 #' positions out of range, mixed positive and negative positions, names not
@@ -256,7 +256,7 @@ select_loci_fast <- function(sel_quo, .data) {
 #' loci names), and selects with its value. This function does the same for a
 #' call (optionally negated with `-` or `!`), e.g. `which(...)`, `sample(...)`
 #' or `sort(x)`, and replaces the call with its value, so that the selection
-#' can be resolved by [select_loci_fast()]. The call is thus evaluated only
+#' can be resolved by `select_loci_fast()`. The call is thus evaluated only
 #' once, also when its value is then left to `tidyselect` (e.g. to give an
 #' error). Calls that use selection helpers or the `.data` and `.env`
 #' pronouns, which only exist within `tidyselect`, and calls that give an
@@ -312,7 +312,7 @@ select_loci_eval_call <- function(sel_quo) {
 #' by looking it up first in a data mask that binds every locus name, and
 #' then in the caller environment and its parents; a value that is not a
 #' function is then used as the argument of `all_of()` would be (with a
-#' deprecation warning, see [warn_external_vector()]). Building that data
+#' deprecation warning, see `warn_external_vector()`). Building that data
 #' mask is what makes selecting with a vector given by name quadratic with
 #' millions of loci (it creates an R symbol for every locus name), so this
 #' function does the same lookup directly, in the same order. It returns
@@ -363,7 +363,7 @@ select_loci_symbol_value <- function(sym, sel_quo, .data) {
 #' `tidyselect` deprecates selecting with a bare variable that holds a vector
 #' (e.g. `select_loci(x, idx)`, rather than `select_loci(x, all_of(idx))`,
 #' which can not be confused with a locus named `idx`). When
-#' [select_loci_fast()] resolves such a selection, this gives the warning
+#' `select_loci_fast()` resolves such a selection, this gives the warning
 #' that `tidyselect` would give, by letting `tidyselect` itself resolve the
 #' same variable (bound to a single position, in a child of the environment
 #' of the selection) on a vector of one element: the warning is thus the one
@@ -395,7 +395,7 @@ warn_external_vector <- function(name, user_env) {
 #' Find the positions of the loci selected by a value
 #'
 #' The value of the argument of `all_of()` or `any_of()`, or a value used as
-#' a selection (see [select_loci_fast()]), is turned into positions as
+#' a selection (see `select_loci_fast()`), is turned into positions as
 #' `tidyselect` does: numbers are positions (zeros are ignored), and strings
 #' (or the labels of a factor) are loci names.
 #' @param sel the value
