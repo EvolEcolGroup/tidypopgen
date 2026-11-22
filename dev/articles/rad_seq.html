@@ -197,7 +197,7 @@ file:</p>
 <tbody>
 <tr class="odd">
 <td align="left">default</td>
-<td align="right">41.0</td>
+<td align="right">35.3</td>
 <td align="right">3708</td>
 <td align="right">2846</td>
 <td align="right">924</td>
@@ -206,7 +206,7 @@ file:</p>
 </tr>
 <tr class="even">
 <td align="left">names_as_int</td>
-<td align="right">18.9</td>
+<td align="right">19.0</td>
 <td align="right">2552</td>
 <td align="right">1756</td>
 <td align="right">924</td>
@@ -215,7 +215,7 @@ file:</p>
 </tr>
 <tr class="odd">
 <td align="left">chromosomes_as_int</td>
-<td align="right">19.1</td>
+<td align="right">19.7</td>
 <td align="right">2410</td>
 <td align="right">1751</td>
 <td align="right">924</td>
@@ -224,7 +224,7 @@ file:</p>
 </tr>
 <tr class="even">
 <td align="left">both</td>
-<td align="right">12.7</td>
+<td align="right">13.1</td>
 <td align="right">1188</td>
 <td align="right">660</td>
 <td align="right">924</td>
@@ -267,7 +267,7 @@ is read.</p>
 <code>gen_tibble</code> in a new session is faster too:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">reloaded</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_load.html">gt_load</a></span><span class="op">(</span><span class="st">"./data/rad/rad_int.gt"</span><span class="op">)</span></span></code></pre></div>
-<p>This takes 3.1 s, against 19.1 s for the <code>gen_tibble</code> read
+<p>This takes 3.1 s, against 17.8 s for the <code>gen_tibble</code> read
 with the default options (see the performance summary at the end).</p>
 </div>
 <div class="section level2">
@@ -474,47 +474,47 @@ options, for the loci that are kept):</p>
 <tbody>
 <tr class="odd">
 <td align="left">read_default</td>
-<td align="right">41.03</td>
+<td align="right">35.33</td>
 <td align="right">3708</td>
 </tr>
 <tr class="even">
 <td align="left">read_names_as_int</td>
-<td align="right">18.85</td>
+<td align="right">19.05</td>
 <td align="right">2552</td>
 </tr>
 <tr class="odd">
 <td align="left">read_chromosomes_as_int</td>
-<td align="right">19.06</td>
+<td align="right">19.65</td>
 <td align="right">2410</td>
 </tr>
 <tr class="even">
 <td align="left">read_both_as_int</td>
-<td align="right">12.68</td>
+<td align="right">13.09</td>
 <td align="right">1188</td>
 </tr>
 <tr class="odd">
 <td align="left">load_default</td>
-<td align="right">19.06</td>
+<td align="right">17.82</td>
 <td align="right">3755</td>
 </tr>
 <tr class="even">
 <td align="left">load_both_as_int</td>
-<td align="right">3.07</td>
+<td align="right">3.08</td>
 <td align="right">1273</td>
 </tr>
 <tr class="odd">
 <td align="left">loci_qc</td>
-<td align="right">0.42</td>
+<td align="right">0.43</td>
 <td align="right">1852</td>
 </tr>
 <tr class="even">
 <td align="left">scan</td>
-<td align="right">0.08</td>
+<td align="right">0.07</td>
 <td align="right">546</td>
 </tr>
 <tr class="odd">
 <td align="left">lookup_first</td>
-<td align="right">0.64</td>
+<td align="right">0.69</td>
 <td align="right">534</td>
 </tr>
 <tr class="even">
@@ -529,8 +529,8 @@ options, for the loci that are kept):</p>
 </tr>
 <tr class="even">
 <td align="left">restore</td>
-<td align="right">0.37</td>
-<td align="right">616</td>
+<td align="right">0.40</td>
+<td align="right">617</td>
 </tr>
 </tbody>
 </table>

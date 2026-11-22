@@ -446,21 +446,21 @@ gt_save(ld_data, file_name = tempfile())
 ```
 
     ## 
-    ## gen_tibble saved to /tmp/RtmpQ22wP0/file29fe38750ec1.gt
+    ## gen_tibble saved to /tmp/RtmpJlRgOk/file2a5d9e8b711.gt
 
-    ## using FBM RDS: /tmp/RtmpQ22wP0/file29fe7386a0cc.rds
+    ## using FBM RDS: /tmp/RtmpJlRgOk/file2a5d1076691c.rds
 
-    ## with FBM backing file: /tmp/RtmpQ22wP0/file29fe7386a0cc.bk
+    ## with FBM backing file: /tmp/RtmpJlRgOk/file2a5d1076691c.bk
 
     ## make sure that you do NOT delete those files!
 
     ## to reload the gen_tibble in another session, use:
 
-    ## gt_load('/tmp/RtmpQ22wP0/file29fe38750ec1.gt')
+    ## gt_load('/tmp/RtmpJlRgOk/file2a5d9e8b711.gt')
 
-    ## [1] "/tmp/RtmpQ22wP0/file29fe38750ec1.gt" 
-    ## [2] "/tmp/RtmpQ22wP0/file29fe7386a0cc.rds"
-    ## [3] "/tmp/RtmpQ22wP0/file29fe7386a0cc.bk"
+    ## [1] "/tmp/RtmpJlRgOk/file2a5d9e8b711.gt"  
+    ## [2] "/tmp/RtmpJlRgOk/file2a5d1076691c.rds"
+    ## [3] "/tmp/RtmpJlRgOk/file2a5d1076691c.bk"
 
 ## Grouping data
 

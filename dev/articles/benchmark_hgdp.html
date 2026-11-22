@@ -160,7 +160,7 @@ names of the metadata lower case, as are those of the
 <span>  backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"test_"</span><span class="op">)</span>,</span>
 <span>  n_cores <span class="op">=</span> <span class="va">n_cores</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>read_plink: 1.2s</p>
+<p>read_plink: 1s</p>
 <p>Add metadata</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hgdp</span> <span class="op">&lt;-</span> <span class="va">hgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
@@ -203,7 +203,7 @@ correction across populations), while the minor allele frequency and the
 missingness are computed over all individuals.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">loci_report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/qc_report_loci.html">qc_report_loci</a></span><span class="op">(</span><span class="va">hgdp</span><span class="op">)</span></span></code></pre></div>
-<p>loci_report: 133ms The resulting report can be observed using
+<p>loci_report: 134ms The resulting report can be observed using
 <code>autoplot</code>.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">loci_report</span>, type <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span></span></code></pre></div>
@@ -222,7 +222,7 @@ so we can filter on its columns:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hgdp</span> <span class="op">&lt;-</span> <span class="va">hgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="va">loci_report</span><span class="op">$</span><span class="va">maf</span> <span class="op">&gt;</span> <span class="fl">0.05</span> <span class="op">&amp;</span> <span class="va">loci_report</span><span class="op">$</span><span class="va">missingness</span> <span class="op">&lt;</span> <span class="fl">0.05</span><span class="op">)</span></span></code></pre></div>
-<p>filter_loci: 18ms</p>
+<p>filter_loci: 17ms</p>
 </div>
 <div class="section level2">
 <h2 id="individual-report">Individual Report<a class="anchor" aria-label="anchor" href="#individual-report"></a>
@@ -232,7 +232,7 @@ heterozygosity per individual, and rate of missingness per
 individual.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">indiv_report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/qc_report_indiv.html">qc_report_indiv</a></span><span class="op">(</span><span class="va">hgdp</span><span class="op">)</span></span></code></pre></div>
-<p>indiv_report: 199ms</p>
+<p>indiv_report: 178ms</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">indiv_report</span>, type <span class="op">=</span> <span class="st">"scatter"</span><span class="op">)</span></span></code></pre></div>
 <div class="float">
@@ -262,7 +262,7 @@ afterwards:</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="../reference/indiv_missingness.html">indiv_missingness</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">0.01</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span></span></code></pre></div>
-<p>filter_indiv: 194ms</p>
+<p>filter_indiv: 188ms</p>
 <p>A few missing genotypes remain after filtering. We do not need to
 impute them: LD clumping, the PCA and the DAPC below use, for each locus
 (or pair of loci), the individuals genotyped at it (see the article on
@@ -279,7 +279,7 @@ disequilibrium.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hgdp</span> <span class="op">&lt;-</span> <span class="va">hgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_ld_clump.html">loci_ld_clump</a></span><span class="op">(</span><span class="va">genotypes</span>, thr_r2 <span class="op">=</span> <span class="fl">0.2</span>, n_cores <span class="op">=</span> <span class="va">n_cores</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>ld_clumping: 464ms</p>
+<p>ld_clumping: 445ms</p>
 </div>
 <div class="section level2">
 <h2 id="pca">PCA<a class="anchor" aria-label="anchor" href="#pca"></a>
@@ -288,7 +288,7 @@ disequilibrium.</p>
 resulting cleaned and LD clumped dataset.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test_pca</span> <span class="op">&lt;-</span> <span class="va">hgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/gt_pca.html">gt_pca</a></span><span class="op">(</span>n_cores <span class="op">=</span> <span class="va">n_cores</span><span class="op">)</span></span></code></pre></div>
-<p>pca: 951ms</p>
+<p>pca: 999ms</p>
 <p>Plot PCA:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">test_pca</span>, type <span class="op">=</span> <span class="st">"scores"</span><span class="op">)</span> <span class="op">+</span></span>
@@ -311,7 +311,7 @@ loadings of the loci.</p>
 <span>  pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">hgdp</span><span class="op">$</span><span class="va">region</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">hgdp</span>, n_cores <span class="op">=</span> <span class="va">n_cores</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>dapc: 133ms</p>
+<p>dapc: 131ms</p>
 <p>Plot DAPC:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">test_dapc</span>, type <span class="op">=</span> <span class="st">"scores"</span><span class="op">)</span></span></code></pre></div>
@@ -330,7 +330,7 @@ set, we calculate pairwise Fst between the populations that
 <span>  n_cores <span class="op">=</span> <span class="va">n_cores</span>,</span>
 <span>  type <span class="op">=</span> <span class="st">"pairwise"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>pairwise_fst: 54ms</p>
+<p>pairwise_fst: 50ms</p>
 <p>Plot pairwise Fst:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Order by continents</span></span>
@@ -363,8 +363,8 @@ file.</p>
 <span>  type <span class="op">=</span> <span class="st">"bed"</span>,</span>
 <span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpPCGAJL/file2dbbf612ed7a7a.bed"</span></span></code></pre></div>
-<p>plink_save: 161ms</p>
+<span><span class="co">#&gt; [1] "/tmp/RtmptYuzhk/file313a93ae8a12.bed"</span></span></code></pre></div>
+<p>plink_save: 162ms</p>
 </div>
 <div class="section level2">
 <h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
@@ -372,17 +372,17 @@ file.</p>
 <p>Here is a summary of the time taken (in seconds) to perform each step
 of the analyses:</p>
 <pre><code><span><span class="co">#&gt;            step time</span></span>
-<span><span class="co">#&gt; 1    read_plink 1.23</span></span>
+<span><span class="co">#&gt; 1    read_plink 1.02</span></span>
 <span><span class="co">#&gt; 2   loci_report 0.13</span></span>
 <span><span class="co">#&gt; 3   filter_loci 0.02</span></span>
-<span><span class="co">#&gt; 4  indiv_report  0.2</span></span>
+<span><span class="co">#&gt; 4  indiv_report 0.18</span></span>
 <span><span class="co">#&gt; 5  filter_indiv 0.19</span></span>
-<span><span class="co">#&gt; 6   ld_clumping 0.46</span></span>
-<span><span class="co">#&gt; 7           pca 0.95</span></span>
+<span><span class="co">#&gt; 6   ld_clumping 0.44</span></span>
+<span><span class="co">#&gt; 7           pca    1</span></span>
 <span><span class="co">#&gt; 8          dapc 0.13</span></span>
 <span><span class="co">#&gt; 9  pairwise_fst 0.05</span></span>
 <span><span class="co">#&gt; 10   plink_save 0.16</span></span>
-<span><span class="co">#&gt; 11        Total 3.52</span></span></code></pre>
+<span><span class="co">#&gt; 11        Total 3.32</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="running-the-benchmark-on-a-laptop">Running the benchmark on a laptop<a class="anchor" aria-label="anchor" href="#running-the-benchmark-on-a-laptop"></a>

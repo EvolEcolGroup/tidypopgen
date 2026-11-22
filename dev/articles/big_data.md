@@ -63,14 +63,24 @@ libraries:
 ``` r
 
 library(tidypopgen)
+#> Loading required package: dplyr
+#> 
+#> Attaching package: 'dplyr'
+#> The following objects are masked from 'package:stats':
+#> 
+#>     filter, lag
+#> The following objects are masked from 'package:base':
+#> 
+#>     intersect, setdiff, setequal, union
+#> Loading required package: tibble
 library(ggplot2)
 ```
 
 Because tidypopgen keeps the genotypes on disk, in file-backed matrices
 (FBM), the following pipeline needs little RAM (see the peak memory of
 each step in the summary at the end), and also runs on a modern laptop.
-Here, we use a desktop machine with a GenuineIntel, Intel(R) Core(TM)
-Ultra 7 155H, 22 CPU and 31 GiB of RAM.
+Here, we use a desktop machine with a GenuineIntel, 13th Gen Intel(R)
+Core(TM) i9-13900, 24 CPU and 126 GiB of RAM.
 
 Before we begin, we will limit the number of cores used by the
 parallelised BLAS library with
@@ -457,15 +467,15 @@ including the objects that were already in memory, such as the
 `gen_tibble` itself):
 
     #>                              step time_s peak_memory_mb
-    #> 1                      merge_vcfs 146.60           2065
-    #> 2                    indiv_report   0.98           1176
-    #> 3                     loci_report   0.99           1729
-    #> 4                      maf_filter   0.52           2220
-    #> 5                        ld_clump  10.38           1694
-    #> 6                             pca   0.42            567
-    #> 7                            dapc   0.26            474
-    #> 8                    pairwise_fst   0.77            439
-    #> 9 Total (time) / maximum (memory) 160.92           2220
+    #> 1                      merge_vcfs  46.40           1991
+    #> 2                    indiv_report   0.46           1117
+    #> 3                     loci_report   0.31           1676
+    #> 4                      maf_filter   0.21           2163
+    #> 5                        ld_clump   4.01           1636
+    #> 6                             pca   0.16            511
+    #> 7                            dapc   0.03            407
+    #> 8                    pairwise_fst   0.17            372
+    #> 9 Total (time) / maximum (memory)  51.74           2163
 
 The memory is measured with [`gc()`](https://rdrr.io/r/base/gc.html),
 and only covers memory allocated by R. It does not include the
