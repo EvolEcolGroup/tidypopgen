@@ -296,60 +296,69 @@ example_gt %>%
   tally()
 ```
 
+Note that we only temporarily grouped the `gen_tibble` for this operation, and the original tibble is unchanged. Most of the time we want the grouping to be permanent, so we can use `group_by` to create a new grouped tibble:
+```{r}
+example_gt <- example_gt %>% group_by(population)
+```
+
 For functions that return one result per individual (such as
 `indiv_het_obs` that we used before), we can use `summarise`, which returns a
 new `tibble` with one line per population. For example, we can count the number of individuals 
 per population, as well as their mean heterozygosity with :
 ```{r}
 example_gt %>%
-  group_by(population) %>%
   summarise(n = n(), mean_het = mean(indiv_het_obs(genotypes)))
 ```
 
-However, note that this is somewhat inefficient, as computing the pop averages
-requires multiple access to the data. A more efficient approach is to:
+However, note that this is somewhat inefficient: on a grouped tibble,
+`summarise()` (and `mutate()`) call `indiv_het_obs()` on each population in
+turn, so the genotypes are read once per population. A more efficient
+approach is to compute the heterozygosities on the ungrouped data, and then
+group them again:
 ```{r}
 example_gt %>%
+  ungroup() %>%
   mutate(het_obs = indiv_het_obs(genotypes)) %>%
   group_by(population) %>%
   summarise(n = n(), mean_het = mean(het_obs))
 ```
 
 In this way, we compute all individual heterozygosities in one go (optimising
-our file access time), and then generate the population summaries.
+our file access time), and then generate the population summaries. Calling
+`indiv_het_obs()` directly on the grouped tibble also reads the genotypes
+only once, and returns one value per individual, in the order of the rows
+(e.g. `example_gt$het_obs <- indiv_het_obs(example_gt)`).
 
-When working with loci, you can use `reframe` to apply functions
-across groups. To use `reframe` correctly,
-be sure to select the `genotype` column within the loci verbs:
+When working with loci, functions have inbuilt grouped methods that return
+the information for each verb by group; for example, if we use `loci_maf()` on a grouped tibble, we get the MAF for each locus in each population:
+
 ```{r}
 example_gt %>%
-  group_by(population) %>%
-  reframe(loci_hwe = loci_hwe(genotypes))
-```
-
-Some functions, such as `loci_maf()`, also have a method for grouped tibbles that 
-allows an even easier syntax:
-```{r}
-example_gt %>%
-  group_by(population) %>%
   loci_maf()
 ```
 
-These methods are coded in C++ to be very efficient, and they should be
+If you have functions that you have written, you can use `reframe` to apply 
+them across groups. To use `reframe` correctly on functions from `tidypopgen`,
+be sure to select the `genotype` column within the loci verbs:
+```{r}
+example_gt %>%
+  reframe(loci_hwe = loci_hwe(genotypes))
+```
+
+These inbuilt grouped methods are coded in C++ to be very efficient, and they
+should be
 preferred to the `reframe()` option. By default, their outputs will return a
 tidy tibble, with one row per locus per population (i.e. the same as we
 would get with `reframe()`). However, using the `type`
 argument, it is also possible to return a list:
 ```{r}
 example_gt %>%
-  group_by(population) %>%
   loci_maf(type = "list")
 ```
 
 Or a matrix:
 ```{r}
 example_gt %>%
-  group_by(population) %>%
   loci_maf(type = "matrix")
 ```
 
@@ -363,9 +372,8 @@ within each population, we combine the per-population results of the grouped
 method into one value per locus. For example, to keep only the loci that are
 polymorphic in every population:
 ```{r}
-grouped_gt <- example_gt %>% group_by(population)
-maf_by_pop <- grouped_gt %>% loci_maf(type = "matrix")
-grouped_gt %>%
+maf_by_pop <- example_gt %>% loci_maf(type = "matrix")
+example_gt %>%
   select_loci_if(apply(maf_by_pop, 1, min) > 0) %>%
   show_loci()
 ```
@@ -375,7 +383,6 @@ refer to populations, such as
 population-specific Fst. For example:
 ```{r}
 example_gt %>%
-  group_by(population) %>%
   pop_fst()
 ```
 

@@ -100,3 +100,28 @@ test_that("indiv_missingness on a subset", {
       )
   ))
 })
+
+test_that("indiv_missingness works on grouped gen_tibbles", {
+  missingness <- indiv_missingness(test_gt)
+  # groups interleaved in the rows
+  grouped_gt <- test_gt %>%
+    mutate(grp = c("x", "y", "x")) %>%
+    group_by(grp)
+  # all individuals in a single pass, in the order of the rows
+  expect_equal(indiv_missingness(grouped_gt), missingness)
+  expect_equal(
+    indiv_missingness(grouped_gt, as_counts = TRUE),
+    indiv_missingness(test_gt, as_counts = TRUE)
+  )
+  # the same values as within a grouped mutate(), which works group by group
+  expect_equal(
+    mutate(grouped_gt, m = indiv_missingness(genotypes))$m,
+    missingness
+  )
+  # tibbles that lost their class are restored
+  expect_equal(
+    indiv_missingness(as_tibble(test_gt) %>% group_by(population)),
+    missingness
+  )
+  expect_equal(indiv_missingness(as.data.frame(test_gt)), missingness)
+})

@@ -249,3 +249,46 @@ test_that("indiv_het_obs uses only the selected loci as denominator", {
     )
   )
 })
+
+test_that("indiv_het_obs works on grouped gen_tibbles", {
+  test_genotypes <- rbind(
+    c(1, 1, 0, 1, 1, 2),
+    c(2, 1, 0, NA, 0, NA),
+    c(2, 2, 0, 0, 1, NA),
+    c(1, 0, 1, 1, NA, 0)
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:6),
+    chromosome = c(1, 1, 1, 1, 2, 2),
+    position = c(3, 5, 65, 343, 23, 456),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("A", "T", "C", "G", "C", "T"),
+    allele_alt = c("T", "C", NA, "C", "G", "A")
+  )
+  # the populations are interleaved in the rows
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = data.frame(
+      id = c("a", "b", "c", "d"),
+      population = c("pop1", "pop2", "pop1", "pop2")
+    ),
+    quiet = TRUE
+  )
+  het_obs <- indiv_het_obs(test_gt)
+  grouped_gt <- test_gt %>% group_by(population)
+  # all individuals in a single pass, in the order of the rows
+  expect_equal(indiv_het_obs(grouped_gt), het_obs)
+  expect_equal(
+    indiv_het_obs(grouped_gt, as_counts = TRUE),
+    indiv_het_obs(test_gt, as_counts = TRUE)
+  )
+  # the same values as within a grouped mutate(), which works group by group
+  expect_equal(mutate(grouped_gt, h = indiv_het_obs(genotypes))$h, het_obs)
+  # tibbles that lost their class are restored
+  expect_equal(
+    indiv_het_obs(as_tibble(test_gt) %>% group_by(population)),
+    het_obs
+  )
+  expect_equal(indiv_het_obs(as.data.frame(test_gt)), het_obs)
+})

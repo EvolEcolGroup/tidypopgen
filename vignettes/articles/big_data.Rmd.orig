@@ -188,11 +188,6 @@ On the other hand, no loci fail the missingness threshold. Because sites absent 
 sum(sgdp_loci_rep$missingness > 0)
 ```
 
-When objects are no longer needed, or once results outputs have been saved, we can remove them using `rm()` to keep memory usage under control:
-
-```{r}
-rm(sgdp_loci_rep)
-```
 
 ## Filtering
 
@@ -202,11 +197,17 @@ We filter for minor allele frequency, choosing to select loci with MAF greater t
 
 ```{r maf_filter, benchmark = TRUE}
 sgdp <- sgdp %>%
-  select_loci_if(loci_maf(genotypes) > 0.05)
+  select_loci_if(sgdp_loci_rep$maf > 0.05)
 cat("Loci remaining:", count_loci(sgdp))
 ```
 
 With other datasets, we would also remove loci with too many missing genotypes (e.g. with `select_loci_if(loci_missingness(genotypes) < 0.1)`). There would be no need to impute the remaining missing genotypes: LD clumping, the PCA and the DAPC below use, for each locus (or pair of loci), the individuals genotyped at it (see the article on [missing genotypes](missing_data.html)). Our dataset has no missing genotypes anyway. There is no need to rewrite the backing file with `gt_update_backingfile()` after filtering: the following steps only use the loci that are left in the `gen_tibble`.
+
+When objects are no longer needed, or once results outputs have been saved, we can remove them using `rm()` to keep memory usage under control:
+
+```{r}
+rm(sgdp_loci_rep)
+```
 
 ## LD clumping
 

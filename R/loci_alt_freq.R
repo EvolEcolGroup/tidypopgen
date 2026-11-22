@@ -33,7 +33,14 @@
 #' @param ... other arguments passed to specific methods, currently unused.
 #' @returns a vector of frequencies, one per locus, if `as_counts = FALSE`;
 #' else a matrix of two columns, the count of alternate alleles and the count
-#' valid alleles (i.e. the sum of alternate and reference)
+#' valid alleles (i.e. the sum of alternate and reference). For a grouped
+#' [`gen_tibble`], the values of each group, as given by `type`: a tibble with
+#' one row per locus and group ("tidy"), a list with one element per group
+#' ("list"), or a matrix with loci in rows and groups in columns ("matrix").
+#' With `as_counts = TRUE`, the tibble has the columns `n_alt` and `n_valid`
+#' instead of `value`, each element of the list is the two-column matrix of
+#' its group, and "matrix" gives a list of two matrices, `n_alt` and
+#' `n_valid`.
 #' @rdname loci_alt_freq
 #' @export
 #' @examples
@@ -181,19 +188,20 @@ loci_alt_freq.grouped_gen_tbl <- function(
       block_size = block_size
     )
 
+    groups <- .group_info(.x)
     if (as_counts) {
-      # split into two matrices (alt counts and valid allele counts, and return
-      # as a list)
-      counts_list <- list(
-        n_alt = freq_mat[, 1:n_groups],
-        n_valid = freq_mat[, (n_groups + 1):(n_groups * 2)]
-      )
-      # add col names
-      names(counts_list) <- c("n_alt", "n_valid")
-      return(counts_list)
+      # the alternate allele counts are in the first n_groups columns, and the
+      # valid allele counts in the next n_groups (drop = FALSE keeps them as
+      # matrices with a single group)
+      return(format_grouped_counts(
+        n_alt = freq_mat[, seq_len(n_groups), drop = FALSE],
+        n_valid = freq_mat[, n_groups + seq_len(n_groups), drop = FALSE],
+        groups = groups,
+        loci_names = loci_names(.x),
+        type = type
+      ))
     }
 
-    groups <- .group_info(.x)
     freq_mat <- format_grouped_output(
       out_mat = freq_mat,
       group_ids = groups$labels,
@@ -538,6 +546,61 @@ format_grouped_output <- function(out_mat, group_ids, loci_names, type,
     # return a matrix_int_names, so that integer loci names are preserved
     matrix_int_names(out_mat, row_names = loci_names, col_names = group_ids)
   }
+}
+
+# format the counts of alternate and valid alleles of each group (two
+# matrices, with one row per locus and one column per group), as given by
+# type: "tidy", a tibble with one row per locus and group, as for the
+# frequencies, but with the columns n_alt and n_valid rather than value;
+# "list", one matrix per group with the columns n_alt and n_valid, as
+# loci_alt_freq(as_counts = TRUE) on each group (i.e. as group_map());
+# "matrix", a list of the two matrices, n_alt and n_valid, with loci in rows
+# and groups in columns. `groups` is the output of .group_info()
+format_grouped_counts <- function(n_alt, n_valid, groups, loci_names, type) {
+  if (type == "tidy") {
+    # the tidy tibble of the alternate allele counts: the loci and the
+    # grouping variables, then the counts in the last column (value)
+    counts <- format_grouped_output(
+      out_mat = n_alt,
+      group_ids = groups$labels,
+      loci_names = loci_names,
+      type = "tidy",
+      group_keys = groups$keys
+    )
+    # the valid allele counts, in the same order (loci in the outer loop, as
+    # in format_grouped_output())
+    n_valid_values <- t(n_valid)
+    attributes(n_valid_values) <- NULL
+    # replace the value column with n_alt and n_valid; bind_cols() renames a
+    # grouping variable called n_alt or n_valid (with a message), as
+    # format_grouped_output() does for one called value, so that the groups
+    # keep their values
+    return(dplyr::bind_cols(
+      counts[-ncol(counts)],
+      tibble::tibble(n_alt = counts[[ncol(counts)]], n_valid = n_valid_values)
+    ))
+  }
+  if (type == "list") {
+    # one two-column matrix per group, as the ungrouped method
+    return(lapply(seq_len(ncol(n_alt)), function(i) {
+      cbind(n_alt = n_alt[, i], n_valid = n_valid[, i])
+    }))
+  }
+  # type == "matrix": the two matrices, named by loci and groups
+  list(
+    n_alt = format_grouped_output(
+      out_mat = n_alt,
+      group_ids = groups$labels,
+      loci_names = loci_names,
+      type = "matrix"
+    ),
+    n_valid = format_grouped_output(
+      out_mat = n_valid,
+      group_ids = groups$labels,
+      loci_names = loci_names,
+      type = "matrix"
+    )
+  )
 }
 
 # a grouped data frame that has lost the class of its tibble (e.g. a grouped

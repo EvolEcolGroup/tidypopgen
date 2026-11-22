@@ -27,6 +27,7 @@ They were in `data-raw/dev_notes/` until 19 Nov 2026. Start with
 | `code_review_2026-10_review_strategy.md` | How the commits of that review are checked and accepted or reverted. |
 | `code_review_2026-11_attribution.md` | The November 2026 review of attribution and licences of third-party code and data: the fixes, with a checkbox for each commit, and the findings not fixed. |
 | `code_review_2026-11_pca_missing.md` | The review of #232 and #233 (DAPC, pcadapt, LD clumping and pruning with missing genotypes): checks, a bug, decisions and test gaps, not fixed yet. |
+| `code_review_2026-11_indiv_grouping.md` | The review of the `indiv_*` and `loci_*` families on grouped `gen_tibble`s (21 Nov, branch `indiv_grouping`): the fixes, with a checkbox for each commit, and the findings not fixed. |
 | `open_issues_2026-11.md` | What is still open after the review and the speed work, and what was resolved. |
 
 ## Speed

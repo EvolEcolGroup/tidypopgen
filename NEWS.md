@@ -46,6 +46,17 @@
 * faster `select_loci()`, and faster `gt_as_vcf()`, `gt_update_backingfile()`
   and `gt_order_loci()` with many chromosomes; `gt_as_genlight()` uses less
   memory
+* `indiv_inbreeding()` on a grouped `gen_tibble` returns one value per
+  individual, in the order of the rows (computed within each group); the
+  list of one vector per group (`type = "list"`) is deprecated. It also
+  works on the `genotypes` column, e.g. within `mutate()`
+* `indiv_het_obs()`, `indiv_missingness()` and `indiv_ploidy()` have methods
+  for grouped `gen_tibble`s (all individuals in one pass, in the order of the
+  rows) and for tibbles that lost their class
+* `loci_alt_freq(as_counts = TRUE)` on a grouped `gen_tibble` follows `type`:
+  by default a tibble with the columns `n_alt` and `n_valid`;
+  `type = "matrix"` gives the two matrices of before, now with loci and group
+  names
 * new article on large RAD-seq datasets; the big data article uses
   `gt_merge_vcfs()`
 
@@ -74,6 +85,8 @@
   first one
 * `gt_add_sf()`: no "Adding missing grouping variables" message on grouped
   `gen_tibble`s
+* `loci_pi()` on a grouped `gen_tibble` with a single individual: fix the
+  output, which was a plain vector whatever `type`
 
 # tidypopgen 1.0.0
 

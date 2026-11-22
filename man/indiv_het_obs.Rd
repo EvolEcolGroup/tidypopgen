@@ -3,6 +3,7 @@
 \name{indiv_het_obs}
 \alias{indiv_het_obs}
 \alias{indiv_het_obs.tbl_df}
+\alias{indiv_het_obs.grouped_gen_tbl}
 \alias{indiv_het_obs.vctrs_bigSNP}
 \title{Estimate individual observed heterozygosity}
 \usage{
@@ -10,11 +11,13 @@ indiv_het_obs(.x, as_counts = FALSE, ...)
 
 \method{indiv_het_obs}{tbl_df}(.x, as_counts = FALSE, ...)
 
+\method{indiv_het_obs}{grouped_gen_tbl}(.x, as_counts = FALSE, ...)
+
 \method{indiv_het_obs}{vctrs_bigSNP}(.x, as_counts = FALSE, ...)
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of
-a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}.}
+a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}} (grouped or not).}
 
 \item{as_counts}{logical, if \code{TRUE}, return a matrix with two columns:
 the number of heterozygotes and the number of missing values for each
@@ -40,6 +43,16 @@ nor the individual's own ploidy, so this works for diploid, polyploid, and
 mixed-ploidy \code{\link{gen_tibble}} objects alike (each individual is evaluated
 against its own ploidy, so individuals of differing ploidy can be mixed
 freely).
+}
+\details{
+On a grouped \code{\link{gen_tibble}}, heterozygosity is computed for all the
+individuals in a single pass over the genotypes (it does not depend on the
+groups), and returned in the order of the rows. Within a grouped
+\code{mutate()} or \code{summarise()}, \code{dplyr} calls \code{indiv_het_obs()} on the
+genotypes of each group in turn: this gives the same values, but reads the
+genotypes once for each group. With many groups and large datasets,
+compute it on the whole grouped tibble instead (e.g.
+\code{grouped_gt$het_obs <- indiv_het_obs(grouped_gt)}), or before grouping.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

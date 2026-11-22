@@ -3,12 +3,20 @@
 \name{indiv_missingness}
 \alias{indiv_missingness}
 \alias{indiv_missingness.tbl_df}
+\alias{indiv_missingness.grouped_gen_tbl}
 \alias{indiv_missingness.vctrs_bigSNP}
 \title{Estimate individual missingness}
 \usage{
 indiv_missingness(.x, as_counts, block_size, ...)
 
 \method{indiv_missingness}{tbl_df}(
+  .x,
+  as_counts = FALSE,
+  block_size = bigstatsr::block_size(nrow(.x), 1),
+  ...
+)
+
+\method{indiv_missingness}{grouped_gen_tbl}(
   .x,
   as_counts = FALSE,
   block_size = bigstatsr::block_size(nrow(.x), 1),
@@ -24,7 +32,7 @@ indiv_missingness(.x, as_counts, block_size, ...)
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of
-a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}.}
+a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}} (grouped or not).}
 
 \item{as_counts}{boolean defining whether the count of NAs (rather than the
 rate) should be returned. It defaults to FALSE (i.e. rates are returned by
@@ -41,6 +49,17 @@ a vector of missingness, one per individuals in the
 \description{
 Estimate missingness for each individual (i.e. the frequency of missing
 genotypes in an individual).
+}
+\details{
+On a grouped \code{\link{gen_tibble}}, missingness is computed for all the
+individuals in a single pass over the genotypes (it does not depend on the
+groups), and returned in the order of the rows. Within a grouped
+\code{mutate()} or \code{summarise()}, \code{dplyr} calls \code{indiv_missingness()} on the
+genotypes of each group in turn: this gives the same values, but reads the
+genotypes once for each group. With many groups and large datasets,
+compute it on the whole grouped tibble instead (e.g.
+\code{grouped_gt$missingness <- indiv_missingness(grouped_gt)}), or before
+grouping.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")
