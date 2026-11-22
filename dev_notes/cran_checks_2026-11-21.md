@@ -5,7 +5,28 @@ branch `cran-fixes-2026-11-21` (not pushed). Following the `submit-to-cran`
 skill; the version is left at 1.0.0.9014 on purpose (Andrea: bumping it
 rebuilds the website).
 
-## Summary
+## Re-run on the final `dev` (2026-11-22)
+
+**Ready, apart from the version and the order of the release steps** (both
+as on 21 Nov, below). Re-run after #241 and #242 (grouped `indiv_*`
+functions and `loci_*` edge cases) on `dev` at `8f51a5ca`, laptop, R 4.6.2.
+The only commit since, `cb7a526e`, changes comments only.
+
+| Check | Result |
+|---|---|
+| `devtools::document()` | no changes; 7 roxygen warnings, links between internal (`@noRd`) helpers in `R/select_loci.R` (from #226), fixed in `cb7a526e` (pushed to `dev`; no Rd file changes) |
+| `spelling::spell_check_package()` | no errors |
+| URLs | the same two 404s as on 21 Nov (`articles/missing_data.html`, `articles/rad_seq.html`): they exist once the site is rebuilt from `main` |
+| Rd sections, non-ASCII, data, top-level files | as on 21 Nov, nothing to fix; non-ASCII characters are in roxygen references (with `Encoding: UTF-8`) and comments, and the PDF manual builds |
+| `devtools::check(remote = TRUE, manual = TRUE)` | 0 errors, 0 warnings, 4 notes, as on 21 Nov: version components, admixtools in `Additional_repositories` and the two URLs (incoming); `-mno-omit-leaf-frame-pointer` and V8 unavailable (local). INFO installed size 46.6 Mb. Tests 6.3 min, examples 1.6 min (1.4 min with `--run-donttest`), vignettes 0.8 min |
+| R-hub, `rhub::rhub_check(branch = "dev")` (run 44992007326) | linux, windows, macos-arm64, m1-san (R-devel): Status OK, no notes |
+| win-builder r-devel, `devtools::check_win_devel()` | uploaded at about 06:00 UTC (a retry got FTP 550, as the file was already queued); the result is emailed to the maintainer |
+| `dartR.base` 1.3.0, the only reverse dependency (`revdep/revdep_dev.sh` in the scratch folder) | the same as with 1.0.0: 27 failures in its own plotting and report tests, and an example that needs HardyWeinberg (not installed in the scratch library); no new problems. It only calls `gen_tibble()`, `show_loci()` and `show_genotypes()` |
+
+`cran-comments.md` needs no change from these results; it still needs the
+win-builder result and the days since the last update at submission.
+
+## Summary (21 Nov)
 
 **Ready, apart from the version and the order of the release steps.** No
 blocking issue is left in the code or the docs.
