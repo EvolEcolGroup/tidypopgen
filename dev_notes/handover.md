@@ -12,8 +12,6 @@ is in `progress.md`; designs are in the topic documents listed in
 | `split_plan` | dev notes only: the plan for the package split (`package_split.md`, `package_split/`) and these living documents; merge into `dev` (no code, `[skip ci]`) | `dev` at `e20145a2` | yes | no |
 | `cran_submission` | the commit R-hub checked on 21 Nov (`66e62aa5`); its content is in `dev` (#241): delete after the release | `dev` at `b4f81b26` | yes | squashed in #241 |
 | `vignette_filtering` | Andrea's vignette edits, the base of #242 (Andrea's checkout is on it): delete once he has switched | `dev` | yes | squashed in #242 |
-| `indiv_grouping` | #242, local only (deleted on GitHub); worktree `/media/andrea/annex/tmp/claude/tidypopgen/wt_indiv` now on `roxygen_links` | `vignette_filtering` | gone | yes (#242, `8f51a5ca`) |
-| `roxygen_links` | `cb7a526e` (roxygen link warnings), pushed straight to `dev` by fast-forward (Andrea, 22 Nov); local only | `dev` at `8f51a5ca` | as `dev` | yes |
 | `as_fbm`, `skill` | `gt_as_fbm()` (Aug) and tooling to build a Claude skill (Oct); not in `dev`, kept (Andrea, 21 Nov); `skill` has one local commit not pushed (not Claude's) | old `dev` | yes | no |
 
 Deleted on 21 Nov (Andrea): `pca_missing` (#231), `cran_test_time` (#237),
@@ -25,9 +23,8 @@ superseded by `dev`). `king_simd_packing` (rejected, below the 1.5x bar) is
 no longer in the laptop's repository (never pushed). The Elements HDD now
 mounts as `/media/andrea/Elements` and gave "Permission denied" on 21 Nov.
 
-A copy of what was unpushed when the annex drive failed (19 Nov) is in
-`~/claude_work/tidypopgen_rescue/` on the laptop's root drive (27 KB; delete
-now that the branches are pushed or merged).
+Deleted on 22 Nov: `indiv_grouping` (#242) and `roxygen_links`
+(`cb7a526e`), local only; the rescue copy of 19 Nov is gone.
 
 ## Next tasks
 
@@ -85,26 +82,28 @@ now that the branches are pushed or merged).
 
 ### 5. **P3** [cleanup] Branches and scratch files
 
-- Branches: `indiv_grouping` and `roxygen_links` (local, merged), then
-  `vignette_filtering` (once Andrea has switched his checkout), and
-  `cran_submission` after the release. Worktrees on the laptop's annex:
-  `wt_cran` (detached at `8f51a5ca`, the CRAN checks), `wt_indiv` (on
-  `roxygen_links`), `wt_notes` (on `split_plan`).
-- Scratch of the CRAN checks, under `/media/andrea/annex/tmp/claude/tidypopgen/`:
-  `check_dev/`, `check*/`, `revdep/` (the scratch library with `dartR.data`
-  and the `dartR.base` checks; keep until the release), `rtmp/`.
-- On manica01: remove the worktree `~/claude_work/tidypopgen/wt_grouping`
-  (`grouping` is merged and deleted), and discard Andrea's uncommitted
+- Done on 22 Nov: the merged branches, the worktrees and the scratch of
+  the CRAN checks on the laptop; on manica01, the worktree `wt_grouping`
+  (its local branch `grouping` is kept) and the stopped `revdep/`.
+- Branches: `vignette_filtering` (once Andrea has switched his checkout),
+  and `cran_submission` after the release. The worktree `wt_notes` (on
+  `split_plan`) on the laptop's annex.
+- After the release: `revdep/` and `revdep.sh` under
+  `/media/andrea/annex/tmp/claude/tidypopgen/` (the scratch library with
+  `dartR.data` and the `dartR.base` checks).
+- On manica01: discard Andrea's uncommitted
   edits of `a02_qc.Rmd` and `benchmark_hgdp.Rmd.orig` (and the lower-case
   edits) in `~/git/tidypopgen`, which are in `dev` through #235, before
   pulling there.
 - Ask Andrea before deleting benchmark files (he may keep optimising with
   them). On the laptop's annex, under `/media/andrea/annex/tmp/claude/tidypopgen/`:
-  `bench_dapc/` (~3 GB), `bench_ld/` (~0.5 GB), `bench_inb/`, `test_timing/`
-  (197 MB: the -O2 library of `e20145a2` and its source, to re-time the tests); on the
+  `bench_dapc/` (~3 GB), `bench_grm/` (~3 GB), `bench_ld/` (~0.5 GB),
+  `test_timing/` (207 MB: the -O2 library of `e20145a2` and its source, to
+  re-time the tests), and the prototypes and references `proj_proto/`,
+  `ld_src/`, `plink_probe/`, `lib_migrate/` (~47 MB together); on the
   Elements HDD, under `/media/andrea/Elements1/tmp/claude/tidypopgen/`:
   `merge_vcf/` (data, builds, bcftools, outputs, worktree) and `plink_king/`
-  (PLINK 2, its source, HGDP650 `.pgen`, builds, worktree); `~/claude_work/tidypopgen_rescue/` on the root drive.
+  (PLINK 2, its source, HGDP650 `.pgen`, builds, worktree).
 - On manica01: `~/claude_work/tidypopgen/` (the -O2 library of
   `e3b2b69c`, logs; `king/` holds the HGDP650 `gen_tibble` (~0.7 GB), the
   libraries and scripts of the KING timings of 19 Nov; `merge_vcf/`, ~3.8 GB:

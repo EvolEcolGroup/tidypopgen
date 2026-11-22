@@ -45,9 +45,10 @@ but Andrea judged it not worth the complexity (with that many loci
 - [ ] **P2** [desktop] Re-time the HGDP650 PCA/DAPC/pcadapt/LD benchmarks on the P-cores (not set up): medians in `gt_pca.md`, `ld_missing.md`.
 - [ ] **P2** [claude] Keep optimising: pcadapt's t-scores, the GRM's count of shared loci, the DAPC regression, the other KING and VCF merge ideas: done when >5% faster with identical outputs.
 - [ ] **P3** [decide] Look into the package split when ready (`package_split.md`: decisions, phases, open questions; Phase 0 after 1.1.0).
-- [ ] **P3** [cleanup] Delete `indiv_grouping`, `roxygen_links` and the worktrees `wt_cran`, `wt_indiv`, `wt_notes`; `vignette_filtering` once Andrea has switched; after the release, `cran_submission` and the CRAN scratch (`revdep/`, `check*/`); ask before deleting the benchmark data on the laptop's annex and in `~/claude_work/tidypopgen/` (incl. `pr_timing/`) on the desktop.
+- [ ] **P3** [cleanup] Delete `vignette_filtering` once Andrea has switched his checkout; after the release, `cran_submission` and `revdep/` on the laptop's annex; ask before deleting the benchmark data and prototypes on the laptop's annex (`bench_*`, `test_timing/`, `proj_proto/`, `ld_src/`) and in `~/claude_work/tidypopgen/` (incl. `pr_timing/`) on the desktop.
 
 **Done**
 - #242 merged (`8f51a5ca`; grouped `indiv_*` functions, `loci_*` edge cases; CodeRabbit's three points fixed): 22 Nov (Andrea).
 - Roxygen link warnings of the `select_loci()` helpers fixed, pushed straight to `dev` (`cb7a526e`): 22 Nov.
 - CRAN checks re-run on the final `dev` (local, R-hub, win-builder, `dartR.base`): 22 Nov.
+- Cleanup: merged branches, worktrees and CRAN scratch on the laptop; `wt_grouping` and the stopped `revdep/` on manica01: 22 Nov.
