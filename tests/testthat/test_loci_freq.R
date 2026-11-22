@@ -417,6 +417,21 @@ test_that("grouped loci_alt_freq counts follow type", {
     counts_tbl$n_alt[valid] / counts_tbl$n_valid[valid],
     freq_tbl$value[valid]
   )
+  # a grouping variable called n_valid keeps its values (renamed, with a
+  # message, as by bind_cols())
+  clash_gt <- test_gt %>%
+    mutate(n_valid = population) %>%
+    group_by(population, n_valid)
+  expect_message(
+    clash_tbl <- loci_alt_freq(clash_gt, as_counts = TRUE),
+    "New names"
+  )
+  expect_named(
+    clash_tbl,
+    c("loci", "population", "n_valid...3", "n_alt", "n_valid...5")
+  )
+  expect_equal(clash_tbl$n_valid...3, clash_tbl$population)
+  expect_equal(clash_tbl$n_valid...5, counts_tbl$n_valid)
   # list: one two-column matrix per group, as loci_alt_freq() on each group
   expect_equal(
     loci_alt_freq(test_gt, as_counts = TRUE, type = "list"),

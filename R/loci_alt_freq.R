@@ -558,7 +558,8 @@ format_grouped_output <- function(out_mat, group_ids, loci_names, type,
 # and groups in columns. `groups` is the output of .group_info()
 format_grouped_counts <- function(n_alt, n_valid, groups, loci_names, type) {
   if (type == "tidy") {
-    # the tidy tibble of the alternate allele counts, renaming their column
+    # the tidy tibble of the alternate allele counts: the loci and the
+    # grouping variables, then the counts in the last column (value)
     counts <- format_grouped_output(
       out_mat = n_alt,
       group_ids = groups$labels,
@@ -566,13 +567,18 @@ format_grouped_counts <- function(n_alt, n_valid, groups, loci_names, type) {
       type = "tidy",
       group_keys = groups$keys
     )
-    names(counts)[names(counts) == "value"] <- "n_alt"
     # the valid allele counts, in the same order (loci in the outer loop, as
     # in format_grouped_output())
     n_valid_values <- t(n_valid)
     attributes(n_valid_values) <- NULL
-    counts$n_valid <- n_valid_values
-    return(counts)
+    # replace the value column with n_alt and n_valid; bind_cols() renames a
+    # grouping variable called n_alt or n_valid (with a message), as
+    # format_grouped_output() does for one called value, so that the groups
+    # keep their values
+    return(dplyr::bind_cols(
+      counts[-ncol(counts)],
+      tibble::tibble(n_alt = counts[[ncol(counts)]], n_valid = n_valid_values)
+    ))
   }
   if (type == "list") {
     # one two-column matrix per group, as the ungrouped method
