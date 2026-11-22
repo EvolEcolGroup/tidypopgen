@@ -54,20 +54,6 @@ Deleted on 22 Nov: `indiv_grouping` (#242) and `roxygen_links`
   release (their timings were rendered on 20 Nov; the laptop section of the
   HGDP benchmark still times the old pipeline; see the backlog).
 
-### 2. **P2** [decide] Stop pkgdown publishing `CLAUDE.md`
-
-- pkgdown renders every top-level `.md` file as a page, whatever
-  `.Rbuildignore` says, so `CLAUDE.md` is at
-  `https://evolecolgroup.github.io/tidypopgen/CLAUDE.html` (and `/dev/`);
-  found by a tidypopgl session on 22 Nov. The file is public on GitHub
-  anyway and holds nothing sensitive.
-- Proposed: `git mv CLAUDE.md .claude/CLAUDE.md` on `dev` (Claude Code reads
-  either; `^\.claude$` is already in `.Rbuildignore`; pkgdown skips
-  dot-folders), before `dev` is merged into `main` for 1.1.0. The deploy
-  (`.github/workflows/pkgdown.yaml`) uses `clean: false`, so then delete
-  `CLAUDE.html` and `dev/CLAUDE.html` from `gh-pages` by hand.
-- Waiting for Andrea's decision.
-
 ### 3. **P2** [desktop] Re-time on the P-cores
 
 - Left: the HGDP650 PCA/DAPC/pcadapt/LD timings, not set up yet (desktop
