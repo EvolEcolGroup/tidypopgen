@@ -72,6 +72,15 @@
 #'   counted in \eqn{n_{ij}}, as in PLINK (filter them out first); with
 #'   `"random"`, they give an error.
 #'
+#' @section Pseudohaploids: Pseudohaploid individuals (see
+#'   [gt_pseudohaploid()]) are coded 0 or 2, and enter the PCA as homozygous
+#'   diploids, as in PLINK and `smartpca` with pseudohaploid ancient DNA:
+#'   half their dosage is their allele frequency, as for diploids, while the
+#'   allele frequencies of the default scaling count one allele per
+#'   pseudohaploid (as [loci_alt_freq()] does). Their own entries on the
+#'   diagonal of the GRM are about twice those of diploids, which does not
+#'   change the relationships between individuals.
+#'
 #' @section Speed: With `method = "partial"`, the matrix products use either
 #'   the BLAS library that R uses (`engine = "blas"`), which is fastest when
 #'   it is an optimised one (OpenBLAS, MKL, Apple Accelerate), or the
@@ -90,7 +99,7 @@
 #'   with the former [gt_pca_partialSVD()]); with R's reference BLAS, 39 s and
 #'   12 s.
 #'
-#' @param x a `gen_tbl` object, with diploid genotypes
+#' @param x a `gen_tbl` object, with diploid (or pseudohaploid) genotypes
 #' @param k the number of principal components to compute. Default is `10`.
 #' @param method `"partial"` (the default) or `"random"` (see Methods).
 #' @param fun_scaling `NULL` (the default) for the binomial scaling, or a
@@ -191,7 +200,7 @@ gt_pca <- function(x, k = 10, method = c("partial", "random"),
                    fun_prod = bigstatsr::big_prodVec,
                    fun_cprod = bigstatsr::big_cprodVec,
                    total_var = TRUE) {
-  stopifnot_diploid(x)
+  stopifnot_dip_pseudo(x)
   method <- match.arg(method)
   engine <- match.arg(engine)
   n_ind <- nrow(x)
@@ -201,6 +210,21 @@ gt_pca <- function(x, k = 10, method = c("partial", "random"),
   if (method == "random") {
     # (pca_random_svd() uses imputed genotypes if they exist; otherwise they
     # must be complete, which its scaling checks)
+    # (bigsnpr's binomial scaling counts two alleles per individual, so
+    # pseudohaploids get the frequencies of loci_alt_freq(), as with
+    # "partial"; that scaling ignores missing genotypes, so all of them are
+    # then looked for, as for a custom scaling)
+    # (computed after switching on the imputed genotypes, if any, as
+    # pca_random_svd() does before the default scaling, so that automatic and
+    # explicit activation give the same frequencies)
+    pseudo_scaling <- is.null(fun_scaling) && is_pseudohaploid(x)
+    if (pseudo_scaling) {
+      if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {
+        gt_set_imputed(x, set = TRUE)
+        on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)
+      }
+      fun_scaling <- pseudohaploid_scaling(x, n_cores)
+    }
     this_pca <- pca_random_svd(x,
       k = k,
       fun_scaling = if (is.null(fun_scaling)) {
@@ -355,6 +379,23 @@ grm_plink <- function(x, center, scale, n_cores, block_size, use_blas) {
     colInd = show_loci(x)$big_index, center = center, scale = scale,
     block_size = block_size, ncores = n_cores, use_blas = use_blas
   )
+}
+
+# The binomial scaling of the loci of a gen_tibble with pseudohaploids, for
+# method "random" (bigsnpr::snp_scaleBinom() would count two alleles per
+# pseudohaploid): centre 2 f and scale sqrt(2 f (1 - f)), with f from
+# loci_alt_freq(), as a scaling function of bigstatsr (the values of the
+# columns ind.col of the backing matrix). Loci without a scale get 1, so
+# that the SVD does not divide by 0 (their centred genotypes are 0).
+pseudohaploid_scaling <- function(x, n_cores) {
+  freq <- loci_alt_freq(x$genotypes, n_cores = n_cores)
+  fbm_cols <- show_loci(x)$big_index
+  scale <- sqrt(2 * freq * (1 - freq))
+  scale[!is.finite(scale) | scale == 0] <- 1
+  function(X, ind.row, ind.col) { # nolint: object_name_linter
+    pos <- match(ind.col, fbm_cols)
+    data.frame(center = 2 * freq[pos], scale = scale[pos])
+  }
 }
 
 # Method "random": bigstatsr::big_randomSVD(), using imputed genotypes if they

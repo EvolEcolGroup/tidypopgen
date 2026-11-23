@@ -20,7 +20,7 @@ gt_pca(
 )
 }
 \arguments{
-\item{x}{a \code{gen_tbl} object, with diploid genotypes}
+\item{x}{a \code{gen_tbl} object, with diploid (or pseudohaploid) genotypes}
 
 \item{k}{the number of principal components to compute. Default is \code{10}.}
 
@@ -178,6 +178,17 @@ with \code{"partial"}). With \code{"partial"}, loci
 with a zero scale (monomorphic loci) add nothing to the GRM, but are
 counted in \eqn{n_{ij}}, as in PLINK (filter them out first); with
 \code{"random"}, they give an error.
+}
+
+\section{Pseudohaploids}{
+ Pseudohaploid individuals (see
+\code{\link[=gt_pseudohaploid]{gt_pseudohaploid()}}) are coded 0 or 2, and enter the PCA as homozygous
+diploids, as in PLINK and \code{smartpca} with pseudohaploid ancient DNA:
+half their dosage is their allele frequency, as for diploids, while the
+allele frequencies of the default scaling count one allele per
+pseudohaploid (as \code{\link[=loci_alt_freq]{loci_alt_freq()}} does). Their own entries on the
+diagonal of the GRM are about twice those of diploids, which does not
+change the relationships between individuals.
 }
 
 \section{Speed}{
