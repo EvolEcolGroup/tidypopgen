@@ -48,6 +48,12 @@
   for developers: the blocks of the block bootstrap, so that other
   packages can resample the same blocks
 - new
+  [`group_labels()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/group_labels.md)
+  and
+  [`group_columns()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/group_columns.md),
+  for developers: the labels and tidy columns of groups, so that other
+  packages name groups as tidypopgen
+- new
   [`gt_merge_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.md)
   and
   [`gt_concat_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_concat_vcfs.md)
