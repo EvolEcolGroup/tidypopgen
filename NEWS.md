@@ -24,6 +24,8 @@
   generics, so that other packages can add methods
 * new `bootstrap_blocks()`, for developers: the blocks of the block bootstrap,
   so that other packages can resample the same blocks
+* new `group_labels()` and `group_columns()`, for developers: the labels and
+  tidy columns of groups, so that other packages name groups as tidypopgen
 * new `gt_merge_vcfs()` and `gt_concat_vcfs()` read several VCF files into a
   single `gen_tibble`, as `bcftools merge` and `bcftools concat`
 * integer chromosomes (`chromosomes_as_int`) for datasets with many
