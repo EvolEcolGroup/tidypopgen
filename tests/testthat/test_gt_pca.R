@@ -1169,3 +1169,38 @@ test_that("projections with missing genotypes match an R reference", {
   expect_true(any(n_obs < 3) && any(n_obs >= 3))
   expect_identical(is.na(sparse[, 1]), n_obs < 3, ignore_attr = TRUE)
 })
+
+test_that("gt_pca works with pseudohaploids, coded as homozygous diploids", {
+  set.seed(1)
+  n <- 30
+  m <- 200
+  geno <- matrix(rbinom(n * m, 2, rep(runif(m, 0.1, 0.9), each = n)), n, m)
+  # the first 10 individuals are pseudohaploids, coded 0 or 2
+  geno[1:10, ] <- 2 * rbinom(10 * m, 1, 0.5)
+  pseudo_gt <- gen_tibble(
+    x = geno,
+    indiv_meta = data.frame(id = paste0("i", 1:n), population = "a"),
+    loci = data.frame(
+      name = paste0("rs", 1:m), chromosome = 1L, position = 1:m,
+      genetic_dist = 0, allele_ref = "A", allele_alt = "T"
+    ),
+    backingfile = tempfile("pseudo_pca_"), quiet = TRUE
+  )
+  pseudo_gt <- gt_pseudohaploid(pseudo_gt, test_n_loci = m)
+  expect_equal(indiv_ploidy(pseudo_gt), rep(c(1, 2), c(10, 20)))
+  # the reference: the SVD of the dosages centred by 2 f and scaled by
+  # sqrt(2 f (1 - f)), with f counting one allele per pseudohaploid
+  freq <- loci_alt_freq(pseudo_gt)
+  expect_equal(
+    freq,
+    (colSums(geno[1:10, ]) / 2 + colSums(geno[11:n, ])) / (10 + 2 * 20)
+  )
+  z <- sweep(sweep(geno, 2, 2 * freq), 2, sqrt(2 * freq * (1 - freq)), "/")
+  ref <- svd(z, nu = 3, nv = 3)
+  for (method in c("partial", "random")) {
+    pca <- gt_pca(pseudo_gt, k = 3, method = method, n_cores = 1)
+    tol <- if (method == "partial") 1e-6 else 1e-3
+    expect_equal(pca$d, ref$d[1:3], tolerance = tol)
+    expect_equal(abs(pca$u), abs(ref$u), tolerance = tol, ignore_attr = TRUE)
+  }
+})

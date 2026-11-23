@@ -5,6 +5,8 @@
 * new `gt_pca()` computes PCAs, by default with missing genotypes handled as
   `plink --pca` (PLINK 1.9), without imputation; `gt_pca_partialSVD()` and
   `gt_pca_randomSVD()` are deprecated
+* `gt_pca()` accepts pseudohaploid data, coded as homozygous diploids (as in
+  PLINK)
 * `gt_pcadapt()`, `gt_dapc()` and `loci_ld_clump()` work with missing
   genotypes without imputation, using the individuals genotyped at each locus
   (as `pcadapt` and PLINK)
