@@ -207,8 +207,14 @@ test_that("group_labels() and group_columns() label groups as the methods", {
   # several: one column per variable
   expect_identical(group_columns(keys, 3), keys[3, ])
   # pairs: suffixed names, also with one variable
-  expect_identical(names(group_columns(keys[1], 1, suffix = "_1")), "population_1")
+  expect_identical(
+    names(group_columns(keys[1], 1, suffix = "_1")),
+    "population_1"
+  )
   expect_identical(names(group_columns(keys, 1, suffix = "_2")),
                    c("population_2", "sex_2"))
-  expect_error(group_columns(keys, 1, other_names = "sex"), "rename the grouping")
+  expect_error(
+    group_columns(keys, 1, other_names = "sex"),
+    "rename the grouping"
+  )
 })
