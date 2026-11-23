@@ -214,8 +214,17 @@ gt_pca <- function(x, k = 10, method = c("partial", "random"),
     # pseudohaploids get the frequencies of loci_alt_freq(), as with
     # "partial"; that scaling ignores missing genotypes, so all of them are
     # then looked for, as for a custom scaling)
+    # (computed after switching on the imputed genotypes, if any, as
+    # pca_random_svd() does before the default scaling, so that automatic and
+    # explicit activation give the same frequencies)
     pseudo_scaling <- is.null(fun_scaling) && is_pseudohaploid(x)
-    if (pseudo_scaling) fun_scaling <- pseudohaploid_scaling(x, n_cores)
+    if (pseudo_scaling) {
+      if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {
+        gt_set_imputed(x, set = TRUE)
+        on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)
+      }
+      fun_scaling <- pseudohaploid_scaling(x, n_cores)
+    }
     this_pca <- pca_random_svd(x,
       k = k,
       fun_scaling = if (is.null(fun_scaling)) {

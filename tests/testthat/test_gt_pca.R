@@ -1203,4 +1203,28 @@ test_that("gt_pca works with pseudohaploids, coded as homozygous diploids", {
     expect_equal(pca$d, ref$d[1:3], tolerance = tol)
     expect_equal(abs(pca$u), abs(ref$u), tolerance = tol, ignore_attr = TRUE)
   }
+  # with imputed genotypes, "random" switches them on before computing the
+  # frequencies of its scaling, as with explicit activation
+  geno_missing <- geno
+  geno_missing[cbind(c(3, 15, 22), c(5, 40, 77))] <- NA
+  missing_gt <- gen_tibble(
+    x = geno_missing,
+    indiv_meta = data.frame(id = paste0("i", 1:n), population = "a"),
+    loci = data.frame(
+      name = paste0("rs", 1:m), chromosome = 1L, position = 1:m,
+      genetic_dist = 0, allele_ref = "A", allele_alt = "T"
+    ),
+    backingfile = tempfile("pseudo_pca_missing_"), quiet = TRUE
+  )
+  missing_gt <- gt_pseudohaploid(missing_gt, test_n_loci = m)
+  missing_gt <- gt_impute_simple(missing_gt, method = "mode")
+  set.seed(2)
+  pca_auto <- gt_pca(missing_gt, k = 3, method = "random", n_cores = 1)
+  expect_false(gt_uses_imputed(missing_gt))
+  gt_set_imputed(missing_gt, set = TRUE)
+  set.seed(2)
+  pca_explicit <- gt_pca(missing_gt, k = 3, method = "random", n_cores = 1)
+  gt_set_imputed(missing_gt, set = FALSE)
+  expect_equal(pca_auto$center, pca_explicit$center)
+  expect_equal(pca_auto$d, pca_explicit$d)
 })
