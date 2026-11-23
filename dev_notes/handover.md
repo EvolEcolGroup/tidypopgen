@@ -1,8 +1,8 @@
 # tidypopgen: handover
 
-Updated 2026-11-22 (laptopX1: the timed articles re-knitted on a quiet
-manica01 and pushed to `dev`, `eaf4d861`; 1.1.0 waits only for Andrea's
-release steps). For the next session: read this and `summary.md` first. History
+Updated 2026-11-23 (laptopX1, from a tidygenclust session: #244 merged into
+`dev`, `bd2e5082`, so `gt_pca()` accepts pseudohaploids; 1.1.0 waits only
+for Andrea's release steps). For the next session: read this and `summary.md` first. History
 is in `progress.md`; designs are in the topic documents listed in
 `README.md`.
 
@@ -27,6 +27,11 @@ mounts as `/media/andrea/Elements` and gave "Permission denied" on 21 Nov.
 Deleted on 22 Nov: `indiv_grouping` (#242) and `roxygen_links`
 (`cb7a526e`), local only; the rescue copy of 19 Nov is gone.
 
+Merged and deleted on origin on 23 Nov: `gt_pca_pseudohaploid` (#244). Its
+worktree `/media/andrea/annex/tmp/claude/tidypopgen_pseudo` and the notes
+worktree `/media/andrea/annex/tmp/claude/tidypopgen_notes` (on
+`split_plan`) remain on the laptop (task 6).
+
 ## Next tasks
 
 ### 1. **P1** [andrea] Release 1.1.0: everything is done but the version
@@ -36,6 +41,10 @@ Deleted on 22 Nov: `indiv_grouping` (#242) and `roxygen_links`
   merge, pre-submission fixes and `cran-comments.md`, grouped `indiv_*`
   functions made consistent), the roxygen link fix, `CLAUDE.md` moved to
   `.claude/`, and the re-timed articles (no code after `cb7a526e`).
+- Since 23 Nov, `dev` (`bd2e5082`) also has #244 (`gt_pca()` with
+  pseudohaploids, version 1.0.0.9015), merged after the checks below
+  without re-running them (Andrea: a small change, covered by CI). The
+  version bump to 1.1.0 replaces 1.0.0.9015.
 - Checks re-run on the final `dev` (22 Nov, `8f51a5ca`; the last commit
   changes comments only; report `dev_notes/cran_checks_2026-11-21.md` on
   `dev`, section "Re-run on the final `dev`"): local `R CMD check
@@ -83,13 +92,42 @@ Deleted on 22 Nov: `indiv_grouping` (#242) and `roxygen_links`
   manica01.
 - **Done when:** faster by more than 5%, with identical outputs.
 
-### 5. **P3** [cleanup] Branches and scratch files
+### 5. **P3** [decide] The GRM diagonal of pseudohaploids
+
+- Since #244, `gt_pca()` takes pseudohaploids (dosages 0 or 2) as
+  homozygous diploids, as PLINK and `smartpca` do. With the diploid scaling
+  sqrt(2 f (1 - f)) and f counting one allele per pseudohaploid
+  (`loci_alt_freq()`), the expected relationship between a pseudohaploid
+  and anyone else is the same as for a diploid with the same ancestry
+  (4 E[(pi_i - f)(pi_j - f)] summed over loci), so the off-diagonal
+  entries of the GRM, which place individuals in the PCA, are unbiased.
+- Only the diagonal differs: a pseudohaploid's self-term is about 2 instead
+  of 1 (one sampled allele: extra binomial noise, not a scaling error).
+- Not to do: scaling pseudohaploids by sqrt(4 f (1 - f)). It brings the
+  diagonal to 1 but shrinks their relationships by 1/sqrt(2) (1/2 between
+  two pseudohaploids), pulling them towards the centre of the PCA, the
+  artefact to avoid with ancient DNA.
+- Option (`method = "partial"`): subtract their expected extra sampling
+  variance from their diagonal entries (about 1, or an estimate per
+  individual over its genotyped loci), in the spirit of GCTA's diagonal
+  correction. A constant shift of the whole diagonal leaves the
+  eigenvectors unchanged; one that affects only some individuals changes
+  them slightly (most with many pseudohaploids and weak structure).
+- Test on real ancient DNA (NORNE): PCs with and without the correction,
+  against projecting the ancient samples on modern PCs
+  (`predict(project_method = "least_squares")`, as `lsqproject`).
+- Not needed by tidygenclust, whose SVD start only uses the factors.
+
+### 6. **P3** [cleanup] Branches and scratch files
 
 - Done on 22 Nov: the merged branches, the worktrees and the scratch of
   the CRAN checks on the laptop; on manica01, the worktree `wt_grouping`
   (its local branch `grouping` is kept) and the stopped `revdep/`.
 - Branches: `vignette_filtering` (once Andrea has switched his checkout),
-  and `cran_submission` after the release. The worktree `wt_notes` (on
+  and `cran_submission` after the release; the local `gt_pca_pseudohaploid`
+  and its worktree `/media/andrea/annex/tmp/claude/tidypopgen_pseudo`, and
+  the worktree `/media/andrea/annex/tmp/claude/tidypopgen_notes` (#244,
+  23 Nov). The worktree `wt_notes` (on
   `split_plan`) on the laptop's annex.
 - After the release: `revdep/` and `revdep.sh` under
   `/media/andrea/annex/tmp/claude/tidypopgen/` (the scratch library with

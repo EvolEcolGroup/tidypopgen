@@ -4,6 +4,17 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-23 (laptopX1, tidygenclust session): gt_pca() accepts pseudohaploids (#244)
+
+- `gt_pca()` refused pseudohaploids (`stopifnot_diploid()`), although they
+  are stored as 0/2 dosages; it now takes them as homozygous diploids (as
+  PLINK). `"random"` uses `loci_alt_freq()`'s frequencies for them (one
+  allele per pseudohaploid), computed after switching on imputed genotypes
+  (CodeRabbit's point, with a regression test). Version 1.0.0.9015.
+- Merged into `dev` after the 1.1.0 CRAN checks, without re-running them
+  (Andrea): `bd2e5082`. Needed by tidygenclust's SVD start.
+- Open: the GRM diagonal of pseudohaploids (handover, task 5).
+
 ## 2026-11-22 (manica01, from laptopX1): timed articles re-knitted on a quiet desktop
 
 - `benchmark_hgdp`, `big_data`, `rad_seq`, `roh_hgdp` knitted twice with an
