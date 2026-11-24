@@ -1,0 +1,296 @@
+call	dataset	status	message
+show_ploidy	diploid	ok	
+indiv_ploidy	diploid	ok	
+show_genotypes	diploid	ok	
+indiv_missingness	diploid	ok	
+loci_missingness	diploid	ok	
+loci_missingness_grouped	diploid	ok	
+loci_alt_freq	diploid	ok	
+loci_alt_freq_grouped	diploid	ok	
+loci_maf	diploid	ok	
+loci_maf_grouped	diploid	ok	
+loci_hwe	diploid	ok	
+loci_hwe_grouped	diploid	ok	
+loci_pi	diploid	ok	
+loci_pi_grouped	diploid	ok	
+loci_ld_clump	diploid	ok	
+select_loci_if	diploid	ok	
+indiv_het_obs	diploid	ok	
+indiv_inbreeding	diploid	ok	
+windows_indiv_roh	diploid	ok	
+pop_het_obs	diploid	ok	
+pop_het_exp	diploid	ok	
+pop_gene_div	diploid	ok	
+pop_fis_Nei87	diploid	ok	
+pop_fis_WG17	diploid	ok	
+pop_fst	diploid	ok	
+pop_global_stats	diploid	ok	
+pop_tajimas_d	diploid	ok	
+windows_pop_tajimas_d	diploid	ok	
+pop_sfs	diploid	ok	
+pairwise_pop_sfs	diploid	ok	
+pairwise_pop_fst_Hudson	diploid	ok	
+pairwise_pop_fst_Nei87	diploid	ok	
+pairwise_pop_fst_WC84	diploid	ok	
+windows_pairwise_pop_fst	diploid	ok	
+nwise_pop_pbs	diploid	ok	
+pairwise_ibs	diploid	ok	
+pairwise_allele_sharing	diploid	ok	
+pairwise_grm	diploid	ok	
+pairwise_king	diploid	ok	
+qc_report_loci	diploid	ok	
+qc_report_loci_grouped	diploid	ok	
+qc_report_indiv	diploid	ok	
+gt_impute_simple	diploid	ok	
+gt_pca_partialSVD	diploid	ok	
+gt_pca_randomSVD	diploid	ok	
+gt_pca_autoSVD	diploid	ok	
+gt_dapc	diploid	ok	
+gt_pseudohaploid	diploid	ok	
+rbind	diploid	ok	
+gt_update_backingfile	diploid	ok	
+gt_save_load	diploid	ok	
+filter_refresh	diploid	ok	
+gt_as_vcf	diploid	ok	
+gt_as_plink	diploid	ok	
+gt_as_genind	diploid	ok	
+gt_as_genlight	diploid	ok	
+gt_as_hierfstat	diploid	ok	
+gt_as_geno_lea	diploid	ok	
+gt_extract_f2	diploid	no_pkg	to use this function, first install package 'admixtools' with devtools::install_github('uqrmaie1/admixtools')
+show_ploidy	haploid	ok	
+indiv_ploidy	haploid	ok	
+show_genotypes	haploid	ok	
+indiv_missingness	haploid	ok	
+loci_missingness	haploid	ok	
+loci_missingness_grouped	haploid	ok	
+loci_alt_freq	haploid	ok	
+loci_alt_freq_grouped	haploid	ok	
+loci_maf	haploid	ok	
+loci_maf_grouped	haploid	ok	
+loci_hwe	haploid	error	`loci_hwe()` only works on diploid data, but these data are haploid
+loci_hwe_grouped	haploid	error	`loci_hwe()` only works on diploid data, but these data are haploid
+loci_pi	haploid	ok	
+loci_pi_grouped	haploid	ok	
+loci_ld_clump	haploid	error	`loci_ld_clump()` only works on diploid data, but these data are haploid
+select_loci_if	haploid	ok	
+indiv_het_obs	haploid	ok	
+indiv_inbreeding	haploid	error	`pairwise_allele_sharing()` only works on diploid data, but these data are haploid
+windows_indiv_roh	haploid	error	`windows_indiv_roh()` only works on diploid data, but these data are haploid
+pop_het_obs	haploid	ok	
+pop_het_exp	haploid	ok	
+pop_gene_div	haploid	ok	
+pop_fis_Nei87	haploid	error	`pop_fis_nei87()` only works on diploid data, but these data are haploid
+pop_fis_WG17	haploid	error	`pop_fis_wg17()` only works on diploid data, but these data are haploid
+pop_fst	haploid	error	`pop_fst()` only works on diploid data, but these data are haploid
+pop_global_stats	haploid	error	`pop_global_stats()` only works on diploid data, but these data are haploid
+pop_tajimas_d	haploid	ok	
+windows_pop_tajimas_d	haploid	ok	
+pop_sfs	haploid	ok	
+pairwise_pop_sfs	haploid	ok	
+pairwise_pop_fst_Hudson	haploid	ok	
+pairwise_pop_fst_Nei87	haploid	error	`method = "Nei87"` only works on diploid data, but these data are haploid. Use `method = "Hudson"`, which is valid for any ploidy.
+pairwise_pop_fst_WC84	haploid	error	`method = "WC84"` only works on diploid data, but these data are haploid. Use `method = "Hudson"`, which is valid for any ploidy.
+windows_pairwise_pop_fst	haploid	ok	
+nwise_pop_pbs	haploid	ok	
+pairwise_ibs	haploid	error	`pairwise_ibs()` only works on diploid data, but these data are haploid
+pairwise_allele_sharing	haploid	error	`pairwise_allele_sharing()` only works on diploid data, but these data are haploid
+pairwise_grm	haploid	error	`pairwise_grm()` only works on diploid data, but these data are haploid
+pairwise_king	haploid	error	`pairwise_king()` only works on diploid data, but these data are haploid
+qc_report_loci	haploid	ok	
+qc_report_loci_grouped	haploid	ok	
+qc_report_indiv	haploid	ok	
+gt_impute_simple	haploid	error	`gt_impute_simple()` only works on diploid or pseudohaploid data, but these data are haploid
+gt_pca_partialSVD	haploid	error	`gt_pca_partialSVD()` only works on diploid or pseudohaploid data, but these data are haploid
+gt_pca_randomSVD	haploid	error	`gt_pca_randomSVD()` only works on diploid or pseudohaploid data, but these data are haploid
+gt_pca_autoSVD	haploid	error	`gt_pca_autoSVD()` only works on diploid or pseudohaploid data, but these data are haploid
+gt_dapc	haploid	error	`gt_pca_partialSVD()` only works on diploid or pseudohaploid data, but these data are haploid
+gt_pseudohaploid	haploid	error	`gt_pseudohaploid()` only works on diploid or pseudohaploid data, but these data are haploid
+rbind	haploid	error	`rbind()` only works on diploid or pseudohaploid data, but these data are haploid
+gt_update_backingfile	haploid	ok	
+gt_save_load	haploid	ok	
+filter_refresh	haploid	ok	
+gt_as_vcf	haploid	error	`gt_as_vcf()` only works on diploid data, but these data are haploid
+gt_as_plink	haploid	error	`gt_as_plink()` only works on diploid or pseudohaploid data, but these data are haploid
+gt_as_genind	haploid	ok	
+gt_as_genlight	haploid	error	`gt_as_genlight()` only works on diploid data, but these data are haploid
+gt_as_hierfstat	haploid	error	`gt_as_hierfstat()` only works on diploid or pseudohaploid data, but these data are haploid
+gt_as_geno_lea	haploid	error	`gt_as_geno_lea()` only works on diploid or pseudohaploid data, but these data are haploid
+gt_extract_f2	haploid	no_pkg	to use this function, first install package 'admixtools' with devtools::install_github('uqrmaie1/admixtools')
+show_ploidy	tetraploid	ok	
+indiv_ploidy	tetraploid	ok	
+show_genotypes	tetraploid	ok	
+indiv_missingness	tetraploid	ok	
+loci_missingness	tetraploid	ok	
+loci_missingness_grouped	tetraploid	ok	
+loci_alt_freq	tetraploid	ok	
+loci_alt_freq_grouped	tetraploid	ok	
+loci_maf	tetraploid	ok	
+loci_maf_grouped	tetraploid	ok	
+loci_hwe	tetraploid	error	`loci_hwe()` only works on diploid data, but these data are polyploid
+loci_hwe_grouped	tetraploid	error	`loci_hwe()` only works on diploid data, but these data are polyploid
+loci_pi	tetraploid	ok	
+loci_pi_grouped	tetraploid	ok	
+loci_ld_clump	tetraploid	error	`loci_ld_clump()` only works on diploid data, but these data are polyploid
+select_loci_if	tetraploid	ok	
+indiv_het_obs	tetraploid	ok	
+indiv_inbreeding	tetraploid	error	`pairwise_allele_sharing()` only works on diploid data, but these data are polyploid
+windows_indiv_roh	tetraploid	error	`windows_indiv_roh()` only works on diploid data, but these data are polyploid
+pop_het_obs	tetraploid	ok	
+pop_het_exp	tetraploid	ok	
+pop_gene_div	tetraploid	ok	
+pop_fis_Nei87	tetraploid	error	`pop_fis_nei87()` only works on diploid data, but these data are polyploid
+pop_fis_WG17	tetraploid	error	`pop_fis_wg17()` only works on diploid data, but these data are polyploid
+pop_fst	tetraploid	error	`pop_fst()` only works on diploid data, but these data are polyploid
+pop_global_stats	tetraploid	error	`pop_global_stats()` only works on diploid data, but these data are polyploid
+pop_tajimas_d	tetraploid	ok	
+windows_pop_tajimas_d	tetraploid	ok	
+pop_sfs	tetraploid	ok	
+pairwise_pop_sfs	tetraploid	ok	
+pairwise_pop_fst_Hudson	tetraploid	ok	
+pairwise_pop_fst_Nei87	tetraploid	error	`method = "Nei87"` only works on diploid data, but these data are polyploid. Use `method = "Hudson"`, which is valid for any ploidy.
+pairwise_pop_fst_WC84	tetraploid	error	`method = "WC84"` only works on diploid data, but these data are polyploid. Use `method = "Hudson"`, which is valid for any ploidy.
+windows_pairwise_pop_fst	tetraploid	ok	
+nwise_pop_pbs	tetraploid	ok	
+pairwise_ibs	tetraploid	error	`pairwise_ibs()` only works on diploid data, but these data are polyploid
+pairwise_allele_sharing	tetraploid	error	`pairwise_allele_sharing()` only works on diploid data, but these data are polyploid
+pairwise_grm	tetraploid	error	`pairwise_grm()` only works on diploid data, but these data are polyploid
+pairwise_king	tetraploid	error	`pairwise_king()` only works on diploid data, but these data are polyploid
+qc_report_loci	tetraploid	ok	
+qc_report_loci_grouped	tetraploid	ok	
+qc_report_indiv	tetraploid	ok	
+gt_impute_simple	tetraploid	error	`gt_impute_simple()` only works on diploid or pseudohaploid data, but these data are polyploid
+gt_pca_partialSVD	tetraploid	error	`gt_pca_partialSVD()` only works on diploid or pseudohaploid data, but these data are polyploid
+gt_pca_randomSVD	tetraploid	error	`gt_pca_randomSVD()` only works on diploid or pseudohaploid data, but these data are polyploid
+gt_pca_autoSVD	tetraploid	error	`gt_pca_autoSVD()` only works on diploid or pseudohaploid data, but these data are polyploid
+gt_dapc	tetraploid	error	`gt_pca_partialSVD()` only works on diploid or pseudohaploid data, but these data are polyploid
+gt_pseudohaploid	tetraploid	error	`gt_pseudohaploid()` only works on diploid or pseudohaploid data, but these data are polyploid
+rbind	tetraploid	error	`rbind()` only works on diploid or pseudohaploid data, but these data are polyploid
+gt_update_backingfile	tetraploid	ok	
+gt_save_load	tetraploid	ok	
+filter_refresh	tetraploid	ok	
+gt_as_vcf	tetraploid	error	`gt_as_vcf()` only works on diploid data, but these data are polyploid
+gt_as_plink	tetraploid	error	`gt_as_plink()` only works on diploid or pseudohaploid data, but these data are polyploid
+gt_as_genind	tetraploid	ok	
+gt_as_genlight	tetraploid	error	`gt_as_genlight()` only works on diploid data, but these data are polyploid
+gt_as_hierfstat	tetraploid	error	`gt_as_hierfstat()` only works on diploid or pseudohaploid data, but these data are polyploid
+gt_as_geno_lea	tetraploid	error	`gt_as_geno_lea()` only works on diploid or pseudohaploid data, but these data are polyploid
+gt_extract_f2	tetraploid	no_pkg	to use this function, first install package 'admixtools' with devtools::install_github('uqrmaie1/admixtools')
+show_ploidy	hexaploid	ok	
+indiv_ploidy	hexaploid	ok	
+show_genotypes	hexaploid	ok	
+indiv_missingness	hexaploid	ok	
+loci_missingness	hexaploid	ok	
+loci_missingness_grouped	hexaploid	ok	
+loci_alt_freq	hexaploid	ok	
+loci_alt_freq_grouped	hexaploid	ok	
+loci_maf	hexaploid	ok	
+loci_maf_grouped	hexaploid	ok	
+loci_hwe	hexaploid	error	`loci_hwe()` only works on diploid data, but these data are polyploid
+loci_hwe_grouped	hexaploid	error	`loci_hwe()` only works on diploid data, but these data are polyploid
+loci_pi	hexaploid	ok	
+loci_pi_grouped	hexaploid	ok	
+loci_ld_clump	hexaploid	error	`loci_ld_clump()` only works on diploid data, but these data are polyploid
+select_loci_if	hexaploid	ok	
+indiv_het_obs	hexaploid	ok	
+indiv_inbreeding	hexaploid	error	`pairwise_allele_sharing()` only works on diploid data, but these data are polyploid
+windows_indiv_roh	hexaploid	error	`windows_indiv_roh()` only works on diploid data, but these data are polyploid
+pop_het_obs	hexaploid	ok	
+pop_het_exp	hexaploid	ok	
+pop_gene_div	hexaploid	ok	
+pop_fis_Nei87	hexaploid	error	`pop_fis_nei87()` only works on diploid data, but these data are polyploid
+pop_fis_WG17	hexaploid	error	`pop_fis_wg17()` only works on diploid data, but these data are polyploid
+pop_fst	hexaploid	error	`pop_fst()` only works on diploid data, but these data are polyploid
+pop_global_stats	hexaploid	error	`pop_global_stats()` only works on diploid data, but these data are polyploid
+pop_tajimas_d	hexaploid	ok	
+windows_pop_tajimas_d	hexaploid	ok	
+pop_sfs	hexaploid	ok	
+pairwise_pop_sfs	hexaploid	ok	
+pairwise_pop_fst_Hudson	hexaploid	ok	
+pairwise_pop_fst_Nei87	hexaploid	error	`method = "Nei87"` only works on diploid data, but these data are polyploid. Use `method = "Hudson"`, which is valid for any ploidy.
+pairwise_pop_fst_WC84	hexaploid	error	`method = "WC84"` only works on diploid data, but these data are polyploid. Use `method = "Hudson"`, which is valid for any ploidy.
+windows_pairwise_pop_fst	hexaploid	ok	
+nwise_pop_pbs	hexaploid	ok	
+pairwise_ibs	hexaploid	error	`pairwise_ibs()` only works on diploid data, but these data are polyploid
+pairwise_allele_sharing	hexaploid	error	`pairwise_allele_sharing()` only works on diploid data, but these data are polyploid
+pairwise_grm	hexaploid	error	`pairwise_grm()` only works on diploid data, but these data are polyploid
+pairwise_king	hexaploid	error	`pairwise_king()` only works on diploid data, but these data are polyploid
+qc_report_loci	hexaploid	ok	
+qc_report_loci_grouped	hexaploid	ok	
+qc_report_indiv	hexaploid	ok	
+gt_impute_simple	hexaploid	error	`gt_impute_simple()` only works on diploid or pseudohaploid data, but these data are polyploid
+gt_pca_partialSVD	hexaploid	error	`gt_pca_partialSVD()` only works on diploid or pseudohaploid data, but these data are polyploid
+gt_pca_randomSVD	hexaploid	error	`gt_pca_randomSVD()` only works on diploid or pseudohaploid data, but these data are polyploid
+gt_pca_autoSVD	hexaploid	error	`gt_pca_autoSVD()` only works on diploid or pseudohaploid data, but these data are polyploid
+gt_dapc	hexaploid	error	`gt_pca_partialSVD()` only works on diploid or pseudohaploid data, but these data are polyploid
+gt_pseudohaploid	hexaploid	error	`gt_pseudohaploid()` only works on diploid or pseudohaploid data, but these data are polyploid
+rbind	hexaploid	error	`rbind()` only works on diploid or pseudohaploid data, but these data are polyploid
+gt_update_backingfile	hexaploid	ok	
+gt_save_load	hexaploid	ok	
+filter_refresh	hexaploid	ok	
+gt_as_vcf	hexaploid	error	`gt_as_vcf()` only works on diploid data, but these data are polyploid
+gt_as_plink	hexaploid	error	`gt_as_plink()` only works on diploid or pseudohaploid data, but these data are polyploid
+gt_as_genind	hexaploid	ok	
+gt_as_genlight	hexaploid	error	`gt_as_genlight()` only works on diploid data, but these data are polyploid
+gt_as_hierfstat	hexaploid	error	`gt_as_hierfstat()` only works on diploid or pseudohaploid data, but these data are polyploid
+gt_as_geno_lea	hexaploid	error	`gt_as_geno_lea()` only works on diploid or pseudohaploid data, but these data are polyploid
+gt_extract_f2	hexaploid	no_pkg	to use this function, first install package 'admixtools' with devtools::install_github('uqrmaie1/admixtools')
+show_ploidy	mixed_2x_4x	ok	
+indiv_ploidy	mixed_2x_4x	ok	
+show_genotypes	mixed_2x_4x	ok	
+indiv_missingness	mixed_2x_4x	ok	
+loci_missingness	mixed_2x_4x	ok	
+loci_missingness_grouped	mixed_2x_4x	ok	
+loci_alt_freq	mixed_2x_4x	ok	
+loci_alt_freq_grouped	mixed_2x_4x	ok	
+loci_maf	mixed_2x_4x	ok	
+loci_maf_grouped	mixed_2x_4x	ok	
+loci_hwe	mixed_2x_4x	error	`loci_hwe()` only works on diploid data, but these data are mixed
+loci_hwe_grouped	mixed_2x_4x	error	`loci_hwe()` only works on diploid data, but these data are mixed
+loci_pi	mixed_2x_4x	ok	
+loci_pi_grouped	mixed_2x_4x	ok	
+loci_ld_clump	mixed_2x_4x	error	`loci_ld_clump()` only works on diploid data, but these data are mixed
+select_loci_if	mixed_2x_4x	ok	
+indiv_het_obs	mixed_2x_4x	ok	
+indiv_inbreeding	mixed_2x_4x	error	`pairwise_allele_sharing()` only works on diploid data, but these data are mixed
+windows_indiv_roh	mixed_2x_4x	error	`windows_indiv_roh()` only works on diploid data, but these data are mixed
+pop_het_obs	mixed_2x_4x	ok	
+pop_het_exp	mixed_2x_4x	ok	
+pop_gene_div	mixed_2x_4x	ok	
+pop_fis_Nei87	mixed_2x_4x	error	`pop_fis_nei87()` only works on diploid data, but these data are mixed
+pop_fis_WG17	mixed_2x_4x	error	`pop_fis_wg17()` only works on diploid data, but these data are mixed
+pop_fst	mixed_2x_4x	error	`pop_fst()` only works on diploid data, but these data are mixed
+pop_global_stats	mixed_2x_4x	error	`pop_global_stats()` only works on diploid data, but these data are mixed
+pop_tajimas_d	mixed_2x_4x	ok	
+windows_pop_tajimas_d	mixed_2x_4x	ok	
+pop_sfs	mixed_2x_4x	ok	
+pairwise_pop_sfs	mixed_2x_4x	ok	
+pairwise_pop_fst_Hudson	mixed_2x_4x	ok	
+pairwise_pop_fst_Nei87	mixed_2x_4x	error	`method = "Nei87"` only works on diploid data, but these data are mixed. Use `method = "Hudson"`, which is valid for any ploidy.
+pairwise_pop_fst_WC84	mixed_2x_4x	error	`method = "WC84"` only works on diploid data, but these data are mixed. Use `method = "Hudson"`, which is valid for any ploidy.
+windows_pairwise_pop_fst	mixed_2x_4x	ok	
+nwise_pop_pbs	mixed_2x_4x	ok	
+pairwise_ibs	mixed_2x_4x	error	`pairwise_ibs()` only works on diploid data, but these data are mixed
+pairwise_allele_sharing	mixed_2x_4x	error	`pairwise_allele_sharing()` only works on diploid data, but these data are mixed
+pairwise_grm	mixed_2x_4x	error	`pairwise_grm()` only works on diploid data, but these data are mixed
+pairwise_king	mixed_2x_4x	error	`pairwise_king()` only works on diploid data, but these data are mixed
+qc_report_loci	mixed_2x_4x	ok	
+qc_report_loci_grouped	mixed_2x_4x	ok	
+qc_report_indiv	mixed_2x_4x	ok	
+gt_impute_simple	mixed_2x_4x	error	`gt_impute_simple()` only works on diploid or pseudohaploid data, but these data are mixed
+gt_pca_partialSVD	mixed_2x_4x	error	`gt_pca_partialSVD()` only works on diploid or pseudohaploid data, but these data are mixed
+gt_pca_randomSVD	mixed_2x_4x	error	`gt_pca_randomSVD()` only works on diploid or pseudohaploid data, but these data are mixed
+gt_pca_autoSVD	mixed_2x_4x	error	`gt_pca_autoSVD()` only works on diploid or pseudohaploid data, but these data are mixed
+gt_dapc	mixed_2x_4x	error	`gt_pca_partialSVD()` only works on diploid or pseudohaploid data, but these data are mixed
+gt_pseudohaploid	mixed_2x_4x	error	`gt_pseudohaploid()` only works on diploid or pseudohaploid data, but these data are mixed
+rbind	mixed_2x_4x	error	`rbind()` only works on diploid or pseudohaploid data, but these data are mixed
+gt_update_backingfile	mixed_2x_4x	ok	
+gt_save_load	mixed_2x_4x	ok	
+filter_refresh	mixed_2x_4x	ok	
+gt_as_vcf	mixed_2x_4x	error	`gt_as_vcf()` only works on diploid data, but these data are mixed
+gt_as_plink	mixed_2x_4x	error	`gt_as_plink()` only works on diploid or pseudohaploid data, but these data are mixed
+gt_as_genind	mixed_2x_4x	ok	
+gt_as_genlight	mixed_2x_4x	error	`gt_as_genlight()` only works on diploid data, but these data are mixed
+gt_as_hierfstat	mixed_2x_4x	error	`gt_as_hierfstat()` only works on diploid or pseudohaploid data, but these data are mixed
+gt_as_geno_lea	mixed_2x_4x	error	`gt_as_geno_lea()` only works on diploid or pseudohaploid data, but these data are mixed
+gt_extract_f2	mixed_2x_4x	no_pkg	to use this function, first install package 'admixtools' with devtools::install_github('uqrmaie1/admixtools')
