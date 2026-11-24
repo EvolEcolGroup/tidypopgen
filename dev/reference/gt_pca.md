@@ -33,7 +33,7 @@ gt_pca(
 
 - x:
 
-  a `gen_tbl` object, with diploid genotypes
+  a `gen_tbl` object, with diploid (or pseudohaploid) genotypes
 
 - k:
 
@@ -230,6 +230,19 @@ these) needs complete or imputed genotypes, and so does any scaling with
 with `"partial"`). With `"partial"`, loci with a zero scale (monomorphic
 loci) add nothing to the GRM, but are counted in \\n\_{ij}\\, as in
 PLINK (filter them out first); with `"random"`, they give an error.
+
+## Pseudohaploids
+
+Pseudohaploid individuals (see
+[`gt_pseudohaploid()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pseudohaploid.md))
+are coded 0 or 2, and enter the PCA as homozygous diploids, as in PLINK
+and `smartpca` with pseudohaploid ancient DNA: half their dosage is
+their allele frequency, as for diploids, while the allele frequencies of
+the default scaling count one allele per pseudohaploid (as
+[`loci_alt_freq()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_alt_freq.md)
+does). Their own entries on the diagonal of the GRM are about twice
+those of diploids, which does not change the relationships between
+individuals.
 
 ## Speed
 

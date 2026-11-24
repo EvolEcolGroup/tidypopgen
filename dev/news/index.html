@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9014</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9015</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,6 +52,8 @@
 <div class="section level3">
 <h3 id="new-features-and-changes-1-1-0">New features and changes<a class="anchor" aria-label="anchor" href="#new-features-and-changes-1-1-0"></a></h3>
 <ul><li>new <code><a href="../reference/gt_pca.html">gt_pca()</a></code> computes PCAs, by default with missing genotypes handled as <code>plink --pca</code> (PLINK 1.9), without imputation; <code><a href="../reference/gt_pca_partialSVD.html">gt_pca_partialSVD()</a></code> and <code><a href="../reference/gt_pca_randomSVD.html">gt_pca_randomSVD()</a></code> are deprecated</li>
+<li>
+<code><a href="../reference/gt_pca.html">gt_pca()</a></code> accepts pseudohaploid data, coded as homozygous diploids (as in PLINK)</li>
 <li>
 <code><a href="../reference/gt_pcadapt.html">gt_pcadapt()</a></code>, <code><a href="../reference/gt_dapc.html">gt_dapc()</a></code> and <code><a href="../reference/loci_ld_clump.html">loci_ld_clump()</a></code> work with missing genotypes without imputation, using the individuals genotyped at each locus (as <code>pcadapt</code> and PLINK)</li>
 <li>new <code><a href="../reference/loci_ld_prune.html">loci_ld_prune()</a></code> prunes loci as <code>plink --indep-pairwise</code> (PLINK 1.9)</li>

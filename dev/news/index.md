@@ -12,6 +12,8 @@
   and
   [`gt_pca_randomSVD()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_randomSVD.md)
   are deprecated
+- [`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca.md)
+  accepts pseudohaploid data, coded as homozygous diploids (as in PLINK)
 - [`gt_pcadapt()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pcadapt.md),
   [`gt_dapc()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_dapc.md)
   and

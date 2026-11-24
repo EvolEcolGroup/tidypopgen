@@ -19,7 +19,7 @@ algorithm of bigsnpr, which removes regions of long-range LD and outliers."><met
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9014</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9015</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -93,7 +93,7 @@ algorithm of <code>bigsnpr</code>, which removes regions of long-range LD and ou
 
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>a <code>gen_tbl</code> object, with diploid genotypes</p></dd>
+<dd><p>a <code>gen_tbl</code> object, with diploid (or pseudohaploid) genotypes</p></dd>
 
 
 <dt id="arg-k">k<a class="anchor" aria-label="anchor" href="#arg-k"></a></dt>
@@ -254,6 +254,17 @@ with <code>"partial"</code>). With <code>"partial"</code>, loci
 with a zero scale (monomorphic loci) add nothing to the GRM, but are
 counted in \(n_{ij}\), as in PLINK (filter them out first); with
 <code>"random"</code>, they give an error.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="pseudohaploids">Pseudohaploids<a class="anchor" aria-label="anchor" href="#pseudohaploids"></a></h2>
+    <p>Pseudohaploid individuals (see
+<code><a href="gt_pseudohaploid.html">gt_pseudohaploid()</a></code>) are coded 0 or 2, and enter the PCA as homozygous
+diploids, as in PLINK and <code>smartpca</code> with pseudohaploid ancient DNA:
+half their dosage is their allele frequency, as for diploids, while the
+allele frequencies of the default scaling count one allele per
+pseudohaploid (as <code><a href="loci_alt_freq.html">loci_alt_freq()</a></code> does). Their own entries on the
+diagonal of the GRM are about twice those of diploids, which does not
+change the relationships between individuals.</p>
     </div>
     <div class="section level2">
     <h2 id="speed">Speed<a class="anchor" aria-label="anchor" href="#speed"></a></h2>
