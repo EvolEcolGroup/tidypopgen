@@ -1,3 +1,4 @@
+AADR
 ADMIXTOOLS
 AVX
 Af
@@ -28,6 +29,8 @@ Dinka
 DiscoSnpRad
 Distruct
 Dusun
+EIGENSOFT
+EIGENSTRAT
 Eam
 Eigen
 FAM
@@ -36,6 +39,7 @@ FMTA
 FST
 Fst
 Fumagalli
+GENO
 GRM
 GS
 GST
@@ -114,6 +118,7 @@ SNPHWE
 Samuk
 Sankararaman
 Stevison
+TGENO
 Tajima
 Tajima's
 Tellier
@@ -302,6 +307,7 @@ snps
 stat
 tbl
 tempfiles
+tgeno
 th
 thr
 tibble

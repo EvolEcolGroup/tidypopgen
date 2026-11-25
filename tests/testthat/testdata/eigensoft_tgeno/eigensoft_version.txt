@@ -1,0 +1,12 @@
+pop_a.tgeno and pop_b.tgeno are inst/extdata/pop_a.geno and pop_b.geno
+(packedancestrymap GENO files) converted to the TGENO layout with EIGENSOFT's
+own code: genotype_matrix_read_file() and genotype_matrix_write_packed_file()
+(with transpose = true), from src/geno.c of https://github.com/DReichLab/EIG
+(master, downloaded 25 Nov 2026), compiled with a small main():
+
+  genotype_matrix g;
+  genotype_matrix_read_file(&g, "pop_a.geno", 0, NULL, NULL);
+  genotype_matrix_write_packed_file(&g, "pop_a.tgeno", true);
+
+Converting them back to GENO the same way gives files identical to the
+originals. They use the .snp and .ind files of inst/extdata.

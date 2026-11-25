@@ -41,9 +41,13 @@
 * `qc_report_loci(hwe = FALSE)` gives the MAF and missingness of loci in a
   single pass
 * `gt_impute_simple()` works after removing loci (but not individuals)
-* faster input and output: VCF and *.bed* files are read in parallel
-  (`n_cores`), *.ped* files are read faster, and *.gt* files are saved twice
-  as fast
+* `gen_tibble()` reads *packedancestry* genotype files in the TGENO layout
+  (one record per individual, as in recent releases of the AADR) as well as
+  GENO; the layout is detected from the header of the file, whatever its
+  extension (*.geno* or *.tgeno*)
+* faster input and output: VCF, *.bed* and *packedancestry* (*.geno*) files
+  are read in parallel (`n_cores`), *.ped* files are read faster, and *.gt*
+  files are saved twice as fast
 * faster `pairwise_king()` (up to 1.8 times on CPUs with AVX2), `pairwise_ibs()`
   and `pairwise_allele_sharing()`, and much faster `indiv_inbreeding()` and
   `qc_report_indiv()` on grouped data
@@ -78,6 +82,9 @@
   individual (#179)
 * `gen_tibble()`: error on *.bed* files whose size does not match the *.bim*
   and *.fam* files, and on individual-major *.bed* files
+* `gen_tibble()`: *packedancestry* files that are truncated, or whose header
+  does not match the *.ind* and *.snp* files, give an error before the
+  backing file is created, and EIGENSTRAT (text) *.geno* files a clear error
 * `gen_tibble()` on *.ped* files: a third allele always flags the locus as
   multi-allelic
 * `gen_tibble()` with the "cpp" parser: fix malformed VCF files read as wrong

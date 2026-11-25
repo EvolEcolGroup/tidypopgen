@@ -739,17 +739,19 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
-// read_packedancestry
-bool read_packedancestry(const char * filename, Environment BM, const RawMatrix& tab);
-RcppExport SEXP _tidypopgen_read_packedancestry(SEXP filenameSEXP, SEXP BMSEXP, SEXP tabSEXP) {
+// read_packedancestry_to_fbm
+void read_packedancestry_to_fbm(std::string filename, Environment BM, const RawMatrix& tab, bool transposed, int n_threads, double max_buffer_bytes);
+RcppExport SEXP _tidypopgen_read_packedancestry_to_fbm(SEXP filenameSEXP, SEXP BMSEXP, SEXP tabSEXP, SEXP transposedSEXP, SEXP n_threadsSEXP, SEXP max_buffer_bytesSEXP) {
 BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const char * >::type filename(filenameSEXP);
+    Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
     Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
     Rcpp::traits::input_parameter< const RawMatrix& >::type tab(tabSEXP);
-    rcpp_result_gen = Rcpp::wrap(read_packedancestry(filename, BM, tab));
-    return rcpp_result_gen;
+    Rcpp::traits::input_parameter< bool >::type transposed(transposedSEXP);
+    Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
+    Rcpp::traits::input_parameter< double >::type max_buffer_bytes(max_buffer_bytesSEXP);
+    read_packedancestry_to_fbm(filename, BM, tab, transposed, n_threads, max_buffer_bytes);
+    return R_NilValue;
 END_RCPP
 }
 // roh_sliding_cpp
@@ -1180,7 +1182,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_ped_to_fbm", (DL_FUNC) &_tidypopgen_ped_to_fbm, 5},
     {"_tidypopgen_pop_stats_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_pop_stats_dip_pseudo_cpp, 12},
     {"_tidypopgen_read_bed_to_fbm", (DL_FUNC) &_tidypopgen_read_bed_to_fbm, 4},
-    {"_tidypopgen_read_packedancestry", (DL_FUNC) &_tidypopgen_read_packedancestry, 3},
+    {"_tidypopgen_read_packedancestry_to_fbm", (DL_FUNC) &_tidypopgen_read_packedancestry_to_fbm, 6},
     {"_tidypopgen_roh_sliding_cpp", (DL_FUNC) &_tidypopgen_roh_sliding_cpp, 17},
     {"_tidypopgen_sfs_config_counts_cpp", (DL_FUNC) &_tidypopgen_sfs_config_counts_cpp, 14},
     {"_tidypopgen_sfs_project_cpp", (DL_FUNC) &_tidypopgen_sfs_project_cpp, 5},

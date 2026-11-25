@@ -56,9 +56,10 @@ same directory and have the same file name.
 the \code{bigsnpr} package (usually created with \code{\link[bigsnpr:snp_readBed]{bigsnpr::snp_readBed()}})
 \item a string giving the path to a vcf file. Only biallelic SNPs will be
 considered.
-\item a string giving the path to a \emph{packedancestry} .geno file. The associated
-.ind and .snp files are expected to be in the same directory and share the
-same file name prefix.
+\item a string giving the path to a \emph{packedancestry} .geno (or .tgeno) file,
+in GENO or TGENO layout (see Details). The associated .ind and .snp files
+are expected to be in the same directory and share the same file name
+prefix.
 \item a genotype matrix of dosages (0, 1, 2, NA) giving the dosage of the
 alternate allele.
 \item with \code{phased = TRUE}, a matrix of haplotypes (see Details).
@@ -106,8 +107,10 @@ in case your
 file compressed with \code{bgzip} (as most are) is also decompressed in
 parallel (other gzipped files are decompressed on a single core). For
 a PLINK \emph{.ped} file, the lines are split and the genotypes coded in
-parallel, and for a PLINK \emph{.bed} file the genotypes are decoded in
-parallel. It is ignored for other formats and for \code{parser = "vcfR"}.}
+parallel, for a PLINK \emph{.bed} file and a \emph{packedancestry} GENO file the
+genotypes are decoded in parallel, and for a \emph{packedancestry} TGENO file
+they are transposed in parallel. It is ignored for other formats and for
+\code{parser = "vcfR"}.}
 
 \item{chunk_size}{the number of loci or individuals (depending on the format)
 processed at a time (currently used if \code{x} is a vcf with parser "vcfR")}
@@ -199,7 +202,13 @@ parents and sex, 0 or -9 for a case/control phenotype, and -9 for a
 quantitative one) are NA, and \code{paternal_ID}, \code{maternal_ID}, \code{sex} and
 \code{phenotype} are only created if they have some non-missing values.
 \code{\link[=gt_as_plink]{gt_as_plink()}} writes these columns back to PLINK files.
-\item \emph{packedancestry} files: When loading \emph{packedancestry} files,
+\item \emph{packedancestry} files: the genotype file can be in either of the two
+layouts of EIGENSOFT, GENO (one record per locus) or TGENO (one record per
+individual, "transposed", as in recent releases of the Allen Ancient DNA
+Resource, AADR); the layout is detected from the header of the file,
+whatever its extension (.geno or .tgeno). A TGENO file is read into memory
+in one go if it is smaller than 2 GB (and otherwise in slabs of loci,
+using up to 2 GB of memory). When loading \emph{packedancestry} files,
 missing alleles will be converted from 'X' to NA
 \item Phased genotypes: with \code{phased = TRUE}, \code{gen_tibble()} creates a phased
 \code{gen_tibble} of diploid individuals, which also knows which allele of each

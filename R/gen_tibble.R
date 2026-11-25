@@ -34,7 +34,13 @@
 #' `phenotype` are only created if they have some non-missing values.
 #' [gt_as_plink()] writes these columns back to PLINK files.
 #'
-#' - *packedancestry* files: When loading *packedancestry* files,
+#' - *packedancestry* files: the genotype file can be in either of the two
+#' layouts of EIGENSOFT, GENO (one record per locus) or TGENO (one record per
+#' individual, "transposed", as in recent releases of the Allen Ancient DNA
+#' Resource, AADR); the layout is detected from the header of the file,
+#' whatever its extension (.geno or .tgeno). A TGENO file is read into memory
+#' in one go if it is smaller than 2 GB (and otherwise in slabs of loci,
+#' using up to 2 GB of memory). When loading *packedancestry* files,
 #' missing alleles will be converted from 'X' to NA
 #'
 #' - Phased genotypes: with `phased = TRUE`, `gen_tibble()` creates a phased
@@ -76,9 +82,10 @@
 #'   the `bigsnpr` package (usually created with [bigsnpr::snp_readBed()])
 #' - a string giving the path to a vcf file. Only biallelic SNPs will be
 #'   considered.
-#' - a string giving the path to a *packedancestry* .geno file. The associated
-#'   .ind and .snp files are expected to be in the same directory and share the
-#'   same file name prefix.
+#' - a string giving the path to a *packedancestry* .geno (or .tgeno) file,
+#'   in GENO or TGENO layout (see Details). The associated .ind and .snp files
+#'   are expected to be in the same directory and share the same file name
+#'   prefix.
 #' - a genotype matrix of dosages (0, 1, 2, NA) giving the dosage of the
 #'   alternate allele.
 #' - with `phased = TRUE`, a matrix of haplotypes (see Details).
@@ -104,8 +111,10 @@
 #'   file compressed with `bgzip` (as most are) is also decompressed in
 #'   parallel (other gzipped files are decompressed on a single core). For
 #'   a PLINK *.ped* file, the lines are split and the genotypes coded in
-#'   parallel, and for a PLINK *.bed* file the genotypes are decoded in
-#'   parallel. It is ignored for other formats and for `parser = "vcfR"`.
+#'   parallel, for a PLINK *.bed* file and a *packedancestry* GENO file the
+#'   genotypes are decoded in parallel, and for a *packedancestry* TGENO file
+#'   they are transposed in parallel. It is ignored for other formats and for
+#'   `parser = "vcfR"`.
 #' @param valid_alleles a vector of valid allele values; it defaults to 'A','T',
 #'   'C' and 'G'.
 #' @param missing_alleles a vector of values in the BIM file/loci dataframe that
@@ -346,7 +355,7 @@ gen_tibble.character <-
         n_cores = n_cores,
         quiet = quiet
       )
-    } else if (tolower(file_ext(x)) == "geno") {
+    } else if (tolower(file_ext(x)) %in% c("geno", "tgeno")) {
       x_gt <- gen_tibble_packedancestry(
         x = x,
         ...,
@@ -354,14 +363,14 @@ gen_tibble.character <-
         missing_alleles = missing_alleles,
         backingfile = backingfile,
         allow_duplicates = allow_duplicates,
-        quiet = quiet,
-        chunk_size = chunk_size
+        n_cores = n_cores,
+        quiet = quiet
       )
     } else {
       stop(paste(
         "x should be a valid file path pointing to a either a PLINK .bed",
-        "or .ped file, a bigSNP .rds file or a VCF .vcf or",
-        ".vcf.gz file"
+        "or .ped file, a bigSNP .rds file, a VCF .vcf or",
+        ".vcf.gz file, or a packedancestrymap .geno or .tgeno file"
       ))
     }
 
@@ -813,7 +822,7 @@ change_duplicated_file_name <- function(file) {
   # remove the extensions of backing files and of input files (other dots in
   # the file name are kept)
   file <- sub(
-    "\\.(bk|rds|gt|bed|ped|geno|vcf\\.gz|vcf|gz)$",
+    "\\.(bk|rds|gt|bed|ped|geno|tgeno|vcf\\.gz|vcf|gz)$",
     "",
     file,
     ignore.case = TRUE

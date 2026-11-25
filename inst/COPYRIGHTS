@@ -25,8 +25,9 @@ bigsnpr and bigstatsr
   Copyright (C) Florian Privé.
   Licence: GPL-3. https://github.com/privefl/bigsnpr,
   https://github.com/privefl/bigstatsr
-  - src/read_packedancestry.cpp: adapted from readbina() (src/read-plink.cpp
-    of bigsnpr).
+  - src/read_packedancestry.cpp: the reading of GENO files in
+    read_packedancestry_to_fbm() is adapted from readbina()
+    (src/read-plink.cpp of bigsnpr).
   - src/read_bed.cpp: read_bed_to_fbm() is adapted from readbina()
     (src/read-plink.cpp of bigsnpr).
   - R/gt_as_plink.R: write_bed() is adapted from bigsnpr::snp_writeBed().

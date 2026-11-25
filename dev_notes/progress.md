@@ -4,6 +4,18 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-25 (cloud session): TGENO files of the AADR
+
+- **Done:** `gen_tibble()` reads packedancestrymap files in the TGENO layout
+  (individual-major, as the AADR is now released) as well as GENO, from the
+  header, with `.geno` or `.tgeno` extensions; both on `n_cores`, checked
+  before the backing file is created (branch `ccr-2e473cc7-1prukj`).
+- **Results:** on a 1.5 GB AADR-like file (4,866 x 1.23M loci, a 4-core VM)
+  the whole `gen_tibble()` takes 17.3 s on 1 core and 13.9 s on 4 for TGENO,
+  and 9.9 s for GENO (10.8 s with the old reader); backing files identical
+  to the old reader's.
+- **Notes changed:** `tgeno_reader.md` (new), `README.md`.
+
 ## 2026-11-20 (manica01): desktop timings of the VCF merge and KING prototypes
 
 - **Done:** the unattended job `vcf_merge_king` (19:30-20:38) timed the

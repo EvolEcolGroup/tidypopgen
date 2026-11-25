@@ -1,0 +1,13 @@
+# fbm_read_packedancestry() on aadr_like.tgeno; lib_v1: words without huge pages, lib_new: with
+RESULT lib=lib_v1 file=aadr_like.tgeno cores=1 elapsed=15.05 user=9.83 sys=4.29
+RESULT lib=lib_v1 file=aadr_like.tgeno cores=4 elapsed=7.47 user=8.01 sys=6.03
+RESULT lib=lib_new file=aadr_like.tgeno cores=1 elapsed=13.77 user=8.30 sys=4.67
+RESULT lib=lib_new file=aadr_like.tgeno cores=4 elapsed=6.79 user=7.04 sys=5.88
+RESULT lib=lib_new file=aadr_like.tgeno cores=1 elapsed=13.39 user=8.06 sys=4.71
+RESULT lib=lib_new file=aadr_like.tgeno cores=4 elapsed=7.51 user=6.98 sys=6.40
+RESULT lib=lib_v1 file=aadr_like.tgeno cores=1 elapsed=15.51 user=10.32 sys=4.63
+RESULT lib=lib_v1 file=aadr_like.tgeno cores=4 elapsed=8.06 user=8.01 sys=8.07
+RESULT lib=lib_v1 file=aadr_like.tgeno cores=1 elapsed=16.39 user=10.86 sys=5.06
+RESULT lib=lib_v1 file=aadr_like.tgeno cores=4 elapsed=7.56 user=8.16 sys=7.84
+RESULT lib=lib_new file=aadr_like.tgeno cores=1 elapsed=14.46 user=9.27 sys=5.03
+RESULT lib=lib_new file=aadr_like.tgeno cores=4 elapsed=8.07 user=7.22 sys=8.31
