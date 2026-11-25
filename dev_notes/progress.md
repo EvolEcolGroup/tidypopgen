@@ -9,7 +9,7 @@ files, SFS, CRAN checks) is described in the topic documents listed in
 - **Done:** `gen_tibble()` reads packedancestrymap files in the TGENO layout
   (individual-major, as the AADR is now released) as well as GENO, from the
   header, with `.geno` or `.tgeno` extensions; both on `n_cores`, checked
-  before the backing file is created (branch `ccr-2e473cc7-1prukj`).
+  before the backing file is created (on `dev`).
 - **Results:** on a 1.5 GB AADR-like file (4,866 x 1.23M loci, a 4-core VM)
   the whole `gen_tibble()` takes 17.3 s on 1 core and 13.9 s on 4 for TGENO,
   and 9.9 s for GENO (10.8 s with the old reader); backing files identical

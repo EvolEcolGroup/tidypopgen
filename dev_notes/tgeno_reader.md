@@ -8,8 +8,7 @@ about 1.5 GB. The code is `R/gen_tibble_packedancestry.R`
 (`gen_tibble_packedancestry()`, `fbm_read_packedancestry()`,
 `read_packedancestry_header()`, `check_packedancestry_file()`) and
 `src/read_packedancestry.cpp` (`read_packedancestry_to_fbm()`, which replaces
-`read_packedancestry()`). Work of 25 Nov 2026 in a cloud session (branch
-`ccr-2e473cc7-1prukj`).
+`read_packedancestry()`). Work of 25 Nov 2026 in a cloud session (on `dev`).
 
 ## The format
 
