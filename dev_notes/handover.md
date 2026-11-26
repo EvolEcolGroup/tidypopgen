@@ -161,8 +161,10 @@ worktree `/media/andrea/annex/tmp/claude/tidypopgen_notes` (on
   merged; the parser timings in
   `/media/andrea/annex/tmp/claude/tidypopgen/parser_ab/` (the two source
   archives and scripts) and `~/project_temp/claude/tidypopgen/parser_ab/`
-  on manica01 (the two -O2 libraries of `4374e70d` and `815611fa`,
-  ~60 MB): ask Andrea before deleting.
+  on manica01 (the two -O2 libraries of `4374e70d` and `815611fa`, their
+  source archives and the scripts, 94 MB): ask Andrea before deleting. The
+  PLINK 1.9 binary downloaded for the fixture was deleted (Andrea's choice:
+  download to scratch, delete at the end).
 - After the release: `revdep/` and `revdep.sh` under
   `/media/andrea/annex/tmp/claude/tidypopgen/` (the scratch library with
   `dartR.data` and the `dartR.base` checks).
