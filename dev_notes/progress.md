@@ -4,6 +4,26 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-26 (laptopX1): sex chromosomes and mtDNA, phase 1
+
+- **Done:**
+  - chromosome types (X, Y, Z, W, PAR, MT recognised by name; numbers
+    declared, e.g. `chr_set = "human"`);
+  - VCF haploid genotypes of diploids stored as homozygotes (0/2, as
+    PLINK), and sex chromosomes no longer set the ploidy;
+  - `indiv_sex_check()` (PLINK 1.9 `--check-sex`);
+  - analyses of diploid autosomes leave out X/Y/MT with a message;
+  - haploid genotypes in `gt_as_vcf()`, PLINK codes in `gt_as_plink()`;
+  - an article.
+- **Where:** branch `sex_chromosomes` (from `dev` at 4374e70d),
+  `b1fb3203`..`f4de9505`; not pushed, no PR.
+- **Result:** the sex check matches PLINK 1.9 exactly on a simulated
+  fixture, and the full test suite passes. VCF parsing is unchanged in
+  speed (+0.5%/+1.2% at 1/8 threads, within noise; manica01).
+- **Decisions:** numbers recognised only when declared, 0/2 coding,
+  autosome-only defaults with a message, phase 1 scope first (Andrea).
+- **Notes changed:** `sex_chromosomes_plan.md` (new), `README.md`.
+
 ## 2026-11-25 (cloud session): TGENO files of the AADR
 
 - **Done:** `gen_tibble()` reads packedancestrymap files in the TGENO layout

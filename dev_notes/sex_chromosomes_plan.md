@@ -10,8 +10,12 @@ which individuals are male or female. With that it can:
 - check the recorded sex against the genotypes;
 - write sex chromosomes back correctly to PLINK and VCF files.
 
-Status: planned 26 Nov 2026 (laptopX1); phase 1 in progress on branch
-`sex_chromosomes` (from `dev` at 4374e70d). Phase 2 is outlined only.
+Status: phase 1 implemented on 26 Nov 2026 (laptopX1), on branch
+`sex_chromosomes` (from `dev` at 4374e70d; not pushed, no PR yet), one
+commit per step: chromosome types (`b1fb3203`), VCF readers (`9526808e`),
+`indiv_sex_check()` (`69bd0209`), autosome-only analyses (`c56ad0bd`),
+writers (`815611fa`), article and cheatsheet (`a7a81f4d`). Phase 2 is
+outlined only. See "As built" for the differences from the design below.
 
 ## Why
 
@@ -213,7 +217,79 @@ counts. It is tested against PLINK 1.9 output.
   - LD on X follows PLINK 1.9 `--ld-xchr`;
   - ROH runs on female X.
 
+## As built (26 Nov 2026)
+
+Differences from the design above, and details settled while building:
+
+- **API.** Declarations take a named vector, `types = c("23" = "X")`, not
+  one argument per type: arguments named `X`, `Y` or `W` would sit oddly next
+  to `.x` and fail the object-name lint. `chr_set` is stored with the
+  declaration, for `gt_as_plink()`.
+- **Integer chromosomes.** Without declarations, only the codes whose
+  names (in the chromosome sidecar) are recognised are looked up; the
+  sidecar is read once with `data.table::fread()` and cached by size and
+  modification time, as RAD data can have millions of codes.
+- **Readers.**
+  - Before the ploidies are known, a haploid ALT gets the provisional value
+    254, replaced by the ploidy of its individual once it is known.
+  - Haploid genotypes of individuals of ploidy > 1 are homozygotes
+    everywhere, not only on sex chromosomes.
+  - The ploidy guess only skips haploid genotypes on chromosomes recognised
+    by name (X, Y, Z, W, MT, M, 0M), since readers know no declarations:
+    `haploid_first_pop_a.vcf` (X coded as 23) still fails, as documented.
+- **Sex check.** It matches PLINK 1.9 b7.11 exactly (F, SNPSEX, STATUS,
+  YCOUNT) on a simulated fixture (`data-raw/validate/create_plink_sexcheck_test_data.R`).
+  - From `sexcheck()` in `plink_misc.c`: F = (N − E − H)/(N − E) over
+    polymorphic X loci where the individual is genotyped, E summing
+    1 − 2pq, no small-sample correction.
+  - From `calc_freqs_and_hwe()` in `plink_filter.c`: frequencies come from
+    founders, with recorded males counting one allele (their
+    heterozygotes left out), and females and unknown sex two.
+  - With no polymorphic X locus, it is an error, as in PLINK.
+  - Not included: the count of heterozygous haploid genotypes per
+    individual (planned; left to the phase 2 QC reports).
+- **Autosome-only defaults.**
+  - The helper `.gt_autosomes_only()` is called at the start of every
+    method (tibble, grouped and genotypes column) of the functions listed,
+    so a function that calls another gives a single message.
+  - A file name (`gt_admixture()`, `gt_snmf()`) passes through.
+  - With no autosomal loci left, it is an error that points to the
+    declaration.
+- **Writers.**
+  - `gt_write_text_by_locus()` takes a set of strings per individual
+    (`indiv_lut`) and counts flagged strings; `gt_as_vcf()` writes runs of
+    loci of the same type.
+  - Individuals of unknown sex are diploid on X and haploid on Y and MT.
+  - `gt_as_plink(chromosomes_as_int = TRUE)` uses n = the declared
+    `chr_set`, else max(22, largest numeric autosome), PLINK's default
+    being human; non-numeric autosomes get n + 4 + rank.
+
+## Numbers
+
+The change to the inner loop of the VCF parser (`count_alt_alleles()`)
+costs nothing measurable:
+
+- **Setup:** `gen_tibble()` on `pop1.vcf.gz`, with 100 samples and 1.02M
+  biallelic SNPs (`allow_duplicates = TRUE`).
+- **Where and when:** manica01, 26 Nov 2026, quiet machine (load 0.2).
+- **Builds:** installed -O2 builds of `dev` (4374e70d) and of the branch
+  (815611fa), A B B A A B, pinned to P-cores.
+
+| threads | `dev` median (min–max) | branch median (min–max) |
+|---|---|---|
+| 1 | 2.081 s (2.080–2.088) | 2.091 s (2.090–2.107) |
+| 8 | 1.314 s (1.312–1.322) | 1.330 s (1.320–1.332) |
+
+The difference is +0.5% and +1.2%, within noise, and the backing files
+are identical (md5). To reproduce: the scripts `time_parser.R` and
+`run_ab.sh` in `~/project_temp/claude/tidypopgen/parser_ab/` on manica01.
+
 ## Open questions
 
-- PLINK 1.9's `sexcheck()`: which samples the X frequencies come from, and
-  how males count. To settle against its output and source.
+- Results change for data with recognised X/Y/MT loci (the autosome-only
+  defaults, and VCF haploid calls as 0/2). Andrea's rule is to keep old
+  behaviour behind a deprecated function; here the escape hatch is a
+  declaration (`types = c(X = "autosome")`) instead. To confirm.
+- Phase 2: which statistics to make sex-aware first (frequencies and
+  missingness on X, HWE on X, Fst on X?), and whether to add a function
+  that erases heterozygous haploid genotypes (as `--set-hh-missing`).
