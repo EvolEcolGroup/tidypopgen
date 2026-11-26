@@ -1,0 +1,19 @@
+ FID     IID       PEDSEX       SNPSEX       STATUS            F
+pop1    ind1            2            2           OK      -0.1184
+pop1    ind2            2            2           OK      -0.0877
+pop1    ind3            1            2      PROBLEM      -0.1563
+pop1    ind4            2            2           OK     -0.08421
+pop1    ind5            2            2           OK       -0.128
+pop1    ind6            2            2           OK      0.07854
+pop1    ind7            2            2           OK     -0.09485
+pop1    ind8            2            2           OK     -0.05098
+pop1    ind9            1            1           OK            1
+pop1   ind10            1            1           OK       0.9594
+pop1   ind11            1            1           OK            1
+pop1   ind12            2            1      PROBLEM            1
+pop1   ind13            1            1           OK            1
+pop1   ind14            1            1           OK            1
+pop1   ind15            1            1           OK            1
+pop1   ind16            1            1           OK            1
+pop1   ind17            2            1      PROBLEM       0.8129
+pop1   ind18            0            2      PROBLEM      -0.1455

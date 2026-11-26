@@ -13,6 +13,8 @@
 * `gen_tibble(phased = TRUE)` reads haploid genotypes as homozygotes
 * `gen_tibble()` keeps the sex of individuals from packedancestrymap `.ind`
   files
+* new `indiv_sex_check()` checks the recorded sex of individuals against
+  their X (and Y) genotypes, as `plink --check-sex` (PLINK 1.9)
 * new `gt_pca()` computes PCAs, by default with missing genotypes handled as
   `plink --pca` (PLINK 1.9), without imputation; `gt_pca_partialSVD()` and
   `gt_pca_randomSVD()` are deprecated
