@@ -73,6 +73,9 @@ pairwise_pop_sfs.gen_tbl <- function(
   block_size = bigstatsr::block_size(nrow(.x), 1),
   ...
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   rlang::check_dots_empty()
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")

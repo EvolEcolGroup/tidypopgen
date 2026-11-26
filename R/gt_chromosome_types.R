@@ -26,11 +26,26 @@
 #'   removes it. A declaration can also bring a recognised chromosome back
 #'   among the autosomes (e.g. `types = c(X = "autosome")`).
 #'
-#'   Functions that assume that loci are on diploid autosomes (e.g.
-#'   [gt_pca()], [pairwise_king()] or [indiv_het_obs()]) only use the
-#'   autosomal loci and the pseudo-autosomal regions, as PLINK does, and say
-#'   how many loci they left out. To include a sex chromosome or the
-#'   mitochondrial genome in those analyses, declare it as an autosome.
+#'   Functions that pool loci and assume that they are on diploid autosomes
+#'   only use the autosomal loci and the pseudo-autosomal regions, as PLINK
+#'   does (e.g. for KING), and say how many loci they left out: the
+#'   individual statistics [indiv_het_obs()], [indiv_inbreeding()] and
+#'   [qc_report_indiv()]; the pairwise statistics [pairwise_king()],
+#'   [pairwise_ibs()], [pairwise_dist()], [pairwise_allele_sharing()] and
+#'   [pairwise_grm()]; [gt_pca()] (and the deprecated `gt_pca_*SVD()`) and
+#'   [gt_pcadapt()]; [gt_extract_f2()], [gt_admixture()] and [gt_snmf()];
+#'   [windows_indiv_roh()]; and the population statistics ([pop_fst()],
+#'   [pop_fis()], [pop_het_obs()], [pop_het_exp()], [pop_gene_div()],
+#'   [pop_global_stats()], [pairwise_pop_fst()], [nwise_pop_pbs()],
+#'   [pop_tajimas_d()], the site frequency spectra [pop_sfs()],
+#'   [pairwise_pop_sfs()], [nwise_pop_sfs()], [bootstrap_pop_sfs()], and their
+#'   `windows_*()` and `jackknife_*()` versions), whose results by locus or by
+#'   window then cover the autosomal loci only. [gt_pseudohaploid()] also
+#'   tests autosomal loci. The functions that return one value per locus
+#'   (`loci_*()`, [qc_report_loci()]), LD clumping and pruning, and
+#'   imputation use all loci, without treating the sex chromosomes of males
+#'   as haploid. To include a sex chromosome or the mitochondrial genome in
+#'   the analyses that use autosomes only, declare it as an autosome.
 #'
 #'   PLINK codes chromosomes with numbers: with n autosomes, X is n+1, Y is
 #'   n+2, the pseudo-autosomal region of X ("XY") is n+3, and MT is n+4 (23
@@ -378,17 +393,31 @@ chromosome_index <- function(.x, chromosome) {
 loci_type_index <- function(.x) {
   chr_types <- attr(.x, "chr_types")
   loci <- attr(.x, "loci")
-  chr <- chromosome_index(.x, loci$chromosome)
-  chr_type_codes <- chromosome_name_type_index(chr$names, chr_types)
-  types <- chr_type_codes[chr$index]
-  # loci with a missing chromosome are taken as autosomal
-  types[is.na(types)] <- 1L
+  chromosome <- loci$chromosome
+  if (is_int_column(chromosome) && (length(chr_types$types) == 0)) {
+    # integer codes without declared types: only the codes of the (few)
+    # chromosomes that are not autosomes are looked up (from the chromosome
+    # sidecar, read once and cached), as there can be millions of codes
+    special <- int_chromosome_types(.x)
+    hit <- match(chromosome, special$code)
+    types <- rep(1L, length(chromosome))
+    types[!is.na(hit)] <- special$type[hit[!is.na(hit)]]
+    chr_type_codes <- special$type
+    locus_chr_names <- function(i) special$name[hit[i]]
+  } else {
+    chr <- chromosome_index(.x, chromosome)
+    chr_type_codes <- chromosome_name_type_index(chr$names, chr_types)
+    types <- chr_type_codes[chr$index]
+    # loci with a missing chromosome are taken as autosomal
+    types[is.na(types)] <- 1L
+    locus_chr_names <- function(i) chr$names[chr$index[i]]
+  }
   # loci of the X chromosome in a pseudo-autosomal region
   par <- chr_types$par
   x_code <- match("X", chromosome_type_levels)
   if (!is.null(par) && any(chr_type_codes == x_code)) {
     on_x <- which(types == x_code)
-    x_chr <- chr$names[chr$index[on_x]]
+    x_chr <- locus_chr_names(on_x)
     for (i in seq_len(nrow(par))) {
       # a region applies to its chromosome, or to any chromosome of type X
       in_region <- loci$position[on_x] >= par$start[i] &
@@ -400,6 +429,114 @@ loci_type_index <- function(.x) {
     }
   }
   types
+}
+
+# the integer codes of the chromosomes of .x (a genotypes column with
+# integer chromosomes) whose names are recognised as those of chromosomes
+# other than autosomes: a data frame with columns code, name and type (the
+# code of the type). The names come from the chromosome sidecar, which is
+# read once and cached (as long as the file does not change); without a
+# sidecar, the names are the codes, and numbers are never recognised
+int_chromosome_types <- function(.x) {
+  none <- data.frame(code = integer(0), name = character(0), type = integer(0))
+  path <- chromosomes_sidecar_path(.x)
+  if (!file.exists(path)) {
+    return(none)
+  }
+  info <- file.info(path, extra_cols = FALSE)
+  cache_key <- paste0(normalizePath(path), "#types")
+  cached <- sidecar_cache[[cache_key]]
+  if (!is.null(cached) && identical(cached$size, info$size) &&
+        identical(cached$mtime, info$mtime)) {
+    return(cached$table)
+  }
+  sidecar <- data.table::fread(path,
+    sep = "\t", header = TRUE, quote = "", na.strings = NULL,
+    colClasses = c("integer", "character"), showProgress = FALSE,
+    data.table = FALSE
+  )
+  types <- chromosome_name_type_index(sidecar[[2]])
+  special <- types != 1L
+  res <- data.frame(
+    code = sidecar[[1]][special],
+    name = sidecar[[2]][special],
+    type = types[special]
+  )
+  assign(cache_key,
+    list(size = info$size, mtime = info$mtime, table = res),
+    envir = sidecar_cache
+  )
+  res
+}
+
+# for the loci of .x (a genotypes column), whether each is autosomal (or in
+# a pseudo-autosomal region), or NULL if they all are. Most gen_tibbles have
+# no chromosome of another type, which is checked first on the levels of the
+# chromosomes (or on the cached codes of integer chromosomes), so that the
+# type of each locus is only found when it is needed
+autosomal_loci <- function(.x) {
+  chr_types <- attr(.x, "chr_types")
+  chromosome <- attr(.x, "loci")$chromosome
+  keep_codes <- match(autosomal_types, chromosome_type_levels)
+  if (is.factor(chromosome)) {
+    level_types <- chromosome_name_type_index(levels(chromosome), chr_types)
+    other <- !level_types %in% keep_codes
+    # (levels of other types may be unused, e.g. after selecting loci)
+    if (!any(other) ||
+          !any(tabulate(chromosome, nbins = nlevels(chromosome))[other] > 0)) {
+      return(NULL)
+    }
+  } else if (is_int_column(chromosome) && (length(chr_types$types) == 0)) {
+    special <- int_chromosome_types(.x)
+    if (!any(chromosome %in% special$code[!special$type %in% keep_codes])) {
+      return(NULL)
+    }
+  }
+  keep <- loci_type_index(.x) %in% keep_codes
+  if (all(keep)) {
+    return(NULL)
+  }
+  keep
+}
+
+# the gen_tibble (or genotypes column) .x restricted to its autosomal loci
+# (and those in pseudo-autosomal regions), with a message giving the number
+# of loci that are left out, for the functions that assume that loci are on
+# diploid autosomes (as PLINK does for, e.g., KING); .x is returned as it is
+# if all its loci are autosomal (or if it is not a gen_tibble, e.g. the
+# name of a file, which is left to the caller)
+.gt_autosomes_only <- function(.x) {
+  if (inherits(.x, "vctrs_bigSNP")) {
+    geno <- .x
+  } else if (is.data.frame(.x) && inherits(.x$genotypes, "vctrs_bigSNP")) {
+    geno <- .x$genotypes
+  } else {
+    return(.x)
+  }
+  keep <- autosomal_loci(geno)
+  if (is.null(keep)) {
+    return(.x)
+  }
+  if (!any(keep)) {
+    stop(
+      "there are no autosomal loci (this function only uses autosomes): ",
+      "declare the chromosomes to use as autosomes with ",
+      "gt_set_chromosome_types()"
+    )
+  }
+  left_out <- loci_type_index(geno)[!keep]
+  message(
+    "Using autosomal loci only: ", length(left_out), " loci on ",
+    paste(chromosome_type_levels[sort(unique(left_out))], collapse = ", "),
+    " are left out (see ?gt_chromosome_types)"
+  )
+  loci <- vctrs::vec_slice(attr(geno, "loci"), which(keep))
+  if (inherits(.x, "vctrs_bigSNP")) {
+    attr(.x, "loci") <- loci
+  } else {
+    attr(.x$genotypes, "loci") <- loci
+  }
+  .x
 }
 
 # the declared types of chromosomes of two gen_tibbles that are bound

@@ -72,6 +72,9 @@ jackknife_nwise_pop_pbs.gen_tbl <- function(
   size_unit = c("snp", "cM", "bp"),
   ...
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   rlang::check_dots_empty()
   # Check if the input is a grouped gen_tibble
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {

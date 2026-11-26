@@ -82,11 +82,26 @@ previous declaration, and a call without \code{types}, \code{chr_set} and \code{
 removes it. A declaration can also bring a recognised chromosome back
 among the autosomes (e.g. \code{types = c(X = "autosome")}).
 
-Functions that assume that loci are on diploid autosomes (e.g.
-\code{\link[=gt_pca]{gt_pca()}}, \code{\link[=pairwise_king]{pairwise_king()}} or \code{\link[=indiv_het_obs]{indiv_het_obs()}}) only use the
-autosomal loci and the pseudo-autosomal regions, as PLINK does, and say
-how many loci they left out. To include a sex chromosome or the
-mitochondrial genome in those analyses, declare it as an autosome.
+Functions that pool loci and assume that they are on diploid autosomes
+only use the autosomal loci and the pseudo-autosomal regions, as PLINK
+does (e.g. for KING), and say how many loci they left out: the
+individual statistics \code{\link[=indiv_het_obs]{indiv_het_obs()}}, \code{\link[=indiv_inbreeding]{indiv_inbreeding()}} and
+\code{\link[=qc_report_indiv]{qc_report_indiv()}}; the pairwise statistics \code{\link[=pairwise_king]{pairwise_king()}},
+\code{\link[=pairwise_ibs]{pairwise_ibs()}}, \code{\link[=pairwise_dist]{pairwise_dist()}}, \code{\link[=pairwise_allele_sharing]{pairwise_allele_sharing()}} and
+\code{\link[=pairwise_grm]{pairwise_grm()}}; \code{\link[=gt_pca]{gt_pca()}} (and the deprecated \code{gt_pca_*SVD()}) and
+\code{\link[=gt_pcadapt]{gt_pcadapt()}}; \code{\link[=gt_extract_f2]{gt_extract_f2()}}, \code{\link[=gt_admixture]{gt_admixture()}} and \code{\link[=gt_snmf]{gt_snmf()}};
+\code{\link[=windows_indiv_roh]{windows_indiv_roh()}}; and the population statistics (\code{\link[=pop_fst]{pop_fst()}},
+\code{\link[=pop_fis]{pop_fis()}}, \code{\link[=pop_het_obs]{pop_het_obs()}}, \code{\link[=pop_het_exp]{pop_het_exp()}}, \code{\link[=pop_gene_div]{pop_gene_div()}},
+\code{\link[=pop_global_stats]{pop_global_stats()}}, \code{\link[=pairwise_pop_fst]{pairwise_pop_fst()}}, \code{\link[=nwise_pop_pbs]{nwise_pop_pbs()}},
+\code{\link[=pop_tajimas_d]{pop_tajimas_d()}}, the site frequency spectra \code{\link[=pop_sfs]{pop_sfs()}},
+\code{\link[=pairwise_pop_sfs]{pairwise_pop_sfs()}}, \code{\link[=nwise_pop_sfs]{nwise_pop_sfs()}}, \code{\link[=bootstrap_pop_sfs]{bootstrap_pop_sfs()}}, and their
+\verb{windows_*()} and \verb{jackknife_*()} versions), whose results by locus or by
+window then cover the autosomal loci only. \code{\link[=gt_pseudohaploid]{gt_pseudohaploid()}} also
+tests autosomal loci. The functions that return one value per locus
+(\verb{loci_*()}, \code{\link[=qc_report_loci]{qc_report_loci()}}), LD clumping and pruning, and
+imputation use all loci, without treating the sex chromosomes of males
+as haploid. To include a sex chromosome or the mitochondrial genome in
+the analyses that use autosomes only, declare it as an autosome.
 
 PLINK codes chromosomes with numbers: with n autosomes, X is n+1, Y is
 n+2, the pseudo-autosomal region of X ("XY") is n+3, and MT is n+4 (23

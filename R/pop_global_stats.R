@@ -116,6 +116,9 @@ pop_global_stats <- function(
   by_locus = FALSE,
   n_cores = bigstatsr::nb_cores()
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   stopifnot_diploid(.x)
   # compute the statistics for each locus in a single pass over the
   # genotypes (see .pop_stats_dip_pseudo() for the formulae); we only keep

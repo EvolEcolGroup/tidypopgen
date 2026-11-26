@@ -77,6 +77,9 @@ indiv_het_obs.data.frame <- function(.x, ...) {
 #' @export
 #' @rdname indiv_het_obs
 indiv_het_obs.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   rlang::check_dots_empty()
   stopifnot_no_pseudohaploid(.x)
   # get the FBM

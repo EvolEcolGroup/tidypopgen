@@ -128,6 +128,9 @@ gt_pca_autoSVD <- function(
   verbose = TRUE,
   total_var = TRUE
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  x <- .gt_autosomes_only(x)
   # a scaling given by the user (see scaling_lookup())
   custom_scaling <- !missing(fun_scaling)
   if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {

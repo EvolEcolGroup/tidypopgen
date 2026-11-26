@@ -149,6 +149,9 @@ windows_indiv_roh.gen_tbl <- function(
   n_cores = bigstatsr::nb_cores(),
   ...
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   # the arguments of the old version (based on detectRUNS) are not used
   # anymore, as the parameters are now those of PLINK
   old_args <- intersect(
@@ -477,6 +480,9 @@ gt_roh_window <- function(
   max_opp_run = NULL,
   max_miss_run = NULL
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   warning(
     "gt_roh_window() is deprecated, and will be removed in a future ",
     "version of tidypopgen. \n",

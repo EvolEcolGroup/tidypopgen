@@ -66,6 +66,9 @@ pop_het_obs <- function(
   include_global = FALSE,
   n_cores = bigstatsr::nb_cores()
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   stopifnot_gen_tibble(.x)
   stopifnot_no_pseudohaploid(.x)
   # get the populations if it is a grouped gen_tibble

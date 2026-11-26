@@ -113,6 +113,9 @@ pairwise_pop_fst.gen_tbl <- function(
   n_cores = bigstatsr::nb_cores(),
   ...
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   rlang::check_dots_empty()
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism

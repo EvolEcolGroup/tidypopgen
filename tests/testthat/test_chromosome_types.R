@@ -167,3 +167,43 @@ test_that("chromosome types are found for integer chromosomes", {
     c("chr1", "chrX", "chrM")
   )
 })
+
+test_that("analyses of diploid autosomes leave out the other loci", {
+  # the fixture of indiv_sex_check(): loci on 1, X, Y and MT, with two
+  # populations
+  sex_gt <- gen_tibble(
+    test_path("testdata", "plink_sexcheck", "sexcheck.bed"),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  sex_gt$population <- rep(c("pop1", "pop2"), length.out = nrow(sex_gt))
+  auto_gt <- sex_gt %>%
+    select_loci_if(loci_chromosome_types(genotypes) == "autosome")
+  msg <- "Using autosomal loci only: 215 loci on X, Y, MT are left out"
+  # individual, pairwise and population statistics, and the PCA
+  expect_message(het <- indiv_het_obs(sex_gt), msg)
+  expect_identical(het, indiv_het_obs(auto_gt))
+  expect_message(king <- pairwise_king(sex_gt), msg)
+  expect_identical(king, pairwise_king(auto_gt))
+  expect_message(pca <- gt_pca(sex_gt, k = 2), msg)
+  expect_identical(pca$loci, gt_pca(auto_gt, k = 2)$loci)
+  grouped_gt <- dplyr::group_by(sex_gt, population)
+  grouped_auto_gt <- dplyr::group_by(auto_gt, population)
+  expect_message(fst <- pairwise_pop_fst(grouped_gt), msg)
+  expect_identical(fst, pairwise_pop_fst(grouped_auto_gt))
+  expect_message(fis <- pop_fis(grouped_gt), msg)
+  expect_identical(fis, pop_fis(grouped_auto_gt))
+  # a single message when a function calls others
+  expect_message(qc_report_indiv(sex_gt, kings_threshold = "first"), msg)
+  # no message without loci of other types
+  expect_no_message(indiv_het_obs(auto_gt))
+  # declaring the sex chromosomes as autosomes keeps them
+  all_gt <- gt_set_chromosome_types(sex_gt,
+    types = c(X = "autosome", Y = "autosome", MT = "autosome")
+  )
+  expect_no_message(het_all <- indiv_het_obs(all_gt))
+  expect_false(identical(het_all, het))
+  # without autosomes
+  x_gt <- sex_gt %>%
+    select_loci_if(loci_chromosome_types(genotypes) == "X")
+  expect_error(pairwise_king(x_gt), "there are no autosomal loci")
+})

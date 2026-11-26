@@ -54,6 +54,9 @@ pairwise_grm <- function(
   n_cores = bigstatsr::nb_cores(),
   method = c("WG17", "plink")
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  x <- .gt_autosomes_only(x)
   stopifnot_diploid(x)
   method <- match.arg(method)
   if (method == "plink") {

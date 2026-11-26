@@ -53,6 +53,9 @@ qc_report_indiv <- function(.x, ...) {
 #' @export
 #' @rdname qc_report_indiv
 qc_report_indiv.gen_tbl <- function(.x, kings_threshold = NULL, ...) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   rlang::check_dots_empty()
 
   if (show_ploidy(.x) == -2) {
@@ -119,6 +122,9 @@ qc_report_indiv_pseudohaploid <- function(.x, ...) {
 #' @export
 #' @rdname qc_report_indiv
 qc_report_indiv.grouped_gen_tbl <- function(.x, kings_threshold = NULL, ...) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   rlang::check_dots_empty()
 
   if (show_ploidy(.x) == -2) {

@@ -100,6 +100,9 @@ gt_pca_randomSVD <- function(
   fun_cprod = bigstatsr::big_cprodVec,
   total_var = TRUE
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  x <- .gt_autosomes_only(x)
   lifecycle::deprecate_soft(
     "1.1.0", "gt_pca_randomSVD()", "gt_pca(method = 'random')"
   )

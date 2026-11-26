@@ -76,6 +76,9 @@ pairwise_king.tbl_df <- function(
   n_cores = bigstatsr::nb_cores(),
   ...
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  x <- .gt_autosomes_only(x)
   stopifnot_has_genotypes(x)
   # hand the genotypes column over to its method, which returns a
   # pairwise_matrix, and label it with the ids of the tibble (the matrix is
@@ -105,6 +108,9 @@ pairwise_king.vctrs_bigSNP <- function(
   n_cores = bigstatsr::nb_cores(),
   ...
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  x <- .gt_autosomes_only(x)
   rlang::check_dots_empty()
   stopifnot_diploid(x)
   king_matrix <- snp_king(
@@ -135,6 +141,9 @@ pairwise_king.grouped_df <- function(
   n_cores = bigstatsr::nb_cores(),
   ...
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  x <- .gt_autosomes_only(x)
   stopifnot_has_genotypes(x)
   rlang::check_dots_empty()
   # the genotypes of all individuals are read once, comparing only the pairs

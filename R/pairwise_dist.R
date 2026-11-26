@@ -134,6 +134,9 @@ pairwise_dist <- function(x, ...) {
 #' @export
 #' @rdname pairwise_dist
 pairwise_dist.tbl_df <- function(x, as_matrix = FALSE, ...) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  x <- .gt_autosomes_only(x)
   stopifnot_has_genotypes(x)
   # hand the genotypes column over to its method (with its own arguments and
   # defaults), which returns a pairwise_matrix, and label it with the ids of
@@ -157,6 +160,9 @@ pairwise_dist.vctrs_bigSNP <- function(
   n_cores = bigstatsr::nb_cores(),
   ...
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  x <- .gt_autosomes_only(x)
   rlang::check_dots_empty()
   stopifnot_diploid(x)
   score <- match.arg(score)
