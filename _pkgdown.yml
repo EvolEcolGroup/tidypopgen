@@ -20,6 +20,7 @@ reference:
         - gt_lookup_loci
         - gt_add_sf
         - gt_pseudohaploid
+        - gt_chromosome_types
   - title: "Show"
     desc: "Functions to view loci and genotype information stored in a `gen_tibble`."
     contents:

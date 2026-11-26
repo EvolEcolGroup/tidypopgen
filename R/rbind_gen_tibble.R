@@ -361,6 +361,12 @@ rbind.gen_tbl <- function(
     fbm_ploidy = indivs_ploidy
   )
 
+  # the declared types of chromosomes of both gen_tibbles
+  attr(merged_tbl$genotypes, "chr_types") <- merge_chr_types(
+    attr(ref$genotypes, "chr_types"),
+    attr(target$genotypes, "chr_types")
+  )
+
   merged_tibble <- tibble::new_tibble(
     merged_tbl,
     class = "gen_tbl"
