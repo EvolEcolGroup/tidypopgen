@@ -508,8 +508,9 @@ test_that("gt_merge_vcfs swaps genotypes with fewer alleles than the ploidy", {
   )
   expect_identical(indiv_ploidy(merged), c(2L, 2L, 2L))
   # the haploid T (REF of file b) is the ALT allele of the merged locus G/T,
-  # and the haploid G is its REF allele
-  expect_equal(show_genotypes(merged), rbind(c(1, 2), c(1, 1), c(0, 0)))
+  # and the haploid G is its REF allele (haploid genotypes of diploids are
+  # homozygotes, as PLINK stores them)
+  expect_equal(show_genotypes(merged), rbind(c(1, 2), c(1, 2), c(0, 0)))
 })
 
 test_that("gt_merge_vcfs gives the same result with and without its cache", {

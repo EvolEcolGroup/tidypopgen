@@ -145,25 +145,14 @@ test_that("declared chromosome types are kept with the gen_tibble", {
 })
 
 test_that("chromosome types are found for integer chromosomes", {
-  vcf_path <- withr::local_tempfile(fileext = ".vcf")
-  writeLines(c(
-    "##fileformat=VCFv4.2",
-    "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">",
-    paste(
-      "#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO",
-      "FORMAT", "a", "b",
-      sep = "\t"
+  vcf_path <- write_merge_vcf(c("a", "b"),
+    data.frame(
+      chrom = c("chr1", "chrX", "chrM"), pos = c(10, 20, 30),
+      id = c("rs1", "rs2", "rs3"), ref = c("A", "C", "G"),
+      alt = c("T", "G", "A")
     ),
-    paste("chr1", 10, "rs1", "A", "T", ".", "PASS", ".", "GT", "0/1", "1/1",
-      sep = "\t"
-    ),
-    paste("chrX", 20, "rs2", "C", "G", ".", "PASS", ".", "GT", "0/1", "1/1",
-      sep = "\t"
-    ),
-    paste("chrM", 30, "rs3", "G", "A", ".", "PASS", ".", "GT", "0/0", "1/1",
-      sep = "\t"
-    )
-  ), vcf_path)
+    rbind(c("0/1", "1/1"), c("0/1", "1/1"), c("0/0", "1/1"))
+  )
   test_gt <- gen_tibble(vcf_path,
     backingfile = tempfile(), quiet = TRUE,
     chromosomes_as_int = TRUE

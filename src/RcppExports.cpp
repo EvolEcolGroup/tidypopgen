@@ -984,14 +984,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // vcf_gt_dosages_cpp
-List vcf_gt_dosages_cpp(const CharacterMatrix& gt, int max_ploidy);
-RcppExport SEXP _tidypopgen_vcf_gt_dosages_cpp(SEXP gtSEXP, SEXP max_ploidySEXP) {
+List vcf_gt_dosages_cpp(const CharacterMatrix& gt, int max_ploidy, const IntegerVector& ploidy);
+RcppExport SEXP _tidypopgen_vcf_gt_dosages_cpp(SEXP gtSEXP, SEXP max_ploidySEXP, SEXP ploidySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const CharacterMatrix& >::type gt(gtSEXP);
     Rcpp::traits::input_parameter< int >::type max_ploidy(max_ploidySEXP);
-    rcpp_result_gen = Rcpp::wrap(vcf_gt_dosages_cpp(gt, max_ploidy));
+    Rcpp::traits::input_parameter< const IntegerVector& >::type ploidy(ploidySEXP);
+    rcpp_result_gen = Rcpp::wrap(vcf_gt_dosages_cpp(gt, max_ploidy, ploidy));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1197,7 +1198,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_which_in_cpp", (DL_FUNC) &_tidypopgen_which_in_cpp, 2},
     {"_tidypopgen_any_duplicated_strings_cpp", (DL_FUNC) &_tidypopgen_any_duplicated_strings_cpp, 1},
     {"_tidypopgen_tajimas_d_window_sums_cpp", (DL_FUNC) &_tidypopgen_tajimas_d_window_sums_cpp, 12},
-    {"_tidypopgen_vcf_gt_dosages_cpp", (DL_FUNC) &_tidypopgen_vcf_gt_dosages_cpp, 2},
+    {"_tidypopgen_vcf_gt_dosages_cpp", (DL_FUNC) &_tidypopgen_vcf_gt_dosages_cpp, 3},
     {"_tidypopgen_merge_sites_new", (DL_FUNC) &_tidypopgen_merge_sites_new, 3},
     {"_tidypopgen_merge_sites_add_file", (DL_FUNC) &_tidypopgen_merge_sites_add_file, 5},
     {"_tidypopgen_merge_sites_result", (DL_FUNC) &_tidypopgen_merge_sites_result, 1},

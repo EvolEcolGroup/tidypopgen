@@ -204,6 +204,10 @@ chromosome_type_levels <- c("autosome", "X", "Y", "Z", "W", "PAR", "MT")
 # autosomes
 autosomal_types <- c("autosome", "PAR")
 
+# the types of chromosomes on which males (or females) are hemizygous, and
+# whose haploid genotypes say nothing of the ploidy of an individual
+hemizygous_types <- c("X", "Y", "Z", "W", "MT")
+
 # the boundaries of the pseudo-autosomal regions of the human X chromosome in
 # each build (the last position of PAR1 and the first position of PAR2), as
 # in PLINK's --split-x

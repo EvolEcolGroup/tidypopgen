@@ -123,7 +123,8 @@ test_that("gt_concat_vcfs keeps the largest ploidy of each individual", {
   )
   expect_match(msgs, "concatenating 2 VCF files with 3 samples", all = FALSE)
   expect_identical(indiv_ploidy(x_gt), c(2L, 2L, 2L))
-  expect_equal(show_genotypes(x_gt)[, 1], c(1, 1, 2))
+  # (the haploid genotype of b is a homozygote, as PLINK stores it)
+  expect_equal(show_genotypes(x_gt)[, 1], c(1, 2, 2))
   # a haploid individual (a) whose genotypes are all missing in another file,
   # where its ploidy can only be guessed (as that of the other individuals):
   # it stays haploid, whatever the order of the files

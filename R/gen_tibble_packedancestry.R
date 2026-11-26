@@ -43,6 +43,18 @@ gen_tibble_packedancestry <- function(
     id = indiv_table$id,
     population = indiv_table$population
   )
+  # sex (M, F, or U for unknown), as a factor with levels "female" and
+  # "male", as read from a .fam file (only if some individuals have a sex)
+  sex <- toupper(as.character(indiv_table$sex))
+  if (any(sex %in% c("M", "F"))) {
+    indiv_meta$sex <- dplyr::recode_values(
+      sex,
+      "M" ~ "male",
+      "F" ~ "female",
+      default = NA,
+      ptype = factor(levels = c("female", "male"))
+    )
+  }
 
   indiv_meta <- validate_indiv_meta(as.data.frame(indiv_meta))
 

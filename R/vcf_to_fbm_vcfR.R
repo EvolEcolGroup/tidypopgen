@@ -77,24 +77,27 @@ vcf_to_fbm_vcfR <- function(
   )
   temp_gt <- vcfR::extract.gt(temp_vcf, convertNA = FALSE)
   ploidy <- unname(apply(temp_gt, 2, get_ploidy))
-  # a missing genotype "." gives no information on ploidy, so for those
-  # individuals we use the first genotype that is not "."
-  unknown_ploidy <- unname(temp_gt[1, ] == ".")
+  # a missing genotype "." gives no information on ploidy, nor does a
+  # haploid genotype on a sex chromosome or mtDNA (e.g. the X of a male), so
+  # for those individuals we use their first genotype that is informative
+  unknown_ploidy <- unname(!ploidy_informative(
+    temp_gt[1, ],
+    vcfR::getCHROM(temp_vcf)
+  ))
   n_read <- 1
   while (any(unknown_ploidy) && (n_read < no_variants)) {
-    next_gt <- vcfR::extract.gt(
-      vcfR::read.vcfR(
-        vcf_path,
-        nrows = min(chunk_size, no_variants - n_read),
-        skip = n_read,
-        verbose = !quiet,
-        convertNA = FALSE,
-        ...
-      ),
-      convertNA = FALSE
+    next_vcf <- vcfR::read.vcfR(
+      vcf_path,
+      nrows = min(chunk_size, no_variants - n_read),
+      skip = n_read,
+      verbose = !quiet,
+      convertNA = FALSE,
+      ...
     )
+    next_gt <- vcfR::extract.gt(next_vcf, convertNA = FALSE)
+    next_chrom <- vcfR::getCHROM(next_vcf)
     for (i in which(unknown_ploidy)) {
-      known <- which(next_gt[, i] != ".")
+      known <- which(ploidy_informative(next_gt[, i], next_chrom))
       if (length(known) > 0) {
         ploidy[i] <- get_ploidy(next_gt[known[1], i])
         unknown_ploidy[i] <- FALSE
@@ -173,7 +176,10 @@ vcf_to_fbm_vcfR <- function(
     # in C++: a genotype is missing if any of its alleles is missing, its
     # dosage is otherwise the sum of its alleles, and genotypes with more
     # than max_ploidy alleles (or a larger dosage) are an error
-    gt_dosages <- vcf_gt_dosages_cpp(gt, max_ploidy = max_ploidy)
+    gt_dosages <- vcf_gt_dosages_cpp(gt,
+      max_ploidy = max_ploidy,
+      ploidy = as.integer(ploidy)
+    )
     if (gt_dosages$error == 1) {
       stop_max_ploidy()
     } else if (gt_dosages$error == 2) {
@@ -249,6 +255,16 @@ vcf_to_fbm_vcfR <- function(
     class = "gen_tbl"
   )
   return(new_gen_tbl)
+}
+
+# whether genotypes tell the ploidy of their individual: not if they are
+# missing ("."), nor if they are haploid on a sex chromosome or mtDNA
+# (chrom, the chromosome of each genotype), e.g. the X of a male
+ploidy_informative <- function(gt, chrom) {
+  hemizygous <- chromosome_name_type_index(chrom) %in%
+    match(hemizygous_types, chromosome_type_levels)
+  haploid <- !grepl("[/|]", gt)
+  (gt != ".") & !(hemizygous & haploid)
 }
 
 # get ploidy for a given individual

@@ -6,6 +6,13 @@
   `loci_chromosome_types()` tell autosomes from sex chromosomes (X, Y, Z, W),
   pseudo-autosomal regions and mtDNA, recognised from their names or declared
   (e.g. PLINK's numeric codes with `chr_set = "human"`)
+* the VCF readers (`gen_tibble()`, `gt_merge_vcfs()`, `gt_concat_vcfs()`)
+  store a haploid genotype of a diploid individual (e.g. the X of a male) as a
+  homozygote (0 or 2), as PLINK does, rather than as 0 or 1; haploid genotypes
+  on sex chromosomes and mtDNA no longer set the ploidy of individuals
+* `gen_tibble(phased = TRUE)` reads haploid genotypes as homozygotes
+* `gen_tibble()` keeps the sex of individuals from packedancestrymap `.ind`
+  files
 * new `gt_pca()` computes PCAs, by default with missing genotypes handled as
   `plink --pca` (PLINK 1.9), without imputation; `gt_pca_partialSVD()` and
   `gt_pca_randomSVD()` are deprecated

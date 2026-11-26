@@ -48,6 +48,33 @@ inline int genotype_ploidy(const char* p) {
   return n_alleles;
 }
 
+// Function to tell whether a chromosome name (not null terminated) is that of
+// a sex chromosome or of the mitochondrial genome, on which males (or
+// females) are hemizygous, as recognised by tidypopgen (see
+// chromosome_name_type_index() in R): "X", "Y", "Z", "W", "MT", "M" or "0M",
+// in any case, after removing a prefix "chromosome_", "chr_", "chromosome"
+// or "chr" (in any case). Haploid genotypes on these chromosomes give no
+// information on the ploidy of an individual (e.g. the X of a male).
+inline bool is_hemizygous_chromosome(const char* name, size_t len) {
+  // (the longest name is "chromosome_MT")
+  if (len > 13) {
+    return false;
+  }
+  std::string upper(name, len);
+  for (size_t i = 0; i < len; i++) {
+    upper[i] = (char) std::toupper((unsigned char) upper[i]);
+  }
+  const char* prefixes[4] = {"CHROMOSOME_", "CHR_", "CHROMOSOME", "CHR"};
+  for (int k = 0; k < 4; k++) {
+    if (upper.compare(0, std::strlen(prefixes[k]), prefixes[k]) == 0) {
+      upper.erase(0, std::strlen(prefixes[k]));
+      break;
+    }
+  }
+  return (upper == "X") || (upper == "Y") || (upper == "Z") ||
+    (upper == "W") || (upper == "MT") || (upper == "M") || (upper == "0M");
+}
+
 
 // Function to convert a vector of characters into an R character vector,
 // reusing a single R string for each distinct character (rather than creating
@@ -250,9 +277,15 @@ enum GenotypeStatus {
   // (phased genotypes only) a genotype is unphased (with '/', e.g. "0/1",
   // "0/0" or "./.")
   UNPHASED_GENOTYPE = 4,
-  // (phased genotypes only) a genotype is not diploid (e.g. "1" or "0|1|1")
+  // (phased genotypes only) a genotype is neither diploid nor haploid (e.g.
+  // "0|1|1")
   NOT_DIPLOID = 5
 };
+
+// the provisional value of a haploid ALT allele, stored by
+// count_alt_alleles() before the ploidies are known (no genotype has that
+// many alleles)
+const unsigned char haploid_alt_provisional = 254;
 
 /******************************************************************************
  * count the number of alternate alleles of each genotype of a line
@@ -277,12 +310,18 @@ enum GenotypeStatus {
  *   (updated)
  * @param min_alleles the smallest number of alleles of a genotype that is
  *   not missing so far (updated)
+ * @param ploidy the ploidy of each individual, or NULL if it is not known
+ *   yet: a haploid genotype (e.g. "1", the X of a male) in an individual of
+ *   higher ploidy is stored as a homozygote (0 or its ploidy, as PLINK stores
+ *   hemizygous genotypes), or, without ploidy, a haploid ALT allele is
+ *   stored as haploid_alt_provisional (replaced once the ploidies are known)
  * @return a GenotypeStatus (GENOTYPES_OK if the genotypes are valid)
  */
 inline int count_alt_alleles(const char* line, size_t len,
                              unsigned char* alt_counts, size_t n,
                              unsigned char missing_value, char alt_allele,
-                             size_t &max_alleles, size_t &min_alleles) {
+                             size_t &max_alleles, size_t &min_alleles,
+                             const int* ploidy) {
   if (n == 0) {
     return GENOTYPES_OK;
   }
@@ -333,7 +372,16 @@ inline int count_alt_alleles(const char* line, size_t len,
     if (!is_missing && (n_alleles < min_alleles)) {
       min_alleles = n_alleles;
     }
-    alt_counts[i] = is_missing ? missing_value : n_alt;
+    if (is_missing) {
+      alt_counts[i] = missing_value;
+    } else if ((n_alleles == 1) && (n_alt == 1)) {
+      // a haploid ALT allele: as many ALT alleles as the ploidy of its
+      // individual (a haploid REF allele has none, whatever the ploidy)
+      alt_counts[i] = (ploidy != NULL) ? (unsigned char) ploidy[i] :
+        haploid_alt_provisional;
+    } else {
+      alt_counts[i] = n_alt;
+    }
     // move to the next field
     p = field_end + 1;
   }
@@ -357,9 +405,11 @@ inline int count_alt_alleles(const char* line, size_t len,
  * @param phased_lut the bytes of the genotypes 0|0, 0|1, 1|0 and 1|1
  * @param bad_indiv set to the (0-based) index of the individual whose
  *   genotype could not be read, if the status is not GENOTYPES_OK
+ * A haploid genotype ('0' or '1', e.g. the X of a male) is stored as a
+ * homozygote (0|0 or 1|1), as PLINK stores hemizygous genotypes.
  * @return a GenotypeStatus: any unphased genotype (with '/') is
  *   UNPHASED_GENOTYPE, and a genotype with valid alleles that is neither
- *   diploid nor a single '.' is NOT_DIPLOID
+ *   diploid nor haploid is NOT_DIPLOID
  */
 inline int phased_genotype_bytes(const char* line, size_t len,
                                  unsigned char* bytes, size_t n,
@@ -401,6 +451,9 @@ inline int phased_genotype_bytes(const char* line, size_t len,
     size_t gt_len = gt_end - p;
     if ((gt_len == 1) && (p[0] == '.')) {
       bytes[i] = missing_value;
+    } else if ((gt_len == 1) && ((p[0] == '0') || (p[0] == '1'))) {
+      // a haploid genotype, stored as a homozygote (0|0 or 1|1)
+      bytes[i] = phased_lut[3 * (p[0] == '1')];
     } else if ((gt_len == 3) && ((p[1] == '|') || (p[1] == '/'))) {
       char a = p[0];
       char b = p[2];
@@ -812,6 +865,16 @@ List vcf_to_bk(std::string filename, std::string bk_file,
     missing_value = max_ploidy + 1;
     std::replace(genotypes.begin(), genotypes.end(), provisional_missing,
                  missing_value);
+    // haploid ALT alleles read so far: as many ALT alleles as the ploidy of
+    // their individual (the genotypes of a locus are one after the other,
+    // and phased genotypes never have this value)
+    if (!phased && (n_individuals > 0)) {
+      for (size_t g = 0; g < genotypes.size(); g++) {
+        if (genotypes[g] == haploid_alt_provisional) {
+          genotypes[g] = (unsigned char) ploidy[g % n_individuals];
+        }
+      }
+    }
     ploidy_known = true;
   };
   // a genotype can not have more alleles than max_ploidy (in case we
@@ -865,11 +928,17 @@ List vcf_to_bk(std::string filename, std::string bk_file,
         }
         // get the ploidy of each individual from its genotype (the genotypes
         // start at the 10th field; a missing genotype "." gives no
-        // information on ploidy, so for those individuals we use their first
-        // genotype that is not ".")
+        // information on ploidy, nor does a haploid genotype on a sex
+        // chromosome or mtDNA, e.g. the X of a male, so for those
+        // individuals we use their first genotype that is informative)
+        const bool hemizygous_line =
+          is_hemizygous_chromosome(field_start[0], field_len[0]);
         const char* p = skip_fields(line, 9);
         while (p != NULL) {
           int this_ploidy = genotype_ploidy(p);
+          if (hemizygous_line && (this_ploidy == 1)) {
+            this_ploidy = 0;
+          }
           if (this_ploidy == 0) {
             unknown_ploidy.push_back(ploidy.size());
           }
@@ -892,6 +961,8 @@ List vcf_to_bk(std::string filename, std::string bk_file,
       } else if (!ploidy_known) {
         // look for the ploidy of the individuals with unknown ploidy
         ploidy_lines_left--;
+        const bool hemizygous_line =
+          is_hemizygous_chromosome(field_start[0], field_len[0]);
         const char* p = line;
         size_t field = 0; // the field that p points to
         size_t n_unknown = 0; // individuals still with unknown ploidy
@@ -903,6 +974,9 @@ List vcf_to_bk(std::string filename, std::string bk_file,
             field = i + 9;
           }
           int this_ploidy = (p != NULL) ? genotype_ploidy(p) : 0;
+          if (hemizygous_line && (this_ploidy == 1)) {
+            this_ploidy = 0;
+          }
           if (this_ploidy > 0) {
             ploidy[i] = this_ploidy;
           } else {
@@ -1089,6 +1163,9 @@ List vcf_to_bk(std::string filename, std::string bk_file,
     unsigned char* chunk_genotypes = genotypes.data() + offset;
     unsigned char this_missing = ploidy_known ? missing_value :
       provisional_missing;
+    // (haploid ALT alleles get a provisional value until the ploidies are
+    // known)
+    const int* this_ploidy = ploidy_known ? ploidy.data() : NULL;
     long n_snp_lines = snp_lines.size();
     size_t chunk_max_alleles = 0;
     size_t chunk_min_alleles = SIZE_MAX;
@@ -1119,7 +1196,7 @@ List vcf_to_bk(std::string filename, std::string bk_file,
         int line_status = count_alt_alleles(
           line_start[l], line_len[l], chunk_genotypes + k * n_individuals,
           n_individuals, this_missing, '1', chunk_max_alleles,
-          chunk_min_alleles);
+          chunk_min_alleles, this_ploidy);
         status = std::max(status, line_status);
       }
     }
@@ -1331,6 +1408,7 @@ void vcf_merge_genotypes(std::string filename, Environment BM, int row_offset,
       swap_vec[k] = (swap[k] == TRUE);
     }
   }
+  std::vector<int> ploidy_vec(ploidy.begin(), ploidy.end());
   const unsigned char missing = (unsigned char) missing_value;
 
   VcfLineReader reader(filename, n_threads);
@@ -1392,8 +1470,8 @@ void vcf_merge_genotypes(std::string filename, Environment BM, int row_offset,
         scratch.data() + (size_t) s * n_individuals : col_start + row_offset;
       // with swapped alleles, the REF allele of the file is the alternate
       // allele of the merged locus, so we count it instead (which also gives
-      // the right dosage for a genotype with fewer alleles than the ploidy
-      // of its individual, e.g. a haploid genotype of a diploid individual);
+      // the right dosage for a haploid genotype of a diploid individual,
+      // stored as a homozygote);
       // phased genotypes are stored as their bytes (and never swapped)
       size_t bad_indiv;
       int line_status = phased ?
@@ -1402,7 +1480,8 @@ void vcf_merge_genotypes(std::string filename, Environment BM, int row_offset,
                               bad_indiv) :
         count_alt_alleles(line_start[l], line_len[l], dest, n_individuals,
                           missing, swap_vec[snp] ? '0' : '1',
-                          chunk_max_alleles, chunk_min_alleles);
+                          chunk_max_alleles, chunk_min_alleles,
+                          ploidy_vec.data());
       if (line_status != GENOTYPES_OK) {
         status = std::max(status, line_status);
         continue;
