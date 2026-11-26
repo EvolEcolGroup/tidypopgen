@@ -24,7 +24,13 @@ backingfile.}
 \item{overwrite}{boolean whether to overwrite the file.}
 
 \item{chromosomes_as_int}{boolean whether to use the integer representation
-of the chromosomes}
+of the chromosomes (for "bed" files): numbers are kept, and sex
+chromosomes and mtDNA (see \code{\link[=gt_chromosome_types]{gt_chromosome_types()}}) get PLINK's codes:
+with n autosomes, X (or Z) is n+1, Y (or W) n+2, the pseudo-autosomal
+regions (XY) n+3 and MT n+4, where n is the number of autosomes declared
+with \code{chr_set} in \code{\link[=gt_set_chromosome_types]{gt_set_chromosome_types()}}, or 22 (PLINK's default,
+for humans), or the largest number of an autosome if it is larger; other
+names are numbered after n+4.}
 }
 \value{
 the path of the saved file

@@ -27,7 +27,13 @@
 #' @param type one of "bed", "ped" or "raw"
 #' @param overwrite boolean whether to overwrite the file.
 #' @param chromosomes_as_int boolean whether to use the integer representation
-#'   of the chromosomes
+#'   of the chromosomes (for "bed" files): numbers are kept, and sex
+#'   chromosomes and mtDNA (see [gt_chromosome_types()]) get PLINK's codes:
+#'   with n autosomes, X (or Z) is n+1, Y (or W) n+2, the pseudo-autosomal
+#'   regions (XY) n+3 and MT n+4, where n is the number of autosomes declared
+#'   with `chr_set` in [gt_set_chromosome_types()], or 22 (PLINK's default,
+#'   for humans), or the largest number of an autosome if it is larger; other
+#'   names are numbered after n+4.
 #' @note PLINK's bed, ped and raw formats only support diploid data, so this
 #'   function only works on diploid (or pseudohaploid) `gen_tibble` objects.
 #'   Pseudohaploid data is simply treated as regular diploid genotype counts
@@ -157,7 +163,8 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
       "allele_ref",
       "allele_alt"
     )
-    bim_table$chromosome <- cast_chromosome_to_int(bim_table$chromosome)
+    # integer codes of chromosomes, with PLINK's codes for X, Y, XY and MT
+    bim_table$chromosome <- plink_chromosome_codes(x)
     bim_table$allele_alt[is.na(bim_table$allele_alt)] <- "0"
     bim_table$allele_ref[is.na(bim_table$allele_ref)] <- "0"
     bim_table
@@ -387,4 +394,45 @@ pull_na <- function(.x, .col_name) {
   } else {
     return(rep(NA, nrow(.x))) # nolint
   }
+}
+
+# The integer codes of the chromosomes of the loci of x for a PLINK .bim
+# file: the codes of cast_chromosome_to_int() for autosomes, and PLINK's
+# codes for the other types of chromosomes (see gt_chromosome_types()): with
+# n autosomes, X (or Z) is n+1, Y (or W) n+2, the pseudo-autosomal regions
+# (XY) n+3 and MT n+4. n is the number of autosomes declared with chr_set (see
+# gt_set_chromosome_types()), or 22 (PLINK's default, for humans), or the
+# largest numeric name of an autosome if it is larger; the codes of
+# autosomes that are not numbers come after n+4.
+plink_chromosome_codes <- function(x) {
+  chromosome <- show_loci(x)$chromosome
+  codes <- cast_chromosome_to_int(chromosome)
+  locus_types <- loci_type_index(x$genotypes)
+  # the offset of each type from n (NA for autosomes)
+  offsets <- c(X = 1L, Z = 1L, Y = 2L, W = 2L, PAR = 3L, MT = 4L)
+  locus_offset <- unname(offsets[chromosome_type_levels[locus_types]])
+  other <- !is.na(locus_offset)
+  if (!any(other)) {
+    return(codes)
+  }
+  # the autosomes whose name is a number keep it
+  chr <- chromosome_index(x$genotypes, chromosome)
+  numeric_name <- grepl("^[0-9]+$",
+    gsub("^(chromosome_|chr_|chromosome|chr)", "", chr$names,
+      ignore.case = TRUE
+    ),
+    perl = TRUE
+  )[chr$index]
+  numeric_name[is.na(numeric_name)] <- FALSE
+  autosome_numbers <- codes[!other & numeric_name]
+  n <- attr(x$genotypes, "chr_types")$chr_set
+  if (is.null(n)) {
+    n <- max(c(22L, autosome_numbers))
+  }
+  # autosomes with other names come after the codes of PLINK, in the order of
+  # their codes
+  named <- !other & !numeric_name & !is.na(codes)
+  codes[named] <- n + 4L + match(codes[named], sort(unique(codes[named])))
+  codes[other] <- n + locus_offset[other]
+  codes
 }

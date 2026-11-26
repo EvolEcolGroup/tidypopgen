@@ -116,6 +116,8 @@ gt_set_chromosome_types <- function(.x, types = NULL, chr_set = NULL,
   # the numeric codes of PLINK (and of EIGENSOFT, for humans)
   if (!is.null(chr_set)) {
     declared <- chr_set_types(chr_set)
+    # (the number of autosomes, used by gt_as_plink() for PLINK's codes)
+    chr_set <- if (identical(chr_set, "human")) 22L else as.integer(chr_set)
   }
   # the types given explicitly take precedence over chr_set
   if (!is.null(types)) {
@@ -130,7 +132,9 @@ gt_set_chromosome_types <- function(.x, types = NULL, chr_set = NULL,
   if ((length(declared) == 0) && is.null(par)) {
     attr(.x$genotypes, "chr_types") <- NULL
   } else {
-    attr(.x$genotypes, "chr_types") <- list(types = declared, par = par)
+    attr(.x$genotypes, "chr_types") <- list(
+      types = declared, par = par, chr_set = chr_set
+    )
   }
   .x
 }
@@ -566,8 +570,18 @@ merge_chr_types <- function(chr_types_1, chr_types_2) {
       "(see gt_set_chromosome_types())"
     )
   }
+  chr_set_1 <- chr_types_1$chr_set
+  chr_set_2 <- chr_types_2$chr_set
+  if (!is.null(chr_set_1) && !is.null(chr_set_2) &&
+        !identical(chr_set_1, chr_set_2)) {
+    stop(
+      "the gen_tibbles declare different numbers of autosomes (chr_set, ",
+      "see gt_set_chromosome_types())"
+    )
+  }
   list(
     types = c(types_1, types_2[setdiff(names(types_2), shared)]),
-    par = if (is.null(par_1)) par_2 else par_1
+    par = if (is.null(par_1)) par_2 else par_1,
+    chr_set = if (is.null(chr_set_1)) chr_set_2 else chr_set_1
   )
 }

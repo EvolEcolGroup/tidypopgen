@@ -81,8 +81,8 @@ gt_pi_polyploid <- function(BM, rowInd, colInd, ploidy, is_pseudohaploid, ncores
     .Call(`_tidypopgen_gt_pi_polyploid`, BM, rowInd, colInd, ploidy, is_pseudohaploid, ncores, block_size)
 }
 
-gt_write_text_by_locus <- function(BM, rowInd, colInd, lut, prefix, sep, file) {
-    invisible(.Call(`_tidypopgen_gt_write_text_by_locus`, BM, rowInd, colInd, lut, prefix, sep, file))
+gt_write_text_by_locus <- function(BM, rowInd, colInd, lut, prefix, sep, file, indiv_lut = as.integer( c()), flag = as.logical( c())) {
+    .Call(`_tidypopgen_gt_write_text_by_locus`, BM, rowInd, colInd, lut, prefix, sep, file, indiv_lut, flag)
 }
 
 gt_write_text_by_indiv <- function(BM, rowInd, colInd, byte_cat, lut, n_cat, locus_lut, prefix, sep, file, block_bytes = 256e6) {

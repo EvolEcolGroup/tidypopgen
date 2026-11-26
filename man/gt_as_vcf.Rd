@@ -29,6 +29,18 @@ ones as unphased (e.g. \code{0/1}). The genotypes are read and
 written in chunks of loci, so that this works on datasets that do not fit in
 memory.
 }
+\details{
+On sex chromosomes and the mitochondrial genome (see
+\code{\link[=gt_chromosome_types]{gt_chromosome_types()}}), hemizygous genotypes (stored as homozygotes, as
+in PLINK) are written as haploid genotypes (e.g. \code{1} rather than \code{1/1}):
+those of individuals of the heterogametic sex (males with X and Y, females
+with Z and W; from the \code{sex} column) on X (or Z) outside the
+pseudo-autosomal regions and on Y (or W), and those of all individuals on
+MT (and on Y or W if their sex is unknown). Heterozygous genotypes of
+hemizygous individuals are written as missing (\code{.}), as PLINK treats them
+as missing, with a message giving their number, and the genotypes of the
+homogametic sex on Y (or W) are written as missing.
+}
 \examples{
 example_gt <- load_example_gt("gen_tbl")
 
