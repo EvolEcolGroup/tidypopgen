@@ -14,7 +14,8 @@ is_phased(.x)
 }
 \description{
 Phased genotypes (see \code{phased} in \code{\link[=gen_tibble]{gen_tibble()}}) are recognised by the
-\code{code256} of their file backed matrix, which is identical to \link{code_phased}.
+\code{code256} of their file backed matrix, which is identical to \link{code_phased},
+or is an extended phased code (see \link{phased_encoding}).
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

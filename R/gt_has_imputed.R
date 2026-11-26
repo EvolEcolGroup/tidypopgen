@@ -92,6 +92,11 @@ gt_set_imputed <- function(x, set = NULL) {
   if (inherits(x, "gen_tbl")) {
     x <- x$genotypes
   }
+  # phased genotypes use their own code256 (see ?phased_encoding), which
+  # would be overwritten
+  if (is_phased(x)) {
+    stop("gt_set_imputed() does not work on phased genotypes", call. = FALSE)
+  }
   if (!is.logical(set)) {
     stop(paste(
       "set should be either TRUE (to use imputed)",
