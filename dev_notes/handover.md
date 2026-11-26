@@ -1,141 +1,221 @@
 # tidypopgen: handover
 
-Updated 2026-11-21 (laptopX1, `pca_missing` merged into `grouping`). For the next session: read this and
-`summary.md` first. History is in `progress.md`; designs are in the topic
-documents listed in `README.md`.
+Updated 2026-11-26 (laptopX1: sex chromosomes and mtDNA, phase 1, on the
+local branch `sex_chromosomes`, waiting for Andrea's review; since 23 Nov
+`dev` also has the TGENO reader, `8284e14d`, 25 Nov; 1.1.0 waits only for
+Andrea's release steps). These living documents were rewritten on
+`sex_chromosomes` from their newest copies on `split_plan` (23 Nov): merge
+them by hand if both branches reach `dev`. For the next session: read this
+and `summary.md` first. History
+is in `progress.md`; designs are in the topic documents listed in
+`README.md`.
 
 ## Branches
 
 | branch | purpose | base | pushed | merged |
 |---|---|---|---|---|
-| `pca_missing` | `gt_pca()` with missing genotypes as PLINK, projections; with #232 (checks, DAPC and pcadapt) and #233 (LD clumping and pruning); CI fix, re-rendered articles, the fixes of the review of #232/#233 (`code_review_2026-11_pca_missing.md`); grouped `pairwise_king()` and the faster bit-packed kernel (`53843683` to `e39cdf49`), grouped `indiv_inbreeding()` in one pass and the KING fallback removed (`f6110412`, `5718c15c`; `pairwise_bitpacked.md`); the parallel `.bed` reader with its size checks (PR #234, `58821fab`; `bed_reader.md`) | `dev` | yes | no (PR #231) |
-| `grouping` | vignettes and articles group by population early; lower-case metadata columns; grouped `rbind()` and `gt_add_sf()` fixed; `select_loci_if()` documents that groups are ignored; precompiled articles re-rendered (`84417a3b`..`87c75ea4`); readable a03 figures and tidy HGDP filters (`7a543b59`..`afbaf023`, laptop); HGDP benchmark re-rendered with the settled filters and the missing_data article grouped (`f364012d`..`fce9b263`, desktop); `pca_missing` merged in on 21 Nov (conflicts only in the dev notes); worktree `~/claude_work/tidypopgen/wt_grouping` on manica01. Andrea's uncommitted edits of `a02_qc.Rmd` and `benchmark_hgdp.Rmd.orig` (and the lower-case edits) are also still uncommitted in `~/git/tidypopgen`: discard them there before merging this branch into `pca_missing` | `pca_missing` at `dd7a251d`, then merged up to `672ec441` | yes (20 Nov) | no (PR #235 into `pca_missing`) |
-| `merge_vcf_speed` | three prototypes speeding up `gt_merge_vcfs()` (`d3b982d0` keep the genotypes of pass 1, `bc6856b6` parallel line parsing, `6982994c` raw alleles), outputs identical; 1.6x on sgdp and many (laptop, 4 threads; desktop, 8 threads), 1.1-1.25x on pops; worktree `/media/andrea/Elements1/tmp/claude/tidypopgen/merge_vcf/wt` (`vcf_merge.md`) | `pca_missing` at `5e207d78` | yes (20 Nov) | no PR |
-| `king_plink_ideas` | KING ideas from PLINK 2: `72377615` tiles + 64-word chunks (1.35x), `ef1c0b4c` AVX2 KING kernel, `e2692136` two paths (full matrix on the desktop: AVX2 1.76x, 1.4x faster than PLINK 2; scalar 1.3x); outputs identical, tests pass with and without AVX2; worktree `/media/andrea/Elements1/tmp/claude/tidypopgen/plink_king/wt` (`pairwise_bitpacked.md`) | `pca_missing` at `b8255226` | yes (20 Nov) | no |
-| `bed_reader` | the parallel `.bed` reader; squash-merged into `pca_missing` (PR #234, `58821fab`), its last notes commit cherry-picked there; deleted locally with its work folder (20 Nov, Andrea); still on origin | `pca_missing` | yes | yes (20 Nov) |
-| `king_simd_packing` | SIMD packing of the bit-packed kernel (`9853e055`), not merged: below the 1.5x bar (`pairwise_bitpacked.md`) | `pca_missing` at `c7c09c67` | no | no |
+| `sex_chromosomes` | phase 1 of sex chromosomes and mtDNA (`sex_chromosomes_plan.md`, "As built"): chromosome types, VCF haploid genotypes as 0/2, `indiv_sex_check()`, autosome-only analyses, haploid VCF output and PLINK codes, an article; worktree `/media/andrea/annex/tmp/claude/tidypopgen/wt_sexchr` | `dev` at `4374e70d` | no (Andrea reviews first) | no |
+| `split_plan` | dev notes only: the plan for the package split (`package_split.md`, `package_split/`) and these living documents; merge into `dev` (no code, `[skip ci]`) | `dev` at `e20145a2` | yes | no |
+| `cran_submission` | the commit R-hub checked on 21 Nov (`66e62aa5`); its content is in `dev` (#241): delete after the release | `dev` at `b4f81b26` | yes | squashed in #241 |
+| `vignette_filtering` | Andrea's vignette edits, the base of #242 (Andrea's checkout is on it): delete once he has switched | `dev` | yes | squashed in #242 |
+| `as_fbm`, `skill` | `gt_as_fbm()` (Aug) and tooling to build a Claude skill (Oct); not in `dev`, kept (Andrea, 21 Nov); `skill` has one local commit not pushed (not Claude's) | old `dev` | yes | no |
 
-About 19 other local branches on the laptop look unmerged to git (`git branch
---no-merged origin/dev`), but many were squash-merged; see the clean-up task.
+Deleted on 21 Nov (Andrea): `pca_missing` (#231), `cran_test_time` (#237),
+`remove_armadillo` (#238, merged), `king_avx2` (#239), `vcf_merge_speed`
+(#240), `merge_vcf_speed`, `king_plink_ideas`, `cran-fixes-2026-11-21`
+(#241), `bed_reader` (#234), `big_data_article`,
+`adm_plot_ordering`, `pedigree` and `feature/pop-tajimas-d-polyploid` (all
+superseded by `dev`). `king_simd_packing` (rejected, below the 1.5x bar) is
+no longer in the laptop's repository (never pushed). The Elements HDD now
+mounts as `/media/andrea/Elements` and gave "Permission denied" on 21 Nov.
 
-The annex drive (USB) disconnected on 19 Nov at 22:09 and came back after a
-re-plug and a reboot; `git fsck` was clean and the unpushed commits read
-back. A copy of what was then unpushed is in
-`~/claude_work/tidypopgen_rescue/` on the laptop's root drive (27 KB; delete
-once the branches are no longer needed).
+Deleted on 22 Nov: `indiv_grouping` (#242) and `roxygen_links`
+(`cb7a526e`), local only; the rescue copy of 19 Nov is gone.
+
+Merged and deleted on origin on 23 Nov: `gt_pca_pseudohaploid` (#244). Its
+worktree `/media/andrea/annex/tmp/claude/tidypopgen_pseudo` and the notes
+worktree `/media/andrea/annex/tmp/claude/tidypopgen_notes` (on
+`split_plan`) remain on the laptop (task 6).
 
 ## Next tasks
 
-### 1. **P1** [review] Review the fixes and merge PR #231
+### 1. **P1** [andrea] Release 1.1.0: everything is done but the version
 
-- **Read first:** `code_review_2026-11_pca_missing.md` ("Changes in
-  behaviour to check before merging", "Fixes by area"; Andrea ticks the
-  boxes), and `pairwise_bitpacked.md` for the grouped `pairwise_king()` and
-  `indiv_inbreeding()` (they used to ignore groups or use `group_map()`).
-- **State:** CI at `b8255226` passes on all R-CMD-check jobs, lint, pkgdown
-  and test-coverage; codecov fails on coverage only (patch 94.68% against a
-  95.50% target, project -0.08%). Later commits touch only `dev_notes/`.
-- **Before merging:** review PR #235, branch `grouping` (vignettes grouped
-  early, lower-case metadata, grouped `rbind()` and `gt_add_sf()` fixes,
-  `select_loci_if()` docs; full test suite passes on an -O2 build) and merge
-  it into `pca_missing`. The desktop job of 20 Nov has pushed, and
-  `pca_missing` (`672ec441`) is merged into `grouping` (21 Nov), so the PR
-  has no conflicts.
-  First discard the same edits, still uncommitted, in `~/git/tidypopgen`
-  (Andrea's `a02_qc.Rmd` and `benchmark_hgdp.Rmd.orig`, and the lower-case
-  edits). The precompiled articles were re-rendered on the branch
-  (`87c75ea4`, 20 Nov) with indicative timings: re-time them on a quiet
-  machine before a release (the laptop section of the HGDP benchmark is
-  older still, with an "impute" step).
-- **HGDP benchmark:** re-rendered on the desktop (`f364012d`, `cbd25afa`,
-  quiet machine, 20 threads): loci are filtered on the columns of
-  `loci_report` (no recomputing), individuals on the ungrouped `gen_tibble`
-  (Andrea's choices); printed results unchanged, total 3.5 s.
-- **Done when:** #231 is merged into `dev` (squash).
+- `dev` at `eaf4d861` has #231 and #237-#242 (missing genotypes without
+  imputation, CRAN test skips, no RcppArmadillo, KING AVX2, faster VCF
+  merge, pre-submission fixes and `cran-comments.md`, grouped `indiv_*`
+  functions made consistent), the roxygen link fix, `CLAUDE.md` moved to
+  `.claude/`, and the re-timed articles (no code after `cb7a526e`).
+- Since 23 Nov, `dev` (`bd2e5082`) also has #244 (`gt_pca()` with
+  pseudohaploids, version 1.0.0.9015), merged after the checks below
+  without re-running them (Andrea: a small change, covered by CI). The
+  version bump to 1.1.0 replaces 1.0.0.9015.
+- Checks re-run on the final `dev` (22 Nov, `8f51a5ca`; the last commit
+  changes comments only; report `dev_notes/cran_checks_2026-11-21.md` on
+  `dev`, section "Re-run on the final `dev`"): local `R CMD check
+  --as-cran` 0/0/4 notes (all expected: version, admixtools, two URLs,
+  local flags); R-hub linux, windows, m1-san, macos-arm64 (run
+  44992007326, on `dev`): Status OK, no notes; win-builder r-devel uploaded
+  (result emailed to Andrea; a retry got FTP 550, i.e. already queued: if
+  no email came, upload again with `devtools::check_win_devel()`);
+  `dartR.base` 1.3.0: same results as with 1.0.0.
+- **Order:** set the version to 1.1.0; merge `dev` into `main` (pkgdown
+  rebuilds the site, so `articles/missing_data.html` and `rad_seq.html`
+  exist); re-run `urlchecker::url_check()`; add the win-builder result and
+  the days since the last update to `cran-comments.md`; submit
+  (`devtools::submit_cran()`); after acceptance tag the release and
+  `usethis::use_dev_version()`. Then delete the branch `cran_submission`.
+- After publication, re-check CRAN's test times (`test_times_2026-11.md`).
+- Precompiled articles: re-timed on a quiet manica01 on 22 Nov
+  (`eaf4d861`; `article_timings_speed_vs_big_data_article.md`, last
+  section). Only the laptop section of the HGDP benchmark still times the
+  old pipeline (see the backlog).
 
-### 2. **P2** [desktop] Re-time on the P-cores
+### 2. **P1** [review] Review `sex_chromosomes`, then push it and open a PR
 
-- The VCF merge and KING were timed on 20 Nov (job `vcf_merge_king`;
-  `vcf_merge.md`, `pairwise_bitpacked.md`). Left: the HGDP650
-  PCA/DAPC/pcadapt/LD timings, not set up yet (desktop queue).
+- **Read first:** `dev_notes/sex_chromosomes_plan.md` on the branch
+  (decisions, "As built", numbers); the article
+  `vignettes/articles/sex_chromosomes.Rmd`.
+- **Commits:** `b1fb3203` chromosome types, `9526808e` VCF readers,
+  `69bd0209` `indiv_sex_check()`, `c56ad0bd` autosome-only analyses,
+  `815611fa` writers, `a7a81f4d` article and cheatsheet, `f4de9505` two
+  fixes found by the full suite; notes `47953f40`, `08610bb8` and this
+  wrap-up.
+- **State:** the full test suite passes (laptop, `load_all()`);
+  `indiv_sex_check()` matches PLINK 1.9 b7.11 exactly (fixture made by
+  `data-raw/validate/create_plink_sexcheck_test_data.R`); the VCF parser is
+  as fast as on `dev` (manica01, -O2, +0.5%/+1.2% at 1/8 threads, within
+  noise, identical backing files). Behaviour changes for data with X/Y/MT
+  are accepted (Andrea, 26 Nov). `R CMD check` not run yet.
+- **After the review:** push the branch; the head commit is `[skip ci]`,
+  so push an empty commit to get CI; open a PR into `dev`. Its NEWS items
+  are in the 1.1.0 section: move them to the next version if 1.1.0 is
+  released first.
+- **Done when:** the PR is merged.
 
-### 3. **P2** [claude] Make `merge_vcf_speed` ready for a PR
+### 3. **P2** [desktop] Re-time on the P-cores
 
-- **Branch:** `merge_vcf_speed` (rebase or merge onto `dev` after #231).
-- **Read first:** `vcf_merge.md` ("How it works", "Open questions").
-- **To do:** name the file in the genotype errors raised in pass 1 (P1's
-  regression); a test that the cache and the re-read give the same result
-  (swapped loci with haploid calls in diploids); the full test suite; time
-  `gen_tibble()` on one large VCF for P3 (-O2 builds only); NEWS.
-- **Done when:** a PR into `dev`, with the desktop timings of `vcf_merge.md`.
+- Left: the HGDP650 PCA/DAPC/pcadapt/LD timings, not set up yet (desktop
+  queue); and `gen_tibble()` on one large VCF with the parallel parsing of
+  #240 (not timed).
 
 ### 4. **P2** [claude] Keep optimising (Andrea)
 
-- **Branch:** a new branch from `dev`, after #231 is merged; for KING,
-  `king_plink_ideas`.
+- **Branch:** a new branch from `dev`.
 - **Read first:** `gt_pca.md` ("Breakdown by operation", "Open questions"),
-  `ld_missing.md`, `pairwise_bitpacked.md` ("Comparison with PLINK 2").
+  `ld_missing.md`, `pairwise_bitpacked.md` ("Comparison with PLINK 2"),
+  `vcf_merge.md` ("Open questions").
 - **Candidates:** pcadapt's t-scores (bigsnpr's `multLinReg`, ~5 of 7 s on
   HGDP650 with 44% missing genotypes), which would also give the counts of
   missing genotypes that `max_missing` now reads in an extra pass (+4%);
   the GRM's count of loci genotyped in both individuals (~2-3 s with
-  missing genotypes); the DAPC regression (3.8 s); KING: the two-path
-  kernel is done on `king_plink_ideas` (`e2692136`; on the desktop's full
-  matrix AVX2 1.76x on 1 thread and 1.53x on 8, 1.4x faster than PLINK 2;
-  scalar 1.3x; "Timings of the PLINK 2 ideas" in `pairwise_bitpacked.md`);
-  before a PR, a build without AVX2 and Andrea's decision; then the other
-  ideas ranked there.
+  missing genotypes); the DAPC regression (3.8 s); the other KING ideas
+  ranked in `pairwise_bitpacked.md`; the further VCF merge candidates.
 - **Check:** -O2 builds only (`pkgbuild::clean_dll()`,
   `compile_dll(debug = FALSE)`, `load_all(compile = FALSE)`, or
   `R CMD INSTALL` into a separate library); the benchmarking skill; the
   scripts and data are in `/media/andrea/annex/tmp/claude/tidypopgen/bench_dapc/`
-  and `bench_ld/`, and in `/media/andrea/Elements1/tmp/claude/tidypopgen/plink_king/`
-  (with `build/lib_{base,p1,p2}` and `run_proto.sh`) on the laptop;
-  `~/claude_work/tidypopgen/plink_king/` (`build/lib_{base,p1,p3}`) on
+  and `bench_ld/` on the laptop, and in `~/claude_work/tidypopgen/` on
   manica01.
 - **Done when:** faster by more than 5%, with identical outputs.
 
-### 5. **P2** [review] Release 1.1.0 (from claude_jobs#5, 15 Nov; not rechecked)
+### 5. **P3** [decide] The GRM diagonal of pseudohaploids
 
-- After #231: set the version, merge `dev` into `main` (pkgdown then publishes
-  `rad_seq.html`), re-run `urlchecker::url_check()` and submit;
-  `cran-comments.md` gives the intermittent failures as the reason for the
-  early resubmission.
+- Since #244, `gt_pca()` takes pseudohaploids (dosages 0 or 2) as
+  homozygous diploids, as PLINK and `smartpca` do. With the diploid scaling
+  sqrt(2 f (1 - f)) and f counting one allele per pseudohaploid
+  (`loci_alt_freq()`), the expected relationship between a pseudohaploid
+  and anyone else is the same as for a diploid with the same ancestry
+  (4 E[(pi_i - f)(pi_j - f)] summed over loci), so the off-diagonal
+  entries of the GRM, which place individuals in the PCA, are unbiased.
+- Only the diagonal differs: a pseudohaploid's self-term is about 2 instead
+  of 1 (one sampled allele: extra binomial noise, not a scaling error).
+- Not to do: scaling pseudohaploids by sqrt(4 f (1 - f)). It brings the
+  diagonal to 1 but shrinks their relationships by 1/sqrt(2) (1/2 between
+  two pseudohaploids), pulling them towards the centre of the PCA, the
+  artefact to avoid with ancient DNA.
+- Option (`method = "partial"`): subtract their expected extra sampling
+  variance from their diagonal entries (about 1, or an estimate per
+  individual over its genotyped loci), in the spirit of GCTA's diagonal
+  correction. A constant shift of the whole diagonal leaves the
+  eigenvectors unchanged; one that affects only some individuals changes
+  them slightly (most with many pseudohaploids and weak structure).
+- Test on real ancient DNA (NORNE): PCs with and without the correction,
+  against projecting the ancient samples on modern PCs
+  (`predict(project_method = "least_squares")`, as `lsqproject`).
+- Not needed by tidygenclust, whose SVD start only uses the factors.
 
 ### 6. **P3** [cleanup] Branches and scratch files
 
-- Delete `pca_missing` once #231 is merged, `king_simd_packing` and
-  `king_plink_ideas` once decided, `merge_vcf_speed` once its PR is merged;
-  review the other local branches on the laptop (many squash-merged).
-- `bed_reader` is merged (PR #234); the local branch and
-  `~/claude_work/tidypopgen/bed_reader/` were deleted on 20 Nov (Andrea);
-  the branch is still on origin. To re-time the `.bed` reader, use the full
-  baboon fileset in `/media/andrea/data1/baboon_consortium/phase2_plink/`
-  (`bed_reader.md`).
+- Done on 22 Nov: the merged branches, the worktrees and the scratch of
+  the CRAN checks on the laptop; on manica01, the worktree `wt_grouping`
+  (its local branch `grouping` is kept) and the stopped `revdep/`.
+- Branches: `vignette_filtering` (once Andrea has switched his checkout),
+  and `cran_submission` after the release; the local `gt_pca_pseudohaploid`
+  and its worktree `/media/andrea/annex/tmp/claude/tidypopgen_pseudo`, and
+  the worktree `/media/andrea/annex/tmp/claude/tidypopgen_notes` (#244,
+  23 Nov). The worktree `wt_notes` (on
+  `split_plan`) on the laptop's annex.
+- `sex_chromosomes`: its worktree
+  `/media/andrea/annex/tmp/claude/tidypopgen/wt_sexchr` once the PR is
+  merged; the parser timings in
+  `/media/andrea/annex/tmp/claude/tidypopgen/parser_ab/` (the two source
+  archives and scripts) and `~/project_temp/claude/tidypopgen/parser_ab/`
+  on manica01 (the two -O2 libraries of `4374e70d` and `815611fa`,
+  ~60 MB): ask Andrea before deleting.
+- After the release: `revdep/` and `revdep.sh` under
+  `/media/andrea/annex/tmp/claude/tidypopgen/` (the scratch library with
+  `dartR.data` and the `dartR.base` checks).
+- On manica01: discard Andrea's uncommitted
+  edits of `a02_qc.Rmd` and `benchmark_hgdp.Rmd.orig` (and the lower-case
+  edits) in `~/git/tidypopgen`, which are in `dev` through #235, before
+  pulling there.
 - Ask Andrea before deleting benchmark files (he may keep optimising with
   them). On the laptop's annex, under `/media/andrea/annex/tmp/claude/tidypopgen/`:
-  `bench_dapc/` (~3 GB), `bench_ld/` (~0.5 GB), `bench_inb/`; on the
+  `bench_dapc/` (~3 GB), `bench_grm/` (~3 GB), `bench_ld/` (~0.5 GB),
+  `test_timing/` (207 MB: the -O2 library of `e20145a2` and its source, to
+  re-time the tests), and the prototypes and references `proj_proto/`,
+  `ld_src/`, `plink_probe/`, `lib_migrate/` (~47 MB together); on the
   Elements HDD, under `/media/andrea/Elements1/tmp/claude/tidypopgen/`:
   `merge_vcf/` (data, builds, bcftools, outputs, worktree) and `plink_king/`
-  (PLINK 2, its source, HGDP650 `.pgen`, builds, worktree); `~/claude_work/tidypopgen_rescue/` on the root drive.
+  (PLINK 2, its source, HGDP650 `.pgen`, builds, worktree).
 - On manica01: `~/claude_work/tidypopgen/` (the -O2 library of
   `e3b2b69c`, logs; `king/` holds the HGDP650 `gen_tibble` (~0.7 GB), the
   libraries and scripts of the KING timings of 19 Nov; `merge_vcf/`, ~3.8 GB:
   data, bcftools, builds and outputs of the VCF job; `plink_king/`, ~1.2 GB:
   plink2, the PLINK input, builds and outputs of the KING job; `bench_inb/`:
   symlinks; `run_desktop.sh`: the copy the job ran; keep them while the
-  prototypes may be re-timed); the NearEast data in
+  prototypes may be re-timed; `articles_2026-11-22/`: the -O2 build of
+  `e812c8d3`, its clone, `render.sh`, logs and both knits of the timed
+  articles, can go); the NearEast data in
   `vignettes/articles/data/NearEastPublic/` (git-ignored, needed to
   re-render aDNA_pseudohaploids).
 
 ## Desktop queue
 
-All on the P-cores (`taskset -c 0-7`), timing-sensitive: tell the other
-sessions first (the benchmarking skill, "Unattended desktop jobs").
+### Done: the timed articles re-knitted (job `tpg_pr_timing_articles`, 22 Nov 11:43-12:04)
+
+- `benchmark_hgdp`, `big_data`, `rad_seq`, `roh_hgdp`, two knits each with
+  the -O2 build of `e812c8d3`, the other jobs paused by their sessions;
+  the second knit pushed to `dev` (`eaf4d861`). To repeat:
+  `dev_notes/article_timings/render_desktop.sh` (paths at its top), run as
+  a systemd user unit named `tpg_pr_timing*`, so that the tidypopgl queue
+  on manica01 holds its phases.
+
+### Done: PRs #239 and #240 against `dev` (job `tpg_pr_timing`, 21 Nov 15:53-17:01)
+
+- Results in `dev_notes/pr_timing/desktop_2026-11-21/summary.md`: KING full
+  matrix 1.82x (AVX2) / 1.29x (scalar) on 1 thread, 1.52x / 1.22x on 8,
+  outputs identical; `gt_merge_vcfs()` 1.21-1.61x on 1 thread, 1.13-1.58x on
+  8, same outputs; `gen_tibble()` on one VCF 0.99-1.02x on 1 thread,
+  1.06-1.10x on 8 (files of ~1 s).
+- Left on manica01: `~/claude_work/tidypopgen/pr_timing/` (the three -O2
+  libraries, the clone, logs; the PRs are merged, so it can go: ask
+  Andrea).
 
 ### HGDP650 timings of `gt_pca()`, DAPC, pcadapt, clumping and pruning
 
-- **Branch and set-up:** `pca_missing` (or `dev` after #231); the HGDP650
+- **Branch and set-up:** `dev` (with #231); the HGDP650
   files of `vignettes/articles/data/hgdp/`; the scripts are on the laptop in
   `bench_dapc/scripts/` and `bench_ld/scripts/` (paths to adapt); the masked
   data are made by `bench_dapc/scripts/mask_dev.R`; PLINK 1.9 is at
@@ -171,6 +251,15 @@ The job `vcf_merge_king` ran them on 20 Nov (results in `vcf_merge.md` and
 
 ## Backlog
 
+- **P3** [decide] Sex chromosomes and mtDNA, phase 2
+  (`sex_chromosomes_plan.md`): ploidy per (individual, locus class) in the
+  kernels, then sex-aware frequencies and missingness on X, HWE on X
+  (Graffelman & Weir, as PLINK 2), diversity and Fst on X/MT, counts and
+  erasure of heterozygous haploid genotypes. Which first?
+- **P3** [decide] Look into the package split when ready: tidypopgen as an
+  umbrella over tidypopcore, tidypopstats and tidygenclust
+  (`package_split.md`, deferred by Andrea on 21 Nov; its open questions;
+  the file map in `package_split/`). Its Phase 0 starts after 1.1.0.
 - [claude] Large PLINK files with locus names: 116 s for the `.bim` of 91M
   loci (fread 84 s, then the loci table 32 s: GCs over 91M strings) against
   17.5 s with `names_as_int = TRUE`; recommend `names_as_int` in the docs

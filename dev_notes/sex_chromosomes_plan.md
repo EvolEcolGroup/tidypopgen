@@ -79,6 +79,12 @@ mtDNA is haploid in everyone; the PARs behave like autosomes. On `dev`
 
 ## Decisions (Andrea, 26 Nov 2026)
 
+0. **Behaviour changes.** Results change for data with loci recognised as
+   X, Y or MT (VCF haploid calls stored as 0/2, autosome-only analyses).
+   This is accepted without deprecated functions, as the new behaviour is
+   the correct one; declaring a chromosome as an autosome brings the old
+   behaviour back (Andrea, 26 Nov, after phase 1).
+
 1. **Recognising chromosomes.** Chromosome names are recognised
    automatically (X, Y, XY, PAR1/PAR2, MT/M, Z, W, with or without "chr").
    Numeric codes count only when the user declares them, with
@@ -286,10 +292,6 @@ are identical (md5). To reproduce: the scripts `time_parser.R` and
 
 ## Open questions
 
-- Results change for data with recognised X/Y/MT loci (the autosome-only
-  defaults, and VCF haploid calls as 0/2). Andrea's rule is to keep old
-  behaviour behind a deprecated function; here the escape hatch is a
-  declaration (`types = c(X = "autosome")`) instead. To confirm.
 - Phase 2: which statistics to make sex-aware first (frequencies and
   missingness on X, HWE on X, Fst on X?), and whether to add a function
   that erases heterozygous haploid genotypes (as `--set-hh-missing`).

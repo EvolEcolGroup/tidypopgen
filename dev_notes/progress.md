@@ -21,8 +21,13 @@ files, SFS, CRAN checks) is described in the topic documents listed in
   fixture, and the full test suite passes. VCF parsing is unchanged in
   speed (+0.5%/+1.2% at 1/8 threads, within noise; manica01).
 - **Decisions:** numbers recognised only when declared, 0/2 coding,
-  autosome-only defaults with a message, phase 1 scope first (Andrea).
-- **Notes changed:** `sex_chromosomes_plan.md` (new), `README.md`.
+  autosome-only defaults with a message, phase 1 scope first; behaviour
+  changes for data with X/Y/MT accepted without deprecated functions, as
+  the new behaviour is correct (Andrea). Push and PR wait for Andrea's
+  review.
+- **Notes changed:** `sex_chromosomes_plan.md` (new), `README.md`,
+  `handover.md` and `summary.md` (rewritten from their 23 Nov copies on
+  `split_plan`).
 
 ## 2026-11-25 (cloud session): TGENO files of the AADR
 
