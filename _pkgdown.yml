@@ -202,6 +202,7 @@ articles:
       - a03_example_clustering_and_dapc
       - articles/missing_data
       - articles/aDNA_pseudohaploids
+      - articles/sex_chromosomes
       - articles/interpolating
       - articles/roh_hgdp
       - articles/sfs
