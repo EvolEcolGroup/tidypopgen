@@ -512,7 +512,8 @@ autosomal_loci <- function(.x) {
 .gt_autosomes_only <- function(.x) {
   if (inherits(.x, "vctrs_bigSNP")) {
     geno <- .x
-  } else if (is.data.frame(.x) && inherits(.x$genotypes, "vctrs_bigSNP")) {
+  } else if (is.data.frame(.x) && ("genotypes" %in% names(.x)) &&
+               inherits(.x$genotypes, "vctrs_bigSNP")) {
     geno <- .x$genotypes
   } else {
     return(.x)
