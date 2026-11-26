@@ -34,9 +34,10 @@ test_that("TGENO files (made by EIGENSOFT) are read as their GENO files", {
     tgeno_gt <- gen_tibble(file.path(tg_dir, paste0(prefix, ".tgeno")),
       quiet = TRUE
     )
+    # (normalise both paths: on Windows the separators differ)
     expect_identical(
-      gt_get_file_names(tgeno_gt)[2],
-      file.path(normalizePath(tg_dir), paste0(prefix, ".bk"))
+      normalizePath(gt_get_file_names(tgeno_gt)[2]),
+      normalizePath(file.path(tg_dir, paste0(prefix, ".bk")))
     )
   }
 })
