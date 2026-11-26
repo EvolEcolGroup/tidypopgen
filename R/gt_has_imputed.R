@@ -93,8 +93,9 @@ gt_set_imputed <- function(x, set = NULL) {
     x <- x$genotypes
   }
   # phased genotypes use their own code256 (see ?phased_encoding), which
-  # would be overwritten
-  if (is_phased(x)) {
+  # would be overwritten (only checked on genotypes, so that other objects
+  # still reach the checks below and give their usual errors)
+  if (inherits(x, "vctrs_bigSNP") && is_phased(x)) {
     stop("gt_set_imputed() does not work on phased genotypes", call. = FALSE)
   }
   if (!is.logical(set)) {
