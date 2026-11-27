@@ -4,6 +4,16 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-27 (laptopX1): `sex_chromosomes` pushed after the annex dropped out
+
+- **Done:** the annex drive dropped out overnight and came back intact
+  (`git fsck` clean); the branch was bundled onto the root drive
+  (`~/claude_work/tidypopgen_rescue/sex_chromosomes.bundle`) and pushed to
+  origin as a backup (Andrea); no PR until his review.
+- **Where:** branch `sex_chromosomes`, `61c41954`.
+- **Notes changed:** `handover.md`, `summary.md`,
+  `sex_chromosomes_plan.md`.
+
 ## 2026-11-26 (laptopX1): sex chromosomes and mtDNA, phase 1
 
 - **Done:**

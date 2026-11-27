@@ -11,7 +11,8 @@ which individuals are male or female. With that it can:
 - write sex chromosomes back correctly to PLINK and VCF files.
 
 Status: phase 1 implemented on 26 Nov 2026 (laptopX1), on branch
-`sex_chromosomes` (from `dev` at 4374e70d; not pushed, no PR yet), one
+`sex_chromosomes` (from `dev` at 4374e70d; pushed on 27 Nov, no PR until
+Andrea's review), one
 commit per step: chromosome types (`b1fb3203`), VCF readers (`9526808e`),
 `indiv_sex_check()` (`69bd0209`), autosome-only analyses (`c56ad0bd`),
 writers (`815611fa`), article and cheatsheet (`a7a81f4d`). Phase 2 is
