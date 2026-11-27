@@ -53,16 +53,16 @@ backing_files <- gt_save(example_gt_filtered,
   file_name = paste0(tempfile(), "_example_filtered")
 )
 #> 
-#> gen_tibble saved to /tmp/RtmpRTEKeo/file1f7013b9ab01_example_filtered.gt
-#> using FBM RDS: /tmp/RtmpRTEKeo/file1f7053b75402.rds
-#> with FBM backing file: /tmp/RtmpRTEKeo/file1f7053b75402.bk
+#> gen_tibble saved to /tmp/RtmpkBUSq9/file202432700ede_example_filtered.gt
+#> using FBM RDS: /tmp/RtmpkBUSq9/file202441776ce4.rds
+#> with FBM backing file: /tmp/RtmpkBUSq9/file202441776ce4.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpRTEKeo/file1f7013b9ab01_example_filtered.gt')
+#> gt_load('/tmp/RtmpkBUSq9/file202432700ede_example_filtered.gt')
 
 # backing_files[1] contains the name of the saved .gt file
 backing_files[1]
-#> [1] "/tmp/RtmpRTEKeo/file1f7013b9ab01_example_filtered.gt"
+#> [1] "/tmp/RtmpkBUSq9/file202432700ede_example_filtered.gt"
 
 # To load the saved gen_tibble object, use the path to the saved .gt file
 reloaded_gt <- gt_load(backing_files[1])
