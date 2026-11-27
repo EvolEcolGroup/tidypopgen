@@ -6,6 +6,46 @@
 # S()), from https://github.com/isaacovercast/easySFS (commit 87d2996).
 # Spectra are returned as R arrays with one dimension per population (so the
 # first population changes fastest in memory), with a "mask" attribute.
+#
+# Licences and changes. easySFS (easySFS.py) is copyright (C) Isaac Overcast
+# and released under the Creative Commons Attribution 4.0 International
+# licence (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/). Its
+# Spectrum.py is taken from dadi (Gutenkunst et al. 2009,
+# https://bitbucket.org/gutenkunstlab/dadi) and keeps dadi's BSD licence,
+# reproduced below. The code here was translated from Python to R by the
+# tidypopgen authors: only the functions listed above were translated, they
+# work on matrices of allele counts (with NA for missing genotypes) rather
+# than on VCF files, and they return R arrays rather than Spectrum objects.
+#
+# The licence of dadi's Spectrum.py, as distributed with easySFS:
+#
+# Copyright (c) 2008, Ryan Gutenkunst
+#
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# a. Redistributions of source code must retain the above copyright notice,
+#    this list of conditions and the following disclaimer.
+# b. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+# c. Neither the name of the Cornell University nor the names of the
+#    contributors may be used to endorse or promote products derived from this
+#    software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
 
 # make_datadict(): the number of called and alternate allele copies of each
 # locus in each population. alt_copies is a matrix (individuals x loci) of the

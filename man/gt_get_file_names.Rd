@@ -10,11 +10,19 @@ gt_get_file_names(x)
 \item{x}{a \code{\link{gen_tibble}}}
 }
 \value{
-a character vector with the names and paths of the two files
+a character vector with the names and paths of the \emph{.rds} and
+\emph{.bk} files, followed by those of any sidecar files
 }
 \description{
 A function to return the names of the files used to store data in a
-\code{gen_tibble}. Specifically, this returns the .rds file storing the big
+\code{gen_tibble}. Specifically, this returns the \emph{.rds} file storing the big
+matrix (FBM) and its \emph{.bk} backing file, always as the first two elements
+and in this order. If the \code{gen_tibble} has integer names of loci
+(\code{names_as_int = TRUE}) or integer chromosomes (\code{chromosomes_as_int = TRUE}), the sidecar files holding their original names (\emph{.loci.tsv}, then
+\emph{.chromosomes.tsv}, see \code{\link[=gt_lookup_loci]{gt_lookup_loci()}} and \code{\link[=gt_lookup_chromosomes]{gt_lookup_chromosomes()}})
+follow. A sidecar is listed only if the \code{gen_tibble} uses it (its loci table
+holds integer names, or integer chromosomes) and the file exists, so a
+\code{gen_tibble} without integer names or chromosomes has exactly two files.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

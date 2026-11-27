@@ -219,3 +219,195 @@ test_that("pairwise_ibs uses imputed genotypes only if set to", {
   expect_identical(ibs_used$ibs[], ibs_filled$ibs[])
   expect_identical(ibs_used$valid_n[], ibs_filled$valid_n[])
 })
+
+test_that("missing_correction = 'allele_freq' gives the same values as plink", {
+  # Read in results from (PLINK v1.9.0 64-bit, 27 Sep 2026; see
+  # data-raw/validate/create_plink_ibs_missing_data.R), for 24 individuals and
+  # 300 loci with 33% of missing genotypes:
+  # plink --bfile ibs_missing --distance square bin allele-ct ibs
+  # [flat-missing], and, with the frequencies of the first 16 individuals
+  # (the founders of ibs_missing_nonfounders.fam):
+  # plink --bfile ibs_missing --fam ibs_missing_nonfounders.fam
+  #   --distance square bin allele-ct
+  # The .bin files hold the matrices as doubles, at full precision
+  read_plink_bin <- function(file) {
+    file <- system.file("extdata/related", file, package = "tidypopgen")
+    matrix(readBin(file, "double", n = 24 * 24), 24, 24)
+  }
+  bed_path <- system.file(
+    "extdata/related/ibs_missing.bed",
+    package = "tidypopgen"
+  )
+  ibs_gt <- gen_tibble(
+    bed_path,
+    quiet = TRUE,
+    valid_alleles = c("A", "T"),
+    backingfile = tempfile()
+  )
+  ibs_fbm <- tidypopgen:::.gt_get_fbm(ibs_gt)
+  # the weighted correction: the operations are those of PLINK, so the values
+  # are identical (with several blocks and cores too)
+  w_dist <- snp_ibs(ibs_fbm,
+    type = "adjusted_counts",
+    missing_correction = "allele_freq", block.size = 70, n_cores = 2
+  )
+  expect_identical(w_dist, read_plink_bin("ibs_missing.dist.bin"))
+  w_prop <- pairwise_ibs(ibs_gt,
+    missing_correction = "allele_freq",
+    as_matrix = TRUE
+  )
+  expect_identical(
+    unclass(unname(w_prop)),
+    read_plink_bin("ibs_missing.mibs.bin")
+  )
+  # allele frequencies of the founders only
+  founder_freqs <- loci_alt_freq(ibs_gt[1:16, ])
+  w_dist_founders <- pairwise_ibs(ibs_gt,
+    type = "adjusted_counts",
+    missing_correction = "allele_freq", allele_freqs = founder_freqs,
+    as_matrix = TRUE
+  )
+  expect_identical(
+    unclass(unname(w_dist_founders)),
+    read_plink_bin("ibs_missing_nonfounders.dist.bin")
+  )
+  # the flat correction (the default), up to rounding
+  expect_equal(
+    unname(snp_ibs(ibs_fbm, type = "adjusted_counts")),
+    read_plink_bin("ibs_missing_flat.dist.bin")
+  )
+  expect_equal(
+    unname(snp_ibs(ibs_fbm)),
+    read_plink_bin("ibs_missing_flat.mibs.bin")
+  )
+})
+
+test_that("missing_correction = 'allele_freq' without missing genotypes", {
+  geno_na <- test_genotypes
+  geno_na[2, 4] <- NA
+  geno_na[3, 2] <- NA
+  gt_na <- gen_tibble(
+    x = geno_na, loci = test_loci, indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  # the two corrections differ with missing genotypes
+  expect_false(isTRUE(all.equal(
+    pairwise_ibs(gt_na, missing_correction = "allele_freq"),
+    pairwise_ibs(gt_na)
+  )))
+  # but not without them (here, with imputed genotypes)
+  gt_imputed <- gt_impute_simple(gt_na, method = "mode")
+  gt_set_imputed(gt_imputed, set = TRUE)
+  expect_equal(
+    pairwise_ibs(gt_imputed,
+      type = "adjusted_counts",
+      missing_correction = "allele_freq"
+    ),
+    pairwise_ibs(gt_imputed, type = "adjusted_counts")
+  )
+  # invalid combinations of arguments
+  expect_error(
+    pairwise_ibs(gt_na,
+      type = "raw_counts",
+      missing_correction = "allele_freq"
+    ),
+    "can not be used with"
+  )
+  expect_error(
+    pairwise_ibs(gt_na, allele_freqs = rep(0.5, 6)),
+    "only used with"
+  )
+  expect_error(
+    pairwise_ibs(gt_na,
+      missing_correction = "allele_freq",
+      allele_freqs = rep(0, 6)
+    ),
+    "all loci are monomorphic"
+  )
+  expect_error(
+    pairwise_ibs(gt_na,
+      missing_correction = "allele_freq",
+      allele_freqs = rep(0.5, 5)
+    ),
+    "allele_freqs should have one value per locus"
+  )
+  expect_error(
+    pairwise_ibs(gt_na,
+      missing_correction = "allele_freq",
+      allele_freqs = c(rep(0.5, 5), 1.5)
+    ),
+    "allele_freqs should be between 0 and 1"
+  )
+})
+
+test_that("pairwise functions delete their temporary FBMs", {
+  # their temporary .bk files used to accumulate in tempdir(), where a new
+  # tempfile() name could clash with them (see with_private_fbm_dir())
+  test_fbm <- tidypopgen:::.gt_get_fbm(test_gt)
+  n_bk <- function() length(list.files(tempdir(), pattern = "\\.bk$"))
+  bk_before <- n_bk()
+  snp_ibs(test_fbm, type = "proportion")
+  snp_king(test_fbm)
+  snp_allele_sharing(test_fbm)
+  expect_identical(n_bk(), bk_before)
+  # the raw counts are returned as FBMs, so their files are kept
+  test_ibs <- snp_ibs(test_fbm, type = "raw_counts")
+  expect_true(file.exists(test_ibs$ibs$backingfile))
+  expect_true(file.exists(test_ibs$valid_n$backingfile))
+})
+
+test_that("pairwise_ibs is a generic with methods for gen_tibbles", {
+  ibs_mat <- pairwise_ibs(test_gt, as_matrix = TRUE)
+  ibs_tidy <- pairwise_ibs(test_gt, type = "adjusted_counts")
+  # the method for the genotypes column labels the individuals with the names
+  # of the vector, and the method for gen_tibbles with their ids
+  expect_identical(pairwise_ibs(test_gt$genotypes, as_matrix = TRUE), ibs_mat)
+  expect_identical(
+    pairwise_ibs(test_gt$genotypes, type = "adjusted_counts"),
+    ibs_tidy
+  )
+  renamed_gt <- test_gt %>% mutate(id = toupper(id))
+  expect_identical(
+    dimnames(pairwise_ibs(renamed_gt, as_matrix = TRUE)),
+    list(renamed_gt$id, renamed_gt$id)
+  )
+  expect_identical(pairwise_ibs(renamed_gt)$item1, c("A", "A", "B"))
+  ibs_counts <- pairwise_ibs(test_gt$genotypes, type = "raw_counts")
+  expect_identical(attr(ibs_counts$ibs, "indiv_names"), test_gt$id)
+  ibs_counts <- pairwise_ibs(renamed_gt, type = "raw_counts")
+  expect_identical(attr(ibs_counts$ibs, "indiv_names"), renamed_gt$id)
+  expect_identical(attr(ibs_counts$valid_n, "indiv_names"), renamed_gt$id)
+  # arguments are matched by the methods, also by position
+  expect_identical(pairwise_ibs(test_gt, TRUE, "proportion", 2, 1), ibs_mat)
+  expect_error(pairwise_ibs(test_gt, foo = 1), "must be empty")
+  expect_error(pairwise_ibs(test_gt, type = "foo"), "should be one of")
+  # grouping is ignored, and tibbles that lost their class work
+  expect_identical(
+    pairwise_ibs(test_gt %>% group_by(population), type = "adjusted_counts"),
+    ibs_tidy
+  )
+  expect_identical(pairwise_ibs(as_tibble(test_gt), as_matrix = TRUE), ibs_mat)
+  # other packages can add methods for their own classes of genotypes
+  registerS3method(
+    "genotypes_tbl_class", "dummy_genotypes",
+    function(genotypes, ...) "dummy_tbl",
+    envir = asNamespace("tidypopgen")
+  )
+  registerS3method(
+    "pairwise_ibs", "dummy_genotypes",
+    function(x, as_matrix = FALSE, ...) {
+      structure(matrix(1, length(x), length(x)),
+        class = c("pairwise_matrix", "matrix", "array")
+      )
+    },
+    envir = asNamespace("tidypopgen")
+  )
+  dummy_tbl <- tibble(
+    id = c("a", "b", "c"),
+    genotypes = structure(1:3, class = "dummy_genotypes")
+  )
+  dummy_ibs <- pairwise_ibs(dummy_tbl)
+  expect_s3_class(dummy_ibs, "pairwise_tbl")
+  expect_identical(dummy_ibs$item2, c("b", "c", "c"))
+  expect_identical(dummy_ibs$value, c(1, 1, 1))
+})

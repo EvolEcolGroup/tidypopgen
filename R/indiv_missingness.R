@@ -3,8 +3,18 @@
 #' Estimate missingness for each individual (i.e. the frequency of missing
 #' genotypes in an individual).
 #'
+#' On a grouped [`gen_tibble`], missingness is computed for all the
+#' individuals in a single pass over the genotypes (it does not depend on the
+#' groups), and returned in the order of the rows. Within a grouped
+#' `mutate()` or `summarise()`, `dplyr` calls `indiv_missingness()` on the
+#' genotypes of each group in turn: this gives the same values, but reads the
+#' genotypes once for each group. With many groups and large datasets,
+#' compute it on the whole grouped tibble instead (e.g.
+#' `grouped_gt$missingness <- indiv_missingness(grouped_gt)`), or before
+#' grouping.
+#'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
-#'   a [`gen_tibble`] object), or a [`gen_tibble`].
+#'   a [`gen_tibble`] object), or a [`gen_tibble`] (grouped or not).
 #' @param as_counts boolean defining whether the count of NAs (rather than the
 #'   rate) should be returned. It defaults to FALSE (i.e. rates are returned by
 #'   default).
@@ -46,6 +56,39 @@ indiv_missingness.tbl_df <- function(
 
 #' @export
 #' @rdname indiv_missingness
+indiv_missingness.grouped_gen_tbl <- function(
+  .x,
+  as_counts = FALSE,
+  block_size = bigstatsr::block_size(nrow(.x), 1), # nolint
+  ...
+) {
+  stopifnot_has_genotypes(.x)
+  # missingness does not depend on the groups: compute it for all the
+  # individuals in a single pass over the genotypes (the whole column), in
+  # the order of the rows
+  indiv_missingness(
+    .x$genotypes,
+    as_counts = as_counts,
+    block_size = block_size,
+    ...
+  )
+}
+
+# (no method for grouped_df: missingness does not depend on the groups, so
+# other grouped tibbles, including those of other packages built on
+# tidypopgen, use the tbl_df method, which hands their genotypes column over
+# to its method)
+
+# a data frame that has lost the class of its tibble (e.g. a gen_tibble
+# returned by pick() or reframe()): restore the class and dispatch again
+#' @export
+#' @noRd
+indiv_missingness.data.frame <- function(.x, ...) {
+  indiv_missingness(restore_genotypes_tbl(.x, "indiv_missingness"), ...)
+}
+
+#' @export
+#' @rdname indiv_missingness
 indiv_missingness.vctrs_bigSNP <- function(
   .x,
   as_counts = FALSE,
@@ -83,11 +126,3 @@ indiv_missingness.vctrs_bigSNP <- function(
   }
   row_na
 }
-
-#' #' @export
-#' #' @rdname indiv_missingness
-#' indiv_missingness.grouped_df <- function(.x, as_counts = FALSE, ...){
-#'   .x %>% mutate(indiv_missingness = indiv_missingness(.data$genotypes,
-#'   as_counts = as_counts)) %>%
-#'     summarise(het_obs = mean(indiv_missingness))
-#' }

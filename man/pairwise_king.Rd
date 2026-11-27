@@ -2,17 +2,43 @@
 % Please edit documentation in R/pairwise_king.R
 \name{pairwise_king}
 \alias{pairwise_king}
+\alias{pairwise_king.tbl_df}
+\alias{pairwise_king.vctrs_bigSNP}
+\alias{pairwise_king.grouped_df}
 \title{Compute the KING-robust Matrix for a \code{gen_tibble} object}
 \usage{
-pairwise_king(
+pairwise_king(x, ...)
+
+\method{pairwise_king}{tbl_df}(
   x,
   as_matrix = FALSE,
   block_size = bigstatsr::block_size(nrow(x)),
-  n_cores = bigstatsr::nb_cores()
+  n_cores = bigstatsr::nb_cores(),
+  ...
+)
+
+\method{pairwise_king}{vctrs_bigSNP}(
+  x,
+  as_matrix = FALSE,
+  block_size = bigstatsr::block_size(length(x)),
+  n_cores = bigstatsr::nb_cores(),
+  ...
+)
+
+\method{pairwise_king}{grouped_df}(
+  x,
+  as_matrix = FALSE,
+  block_size = bigstatsr::block_size(nrow(x)),
+  n_cores = bigstatsr::nb_cores(),
+  ...
 )
 }
 \arguments{
-\item{x}{a \code{gen_tibble} object.}
+\item{x}{a \code{gen_tibble} object, or a vector of class \code{vctrs_bigSNP} (the
+\code{genotypes} column of a \code{\link{gen_tibble}}, whose individuals are then
+labelled with the names of the vector).}
+
+\item{...}{other arguments passed to specific methods, currently unused.}
 
 \item{as_matrix}{boolean, determining whether the results should be a square
 symmetrical matrix (TRUE), or a tidied tibble (FALSE, the default)}
@@ -27,7 +53,9 @@ memory use.}
 \value{
 a square symmetrical matrix of relationship coefficients between
 individuals if \code{as_matrix} is TRUE, or a tidied tibble of coefficients if
-\code{as_matrix} is FALSE.
+\code{as_matrix} is FALSE. For a grouped \code{\link{gen_tibble}}, a list of matrices
+(one per group), or a tidied tibble of the pairs within each group, with
+the group columns first.
 }
 \description{
 This function computes the KING-robust estimator of kinship, reimplementing
@@ -36,6 +64,22 @@ the KING algorithm of Manichaikul et al. (2010).
 \details{
 Imputed genotypes are used if \code{x} is set to use them (see
 \code{\link[=gt_set_imputed]{gt_set_imputed()}}), and treated as missing otherwise.
+
+\code{pairwise_king()} is an S3 generic. The method for a \code{\link{gen_tibble}}
+computes the matrix with the method for its \code{genotypes} column (of class
+\code{vctrs_bigSNP}), and labels it with the \code{id} of the individuals. Other
+packages can add methods for their own classes of genotypes (e.g. genotype
+likelihoods).
+
+For a grouped \code{\link{gen_tibble}}, kinship is computed within each group (e.g.
+within each population), giving the same results as
+\code{group_map(x, ~ pairwise_king(.x))}, but much faster: the genotypes are
+read only once, and only the pairs of individuals within each group are
+compared. With \code{as_matrix = TRUE}, the result is a list of matrices, one
+per group in the order of \code{\link[dplyr:group_keys]{dplyr::group_keys()}} (an empty group gives an
+empty matrix); otherwise, it is a tibble with the pairs of individuals of
+all groups, preceded by a \code{group} column (or by one column per grouping
+variable, if there are several).
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")
@@ -48,6 +92,11 @@ pairwise_king(example_gt, as_matrix = FALSE)
 
 # Adjust block_size
 pairwise_king(example_gt, block_size = 2)
+
+# Kinship within each population
+example_gt \%>\%
+  group_by(population) \%>\%
+  pairwise_king()
 
 }
 \references{

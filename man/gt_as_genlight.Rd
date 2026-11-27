@@ -4,10 +4,14 @@
 \alias{gt_as_genlight}
 \title{Convert a \code{gen_tibble} to a \code{genlight} object from \code{adegenet}}
 \usage{
-gt_as_genlight(x)
+gt_as_genlight(x, chunk_size = NULL)
 }
 \arguments{
 \item{x}{a \code{\link{gen_tibble}}, with population coded as 'population'}
+
+\item{chunk_size}{the number of loci processed at a time (rounded up to a
+multiple of 8). If left to NULL, chunks of about 10 million genotypes
+are used.}
 }
 \value{
 a \code{genlight} object
@@ -21,6 +25,10 @@ object, and the alleles are stored as "ref/alt" in \code{loc.all} (\code{genligh
 counts the second allele, i.e. the alternate allele). As \code{genlight} only
 supports single letter alleles, \code{loc.all} is not set (with a warning) if any
 locus has a missing or multi-character allele.
+
+The genotypes are read in chunks of loci, so that the full matrix of
+genotypes is never loaded in memory; the result is the same as building the
+\code{genlight} from that matrix.
 }
 \examples{
 \dontshow{if (rlang::is_installed("adegenet")) withAutoprint(\{ # examplesIf}

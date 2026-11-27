@@ -12,4 +12,6 @@ admixture/
 ^CRAN-SUBMISSION$
 ^\.positai$
 ^\.claude$
-^CLAUDE\.md$
+^benchmarks$
+^dev_notes$
+^Rplots\.pdf$

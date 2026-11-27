@@ -1,3 +1,104 @@
+# tidypopgen 1.1.0
+
+## New features and changes
+
+* new `gt_pca()` computes PCAs, by default with missing genotypes handled as
+  `plink --pca` (PLINK 1.9), without imputation; `gt_pca_partialSVD()` and
+  `gt_pca_randomSVD()` are deprecated
+* `gt_pca()` accepts pseudohaploid data, coded as homozygous diploids (as in
+  PLINK)
+* `gt_pcadapt()`, `gt_dapc()` and `loci_ld_clump()` work with missing
+  genotypes without imputation, using the individuals genotyped at each locus
+  (as `pcadapt` and PLINK)
+* new `loci_ld_prune()` prunes loci as `plink --indep-pairwise` (PLINK 1.9)
+* `predict()` of a `gt_pca` uses `project_method = "least_squares"` on all
+  components by default, and is 2-3 times faster; new
+  `project_method = "plink"` projects as PLINK 1.9
+* `pairwise_grm(method = "plink")` gives PLINK 1.9's relationship matrix
+* `pairwise_ibs(missing_correction = "allele_freq")` corrects for missing
+  genotypes as PLINK 1.9's `--distance`
+* new `pairwise_dist()` computes genetic distances between individuals as
+  ngsDist, e.g. for neighbour-joining trees
+* `pairwise_king()` on a grouped `gen_tibble` computes kinship within each
+  group (it used to ignore the groups)
+* `pairwise_king()`, `pairwise_ibs()`, `pairwise_allele_sharing()`,
+  `pairwise_dist()`, `indiv_inbreeding()` and `windows_indiv_roh()` are S3
+  generics, so that other packages can add methods
+* new `bootstrap_blocks()`, for developers: the blocks of the block bootstrap,
+  so that other packages can resample the same blocks
+* new `group_labels()` and `group_columns()`, for developers: the labels and
+  tidy columns of groups, so that other packages name groups as tidypopgen
+* new `gt_merge_vcfs()` and `gt_concat_vcfs()` read several VCF files into a
+  single `gen_tibble`, as `bcftools merge` and `bcftools concat`
+* integer chromosomes (`chromosomes_as_int`) for datasets with many
+  chromosomes; the original names of integer loci and chromosomes are kept in
+  sidecar files (`gt_lookup_loci()`, `gt_restore_loci()` and
+  `gt_lookup_chromosomes()`)
+* phased genotypes (experimental): `gen_tibble(phased = TRUE)` reads phased
+  VCF files; `is_phased()` and `show_haplotypes()` give the phase,
+  `gt_as_vcf()` writes it, and `rbind()` keeps it
+* new `gt_simulate_bn()` simulates toy datasets (Balding-Nichols model)
+* `qc_report_loci(hwe = FALSE)` gives the MAF and missingness of loci in a
+  single pass
+* `gt_impute_simple()` works after removing loci (but not individuals)
+* `gen_tibble()` reads *packedancestry* genotype files in the TGENO layout
+  (one record per individual, as in recent releases of the AADR) as well as
+  GENO; the layout is detected from the header of the file, whatever its
+  extension (*.geno* or *.tgeno*)
+* faster input and output: VCF, *.bed* and *packedancestry* (*.geno*) files
+  are read in parallel (`n_cores`), *.ped* files are read faster, and *.gt*
+  files are saved twice as fast
+* faster `pairwise_king()` (up to 1.8 times on CPUs with AVX2), `pairwise_ibs()`
+  and `pairwise_allele_sharing()`, and much faster `indiv_inbreeding()` and
+  `qc_report_indiv()` on grouped data
+* faster `select_loci()`, and faster `gt_as_vcf()`, `gt_update_backingfile()`
+  and `gt_order_loci()` with many chromosomes; `gt_as_genlight()` uses less
+  memory
+* `indiv_inbreeding()` on a grouped `gen_tibble` returns one value per
+  individual, in the order of the rows (computed within each group); the
+  list of one vector per group (`type = "list"`) is deprecated. It also
+  works on the `genotypes` column, e.g. within `mutate()`
+* `indiv_het_obs()`, `indiv_missingness()` and `indiv_ploidy()` have methods
+  for grouped `gen_tibble`s (all individuals in one pass, in the order of the
+  rows) and for tibbles that lost their class
+* `loci_alt_freq(as_counts = TRUE)` on a grouped `gen_tibble` follows `type`:
+  by default a tibble with the columns `n_alt` and `n_valid`;
+  `type = "matrix"` gives the two matrices of before, now with loci and group
+  names
+* new article on large RAD-seq datasets; the big data article uses
+  `gt_merge_vcfs()`
+
+## Bug fixes
+
+* fix occasional "File '...bk' already exists" errors from functions using
+  temporary backing files (PCA, LD clumping, KING, IBS and allele sharing)
+* `loci_ld_clump()`, `gt_pcadapt()` and the PCA functions: fix false "You
+  can't have missing values" errors (or hangs) after removing loci or
+  individuals with missing genotypes
+* `gt_pca(method = "random")` and `gt_pca_autoSVD()`: fix hangs or cryptic
+  errors with a custom `fun_scaling` and missing genotypes, and use at most
+  `n_cores` cores
+* `gt_pcadapt()`: clear error for loci with the same genotype in every
+  individual (#179)
+* `gen_tibble()`: error on *.bed* files whose size does not match the *.bim*
+  and *.fam* files, and on individual-major *.bed* files
+* `gen_tibble()`: *packedancestry* files that are truncated, or whose header
+  does not match the *.ind* and *.snp* files, give an error before the
+  backing file is created, and EIGENSTRAT (text) *.geno* files a clear error
+* `gen_tibble()` on *.ped* files: a third allele always flags the locus as
+  multi-allelic
+* `gen_tibble()` with the "cpp" parser: fix malformed VCF files read as wrong
+  genotypes (now an error), missing chromosomes (now `NA`), and backing files
+  left behind on errors
+* `gt_as_vcf()`: fix loci with missing chromosomes (now written as ".")
+* `loci_ld_clump()`: error on `exclude` values that are not indices of loci
+* `rbind()`: fix grouped `gen_tibble`s, which now keep the grouping of the
+  first one
+* `gt_add_sf()`: no "Adding missing grouping variables" message on grouped
+  `gen_tibble`s
+* `loci_pi()` on a grouped `gen_tibble` with a single individual: fix the
+  output, which was a plain vector whatever `type`
+
 # tidypopgen 1.0.0
 
 ## New features and changes

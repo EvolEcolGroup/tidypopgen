@@ -1,0 +1,8 @@
+08:25:27 load 3.81 dirty 61MB | base: fbm_read_bed n_indiv 2000 n_snp 15000000 cores 1: elapsed 18.38 user 4.78 sys 13.22
+08:26:10 load 4.21 dirty 161MB | proto: fbm_read_bed n_indiv 2000 n_snp 15000000 cores 1: elapsed 15.05 user 2.20 sys 12.77
+08:26:49 load 4.54 dirty 163MB | proto: fbm_read_bed n_indiv 2000 n_snp 15000000 cores 4: elapsed 10.67 user 2.37 sys 20.18
+08:27:23 load 6.57 dirty 510MB | proto: fbm_read_bed n_indiv 2000 n_snp 15000000 cores 8: elapsed 10.58 user 2.36 sys 29.32
+08:27:57 load 7.53 dirty 359MB | base: fbm_read_bed n_indiv 2000 n_snp 15000000 cores 1: elapsed 17.46 user 4.71 sys 12.67
+08:28:38 load 6.64 dirty 359MB | proto: fbm_read_bed n_indiv 2000 n_snp 15000000 cores 8: elapsed 10.95 user 2.29 sys 28.85
+08:29:13 load 6.49 dirty 323MB | proto: fbm_read_bed n_indiv 2000 n_snp 15000000 cores 4: elapsed 11.81 user 2.35 sys 19.54
+08:29:49 load 6.04 dirty 217MB | proto: fbm_read_bed n_indiv 2000 n_snp 15000000 cores 1: elapsed 14.81 user 2.07 sys 12.66

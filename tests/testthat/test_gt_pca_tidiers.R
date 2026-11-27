@@ -11,7 +11,7 @@ test_that("gt_pca_tidiers", {
   )
 
   test_gt <- gt_impute_simple(test_gt, method = "mode")
-  test_pca <- test_gt %>% gt_pca_randomSVD(k = 5)
+  test_pca <- test_gt %>% gt_pca(k = 5, n_cores = 2)
   # get error if more than one matrix selected
   expect_error(
     test_pca %>% tidy(matrix = c("X", "X")),
@@ -81,7 +81,7 @@ test_that("augment and augment_loci work with a single component", {
     quiet = TRUE
   )
   test_gt <- gt_impute_simple(test_gt, method = "mode")
-  test_pca <- test_gt %>% gt_pca_randomSVD(k = 5)
+  test_pca <- test_gt %>% gt_pca(k = 5, n_cores = 2)
   augmented_gt <- test_pca %>% augment(data = test_gt, k = 1)
   expect_true(ncol(augmented_gt) == ncol(test_gt) + 1 + 1)
   expect_equal(augmented_gt$.fittedPC1, test_pca$u[, 1] * test_pca$d[1],
@@ -98,6 +98,20 @@ test_that("augment and augment_loci work with a single component", {
     autoplot(test_pca, type = "scores", k = 1),
     "for 'scores' plots, 'k' should be a pair of values"
   )
+  # the loadings of several components are plotted with geom_hex(), which
+  # needs hexbin (bigstatsr combines the panels with cowplot into a ggplot)
+  if (rlang::is_installed("hexbin")) {
+    expect_s3_class(
+      autoplot(test_pca, type = "loadings", k = c(1, 2)),
+      "ggplot"
+    )
+  } else {
+    rlang::local_interactive(FALSE)
+    expect_error(
+      autoplot(test_pca, type = "loadings", k = c(1, 2)),
+      class = "rlib_error_package_not_found"
+    )
+  }
 })
 
 test_that("augment_loci works with gt_pca_autoSVD", {
@@ -155,7 +169,7 @@ test_that("augment checks the ids of data", {
   test_gt <- gt_impute_simple(test_gt, method = "mode")
   # use integer ids
   test_gt$id <- seq_len(nrow(test_gt))
-  test_pca <- test_gt %>% gt_pca_randomSVD(k = 5)
+  test_pca <- test_gt %>% gt_pca(k = 5, n_cores = 2)
   augmented_gt <- test_pca %>% augment(data = test_gt)
   expect_identical(augmented_gt$id, test_gt$id)
   # error if the individuals are not in the same order

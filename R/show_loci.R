@@ -54,8 +54,13 @@ show_loci.vctrs_bigSNP <- function(.x, ...) {
 #' @export
 #' @rdname show_loci
 "show_loci<-.vctrs_bigSNP" <- function(.x, value) {
-  # test for validity of loci
-  value <- validate_loci(value)
+  # test for validity of loci (keeping integer chromosomes if the loci table
+  # already has them, i.e. chromosomes_as_int; otherwise chromosomes become a
+  # factor, as before)
+  keep_int_chromosomes <- is.integer(show_loci(.x)$chromosome) &&
+    !is.factor(show_loci(.x)$chromosome) &&
+    is.numeric(value$chromosome) && !is.factor(value$chromosome)
+  value <- validate_loci(value, chromosomes_as_int = keep_int_chromosomes)
   if (nrow(show_loci(.x)) != nrow(value)) {
     stop(paste(
       "the replacement loci tibble does not have the same number",

@@ -59,7 +59,7 @@
 #' @aliases gt_pca_tidiers
 #' @rdname tidy_gt_pca
 #' @export
-#' @seealso [gt_pca_autoSVD()] [augment_gt_pca]
+#' @seealso [gt_pca()] [gt_pca_autoSVD()] [augment_gt_pca]
 #' @examples
 #' # Create a gen_tibble of lobster genotypes
 #' bed_file <-
@@ -69,12 +69,11 @@
 #'   quiet = TRUE
 #' )
 #'
-#' # Remove monomorphic loci and impute
+#' # Remove monomorphic loci
 #' lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
-#' lobsters <- gt_impute_simple(lobsters, method = "mode")
 #'
 #' # Create PCA object
-#' pca <- gt_pca_partialSVD(lobsters)
+#' pca <- gt_pca(lobsters)
 #'
 #' # Tidy the PCA object
 #' tidy(pca)
@@ -168,7 +167,7 @@ tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
 #'   columns containing each observation's projection into PCA space.
 #' @export
 #' @name augment_gt_pca
-#' @seealso [gt_pca_autoSVD()] [gt_pca_tidiers]
+#' @seealso [gt_pca()] [gt_pca_autoSVD()] [gt_pca_tidiers]
 #' @examples
 #' # Create a gen_tibble of lobster genotypes
 #' bed_file <-
@@ -178,12 +177,11 @@ tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
 #'   quiet = TRUE
 #' )
 #'
-#' # Remove monomorphic loci and impute
+#' # Remove monomorphic loci
 #' lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
-#' lobsters <- gt_impute_simple(lobsters, method = "mode")
 #'
 #' # Create PCA object
-#' pca <- gt_pca_partialSVD(lobsters)
+#' pca <- gt_pca(lobsters)
 #'
 #' # Augment the gen_tibble with PCA scores
 #' augment(pca, data = lobsters)
@@ -247,7 +245,7 @@ augment.gt_pca <- function(x, data = NULL, k = NULL, ...) {
 #'   with [show_loci()]. If `data` is missing, a tibble of loadings.
 #' @export
 #' @name augment_loci_gt_pca
-#' @seealso [gt_pca_autoSVD()] [gt_pca_tidiers]
+#' @seealso [gt_pca()] [gt_pca_autoSVD()] [gt_pca_tidiers]
 #' @examples
 #' # Create a gen_tibble of lobster genotypes
 #' bed_file <-
@@ -257,12 +255,11 @@ augment.gt_pca <- function(x, data = NULL, k = NULL, ...) {
 #'   quiet = TRUE
 #' )
 #'
-#' # Remove monomorphic loci and impute
+#' # Remove monomorphic loci
 #' lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
-#' lobsters <- gt_impute_simple(lobsters, method = "mode")
 #'
 #' # Create PCA
-#' pca <- gt_pca_partialSVD(lobsters)
+#' pca <- gt_pca(lobsters)
 #'
 #' # Augment the gen_tibble with the PCA scores
 #' augment_loci(pca, data = lobsters)
@@ -308,6 +305,20 @@ print.gt_pca <- function(x, ...) {
   cat(" === PCA of gen_tibble object ===")
   cat("\nMethod: ")
   print(x$method)
+  # the genotypes used (objects from older versions do not record them)
+  if (!is.null(attr(x, "missing"))) {
+    cat(
+      "\nGenotypes:",
+      if (isTRUE(attr(x, "missing"))) {
+        "with missing genotypes (compared pairwise)"
+      } else if (isTRUE(attr(x, "imputed"))) {
+        "imputed"
+      } else {
+        "complete"
+      },
+      "\n"
+    )
+  }
   cat("\nCall ($call):")
   print(x$call)
   cat(

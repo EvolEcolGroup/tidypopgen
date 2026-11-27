@@ -192,3 +192,29 @@ test_that("heatmap_pairwise keeps the order of a tidy input", {
   expect_equal(axis_labels(heatmap_pairwise(king_mat)), rev_gt$id)
   expect_equal(axis_labels(heatmap_pairwise(king_tidy)), rev_gt$id)
 })
+
+test_that("group_labels() and group_columns() label groups as the methods", {
+  keys <- tibble::tibble(
+    population = factor(c("b", "a", "a"), levels = c("b", "a")),
+    sex = c("F", "F", "M")
+  )
+  expect_identical(group_labels(keys), c("b.F", "a.F", "a.M"))
+  expect_identical(group_labels(keys[1]), c("b", "a", "a"))
+  # one grouping variable: a group column, keeping the type
+  one <- group_columns(keys[1], c(2, 1))
+  expect_identical(names(one), "group")
+  expect_identical(one$group, factor(c("a", "b"), levels = c("b", "a")))
+  # several: one column per variable
+  expect_identical(group_columns(keys, 3), keys[3, ])
+  # pairs: suffixed names, also with one variable
+  expect_identical(
+    names(group_columns(keys[1], 1, suffix = "_1")),
+    "population_1"
+  )
+  expect_identical(names(group_columns(keys, 1, suffix = "_2")),
+                   c("population_2", "sex_2"))
+  expect_error(
+    group_columns(keys, 1, other_names = "sex"),
+    "rename the grouping"
+  )
+})

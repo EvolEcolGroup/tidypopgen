@@ -176,10 +176,6 @@ loci_pi.grouped_gen_tbl <- function(
   }
   rlang::check_dots_empty()
   type <- match.arg(type)
-  # if we only have one individual, return NA for all loci
-  if (nrow(.x) == 1) {
-    return(rep(NA_real_, nrow(show_loci(.x))))
-  }
 
   geno_fbm <- .gt_get_fbm(.x)
   # rows (individuals) that we want to use
@@ -191,7 +187,16 @@ loci_pi.grouped_gen_tbl <- function(
   # directly, in blocks of block_size loci, and fills a single matrix
   # (rather than binding the matrices from each block); openMP uses
   # multiple cores in the cpp code.
-  if (is_diploid_only(.x)) {
+  if (nrow(.x) == 1) {
+    # with a single individual, pi is NA at every locus, for every group (as
+    # for an ungrouped gen_tibble); it is formatted below as given by type,
+    # as for any other grouped gen_tibble
+    pi_mat <- matrix(
+      NA_real_,
+      nrow = count_loci(.x),
+      ncol = dplyr::n_groups(.x)
+    )
+  } else if (is_diploid_only(.x)) {
     pi_mat <- gt_grouped_pi_diploid(
       BM = geno_fbm,
       rowInd = rows_to_keep,

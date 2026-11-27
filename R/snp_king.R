@@ -52,6 +52,10 @@ snp_king <- function(
   if (n == 0) {
     return(matrix(numeric(0), 0, 0))
   }
+  # all the FBMs below are temporary (the result is a matrix): make them in a
+  # private directory, deleted on exit, so that their names cannot clash with
+  # other .bk files (see with_private_fbm_dir())
+  local_private_fbm_dir()
   # FBM matrix for the KING numerator
   k_numerator <- bigstatsr::FBM(n, n, init = 0)
   # FBM matrix of number of heterozygous loci for individual i

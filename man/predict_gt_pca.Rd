@@ -7,8 +7,8 @@
 \method{predict}{gt_pca}(
   object,
   new_data = NULL,
-  project_method = c("none", "simple", "OADP", "least_squares"),
-  lsq_pcs = c(1, 2),
+  project_method = c("least_squares", "simple", "plink", "OADP", "none"),
+  lsq_pcs = NULL,
   block_size = NULL,
   n_cores = 1,
   as_matrix = TRUE,
@@ -20,17 +20,19 @@
 
 \item{new_data}{a gen_tibble if scores are requested for a new dataset}
 
-\item{project_method}{a string taking the value of either "simple", "OADP"
-(Online Augmentation, Decomposition, and Procrustes (OADP) projection), or
-"least_squares" (as done by SMARTPCA)}
+\item{project_method}{the projection method: \code{"least_squares"} (the
+default, as done by smartpca), \code{"simple"}, \code{"plink"} (as PLINK 1.9),
+\code{"OADP"} (Online Augmentation, Decomposition, and Procrustes projection)
+or \code{"none"}; see Details.}
 
-\item{lsq_pcs}{a vector of the indices of the principal
-components to use for the least square fitting. Only relevant
-if \code{project_method = 'least_squares'}. It defaults to the first two
-components.}
+\item{lsq_pcs}{a vector of the indices of the principal components to use
+for the least squares fitting (and to return). Only relevant if
+\code{project_method = "least_squares"}. It defaults to all the components of
+the PCA.}
 
 \item{block_size}{number of loci read simultaneously (larger values will
-speed up computation, but require more memory)}
+speed up computation, but require more memory); by default, blocks of about
+128 MB.}
 
 \item{n_cores}{number of cores}
 
@@ -48,6 +50,51 @@ object.
 \description{
 Predict the PCA scores for a \code{\link{gt_pca}}, either for the original data or
 projecting new data.
+}
+\details{
+New individuals are projected on the loadings of the PCA, with their
+genotypes centred and scaled as those of the PCA. The methods differ in how
+they deal with missing genotypes:
+\itemize{
+\item \code{"least_squares"} (the default): for each individual, the least squares
+fit of its standardised genotypes on the loadings of the loci genotyped
+in that individual (as \code{lsqproject} in smartpca). Individuals with many
+missing genotypes are not shrunk towards the centre of the PCA. With
+complete genotypes, it gives the same scores as \code{"simple"}. Individuals
+with too few genotyped loci to fit the components get \code{NA}, with a
+warning. As with \code{"simple"} and \code{"OADP"}, imputed genotypes are used only
+if the \code{gen_tibble} is set to use them (see \code{\link[=gt_set_imputed]{gt_set_imputed()}}).
+\item \code{"simple"}: the product of the standardised genotypes, with missing
+genotypes set to 0 (the mean), by the loadings. An individual with a
+proportion f of missing genotypes is shrunk towards 0 by a factor of
+about 1 - f (e.g. to a fifth of its distance with 80\% missing
+genotypes), so it should only be used with complete or imputed data.
+\item \code{"plink"}: the simple projection divided by the proportion of loci
+genotyped in each individual, which is how PLINK 1.9 projects the
+individuals outside the clusters of \code{--pca-cluster-names} (or
+\code{--pca-clusters}). It removes most of the shrinkage of \code{"simple"}. PLINK
+standardises the genotypes with the allele frequencies of all the
+individuals in its run, reference and projected, whereas \code{predict()} uses
+those of the PCA (see \code{\link[=gt_pca]{gt_pca()}} to choose them): the scores are the same
+as PLINK's when the PCA uses the same frequencies, and PLINK's
+\code{.eigenvec} values are these scores divided by the singular values
+(\code{object$d}). Individuals with no genotyped locus get \code{NA}.
+\item \code{"OADP"}: the Online Augmentation, Decomposition, and Procrustes
+projection (Zhang et al. 2020), which corrects the shrinkage of
+projections with many more loci than individuals; missing genotypes are
+set to 0, as for \code{"simple"}, with the same shrinkage.
+\item \code{"none"}: the product of the genotypes by the loadings with
+\code{\link[bigstatsr:big_prodMat]{bigstatsr::big_prodMat()}}; it needs complete or imputed genotypes (and
+uses imputed genotypes automatically).
+}
+
+In a simulation of individuals with 20-80\% missing genotypes projected on
+complete reference individuals, \code{"least_squares"} had no shrinkage and the
+smallest error, \code{"simple"} and \code{"OADP"} shrank individuals by their
+proportion of missing genotypes, and imputing the genotypes (by their mode)
+before a simple projection only halved the shrinkage. \code{"plink"} was close
+to \code{"least_squares"} with the frequencies of the reference individuals, and
+had a larger error with those of all the individuals, as PLINK does.
 }
 \examples{
 \dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}
@@ -73,19 +120,19 @@ original_lobsters <- lobsters[c(1:150), ]
 new_lobsters <- lobsters[c(151:176), ]
 
 # Create PCA object
-pca <- gt_pca_partialSVD(original_lobsters)
+pca <- gt_pca(original_lobsters)
 
 # Predict
 predict(pca, new_data = new_lobsters, project_method = "simple")
 
+# Predict as PLINK 1.9
+predict(pca, new_data = new_lobsters, project_method = "plink")
+
 # Predict with OADP
 predict(pca, new_data = new_lobsters, project_method = "OADP")
 
-# Predict with least squares
-predict(pca,
-  new_data = new_lobsters,
-  project_method = "least_squares", lsq_pcs = c(1, 2, 3)
-)
+# Predict with least squares (the default), on the first three components
+predict(pca, new_data = new_lobsters, lsq_pcs = c(1, 2, 3))
 
 # Return a tibble
 predict(pca, new_data = new_lobsters, as_matrix = FALSE)
@@ -96,5 +143,13 @@ predict(pca, new_data = new_lobsters, block_size = 10)
 }
 \references{
 Zhang et al (2020). Fast and robust ancestry prediction using
-principal component analysis  36(11): 3439–3446.
+principal component analysis. Bioinformatics 36(11): 3439–3446.
+
+Patterson N., Price A.L. and Reich D. (2006) Population structure and
+eigenanalysis. PLoS Genetics 2: e190.
+
+Privé F., Luu K., Blum M.G.B., McGrath J.J. and Vilhjálmsson B.J. (2020)
+Efficient toolkit implementing best practices for principal component
+analysis of population genetic data. Bioinformatics 36: 4449-4457 (for
+the implementation of OADP in bigsnpr, which \code{"OADP"} uses).
 }

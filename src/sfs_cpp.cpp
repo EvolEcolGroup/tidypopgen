@@ -21,6 +21,14 @@
 //   SFS (dadi's Spectrum._from_count_dict()).
 // - sfs_preview_cpp(): the number of segregating sites in the projected 1D
 //   SFS, for every projection (easySFS --preview).
+//
+// These functions follow the methods of dadi's Spectrum class (copyright (C)
+// 2008 Ryan Gutenkunst, BSD licence; see the header of
+// tests/testthat/helper_sfs_reference.R for its full text) and of easySFS
+// (copyright (C) Isaac Overcast, CC BY 4.0,
+// https://github.com/isaacovercast/easySFS), and are tested against an R
+// translation of their code (tests/testthat/helper_sfs_reference.R). The C++
+// code here was written for tidypopgen, working on the FBM.
 /******************************************************************************/
 
 // index of the pair (n, k), with 0 <= k <= n, in a triangular array

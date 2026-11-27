@@ -16,7 +16,7 @@
 #' loci, a length of at least `min_kb`, and at most `max_kb_per_snp` kb per
 #' locus.
 #'
-#' @param .x a [gen_tibble]
+#' @param .x a [`gen_tibble`], grouped or not
 #' @param window_snp the number of loci in each window (PLINK
 #'   `--homozyg-window-snp`, default 50)
 #' @param window_het the largest number of heterozygous genotypes in a window
@@ -44,8 +44,9 @@
 #'   which gives the lengths of PLINK 1.07)
 #' @param n_cores the number of cores to use (individuals are analysed in
 #'   parallel)
-#' @param ... not used. The arguments of the version of this function based
-#'   on `detectRUNS` (e.g. `window_size`) give an error: use
+#' @param ... other arguments passed to specific methods. The method for
+#'   [`gen_tibble`] objects uses none: the arguments of the version of this
+#'   function based on `detectRUNS` (e.g. `window_size`) give an error: use
 #'   [gt_roh_window()] for that version.
 #'
 #' @details The runs are those of `plink --homozyg` with the same parameters,
@@ -72,6 +73,10 @@
 #'   of `detectRUNS`. Use [as_detectRUNS()] to convert the runs to the format
 #'   of `detectRUNS`, to use its own functions.
 #'
+#'   `windows_indiv_roh()` is an S3 generic, with a method for [`gen_tibble`]
+#'   objects (grouped or not). Other packages can add methods for their own
+#'   classes (e.g. tibbles of genotype likelihoods).
+#'
 #' @return An `indiv_roh` object, a tibble with one row per run, ordered by
 #'   individual, then by chromosome (in the order of its levels) and
 #'   position, with columns:
@@ -80,7 +85,10 @@
 #'   per grouping variable);
 #'   - `id`: the individual;
 #'   - `chromosome`: the chromosome of the run (a factor, with the levels of
-#'   the loci table);
+#'   the loci table; integer chromosomes, from `chromosomes_as_int = TRUE`,
+#'   are replaced by their names from the chromosome sidecar, see
+#'   [gt_lookup_chromosomes()], so the runs are the same as without
+#'   `chromosomes_as_int`);
 #'   - `start`, `end`: the positions of the first and last locus of the run
 #'   (in bp; PLINK `POS1` and `POS2`);
 #'   - `length_bp`: `end - start + 1` (or `end - start` with
@@ -97,6 +105,7 @@
 #'   length of each chromosome, its largest position, as in `detectRUNS`) and
 #'   `n_loci` (the number of loci) are used by [autoplot.indiv_roh()],
 #'   [gt_roh_froh()], [gt_roh_loci()] and [gt_roh_islands()].
+#' @rdname windows_indiv_roh
 #' @export
 #' @references Chang CC, Chow CC, Tellier LCAM, Vattikuti S, Purcell SM, Lee
 #'   JJ (2015) Second-generation PLINK: rising to the challenge of larger and
@@ -119,7 +128,13 @@
 #'   detectRUNS::plot_Runs(runs = as_detectRUNS(sim_roh))
 #' }
 #' }
-windows_indiv_roh <- function(
+windows_indiv_roh <- function(.x, ...) {
+  UseMethod("windows_indiv_roh", .x)
+}
+
+#' @export
+#' @rdname windows_indiv_roh
+windows_indiv_roh.gen_tbl <- function(
   .x,
   window_snp = 50,
   window_het = 1,
@@ -171,10 +186,20 @@ windows_indiv_roh <- function(
     stop("window_threshold should be between 0 and 1")
   }
   loci <- show_loci(.x)
-  chromosome <- loci$chromosome
-  if (!is.factor(chromosome)) {
+  # integer chromosomes (chromosomes_as_int) with a chromosome sidecar become
+  # the factor that a read without chromosomes_as_int gives, so that the runs
+  # are ordered by chromosome name and the outputs hold names (only the
+  # distinct codes are looked up, and the factor needs no string per locus)
+  chromosome <- roh_chromosome_factor(.x, loci$chromosome)
+  # integer chromosomes without a sidecar (e.g. numbers in a loci table) are
+  # used as codes (a factor would create a string for each chromosome)
+  int_chromosomes <- is.integer(chromosome) && !is.factor(chromosome)
+  if (!int_chromosomes && !is.factor(chromosome)) {
     chromosome <- as.factor(chromosome)
   }
+  # (the C++ code takes positive codes, with a table as long as the largest:
+  # integer chromosomes are turned into groups 1..n if their codes are large)
+  chromosome_groups <- chromosome_group_codes(chromosome)
   if (anyNA(chromosome)) {
     stop("the chromosomes of the loci should not be missing")
   }
@@ -206,7 +231,7 @@ windows_indiv_roh <- function(
     BM = .gt_get_fbm(.x),
     rowInd = .gt_fbm_rows(.x),
     colInd = .gt_fbm_cols(.x),
-    chrom = chromosome,
+    chrom = chromosome_groups$codes,
     position = loci$position,
     window_size = as.integer(window_snp),
     max_het_window = as.integer(min(window_het, .Machine$integer.max)),
@@ -232,9 +257,17 @@ windows_indiv_roh <- function(
   end <- loci$position[last_locus]
   res <- tibble::tibble(
     id = .x$id[indiv],
-    chromosome = factor(levels(chromosome)[runs$chrom[run_order]],
-      levels = levels(chromosome)
-    ),
+    chromosome = if (int_chromosomes) {
+      if (is.null(chromosome_groups$values)) {
+        runs$chrom[run_order]
+      } else {
+        chromosome_groups$values[runs$chrom[run_order]]
+      }
+    } else {
+      factor(levels(chromosome)[runs$chrom[run_order]],
+        levels = levels(chromosome)
+      )
+    },
     start = start,
     end = end,
     length_bp = end - start + !isTRUE(subtract_1_from_lengths),
@@ -274,6 +307,55 @@ windows_indiv_roh <- function(
   )
 }
 
+# a data frame that has lost the class of its tibble (e.g. a gen_tibble
+# returned by pick() or reframe()): restore the class and dispatch again
+#' @export
+#' @noRd
+windows_indiv_roh.data.frame <- function(.x, ...) {
+  windows_indiv_roh(restore_genotypes_tbl(.x, "windows_indiv_roh"), ...)
+}
+
+
+# the chromosomes of the loci of .x for the runs of homozygosity: integer
+# chromosomes (chromosomes_as_int) become a factor of their names, from the
+# chromosome sidecar, with the levels that a read without chromosomes_as_int
+# gives (see chromosome_sidecar_factor()), so that the runs are the same
+# with and without integer chromosomes. Other chromosomes, and integer
+# chromosomes without a sidecar (e.g. numbers from a bed file), are returned
+# unchanged
+roh_chromosome_factor <- function(.x, chromosome) {
+  if (is_int_column(chromosome) &&
+        file.exists(chromosomes_sidecar_path(.x))) {
+    chromosome <- chromosome_sidecar_factor(.x, chromosome)
+  }
+  chromosome
+}
+
+# the loci table given to gt_roh_loci() and gt_roh_islands(), with integer
+# chromosomes (chromosomes_as_int) replaced by the chromosomes of the runs,
+# if windows_indiv_roh() found them as names (see roh_chromosome_factor()):
+# the attribute chromosome_length of roh has a row for each stretch of
+# loci of the same chromosome, in the order of the loci table, so each
+# stretch of loci gets the chromosome of its row (after checking that the
+# stretches and their last positions match)
+roh_loci_chromosomes <- function(roh, loci) {
+  chromosome_length <- attr(roh, "chromosome_length")
+  if (!is_int_column(loci$chromosome) ||
+        is_int_column(chromosome_length$chromosome)) {
+    return(loci)
+  }
+  chrom_runs <- vctrs::vec_unrep(loci$chromosome)
+  last_positions <- as.numeric(loci$position[cumsum(chrom_runs$times)])
+  if (nrow(chrom_runs) != nrow(chromosome_length) ||
+        !identical(last_positions, as.numeric(chromosome_length$length_bp))) {
+    stop(
+      "loci should be the loci table (show_loci()) of the gen_tibble ",
+      "used to find the runs"
+    )
+  }
+  loci$chromosome <- rep(chromosome_length$chromosome, times = chrom_runs$times)
+  loci
+}
 
 #' Convert runs of homozygosity to the format of `detectRUNS`
 #'
@@ -432,6 +514,9 @@ gt_roh_window <- function(
       "bps" = "position"
     ) %>%
     as.data.frame()
+  # integer chromosomes (chromosomes_as_int) get their names, as without
+  # chromosomes_as_int
+  map$Chrom <- roh_chromosome_factor(.x, map$Chrom)
 
   # compute the gaps between snps
   gaps <- diff(map$bps)

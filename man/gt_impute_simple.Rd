@@ -28,7 +28,20 @@ objects by using the mode, mean or sampling from the allele frequencies. Each
 locus is imputed independently (and thus linkage information is ignored).
 }
 \details{
-This function is a wrapper around \code{\link[bigsnpr:snp_fastImputeSimple]{bigsnpr::snp_fastImputeSimple()}}.
+This function is a wrapper around \code{\link[bigsnpr:snp_fastImputeSimple]{bigsnpr::snp_fastImputeSimple()}}, which
+imputes the whole file backing matrix (FBM). The allele frequencies used to
+impute each locus are therefore estimated from all the individuals in the
+FBM, so the \code{gen_tibble} must contain all of them (in any order). If some
+individuals have been removed (e.g. with \code{filter()}), use
+\code{\link[=gt_update_backingfile]{gt_update_backingfile()}} to resave the FBM with only the individuals in the
+\code{gen_tibble} before imputing.
+
+As each locus is imputed independently, the \code{gen_tibble} does not need to
+contain all the loci in the FBM: the loci that have been removed (e.g. with
+\code{\link[=select_loci]{select_loci()}}) are also imputed, but they do not affect the imputation of
+the loci in the \code{gen_tibble}. If only a few of the loci in the FBM are kept,
+resaving the FBM with \code{\link[=gt_update_backingfile]{gt_update_backingfile()}} first avoids the time spent
+imputing loci that are not used.
 }
 \examples{
 \dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}

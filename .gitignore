@@ -7,3 +7,4 @@ inst/doc
 tests/testthat/Rplots.pdf
 .positai
 Rplots.pdf
+.claude/settings.local.json

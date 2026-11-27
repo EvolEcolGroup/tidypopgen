@@ -12,8 +12,9 @@ gt_as_vcf(x, file = NULL, chunk_size = NULL, overwrite = FALSE)
 \item{file}{the .vcf file name with a path, or NULL (the default) to use the
 location of the backing files.}
 
-\item{chunk_size}{the number of loci processed at a time. If left to NULL,
-100,000 loci are processed at a time.}
+\item{chunk_size}{the number of loci processed at a time (also used for the
+number of chromosomes processed at a time when writing the contig lines
+of the header). If left to NULL, 100,000 loci are processed at a time.}
 
 \item{overwrite}{logical, should the file be overwritten if it already
 exists?}
@@ -22,7 +23,9 @@ exists?}
 the path of the .vcf file
 }
 \description{
-This function write a VCF from a \code{gen_tibble}. The genotypes are read and
+This function write a VCF from a \code{gen_tibble}. Phased genotypes (see
+\code{phased} in \code{\link[=gen_tibble]{gen_tibble()}}) are written as phased (e.g. \code{0|1}), and unphased
+ones as unphased (e.g. \code{0/1}). The genotypes are read and
 written in chunks of loci, so that this works on datasets that do not fit in
 memory.
 }

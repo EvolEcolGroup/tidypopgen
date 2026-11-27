@@ -15,8 +15,9 @@ with \emph{.gt}, the extension will be added.}
 \item{quiet}{boolean to suppress information about the files}
 }
 \value{
-the file name and path of the \emph{.gt} file, together with the \emph{.rds}
-and \emph{.bk} files
+the file name and path of the \emph{.gt} file, followed by those of the
+\emph{.rds} and \emph{.bk} files and of any sidecar files (as given by
+\code{\link[=gt_get_file_names]{gt_get_file_names()}})
 }
 \description{
 Save the tibble (and update the backing files). The \code{gen_tibble} object is
@@ -26,7 +27,19 @@ and \emph{.bk} files; generally, this occurs when we create multiple subsets of
 the data. The \emph{.gt} file then stores the information on what subset of the
 full dataset we are interested in, whilst the \emph{.rds} and \emph{.bk} file store the
 full dataset. To reload a \code{gen_tibble}, you can pass the name of the \emph{.gt}
-file with \code{\link[=gt_load]{gt_load()}}.
+file with \code{\link[=gt_load]{gt_load()}}. The \emph{.gt} file is compressed with gzip at its
+fastest level, as saving the information on millions of loci with the
+default level of \code{\link[=saveRDS]{saveRDS()}} is slow.
+}
+\details{
+If the names of the loci are integers (\code{names_as_int = TRUE}), their
+original names are in a sidecar file next to the \emph{.bk} file (\emph{.loci.tsv},
+see \code{\link[=gt_lookup_loci]{gt_lookup_loci()}}); if the chromosomes are integers
+(\code{chromosomes_as_int = TRUE}), their names are in another sidecar file
+(\emph{.chromosomes.tsv}, see \code{\link[=gt_lookup_chromosomes]{gt_lookup_chromosomes()}}). The sidecars are
+listed in the messages and in the value returned, after the \emph{.bk} file.
+Keep them with the other files (if you move the files, move them too, so
+that \code{\link[=gt_load]{gt_load()}} with \code{reattach_to} finds them).
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

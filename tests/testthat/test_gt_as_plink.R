@@ -1,3 +1,6 @@
+# delete the backing files of this file when it ends (see helper_cleanup.R)
+local_tempdir_cleanup()
+
 # create file
 test_indiv_meta <- data.frame(
   id = c("a", "b", "c"),
@@ -392,6 +395,8 @@ test_that("ped files are read into the same columns as bed files", {
 })
 
 test_that("individual information survives round trips through PLINK files", {
+  # many round trips (~4 s): skipped on CRAN to keep its check short
+  skip_on_cran()
   test_gt_meta <- test_gt %>%
     mutate(
       paternal_ID = c(NA, NA, "a"),
@@ -492,6 +497,8 @@ test_that("individual information survives round trips through PLINK files", {
 })
 
 test_that("information of example PLINK files survives round trips", {
+  # many round trips (~2 s): skipped on CRAN to keep its check short
+  skip_on_cran()
   ext_dir <- system.file("extdata", package = "tidypopgen")
   files <- c(
     file.path(ext_dir, c("pop_a.bed", "pop_b.bed", "pop_a.ped", "pop_b.ped")),

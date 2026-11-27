@@ -404,6 +404,58 @@ test_that("loci_alt_freq grouped with one group", {
   )
 })
 
+test_that("grouped loci_alt_freq counts follow type", {
+  test_gt <- load_example_gt("grouped_gen_tbl")
+  counts_map <- group_map(test_gt, ~ loci_alt_freq(.x, as_counts = TRUE))
+  # tidy (the default): the rows of the frequencies, with n_alt and n_valid
+  counts_tbl <- loci_alt_freq(test_gt, as_counts = TRUE)
+  freq_tbl <- loci_alt_freq(test_gt)
+  expect_named(counts_tbl, c("loci", "group", "n_alt", "n_valid"))
+  expect_equal(counts_tbl[c("loci", "group")], freq_tbl[c("loci", "group")])
+  valid <- counts_tbl$n_valid > 0
+  expect_equal(
+    counts_tbl$n_alt[valid] / counts_tbl$n_valid[valid],
+    freq_tbl$value[valid]
+  )
+  # a grouping variable called n_valid keeps its values (renamed, with a
+  # message, as by bind_cols())
+  clash_gt <- test_gt %>%
+    mutate(n_valid = population) %>%
+    group_by(population, n_valid)
+  expect_message(
+    clash_tbl <- loci_alt_freq(clash_gt, as_counts = TRUE),
+    "New names"
+  )
+  expect_named(
+    clash_tbl,
+    c("loci", "population", "n_valid...3", "n_alt", "n_valid...5")
+  )
+  expect_equal(clash_tbl$n_valid...3, clash_tbl$population)
+  expect_equal(clash_tbl$n_valid...5, counts_tbl$n_valid)
+  # list: one two-column matrix per group, as loci_alt_freq() on each group
+  expect_equal(
+    loci_alt_freq(test_gt, as_counts = TRUE, type = "list"),
+    counts_map
+  )
+  # matrix: the two matrices, with loci in rows and groups in columns
+  counts_mat <- loci_alt_freq(test_gt, as_counts = TRUE, type = "matrix")
+  expect_named(counts_mat, c("n_alt", "n_valid"))
+  expect_equal(colnames(counts_mat$n_valid), group_keys(test_gt)$population)
+  expect_equal(rownames(counts_mat$n_alt), show_loci(test_gt)$name)
+  expect_equal(
+    unname(unclass(counts_mat$n_alt)[, 2]),
+    unname(counts_map[[2]][, "n_alt"])
+  )
+  # with a single group, they are still matrices
+  one_grp <- test_gt %>%
+    filter(population == "pop1") %>%
+    group_by(population)
+  expect_equal(
+    dim(loci_alt_freq(one_grp, as_counts = TRUE, type = "matrix")$n_alt),
+    c(count_loci(one_grp), 1)
+  )
+})
+
 test_that("grouped loci_ functions work with factor and numeric groups", {
   test_genotypes <- rbind(
     c(0, 1, 2, NA),
@@ -500,9 +552,9 @@ test_that("grouped loci_ functions keep empty groups with .drop = FALSE", {
     keep_tidy <- this_fun(keep_grp, type = "tidy")
     expect_equal(nrow(keep_tidy), 4 * 3)
   }
-  keep_counts <- loci_alt_freq(keep_grp, as_counts = TRUE)
+  keep_counts <- loci_alt_freq(keep_grp, as_counts = TRUE, type = "matrix")
   expect_equal(ncol(keep_counts$n_alt), 3)
-  expect_equal(keep_counts$n_valid[, 3], rep(0, 4))
+  expect_equal(unname(unclass(keep_counts$n_valid)[, 3]), rep(0, 4))
 })
 
 test_that("format_grouped_output tidy is the pivoted matrix", {

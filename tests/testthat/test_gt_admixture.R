@@ -20,7 +20,7 @@ pops_path <- system.file(
 )
 pops <- readr::read_csv(pops_path, show_col_types = FALSE)
 anole_gt <- anole_gt %>% mutate(id = gsub("punc_", "", .data$id, ))
-anole_gt <- anole_gt %>% mutate(population = pops$pop[match(pops$ID, .data$id)])
+anole_gt <- anole_gt %>% mutate(population = pops$pop[match(pops$id, .data$id)])
 
 test_that("gt_admixture error messages", {
   # file that doesn't exist
@@ -707,7 +707,7 @@ test_that("seed length", {
   pops <- readr::read_csv(pops_path, show_col_types = FALSE)
   anole_gt <- anole_gt %>% mutate(id = gsub("punc_", "", .data$id, ))
   anole_gt <- anole_gt %>%
-    mutate(population = pops$pop[match(pops$ID, .data$id)])
+    mutate(population = pops$pop[match(pops$id, .data$id)])
 
   res_null <- gt_admixture(
     x = anole_gt,

@@ -19,9 +19,9 @@ test_that("using integers as names works", {
   expect_true(is.integer(show_loci(anole_gt)$name))
   # test a pca
   anole_gt <- gt_impute_simple(anole_gt, method = "mode")
-  anole_pca <- anole_gt %>% gt_pca_randomSVD(k = 30)
+  anole_pca <- anole_gt %>% gt_pca(k = 30, method = "random", n_cores = 1)
   expect_true(is.integer(row_names(anole_pca$v)))
-  anole_pca <- anole_gt %>% gt_pca_partialSVD(k = 30)
+  anole_pca <- anole_gt %>% gt_pca(k = 30, n_cores = 2)
   expect_true(is.integer(row_names(anole_pca$v)))
   # tidy the pca
   loadings_pca <- tidy(anole_pca, matrix = "loadings")
@@ -97,9 +97,14 @@ for (names_as_int in c(TRUE, FALSE)) {
     "pca and dapc keep loci names, names_as_int =",
     names_as_int
   ), {
+    # slow with names as strings (~4 s): skipped on CRAN to keep its check
+    # short; the run with integer names still runs there
+    if (!names_as_int) skip_on_cran()
     anole_gt <- make_int_gt(names_as_int)
     anole_gt <- gt_impute_simple(anole_gt, method = "mode")
-    anole_pca <- gt_pca_partialSVD(anole_gt, k = 5)
+    # (a PCA of the imputed genotypes, whose DAPC needs no 'data')
+    gt_set_imputed(anole_gt, set = TRUE)
+    anole_pca <- gt_pca(anole_gt, k = 5, n_cores = 2)
     expect_identical(row_names(anole_pca$v), loci_names(anole_gt))
     # tidy loadings
     loadings_pca <- tidy(anole_pca, matrix = "loadings")
@@ -115,7 +120,10 @@ for (names_as_int in c(TRUE, FALSE)) {
     aug_loci <- augment_loci(anole_pca)
     expect_identical(aug_loci$.rownames, loci_names(anole_gt))
     # autoSVD only keeps a subset of loci
-    anole_auto <- gt_pca_autoSVD(anole_gt,
+    # (on the first 200 loci: its clumping makes a temporary FBM for each
+    # chromosome, and with all the ~1400 scaffolds the chance that two of
+    # their random names clash, about 4e-4 per call, is not negligible)
+    anole_auto <- gt_pca_autoSVD(anole_gt |> select_loci(1:200),
       k = 5, roll_size = 0, verbose = FALSE
     )
     expect_identical(row_names(anole_auto$v), anole_auto$loci$name)

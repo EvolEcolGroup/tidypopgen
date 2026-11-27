@@ -26,12 +26,12 @@
 #'   quiet = TRUE
 #' )
 #'
-#' # Remove monomorphic loci and impute
+#' # Remove monomorphic loci
 #' lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
-#' lobsters <- gt_impute_simple(lobsters, method = "mode")
 #'
-#' # Create PCA object
-#' pca <- gt_pca_partialSVD(lobsters)
+#' # Create PCA object (the lobsters have some missing genotypes, which do not
+#' # need to be imputed)
+#' pca <- gt_pca(lobsters)
 #'
 #' # Create a gt_pcadapt object
 #' pcadapt_obj <- gt_pcadapt(lobsters, pca, k = 2)

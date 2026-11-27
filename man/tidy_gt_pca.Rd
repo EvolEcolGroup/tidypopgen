@@ -75,12 +75,11 @@ lobsters <- gen_tibble(bed_file,
   quiet = TRUE
 )
 
-# Remove monomorphic loci and impute
+# Remove monomorphic loci
 lobsters <- lobsters \%>\% select_loci_if(loci_maf(genotypes) > 0)
-lobsters <- gt_impute_simple(lobsters, method = "mode")
 
 # Create PCA object
-pca <- gt_pca_partialSVD(lobsters)
+pca <- gt_pca(lobsters)
 
 # Tidy the PCA object
 tidy(pca)
@@ -95,5 +94,5 @@ tidy(pca, matrix = "loadings")
 tidy(pca, matrix = "scores")
 }
 \seealso{
-\code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}} \link{augment_gt_pca}
+\code{\link[=gt_pca]{gt_pca()}} \code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}} \link{augment_gt_pca}
 }

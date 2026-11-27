@@ -1,0 +1,19 @@
+start 08:32:29 load 3.57 4.67 3.81
+Avoidable file copy in RAM took 12.857 seconds. This file is very unusual: it ends abruptly without a final newline, and also its size is a multiple of 4096 bytes. Please properly end the last row with a newline using for example 'echo >> file'.
+fread .bim                     elapsed   84.34  user   72.30  sys    4.15  (08:33:54)
+Warning message:
+In data.table::fread(file, header = FALSE, drop = drop, colClasses = list(character = character_cols),  :
+  Discarded single-line footer: <<9	chr9:80258168:G:A	0	8025816>>
+loci_from_bim (rest)           elapsed   31.95  user   31.08  sys    0.86  (08:34:26)
+indiv_meta_from_fam            elapsed    0.00  user    0.00  sys    0.00  (08:34:26)
+fbm_read_bed                   elapsed   43.53  user    8.02  sys   20.38  (08:35:10)
+Warning message:
+In ns$fbm_read_bed(bed, n_indiv = nrow(meta), n_snp = nrow(loci),  :
+  EOF of bedfile has not been reached.
+build gen_tibble               elapsed    0.02  user    0.02  sys    0.00  (08:35:10)
+remove_stale_sidecars          elapsed    0.00  user    0.00  sys    0.00  (08:35:10)
+has_genotypes_without_alleles  elapsed    0.53  user    0.31  sys    0.21  (08:35:10)
+gt_save_light                  elapsed   35.93  user   35.70  sys    0.20  (08:35:46)
+TOTAL elapsed 196.30 user 147.44 sys 25.80; loci 91162139; R memory 11.7 GB
+wall 203.30 s, maxrss 56750112 KB
+end 08:35:52

@@ -1,0 +1,19 @@
+label	version	n_variants	threads	step	status	elapsed_s	user_s	sys_s	load_s	pss_start_gb	pss_median_gb	pss_peak_gb	rss_peak_gb	proc_maxrss_gb	n_samples	summary
+dev	1.0.0.9004	2322460	4	subsample_loci	ok	0.004	0.003	0.002	3.477	0.4653	0.4653	0.4653	0.4783	0.4858	1	56 indiv x 1000 loci
+dev	1.0.0.9004	2322460	4	subsample_loci_bare	ok	0.063	0.052	0.01	3.075	0.4653	0.4653	0.4653	0.4783	0.5302	1	56 indiv x 1000 loci
+dev	1.0.0.9004	4644921	4	subsample_loci	ok	0.009	0.004	0.004	6.407	0.8187	0.8204	0.8204	0.8335	0.8497	1	56 indiv x 1000 loci
+dev	1.0.0.9004	4644921	4	subsample_loci_bare	ok	0.128	0.1	0.017	6.704	0.8205	0.8613	0.9022	0.9153	0.9253	2	56 indiv x 1000 loci
+dev	1.0.0.9004	18579683	4	subsample_loci	ok	0.004	0.003	0	27.53	2.96	2.96	2.96	2.973	2.973	2	56 indiv x 1000 loci
+dev	1.0.0.9004	18579683	4	subsample_loci_bare	ok	0.275	0.223	0.051	25.86	2.96	2.96	3.131	3.144	3.242	3	56 indiv x 1000 loci
+dev	1.0.0.9004	2322460	4	subsample_loci	ok	0.005	0.003	0.002	3.092	0.4653	0.4653	0.4653	0.4783	0.4859	1	56 indiv x 1000 loci
+dev	1.0.0.9004	2322460	4	subsample_loci_bare	ok	0.06	0.048	0.01	3.141	0.465	0.465	0.465	0.4781	0.5294	1	56 indiv x 1000 loci
+dev	1.0.0.9004	4644921	4	subsample_loci	ok	0.006	0.004	0.002	6.468	0.8188	0.8205	0.8205	0.8335	0.8495	1	56 indiv x 1000 loci
+dev	1.0.0.9004	4644921	4	subsample_loci_bare	ok	0.094	0.072	0.021	6.399	0.8188	0.8205	0.8205	0.8336	0.9255	1	56 indiv x 1000 loci
+dev	1.0.0.9004	18579683	4	subsample_loci	ok	0.003	0.002	0	25.34	2.96	2.96	2.96	2.973	2.973	2	56 indiv x 1000 loci
+dev	1.0.0.9004	18579683	4	subsample_loci_bare	ok	0.284	0.228	0.055	26.79	2.96	2.96	2.96	2.973	3.242	2	56 indiv x 1000 loci
+dev	1.0.0.9004	2322460	4	subsample_loci	ok	0.006	0.003	0.002	3.186	0.4636	0.4636	0.4636	0.4766	0.4861	1	56 indiv x 1000 loci
+dev	1.0.0.9004	2322460	4	subsample_loci_bare	ok	0.061	0.05	0.009	3.135	0.4636	0.4636	0.4636	0.4767	0.5296	1	56 indiv x 1000 loci
+dev	1.0.0.9004	4644921	4	subsample_loci	ok	0.007	0.004	0.003	6.506	0.8188	0.8205	0.8205	0.8336	0.8491	1	56 indiv x 1000 loci
+dev	1.0.0.9004	4644921	4	subsample_loci_bare	ok	0.097	0.072	0.023	6.464	0.8187	0.8204	0.8204	0.8335	0.9253	1	56 indiv x 1000 loci
+dev	1.0.0.9004	18579683	4	subsample_loci	ok	0.003	0.003	0	26.81	2.96	2.96	2.96	2.973	2.972	2	56 indiv x 1000 loci
+dev	1.0.0.9004	18579683	4	subsample_loci_bare	ok	0.273	0.206	0.049	28.07	2.96	2.96	3.153	3.166	3.242	3	56 indiv x 1000 loci

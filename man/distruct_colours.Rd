@@ -7,6 +7,10 @@
 \format{
 A vector of 56 hex colours
 }
+\source{
+The colour palette of distruct
+(\url{https://rosenberglab.stanford.edu/distruct.html}).
+}
 \usage{
 distruct_colours
 }
@@ -17,5 +21,9 @@ Colours in the palette used by distruct
 The 56 distinct colours of the palette of distruct (which repeats 4 of its
 60 colours), in their original order. \code{\link[=scale_fill_distruct]{scale_fill_distruct()}} recycles them
 when there are more groups.
+}
+\references{
+Rosenberg N.A. (2004) DISTRUCT: a program for the graphical
+display of population structure. Molecular Ecology Notes 4: 137-138.
 }
 \keyword{datasets}

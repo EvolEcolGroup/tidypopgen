@@ -65,6 +65,18 @@ test_that("ploidy works correctly", {
   # get ploidy for each individual
   expect_true(all(indiv_ploidy(test_gt) == c(2, 4, 2)))
   expect_true(all(indiv_ploidy(test_gt$genotypes) == c(2, 4, 2)))
+  # on grouped data (groups interleaved in the rows), the ploidy of all the
+  # individuals, in the order of the rows, also for tibbles that lost their
+  # class
+  grouped_gt <- test_gt %>%
+    mutate(grp = c("x", "y", "x")) %>%
+    group_by(grp)
+  expect_equal(indiv_ploidy(grouped_gt), c(2, 4, 2))
+  expect_equal(
+    indiv_ploidy(as_tibble(test_gt) %>% group_by(population)),
+    c(2, 4, 2)
+  )
+  expect_equal(indiv_ploidy(as.data.frame(test_gt)), c(2, 4, 2))
 
   # expect warning when trying to do something with a mixed ploidy object
   expect_warning(test_gt %>% loci_maf(), "this function ")

@@ -1,0 +1,90 @@
+== base 520f717d n_cores 1 08:39:07 load 1.29 2.87 3.35 free 144G
+fread .bim                     elapsed    2.90  user    5.75  sys    1.26  (08:39:11)
+loci_from_bim (rest)           elapsed    1.90  user    1.28  sys    0.62  (08:39:13)
+indiv_meta_from_fam            elapsed    0.00  user    0.00  sys    0.00  (08:39:13)
+fbm_read_bed                   elapsed   45.98  user    7.13  sys   18.11  (08:39:58)
+build gen_tibble               elapsed    0.02  user    0.02  sys    0.00  (08:39:59)
+remove_stale_sidecars          elapsed    0.00  user    0.00  sys    0.00  (08:39:59)
+has_genotypes_without_alleles  elapsed    0.69  user    0.47  sys    0.23  (08:39:59)
+gt_save_light                  elapsed   22.14  user   21.53  sys    0.59  (08:40:21)
+TOTAL elapsed 73.63 user 36.18 sys 20.81; loci 91162139; R memory 3.0 GB
+== p1 0b1265c2 n_cores 1 08:40:45 load 1.58 2.63 3.22 free 144G
+fread .bim                     elapsed    2.93  user    5.74  sys    1.27  (08:40:49)
+loci_from_bim (rest)           elapsed    2.06  user    1.42  sys    0.64  (08:40:51)
+indiv_meta_from_fam            elapsed    0.00  user    0.00  sys    0.00  (08:40:51)
+fbm_read_bed                   elapsed   41.83  user    3.57  sys   17.82  (08:41:33)
+build gen_tibble               elapsed    0.02  user    0.01  sys    0.00  (08:41:33)
+remove_stale_sidecars          elapsed    0.00  user    0.00  sys    0.00  (08:41:33)
+has_genotypes_without_alleles  elapsed    0.60  user    0.40  sys    0.20  (08:41:33)
+gt_save_light                  elapsed   21.91  user   21.34  sys    0.55  (08:41:55)
+TOTAL elapsed 69.35 user 32.49 sys 20.48; loci 91162139; R memory 3.0 GB
+== p8 0b1265c2 n_cores 8 08:42:18 load 1.30 2.33 3.06 free 144G
+fread .bim                     elapsed    2.93  user    5.80  sys    1.26  (08:42:22)
+loci_from_bim (rest)           elapsed    1.91  user    1.28  sys    0.63  (08:42:24)
+indiv_meta_from_fam            elapsed    0.00  user    0.00  sys    0.00  (08:42:24)
+fbm_read_bed                   elapsed   29.94  user    3.71  sys   48.50  (08:42:54)
+build gen_tibble               elapsed    0.02  user    0.01  sys    0.00  (08:42:54)
+remove_stale_sidecars          elapsed    0.00  user    0.00  sys    0.00  (08:42:54)
+has_genotypes_without_alleles  elapsed    0.60  user    0.38  sys    0.22  (08:42:55)
+gt_save_light                  elapsed   22.01  user   21.43  sys    0.57  (08:43:17)
+TOTAL elapsed 57.41 user 32.62 sys 51.17; loci 91162139; R memory 3.0 GB
+== p8 0b1265c2 n_cores 8 08:43:40 load 1.52 2.26 2.98 free 144G
+fread .bim                     elapsed    2.93  user    5.79  sys    1.27  (08:43:44)
+loci_from_bim (rest)           elapsed    1.91  user    1.26  sys    0.65  (08:43:46)
+indiv_meta_from_fam            elapsed    0.00  user    0.00  sys    0.00  (08:43:46)
+fbm_read_bed                   elapsed   28.25  user    3.72  sys   49.56  (08:44:14)
+build gen_tibble               elapsed    0.02  user    0.02  sys    0.00  (08:44:14)
+remove_stale_sidecars          elapsed    0.00  user    0.00  sys    0.00  (08:44:14)
+has_genotypes_without_alleles  elapsed    0.61  user    0.39  sys    0.21  (08:44:15)
+gt_save_light                  elapsed   22.18  user   21.58  sys    0.59  (08:44:37)
+TOTAL elapsed 55.90 user 32.77 sys 52.29; loci 91162139; R memory 3.0 GB
+== p1 0b1265c2 n_cores 1 08:45:01 load 1.20 2.03 2.84 free 144G
+fread .bim                     elapsed    2.95  user    5.84  sys    1.26  (08:45:04)
+loci_from_bim (rest)           elapsed    1.93  user    1.30  sys    0.63  (08:45:06)
+indiv_meta_from_fam            elapsed    0.00  user    0.00  sys    0.00  (08:45:06)
+fbm_read_bed                   elapsed   41.41  user    3.63  sys   17.38  (08:45:48)
+build gen_tibble               elapsed    0.02  user    0.01  sys    0.00  (08:45:48)
+remove_stale_sidecars          elapsed    0.00  user    0.00  sys    0.00  (08:45:48)
+has_genotypes_without_alleles  elapsed    0.60  user    0.39  sys    0.22  (08:45:48)
+gt_save_light                  elapsed   21.88  user   21.32  sys    0.56  (08:46:10)
+TOTAL elapsed 68.80 user 32.49 sys 20.05; loci 91162139; R memory 3.0 GB
+== base 520f717d n_cores 1 08:46:34 load 1.05 1.81 2.69 free 144G
+fread .bim                     elapsed    2.94  user    5.85  sys    1.24  (08:46:37)
+loci_from_bim (rest)           elapsed    1.91  user    1.30  sys    0.62  (08:46:39)
+indiv_meta_from_fam            elapsed    0.00  user    0.00  sys    0.00  (08:46:39)
+fbm_read_bed                   elapsed   43.70  user    7.26  sys   17.18  (08:47:23)
+build gen_tibble               elapsed    0.02  user    0.01  sys    0.00  (08:47:23)
+remove_stale_sidecars          elapsed    0.00  user    0.00  sys    0.00  (08:47:23)
+has_genotypes_without_alleles  elapsed    0.60  user    0.37  sys    0.24  (08:47:24)
+gt_save_light                  elapsed   22.02  user   21.42  sys    0.59  (08:47:46)
+TOTAL elapsed 71.19 user 36.21 sys 19.86; loci 91162139; R memory 3.0 GB
+== base 520f717d n_cores 1 08:48:09 load 0.95 1.61 2.53 free 144G
+fread .bim                     elapsed    2.93  user    5.79  sys    1.25  (08:48:13)
+loci_from_bim (rest)           elapsed    1.92  user    1.28  sys    0.63  (08:48:15)
+indiv_meta_from_fam            elapsed    0.00  user    0.00  sys    0.00  (08:48:15)
+fbm_read_bed                   elapsed   43.67  user    7.20  sys   17.40  (08:48:59)
+build gen_tibble               elapsed    0.02  user    0.02  sys    0.00  (08:48:59)
+remove_stale_sidecars          elapsed    0.00  user    0.00  sys    0.00  (08:48:59)
+has_genotypes_without_alleles  elapsed    0.61  user    0.39  sys    0.22  (08:48:59)
+gt_save_light                  elapsed   21.96  user   21.36  sys    0.60  (08:49:21)
+TOTAL elapsed 71.11 user 36.04 sys 20.11; loci 91162139; R memory 3.0 GB
+== p1 0b1265c2 n_cores 1 08:49:45 load 0.99 1.49 2.40 free 144G
+fread .bim                     elapsed    2.93  user    5.77  sys    1.30  (08:49:48)
+loci_from_bim (rest)           elapsed    1.92  user    1.26  sys    0.66  (08:49:50)
+indiv_meta_from_fam            elapsed    0.00  user    0.00  sys    0.00  (08:49:50)
+fbm_read_bed                   elapsed   41.22  user    3.55  sys   17.46  (08:50:32)
+build gen_tibble               elapsed    0.02  user    0.02  sys    0.00  (08:50:32)
+remove_stale_sidecars          elapsed    0.00  user    0.00  sys    0.00  (08:50:32)
+has_genotypes_without_alleles  elapsed    0.61  user    0.39  sys    0.22  (08:50:32)
+gt_save_light                  elapsed   21.90  user   21.33  sys    0.56  (08:50:54)
+TOTAL elapsed 68.61 user 32.33 sys 20.20; loci 91162139; R memory 3.0 GB
+== p8 0b1265c2 n_cores 8 08:51:18 load 1.11 1.44 2.29 free 144G
+fread .bim                     elapsed    2.97  user    5.93  sys    1.21  (08:51:21)
+loci_from_bim (rest)           elapsed    1.91  user    1.28  sys    0.62  (08:51:23)
+indiv_meta_from_fam            elapsed    0.00  user    0.00  sys    0.00  (08:51:23)
+fbm_read_bed                   elapsed   27.81  user    3.59  sys   47.26  (08:51:51)
+build gen_tibble               elapsed    0.02  user    0.01  sys    0.00  (08:51:51)
+remove_stale_sidecars          elapsed    0.00  user    0.00  sys    0.00  (08:51:51)
+has_genotypes_without_alleles  elapsed    0.59  user    0.38  sys    0.22  (08:51:52)
+gt_save_light                  elapsed   21.98  user   21.40  sys    0.57  (08:52:14)
+TOTAL elapsed 55.28 user 32.60 sys 49.88; loci 91162139; R memory 3.0 GB

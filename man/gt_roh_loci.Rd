@@ -10,7 +10,11 @@ gt_roh_loci(roh, loci, by_group = TRUE)
 \item{roh}{an \code{indiv_roh} object, as returned by \code{\link[=windows_indiv_roh]{windows_indiv_roh()}}}
 
 \item{loci}{the loci table of the \code{\link{gen_tibble}} used to find the runs
-(i.e. \code{show_loci(x)}, as the runs refer to its rows)}
+(i.e. \code{show_loci(x)}, as the runs refer to its rows). Integer chromosomes
+(\code{chromosomes_as_int = TRUE}) are replaced by the names of the
+chromosomes of the runs, so the output is the same as without
+\code{chromosomes_as_int}; integer names of loci (\code{names_as_int = TRUE}) are
+kept (see \code{\link[=gt_restore_loci]{gt_restore_loci()}} to restore them first)}
 
 \item{by_group}{if \code{roh} was found on a grouped \code{\link{gen_tibble}}, whether to
 count the individuals of each group (the default) or of all groups}

@@ -13,7 +13,8 @@
 \item{type}{the type of plot (one of "screeplot", "scores" and "loadings")}
 
 \item{k}{the principal components to be plotted: for scores, a pair of values
-e.g. c(1,2); for \code{loadings} either one or more values.}
+e.g. c(1,2); for \code{loadings} either one or more values. Plotting the
+loadings of more than one component requires the \code{hexbin} package.}
 
 \item{...}{not currently used.}
 }
@@ -46,12 +47,11 @@ lobsters <- gen_tibble(bed_file,
   quiet = TRUE
 )
 
-# Remove monomorphic loci and impute
+# Remove monomorphic loci
 lobsters <- lobsters \%>\% select_loci_if(loci_maf(genotypes) > 0)
-lobsters <- gt_impute_simple(lobsters, method = "mode")
 
 # Create PCA object
-pca <- gt_pca_partialSVD(lobsters)
+pca <- gt_pca(lobsters)
 
 # Screeplot
 autoplot(pca, type = "screeplot")

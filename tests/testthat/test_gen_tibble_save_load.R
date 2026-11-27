@@ -24,6 +24,34 @@ test_gt <- gen_tibble(
   quiet = TRUE
 )
 
+test_that("gt files are gzip compressed and load back identical", {
+  gt_file <- paste0(tempfile(), ".gt")
+  gt_save(test_gt, file_name = gt_file, quiet = TRUE)
+  # gzip files start with the bytes 1f 8b
+  expect_identical(
+    readBin(gt_file, what = "raw", n = 2),
+    as.raw(c(0x1f, 0x8b))
+  )
+  # (the FBM is a reference class object, so we compare its content)
+  loaded_gt <- gt_load(gt_file)
+  expect_identical(loaded_gt$id, test_gt$id)
+  expect_identical(show_loci(loaded_gt), show_loci(test_gt))
+  expect_identical(show_genotypes(loaded_gt), show_genotypes(test_gt))
+  # gen_tibble() saves its .gt file in the same way
+  vcf_gt <- gen_tibble(
+    system.file("extdata/pop_a.vcf", package = "tidypopgen"),
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  vcf_gt_file <- gt_get_file_names(vcf_gt)[2]
+  vcf_gt_file <- bigstatsr::sub_bk(vcf_gt_file, ".gt")
+  expect_identical(
+    readBin(vcf_gt_file, what = "raw", n = 2),
+    as.raw(c(0x1f, 0x8b))
+  )
+  expect_identical(show_loci(gt_load(vcf_gt_file)), show_loci(vcf_gt))
+})
+
 # this also tests show_genotypes and show_loci
 test_that("save and load gt", {
   expect_true(inherits(test_gt, "gen_tbl"))

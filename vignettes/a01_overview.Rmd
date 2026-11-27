@@ -296,61 +296,86 @@ example_gt %>%
   tally()
 ```
 
+Note that we only temporarily grouped the `gen_tibble` for this operation, and the original tibble is unchanged. Most of the time we want the grouping to be permanent, so we can use `group_by` to create a new grouped tibble:
+```{r}
+example_gt <- example_gt %>% group_by(population)
+```
+
 For functions that return one result per individual (such as
 `indiv_het_obs` that we used before), we can use `summarise`, which returns a
 new `tibble` with one line per population. For example, we can count the number of individuals 
 per population, as well as their mean heterozygosity with :
 ```{r}
 example_gt %>%
-  group_by(population) %>%
   summarise(n = n(), mean_het = mean(indiv_het_obs(genotypes)))
 ```
 
-However, note that this is somewhat inefficient, as computing the pop averages
-requires multiple access to the data. A more efficient approach is to:
+However, note that this is somewhat inefficient: on a grouped tibble,
+`summarise()` (and `mutate()`) call `indiv_het_obs()` on each population in
+turn, so the genotypes are read once per population. A more efficient
+approach is to compute the heterozygosities on the ungrouped data, and then
+group them again:
 ```{r}
 example_gt %>%
+  ungroup() %>%
   mutate(het_obs = indiv_het_obs(genotypes)) %>%
   group_by(population) %>%
   summarise(n = n(), mean_het = mean(het_obs))
 ```
 
 In this way, we compute all individual heterozygosities in one go (optimising
-our file access time), and then generate the population summaries.
+our file access time), and then generate the population summaries. Calling
+`indiv_het_obs()` directly on the grouped tibble also reads the genotypes
+only once, and returns one value per individual, in the order of the rows
+(e.g. `example_gt$het_obs <- indiv_het_obs(example_gt)`).
 
-When working with loci, you can use `reframe` to apply functions
-across groups. To use `reframe` correctly,
-be sure to select the `genotype` column within the loci verbs:
+When working with loci, functions have inbuilt grouped methods that return
+the information for each verb by group; for example, if we use `loci_maf()` on a grouped tibble, we get the MAF for each locus in each population:
+
 ```{r}
 example_gt %>%
-  group_by(population) %>%
-  reframe(loci_hwe = loci_hwe(genotypes))
-```
-
-Some functions, such as `loci_maf()`, also have a method for grouped tibbles that 
-allows an even easier syntax:
-```{r}
-example_gt %>%
-  group_by(population) %>%
   loci_maf()
 ```
 
-These methods are coded in C++ to be very efficient, and they should be
+If you have functions that you have written, you can use `reframe` to apply 
+them across groups. To use `reframe` correctly on functions from `tidypopgen`,
+be sure to select the `genotype` column within the loci verbs:
+```{r}
+example_gt %>%
+  reframe(loci_hwe = loci_hwe(genotypes))
+```
+
+These inbuilt grouped methods are coded in C++ to be very efficient, and they
+should be
 preferred to the `reframe()` option. By default, their outputs will return a
 tidy tibble, with one row per locus per population (i.e. the same as we
 would get with `reframe()`). However, using the `type`
 argument, it is also possible to return a list:
 ```{r}
 example_gt %>%
-  group_by(population) %>%
   loci_maf(type = "list")
 ```
 
 Or a matrix:
 ```{r}
 example_gt %>%
-  group_by(population) %>%
   loci_maf(type = "matrix")
+```
+
+Note that `select_loci_if()` ignores groups. Unlike in `reframe()`, where
+`genotypes` refers to the individuals of each group, in `select_loci_if()`
+`genotypes` always refers to all individuals: as all populations share the
+same loci, a locus is either kept or dropped for all of them. So, on a grouped
+`gen_tibble`, `select_loci_if(loci_maf(genotypes) > 0.2)` uses the minor
+allele frequency over all individuals. To select loci on statistics computed
+within each population, we combine the per-population results of the grouped
+method into one value per locus. For example, to keep only the loci that are
+polymorphic in every population:
+```{r}
+maf_by_pop <- example_gt %>% loci_maf(type = "matrix")
+example_gt %>%
+  select_loci_if(apply(maf_by_pop, 1, min) > 0) %>%
+  show_loci()
 ```
 
 Certain metrics and analyses are naturally defined by a grouped tibble as they
@@ -358,7 +383,6 @@ refer to populations, such as
 population-specific Fst. For example:
 ```{r}
 example_gt %>%
-  group_by(population) %>%
   pop_fst()
 ```
 
@@ -494,9 +518,16 @@ also make sure that the two datasets were aligned to the same reference genome a
 
 # Imputation
 
-Many genetic analysis (e.g. PCA) do not allow missing data. In many software implementations,
-missing genotypes are imputed on the fly, often in a simplistic manner. In `tidypopgen`, we
-encourage taking this step explicitly, before running any analysis. 
+Most analyses in `tidypopgen` deal with missing genotypes directly: for
+example, the default PCA (`gt_pca()`), DAPC, pcadapt, LD clumping and pruning,
+and the summary statistics. Imputation pulls individuals with many missing
+genotypes towards the centre of the data, so it is best avoided where it is not
+needed (see the article "Missing genotypes: impute only when you must"). A few
+methods do not allow missing data (e.g. the randomised PCA,
+`gt_pca(method = "random")`, or `gt_pca_autoSVD()`). In many software
+implementations, missing genotypes are imputed on the fly, often in a simplistic
+manner. In `tidypopgen`, we encourage taking this step explicitly, when it is
+required.
 
 Let us start with a dataset that has some missing genotypes:
 ```{r}
@@ -512,13 +543,11 @@ missing_gt %>%
   hist()
 ```
 
-If we attempt to run a PCA on this dataset, we get:
+If we attempt to run a randomised PCA on this dataset, with
+`gt_pca(method = "random")`, we get:
 ```{r, error = TRUE}
-missing_pca <- missing_gt %>% gt_pca_autoSVD()
+missing_pca <- gt_pca(missing_gt, k = 2, method = "random")
 ```
-
-Note that using gt_pca_autoSVD with a small dataset will likely cause an error, 
-see manual page for details.
 
 It is possible to obviate to this problem by filtering loci with missing data,
 but that might lose a lot of loci. The alternative is to impute the missing
@@ -568,9 +597,10 @@ missing_gt %>%
   hist()
 ```
 
-And let functions that need imputation use it automatically:
+And let functions that need imputation use it automatically (here,
+`gt_pca(method = "random")` will use the imputed genotypes):
 ```{r}
-missing_pca <- missing_gt %>% gt_pca_partialSVD()
+missing_pca <- gt_pca(missing_gt, k = 2, method = "random")
 missing_pca
 ```
 
@@ -583,8 +613,7 @@ missing_gt %>%
   hist()
 ```
 
-More details about PCA and other analysis is found in the vignette on population
-genetic analysis.
+More details about using imputed data for specific PCA methods can be found in the documentation of `gt_pca()`.
 
 # Saving data and updating backingfiles
 
@@ -625,11 +654,21 @@ new_example_gt %>% show_genotypes()
 
 We can see that our genotypes were recovered correctly.
 
-Occasionally, we may need to update the backing files of a `gen_tibble` (the `.rds` and `.bk` files), as some functions require that the number of individuals in the `gen_tibble` object loaded in the R session matches the number of individuals in the backing files that are stored on disk. The schematic below illustrates this.
+Imputation is the only case that might require us to update the backing files 
+of a `gen_tibble`. Simple imputation is based on the frequency of the alleles
+at each locus, and so it depends on the individuals that are included in the
+`gen_tibble`. If we subset the individuals, the imputed genotypes will be 
+different. Therefore, if we have removed individuals from our `gen_tibble`, and
+we want to impute, we need to update the backing files to reflect the new set 
+of individuals. For more complex imputation methods (`gt_impute_xgboost()`), we
+may also need to update the backing files if we have removed loci, as the 
+imputation model has to be trained on the whole backing file.
+The schematic below illustrates a situation when the backing file has to be
+reduced before imputation.
 
 ![Figure 3: Visual representation of updating backingfiles for a gen_tibble object](./img/update_backingfile.jpg){width=630px}
 
-For example, lets assume we want to impute missing values in our data. In our QC step we may have filtered out some individuals, like so: 
+For example, let's assume that, in our QC step, we have filtered out some individuals, like so:
 
 ```{r}
 new_example_gt <- new_example_gt %>% filter(!population == "pop1")

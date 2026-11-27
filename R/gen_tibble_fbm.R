@@ -25,7 +25,8 @@ validate_loci <- function(loci,
                           check_duplicates = FALSE,
                           allow_duplicates = FALSE,
                           valid_alleles = c("A", "T", "C", "G"),
-                          missing_alleles = c("0", ".")) {
+                          missing_alleles = c("0", "."),
+                          chromosomes_as_int = FALSE) {
   required_cols <- c(
     "name", "chromosome", "position",
     "genetic_dist", "allele_ref", "allele_alt"
@@ -43,7 +44,23 @@ validate_loci <- function(loci,
   if (!is.character(loci$name) && !is.integer(loci$name)) {
     stop("loci$name must be a character or an integer")
   }
-  if (!is.factor(loci$chromosome)) {
+  # chromosomes are a factor, unless we keep their integer codes
+  # (chromosomes_as_int: with millions of chromosomes, a factor would create
+  # a string for each of them)
+  if (chromosomes_as_int) {
+    if (!is.numeric(loci$chromosome)) {
+      stop("loci$chromosome must be integer codes")
+    }
+    if (!is.integer(loci$chromosome)) {
+      # (as.integer() would truncate codes that are not whole numbers)
+      codes <- loci$chromosome[!is.na(loci$chromosome)]
+      if (any(codes != round(codes)) ||
+            any(abs(codes) > .Machine$integer.max)) {
+        stop("loci$chromosome must be integer codes (whole numbers)")
+      }
+      loci$chromosome <- as.integer(loci$chromosome)
+    }
+  } else if (!is.factor(loci$chromosome)) {
     loci$chromosome <- as.factor(loci$chromosome)
   }
   if (!is.integer(loci$position) && !is.numeric(loci$position)) {
@@ -74,13 +91,14 @@ validate_loci <- function(loci,
     # check for duplicated positions within chromosomes, i.e. duplicated
     # pairs of chromosome and position. When positions are sorted within
     # each chromosome (as usual), duplicates are equal consecutive positions,
-    # which a single pass in C++ finds without hashing every pair (each level
-    # of the factor of chromosomes is a group of its own); otherwise (or with
-    # missing positions) we hash the pairs with vctrs
+    # which a single pass in C++ finds without hashing every pair (each
+    # chromosome is a group of its own); otherwise (or with missing
+    # positions) we hash the pairs with vctrs
+    chromosome_groups <- chromosome_group_codes(loci$chromosome)
     position_order <- unsorted_by_chromosome_cpp(
       loci$position,
-      loci$chromosome,
-      seq_len(nlevels(loci$chromosome))
+      chromosome_groups$codes,
+      seq_len(chromosome_groups$n)
     )
     if (isFALSE(position_order[["unsorted"]])) {
       has_dup_pos <- position_order[["ties"]]
@@ -209,6 +227,9 @@ gt_write_fbm_from_dfs <- function(
     init = NULL,
     create_bk = TRUE
   )
+  # (sidecars next to the new backing file are left from older files with the
+  # same name, and can not belong to the new data)
+  remove_stale_sidecars(big_geno$backingfile)
   # write the dosages as bytes (missing genotypes as max_ploidy + 1) directly
   # into the FBM, without copying the matrix
   write_dosage_matrix_cpp(genotypes, big_geno, na_byte = max_ploidy + 1)

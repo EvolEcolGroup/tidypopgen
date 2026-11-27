@@ -1,0 +1,7 @@
+# generated or downloaded by the harness (directories, or links to them)
+/env
+/lib
+/src
+/data
+/out
+/results.tsv

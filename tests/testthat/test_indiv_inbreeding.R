@@ -43,16 +43,17 @@ test_that("indiv_inbreeding compute correctly", {
   inbreed_gt <- test_gt %>% indiv_inbreeding(method = "WG17")
   expect_true(all.equal(inbreed_hier, inbreed_gt, check.attributes = FALSE))
 
-  # group the tibble
+  # group the tibble: the coefficients are computed within each population,
+  # and returned in the order of the rows
   test_gt <- test_gt %>% dplyr::group_by(population)
-  # is this right???
   inbreed_group_gt <- test_gt %>% indiv_inbreeding(method = "WG17")
-  # subset gentibble to a single population, pop 1
+  expect_named(inbreed_group_gt, test_gt$id)
+  # subset gentibble to a single population, pop 1 (rows 1, 2 and 5)
   pop1_gt <- test_gt %>% dplyr::filter(population == "pop1")
   inbreed_pop1_hier <- diag(hierfstat::beta.dosage(show_genotypes(pop1_gt)))
   expect_true(all.equal(
     inbreed_pop1_hier,
-    inbreed_group_gt[[1]],
+    inbreed_group_gt[pop1_gt$id],
     check.attributes = FALSE
   ))
   # subset gentibble to a single population, pop 2
@@ -60,7 +61,7 @@ test_that("indiv_inbreeding compute correctly", {
   inbreed_pop2_hier <- diag(hierfstat::beta.dosage(show_genotypes(pop2_gt)))
   expect_true(all.equal(
     inbreed_pop2_hier,
-    inbreed_group_gt[[2]],
+    inbreed_group_gt[pop2_gt$id],
     check.attributes = FALSE
   ))
 })
@@ -85,7 +86,104 @@ test_that("indiv_inbreeding and allele sharing work with a single individual", {
   test_gt$population[1] <- "pop_single"
   grouped_gt <- test_gt %>% group_by(population)
   inb_grp <- indiv_inbreeding(grouped_gt)
-  expect_length(inb_grp, 4)
-  single_grp <- which(group_keys(grouped_gt)$population == "pop_single")
-  expect_true(is.nan(inb_grp[[single_grp]]))
+  expect_length(inb_grp, nrow(test_gt))
+  expect_true(is.nan(inb_grp[[1]]))
+})
+
+test_that("indiv_inbreeding is a generic with methods for gen_tibbles", {
+  inbreed_gt <- indiv_inbreeding(test_gt)
+  ashare <- pairwise_allele_sharing(test_gt, as_matrix = TRUE)
+  # the method for the genotypes column takes the matrix of allele sharing, or
+  # computes it
+  expect_identical(
+    indiv_inbreeding(test_gt$genotypes, allele_sharing_mat = ashare),
+    inbreed_gt
+  )
+  expect_equal(indiv_inbreeding(test_gt$genotypes), inbreed_gt)
+  # so it works within mutate(), and within each group of a grouped
+  # gen_tibble (populations interleaved in the rows)
+  expect_equal(
+    mutate(test_gt, inb = indiv_inbreeding(genotypes))$inb,
+    inbreed_gt,
+    ignore_attr = TRUE
+  )
+  grouped_gt <- test_gt %>% group_by(population)
+  expect_equal(
+    mutate(grouped_gt, inb = indiv_inbreeding(genotypes))$inb,
+    indiv_inbreeding(grouped_gt),
+    ignore_attr = TRUE
+  )
+  # arguments are matched by the methods, also by position
+  expect_identical(indiv_inbreeding(test_gt, "WG17", ashare), inbreed_gt)
+  expect_error(indiv_inbreeding(test_gt, foo = 1), "must be empty")
+  # tibbles that lost their class are restored
+  expect_identical(indiv_inbreeding(as_tibble(test_gt)), inbreed_gt)
+  expect_identical(
+    indiv_inbreeding(as_tibble(test_gt) %>% group_by(population)),
+    indiv_inbreeding(test_gt %>% group_by(population))
+  )
+  # other packages can add methods for their own classes of genotypes and
+  # of tibbles (here, a tibble that lost its class is restored as a dummy_tbl)
+  registerS3method(
+    "genotypes_tbl_class", "dummy_genotypes",
+    function(genotypes, ...) "dummy_tbl",
+    envir = asNamespace("tidypopgen")
+  )
+  dummy_genotypes <- structure(1:3, class = "dummy_genotypes")
+  dummy_tbl <- tibble(id = c("a", "b", "c"), genotypes = dummy_genotypes)
+  expect_error(
+    indiv_inbreeding(dummy_tbl),
+    "indiv_inbreeding\\(\\) has no method for objects of class 'dummy_tbl'"
+  )
+  registerS3method(
+    "indiv_inbreeding", "dummy_tbl",
+    function(.x, ...) rep(0.5, nrow(.x)),
+    envir = asNamespace("tidypopgen")
+  )
+  expect_identical(indiv_inbreeding(dummy_tbl), rep(0.5, 3))
+})
+
+test_that("indiv_inbreeding on a grouped gen_tibble works within groups", {
+  # more than 64 individuals, with missing data, in interleaved groups, so
+  # that genotypes are packed into several words; one group of a single
+  # individual, and an empty group
+  set.seed(42)
+  geno_vals <- sample(c(0:2, NA), 140 * 100,
+    replace = TRUE,
+    prob = c(0.4, 0.3, 0.25, 0.05)
+  )
+  pops <- sample(c("A", "B", "C"), 140, replace = TRUE, prob = c(0.6, 0.2, 0.2))
+  pops[17] <- "D"
+  big_gt <- gen_tibble(
+    x = matrix(geno_vals, nrow = 140),
+    loci = data.frame(
+      name = paste0("rs", 1:100), chromosome = 1L, position = 1:100,
+      genetic_dist = 0, allele_ref = "A", allele_alt = "T"
+    ),
+    indiv_meta = data.frame(
+      id = paste0("i", 1:140),
+      population = factor(pops, levels = c("C", "A", "E", "D", "B"))
+    ),
+    quiet = TRUE
+  )
+  grouped_gt <- big_gt %>% group_by(population, .drop = FALSE)
+  # the same values as indiv_inbreeding() on each group
+  expected <- group_map(grouped_gt, ~ indiv_inbreeding(.x))
+  inb_grp <- indiv_inbreeding(grouped_gt)
+  # one value per individual, in the order of the rows, named by their ids
+  expect_named(inb_grp, big_gt$id)
+  for (g in which(lengths(expected) > 0)) {
+    expect_equal(inb_grp[names(expected[[g]])], expected[[g]])
+  }
+  expect_equal(unname(inb_grp[pops == "A"]), unname(expected[[2]]))
+  # the single individual of group D
+  expect_true(is.nan(inb_grp[[17]]))
+  # the list of tidypopgen 1.0.0 (one vector per group) is deprecated
+  lifecycle::expect_deprecated(
+    inb_list <- indiv_inbreeding(grouped_gt, type = "list")
+  )
+  expect_equal(inb_list, expected)
+  expect_length(inb_list[[3]], 0)
+  # several blocks of loci give the same results
+  expect_equal(.indiv_inbreeding_by_group(grouped_gt, block_size = 7), expected)
 })

@@ -17,8 +17,8 @@ missing_gt <- gen_tibble(
 test_that("impute and use the imputation", {
   # we get errors because of missing values
   expect_error(
-    missing_gt %>% gt_pca_partialSVD(),
-    "You can't have missing values"
+    missing_gt %>% gt_pca(method = "random", n_cores = 1),
+    "needs complete or imputed genotypes"
   )
   expect_false(gt_has_imputed(missing_gt))
   expect_error(
@@ -33,7 +33,10 @@ test_that("impute and use the imputation", {
   # but don't use it by default
   expect_false(gt_uses_imputed(missing_gt))
   # now we return a pca successfully
-  expect_true(inherits(missing_gt %>% gt_pca_partialSVD(), "gt_pca"))
+  expect_true(inherits(
+    missing_gt %>% gt_pca(method = "random", n_cores = 1),
+    "gt_pca"
+  ))
   # simple error message
   expect_error(
     gt_set_imputed(missing_gt),
@@ -42,6 +45,8 @@ test_that("impute and use the imputation", {
 })
 
 test_that("gt_impute_xgboost works with loci out of order", {
+  # trains xgboost (~1.5 s): skipped on CRAN to keep its check short
+  skip_on_cran()
   set.seed(42)
   n_ind <- 100
   n_loci <- 80
@@ -122,6 +127,8 @@ test_that("error imputing an already imputed set", {
 })
 
 test_that("n_cores can be set", {
+  # trains xgboost (~3 s): skipped on CRAN to keep its check short
+  skip_on_cran()
   bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
   missing_gt <- gen_tibble(
     bed_file,
@@ -142,6 +149,8 @@ test_that("n_cores can be set", {
 })
 
 test_that("append_error correct dimensions", {
+  # trains xgboost (~3 s): skipped on CRAN to keep its check short
+  skip_on_cran()
   bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
   missing_gt <- gen_tibble(
     bed_file,

@@ -2,22 +2,30 @@
 % Please edit documentation in R/indiv_inbreeding.R
 \name{indiv_inbreeding}
 \alias{indiv_inbreeding}
-\alias{indiv_inbreeding.tbl_df}
+\alias{indiv_inbreeding.gen_tbl}
 \alias{indiv_inbreeding.vctrs_bigSNP}
 \alias{indiv_inbreeding.grouped_gen_tbl}
 \title{Individual inbreeding coefficient}
 \usage{
-indiv_inbreeding(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
+indiv_inbreeding(.x, ...)
 
-\method{indiv_inbreeding}{tbl_df}(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
+\method{indiv_inbreeding}{gen_tbl}(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
 
 \method{indiv_inbreeding}{vctrs_bigSNP}(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
 
-\method{indiv_inbreeding}{grouped_gen_tbl}(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
+\method{indiv_inbreeding}{grouped_gen_tbl}(
+  .x,
+  method = c("WG17"),
+  allele_sharing_mat = NULL,
+  type = c("vector", "list"),
+  ...
+)
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of
 a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}.}
+
+\item{...}{other arguments passed to specific methods, currently unused.}
 
 \item{method}{currently only "WG17" (for Weir and Goudet 2017).}
 
@@ -27,14 +35,44 @@ of Allele Sharing returned by \code{\link[=pairwise_allele_sharing]{pairwise_all
 Sharing matrix, it is sometimes more efficient to pre-compute this matrix.
 It is not possible to use this with grouped tibbles.}
 
-\item{...}{currently unused.}
+\item{type}{only for a grouped \code{\link{gen_tibble}}: "vector" (the default), one
+value per individual, in the order of the rows; or "list" (deprecated),
+one vector per group, in the order of \code{\link[dplyr:group_keys]{dplyr::group_keys()}}.}
 }
 \value{
-a numeric vector of inbreeding coefficients.
+a numeric vector of inbreeding coefficients, one per individual in
+the order of the rows, named by the ids of the individuals (when
+\code{allele_sharing_mat} is given, by its row names). For a grouped
+\code{\link{gen_tibble}}, the coefficients are computed within each group (with
+\code{type = "list"}, deprecated, they are returned as a list of vectors, one
+per group; an empty group gives an empty vector).
 }
 \description{
 This function calculates the inbreeding coefficient for each individual based
 on the beta estimate from Weir and Goudet (2017).
+}
+\details{
+\code{indiv_inbreeding()} is an S3 generic, with methods for \code{\link{gen_tibble}}
+objects (grouped or not) and for their \code{genotypes} column. Other packages
+can add methods for their own classes (e.g. tibbles of genotype
+likelihoods).
+
+For a grouped \code{\link{gen_tibble}}, the coefficients are computed within each
+group (the beta estimate is relative to the other individuals of the
+group), giving the same values as
+\code{group_map(.x, ~ indiv_inbreeding(.x))}, but much faster: the genotypes are
+read only once, and only the pairs of individuals within each group are
+compared. As for an ungrouped \code{\link{gen_tibble}}, the result has one value per
+individual, in the order of the rows, so that it can be added as a column
+(e.g. \code{grouped_gt$inbreeding <- indiv_inbreeding(grouped_gt)}).
+
+The method for the \code{genotypes} column computes the matrix of allele
+sharing of the individuals in the column, so that \code{indiv_inbreeding()} can
+be used within \code{dplyr} verbs, e.g.
+\code{mutate(inbreeding = indiv_inbreeding(genotypes))}. Within a grouped
+\code{mutate()}, \code{dplyr} calls it on the individuals of each group in turn, so
+it gives the same values as the method for a grouped \code{\link{gen_tibble}}, but
+it reads the genotypes once for each group.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

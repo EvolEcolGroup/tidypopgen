@@ -1,0 +1,31 @@
+label	commit	version	n_variants	threads	action	rep	step	status	elapsed_s	user_s	sys_s	pss_start_gb	pss_median_gb	pss_peak_gb	rss_peak_gb	proc_maxrss_gb	load1	busy_cores	cached_frac	extra	summary
+sidecar	f88a81e8	1.0.0.9001	2322460	4	read_int	1	read_int	ok	3.1	3.083	0.467	0.1159	0.3306	0.3995	0.413	0.4125	0.9868	0.115	NA	{"n_loci":2162763,"bk_bytes":121114728,"rds_bytes":102065,"sidecar_bytes":95722162}	56 indiv x 2162763 loci
+sidecar	f88a81e8	1.0.0.9001	2322460	4	read_int	1	gt_save	ok	0.849	0.842	0.007	0.3995	0.3996	0.3996	0.413	0.4125	0.9868	0.115	NA	{"gt_bytes":15133194}	saved
+sidecar	f88a81e8	1.0.0.9001	2322460	4	restore_parts	1	gt_load	ok	1.645	1.579	0.062	0.1158	0.2586	0.3214	0.3348	0.5086	1.068	0.1502	NA	{}	loaded
+sidecar	f88a81e8	1.0.0.9001	2322460	4	restore_parts	1	restore_fetch_checked_1	ok	1.216	1.022	0.18	0.322	0.4332	0.4741	0.4876	0.5086	1.068	0.1502	NA	{}	2162763 names (0 NA), first: 9999998, 9999967, 9999938
+sidecar	f88a81e8	1.0.0.9001	2322460	4	restore_parts	1	restore_assign	ok	0.007839	0.007	0	0.4941	0.4861	0.4861	0.4996	0.5086	1.068	0.1502	NA	{}	2162763 names (0 NA), first: 9999998, 9999967, 9999938
+sidecar	f88a81e8	1.0.0.9001	2322460	4	restore_parts	1	restore_fetch_checked_2	ok	0.6935	0.559	0.13	0.4861	0.47	0.4744	0.4879	0.5086	1.068	0.1502	NA	{}	2162763 names (0 NA), first: 9999998, 9999967, 9999938
+sidecar	f88a81e8	1.0.0.9001	2322460	4	restore_parts	1	restore_fetch_unchecked_3	ok	0.6278	0.486	0.142	0.4943	0.4953	0.4953	0.5087	0.5086	1.068	0.1502	NA	{}	2162763 names (0 NA), first: 9999998, 9999967, 9999938
+sidecar	f88a81e8	1.0.0.9001	2322460	4	restore_unchecked	1	gt_load	ok	1.614	1.548	0.064	0.1154	0.2586	0.3214	0.335	0.5076	0.9771	0.2002	NA	{}	loaded
+sidecar	f88a81e8	1.0.0.9001	2322460	4	restore_unchecked	1	restore_unchecked	ok	1.21	1.009	0.184	0.3221	0.4372	0.4779	0.4916	0.5076	0.9771	0.2002	NA	{}	2162763 names (0 NA), first: 9999998, 9999967, 9999938
+sidecar	f88a81e8	1.0.0.9001	2322460	4	restore	1	gt_load	ok	1.62	1.547	0.074	0.1158	0.2586	0.3214	0.335	0.5079	0.979	0.1502	NA	{}	loaded
+sidecar	f88a81e8	1.0.0.9001	2322460	4	restore	1	restore	ok	1.238	1.021	0.2	0.3221	0.4352	0.475	0.4886	0.5079	0.979	0.1502	NA	{}	2162763 names (0 NA), first: 9999998, 9999967, 9999938
+sidecar	f88a81e8	1.0.0.9001	2322460	4	restore_unchecked	1	gt_load	ok	1.633	1.56	0.067	0.1154	0.2586	0.3214	0.3349	0.5075	0.981	0.1201	NA	{}	loaded
+sidecar	f88a81e8	1.0.0.9001	2322460	4	restore_unchecked	1	restore_unchecked	ok	1.214	1.02	0.177	0.3221	0.4336	0.4746	0.4882	0.5075	0.981	0.1201	NA	{}	2162763 names (0 NA), first: 9999998, 9999967, 9999938
+sidecar	f88a81e8	1.0.0.9001	2322460	4	restore	1	gt_load	ok	1.627	1.562	0.063	0.1154	0.2586	0.3214	0.3349	0.5071	0.9829	0.1702	NA	{}	loaded
+sidecar	f88a81e8	1.0.0.9001	2322460	4	restore	1	restore	ok	1.234	1.029	0.189	0.322	0.4332	0.4735	0.487	0.5071	0.9829	0.1702	NA	{}	2162763 names (0 NA), first: 9999998, 9999967, 9999938
+sidecar	f88a81e8	1.0.0.9001	18579683	4	read_int	1	read_int	ok	24.13	23.89	3.687	0.1159	1.748	2.276	2.29	2.397	0.9053	0.1851	NA	{"n_loci":17303683,"bk_bytes":969006248,"rds_bytes":102067,"sidecar_bytes":784695727}	56 indiv x 17303683 loci
+sidecar	f88a81e8	1.0.0.9001	18579683	4	read_int	1	gt_save	ok	6.5	6.43	0.04	2.158	1.803	1.803	1.817	2.397	0.9053	0.1851	NA	{"gt_bytes":112990625}	saved
+sidecar	f88a81e8	1.0.0.9001	18579683	4	restore_parts	1	gt_load	ok	11.93	11.49	0.331	0.116	1.072	1.769	1.782	3.171	1.015	0.1301	NA	{}	loaded
+sidecar	f88a81e8	1.0.0.9001	18579683	4	restore_parts	1	restore_fetch_checked_1	ok	9.904	8.137	1.452	1.769	2.749	3.145	3.158	3.171	1.015	0.1301	NA	{}	17303683 names (0 NA), first: 9999998, 9999997, 9999994
+sidecar	f88a81e8	1.0.0.9001	18579683	4	restore_parts	1	restore_assign	ok	0.04987	0.034	0.014	3.029	3.093	3.093	3.107	3.171	1.015	0.1301	NA	{}	17303683 names (0 NA), first: 9999998, 9999997, 9999994
+sidecar	f88a81e8	1.0.0.9001	18579683	4	restore_parts	1	restore_fetch_checked_2	ok	4.458	3.473	0.985	2.9	3.159	3.159	3.173	3.171	1.015	0.1301	NA	{}	17303683 names (0 NA), first: 9999998, 9999997, 9999994
+sidecar	f88a81e8	1.0.0.9001	18579683	4	restore_parts	1	restore_fetch_unchecked_3	ok	4.484	3.364	1.047	3.159	2.901	3.124	3.137	3.171	1.015	0.1301	NA	{}	17303683 names (0 NA), first: 9999998, 9999997, 9999994
+sidecar	f88a81e8	1.0.0.9001	18579683	4	restore_unchecked	1	gt_load	ok	11.93	11.45	0.375	0.1161	1.072	1.769	1.782	3.171	1.051	0.1601	NA	{}	loaded
+sidecar	f88a81e8	1.0.0.9001	18579683	4	restore_unchecked	1	restore_unchecked	ok	9.713	8.064	1.358	1.769	2.755	3.147	3.16	3.171	1.051	0.1601	NA	{}	17303683 names (0 NA), first: 9999998, 9999997, 9999994
+sidecar	f88a81e8	1.0.0.9001	18579683	4	restore	1	gt_load	ok	11.97	11.48	0.379	0.1155	1.072	1.769	1.782	3.171	1.055	0.2353	NA	{}	loaded
+sidecar	f88a81e8	1.0.0.9001	18579683	4	restore	1	restore	ok	9.878	8.196	1.381	1.769	2.736	3.138	3.151	3.171	1.055	0.2353	NA	{}	17303683 names (0 NA), first: 9999998, 9999997, 9999994
+sidecar	f88a81e8	1.0.0.9001	18579683	4	restore_unchecked	1	gt_load	ok	11.9	11.43	0.369	0.1154	1.072	1.768	1.782	3.171	1.235	0.1251	NA	{}	loaded
+sidecar	f88a81e8	1.0.0.9001	18579683	4	restore_unchecked	1	restore_unchecked	ok	9.697	8.077	1.329	1.769	2.747	3.139	3.153	3.171	1.235	0.1251	NA	{}	17303683 names (0 NA), first: 9999998, 9999997, 9999994
+sidecar	f88a81e8	1.0.0.9001	18579683	4	restore	1	gt_load	ok	11.94	11.41	0.412	0.116	1.072	1.769	1.782	3.172	1.074	0.145	NA	{}	loaded
+sidecar	f88a81e8	1.0.0.9001	18579683	4	restore	1	restore	ok	9.71	7.955	1.425	1.769	2.764	3.146	3.159	3.172	1.074	0.145	NA	{}	17303683 names (0 NA), first: 9999998, 9999997, 9999994

@@ -1,0 +1,8 @@
+label	rep	elapsed_s	peak_rss_mb	peak_heap_mb	load
+new	1	4.81	566	133	2.76
+new4	1	1.64	566	133	2.94
+new	2	4.31	566	133	2.94
+new4	2	2.25	566	133	2.79
+new	3	4.25	566	133	2.79
+new4	3	1.57	566	133	2.81
+old	1	184.61	2806	2334	2.75

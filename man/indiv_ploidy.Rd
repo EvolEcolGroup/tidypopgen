@@ -3,6 +3,7 @@
 \name{indiv_ploidy}
 \alias{indiv_ploidy}
 \alias{indiv_ploidy.tbl_df}
+\alias{indiv_ploidy.grouped_gen_tbl}
 \alias{indiv_ploidy.vctrs_bigSNP}
 \title{Return individual ploidy}
 \usage{
@@ -10,11 +11,13 @@ indiv_ploidy(.x, ...)
 
 \method{indiv_ploidy}{tbl_df}(.x, ...)
 
+\method{indiv_ploidy}{grouped_gen_tbl}(.x, ...)
+
 \method{indiv_ploidy}{vctrs_bigSNP}(.x, ...)
 }
 \arguments{
-\item{.x}{a \code{\link{gen_tibble}}, or a vector of class \code{vctrs_bigSNP} (usually the
-\code{genotype} column of a \code{\link{gen_tibble}} object)}
+\item{.x}{a \code{\link{gen_tibble}} (grouped or not), or a vector of class
+\code{vctrs_bigSNP} (usually the \code{genotype} column of a \code{\link{gen_tibble}} object)}
 
 \item{...}{currently unused.}
 }
@@ -22,7 +25,9 @@ indiv_ploidy(.x, ...)
 a vector of ploidy, one per individuals in the \code{\link{gen_tibble}}
 }
 \description{
-Returns the ploidy for each individual.
+Returns the ploidy for each individual. On a grouped \code{\link{gen_tibble}}, the
+ploidy of all the individuals is returned, in the order of the rows (it
+does not depend on the groups).
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

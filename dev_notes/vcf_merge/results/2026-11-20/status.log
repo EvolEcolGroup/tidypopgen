@@ -1,0 +1,47 @@
+2026-11-20T03:46:59+00:00 load=0.67 start
+2026-11-20T03:46:59+00:00 load=0.67 vcf pops T=4
+base pops T=4 rep=1: 9.15s 663MB load=0.67 md5=87fe0252_1cb5b27f
+p1 pops T=4 rep=1: 8.61s 665MB load=1.01 md5=87fe0252_1cb5b27f
+p3 pops T=4 rep=1: 8.05s 666MB load=1.21 md5=87fe0252_1cb5b27f
+p4 pops T=4 rep=1: 7.67s 688MB load=1.32 md5=87fe0252_1cb5b27f
+p4 pops T=4 rep=2: 7.11s 688MB load=1.31 md5=87fe0252_1cb5b27f
+p3 pops T=4 rep=2: 7.50s 666MB load=1.53 md5=87fe0252_1cb5b27f
+p1 pops T=4 rep=2: 8.34s 665MB load=1.59 md5=87fe0252_1cb5b27f
+base pops T=4 rep=2: 9.17s 663MB load=1.45 md5=87fe0252_1cb5b27f
+base pops T=4 rep=3: 9.19s 663MB load=1.85 md5=87fe0252_1cb5b27f
+p1 pops T=4 rep=3: 8.32s 665MB load=2.01 md5=87fe0252_1cb5b27f
+p3 pops T=4 rep=3: 7.71s 666MB load=1.77 md5=87fe0252_1cb5b27f
+p4 pops T=4 rep=3: 8.08s 688MB load=1.68 md5=87fe0252_1cb5b27f
+2026-11-20T03:50:17+00:00 load=1.28 vcf sgdp T=4
+base sgdp T=4 rep=1: 64.45s 875MB load=1.28 md5=2e2fdeae_e4f9c90e
+p1 sgdp T=4 rep=1: 42.22s 879MB load=2.61 md5=2e2fdeae_e4f9c90e
+p3 sgdp T=4 rep=1: 36.92s 860MB load=2.68 md5=2e2fdeae_e4f9c90e
+p4 sgdp T=4 rep=1: 32.95s 856MB load=2.15 md5=2e2fdeae_e4f9c90e
+p4 sgdp T=4 rep=2: 33.04s 855MB load=2.15 md5=2e2fdeae_e4f9c90e
+p3 sgdp T=4 rep=2: 36.45s 860MB load=1.91 md5=2e2fdeae_e4f9c90e
+p1 sgdp T=4 rep=2: 42.51s 879MB load=2.21 md5=2e2fdeae_e4f9c90e
+base sgdp T=4 rep=2: 54.54s 875MB load=2.62 md5=2e2fdeae_e4f9c90e
+base sgdp T=4 rep=3: 54.93s 875MB load=2.72 md5=2e2fdeae_e4f9c90e
+p1 sgdp T=4 rep=3: 42.54s 879MB load=2.83 md5=2e2fdeae_e4f9c90e
+p3 sgdp T=4 rep=3: 36.54s 860MB load=2.81 md5=2e2fdeae_e4f9c90e
+p4 sgdp T=4 rep=3: 33.34s 856MB load=2.26 md5=2e2fdeae_e4f9c90e
+2026-11-20T04:00:23+00:00 load=1.77 vcf many T=4
+base many T=4 rep=1: 53.56s 962MB load=1.77 md5=f286411f_d33f758d
+p1 many T=4 rep=1: 42.75s 942MB load=2.02 md5=f286411f_d33f758d
+p3 many T=4 rep=1: 37.24s 980MB load=2.02 md5=f286411f_d33f758d
+p4 many T=4 rep=1: 33.98s 964MB load=2.28 md5=f286411f_d33f758d
+p4 many T=4 rep=2: 33.10s 964MB load=2.52 md5=f286411f_d33f758d
+p3 many T=4 rep=2: 37.48s 980MB load=2.56 md5=f286411f_d33f758d
+p1 many T=4 rep=2: 43.97s 942MB load=2.20 md5=f286411f_d33f758d
+base many T=4 rep=2: 53.52s 962MB load=2.15 md5=f286411f_d33f758d
+base many T=4 rep=3: 52.96s 962MB load=2.92 md5=f286411f_d33f758d
+p1 many T=4 rep=3: 44.06s 942MB load=2.84 md5=f286411f_d33f758d
+p3 many T=4 rep=3: 37.47s 980MB load=2.08 md5=f286411f_d33f758d
+p4 many T=4 rep=3: 33.52s 964MB load=2.14 md5=f286411f_d33f758d
+2026-11-20T04:10:22+00:00 load=1.79 vcf pops T=1
+2026-11-20T04:10:30+00:00 stopped run_all.sh after the 4-thread VCF block (deadline 06:00)
+2026-11-20T04:10:30+00:00 load=1.59 king bench T=1
+2026-11-20T04:18:18+00:00 load=0.46 king proto T=1
+2026-11-20T04:26:22+00:00 load=0.65 king bench T=4
+2026-11-20T04:31:32+00:00 load=0.99 king proto T=4
+2026-11-20T04:36:21+00:00 load=1.28 king done

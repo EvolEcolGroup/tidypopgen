@@ -17,7 +17,8 @@
 #' SNPs are supported. If haploid variants (e.g. sex chromosomes) are included
 #' in the *VCF*, they are not transformed into homozygous calls. Instead,
 #' reference alleles will be coded as 0 and alternative alleles will be coded
-#' as 1.
+#' as 1. The phase of phased genotypes (e.g. `0|1`) is ignored, unless
+#' `phased = TRUE` (see below).
 #'
 #' - *PLINK* files (.bed, .ped, or a bigSNP .rds): the individual information
 #' (from the .fam file, or the first six columns of the .ped file) is stored
@@ -33,8 +34,42 @@
 #' `phenotype` are only created if they have some non-missing values.
 #' [gt_as_plink()] writes these columns back to PLINK files.
 #'
-#' - *packedancestry* files: When loading *packedancestry* files,
+#' - *packedancestry* files: the genotype file can be in either of the two
+#' layouts of EIGENSOFT, GENO (one record per locus) or TGENO (one record per
+#' individual, "transposed", as in recent releases of the Allen Ancient DNA
+#' Resource, AADR); the layout is detected from the header of the file,
+#' whatever its extension (.geno or .tgeno). A TGENO file is read into memory
+#' in one go if it is smaller than 2 GB (and otherwise in slabs of loci,
+#' using up to 2 GB of memory). When loading *packedancestry* files,
 #' missing alleles will be converted from 'X' to NA
+#'
+#' - Phased genotypes: with `phased = TRUE`, `gen_tibble()` creates a phased
+#' `gen_tibble` of diploid individuals, which also knows which allele of each
+#' genotype is on the first and which on the second haplotype (e.g. `0|1`
+#' versus `1|0`), as needed by haplotype based statistics. Phased genotypes
+#' are stored in the same file backed matrix as unphased ones (see
+#' [phased_encoding]), so that all other
+#' functions work on phased `gen_tibble`s as usual, treating their genotypes
+#' as ordinary dosages of the alternate allele. [is_phased()] tests whether a
+#' `gen_tibble` is phased, and [show_haplotypes()] returns its haplotypes.
+#' Phased genotypes can be read from *VCF* files (with parser "cpp"), in which
+#' all individuals have to be diploid and all genotypes phased (with `|`, e.g.
+#' `0|1`): any unphased genotype (with `/`, including `0/0` and `./.`) is an
+#' error, naming the individual and the locus, and a genotype with a missing
+#' allele (e.g. `.|.`, `0|.`, or a single `.`) is missing. They can also be
+#' created from a matrix of haplotypes, with two rows per individual (the
+#' first and second haplotypes of individual `i` are rows `2 * i - 1` and
+#' `2 * i`) and one column per locus, containing 0 (reference allele), 1
+#' (alternate allele) or `NA` (if either haplotype is missing, the genotype is
+#' missing). [gt_merge_vcfs()] and [gt_concat_vcfs()] also read phased *VCF*
+#' files with `phased = TRUE`. Functions that write genotypes keep the phase
+#' where they can: [gt_as_vcf()] writes phased genotypes (`0|1`), subsetting,
+#' [gt_save()], [gt_load()], [gt_order_loci()] and [gt_update_backingfile()]
+#' keep phased data phased, and [rbind()][rbind.gen_tbl] keeps the phase when
+#' both `gen_tibble`s are phased (it then never swaps or flips alleles), and
+#' discards it (with a message) when only one of them is phased. Imputation
+#' ([gt_impute_simple()], [gt_impute_xgboost()]) is not available for phased
+#' `gen_tibble`s.
 #'
 #' @note Helper functions for accessing `gen_tibble` object attributes and
 #'   checking gen_tibble ploidy can be found in gt_helper_functions.R
@@ -47,11 +82,13 @@
 #'   the `bigsnpr` package (usually created with [bigsnpr::snp_readBed()])
 #' - a string giving the path to a vcf file. Only biallelic SNPs will be
 #'   considered.
-#' - a string giving the path to a *packedancestry* .geno file. The associated
-#'   .ind and .snp files are expected to be in the same directory and share the
-#'   same file name prefix.
+#' - a string giving the path to a *packedancestry* .geno (or .tgeno) file,
+#'   in GENO or TGENO layout (see Details). The associated .ind and .snp files
+#'   are expected to be in the same directory and share the same file name
+#'   prefix.
 #' - a genotype matrix of dosages (0, 1, 2, NA) giving the dosage of the
 #'   alternate allele.
+#' - with `phased = TRUE`, a matrix of haplotypes (see Details).
 #' @param indiv_meta a list, data.frame or tibble with compulsory columns 'id'
 #'   and 'population', plus any additional metadata of interest. This is only
 #'   used if `x` is a genotype matrix. Otherwise this information is extracted
@@ -69,8 +106,15 @@
 #'   latter is slower but more robust; if "cpp" gives an error, try using "vcfR"
 #'   in case your
 #'   *VCF* has an unusual structure.
-#' @param n_cores currently ignored (reading files is not parallelised); kept
-#'   for backwards compatibility
+#' @param n_cores the number of cores used to read a *VCF* file with
+#'   `parser = "cpp"`: the genotypes are parsed in parallel, and a *.vcf.gz*
+#'   file compressed with `bgzip` (as most are) is also decompressed in
+#'   parallel (other gzipped files are decompressed on a single core). For
+#'   a PLINK *.ped* file, the lines are split and the genotypes coded in
+#'   parallel, for a PLINK *.bed* file and a *packedancestry* GENO file the
+#'   genotypes are decoded in parallel, and for a *packedancestry* TGENO file
+#'   they are transposed in parallel. It is ignored for other formats and for
+#'   `parser = "vcfR"`.
 #' @param valid_alleles a vector of valid allele values; it defaults to 'A','T',
 #'   'C' and 'G'.
 #' @param missing_alleles a vector of values in the BIM file/loci dataframe that
@@ -101,7 +145,29 @@
 #'   index of each locus in the *VCF* (or *bim*) file, so they can not be used
 #'   to match loci across datasets: [rbind()][rbind.gen_tbl] and
 #'   [rbind_dry_run()] always match loci with integer names by chromosome and
-#'   position.
+#'   position. For *VCF* files, the original names (with the chromosomes and
+#'   positions) are written to a sidecar file next to the backing file
+#'   (*.loci.tsv*), from which [gt_lookup_loci()] and [gt_restore_loci()] get
+#'   them back.
+#' @param chromosomes_as_int logical. If TRUE, chromosomes will be stored as
+#'   integer codes rather than as a factor. Only used when `x` is a *VCF* file
+#'   with parser "cpp". Default is FALSE. This saves memory and time with
+#'   many chromosomes (e.g. RAD loci assembled de novo, each its own
+#'   "chromosome"). A chromosome whose name is a positive number (after an
+#'   optional "chr" or "chromosome" prefix, e.g. "7", "chr7" or "Chr07")
+#'   keeps that number as its code, unless an earlier name has the same
+#'   number (e.g. "chr1" after "1"); these names, "0", numbers larger than
+#'   the largest integer, and other names are numbered after the largest
+#'   number, in order of first appearance. The names are written to a sidecar
+#'   file
+#'   next to the backing file (*.chromosomes.tsv*), from which
+#'   [gt_lookup_chromosomes()], [gt_lookup_loci()] and [gt_restore_loci()]
+#'   get them back.
+#' @param phased logical. If TRUE, the genotypes are stored with their phase,
+#'   giving a phased `gen_tibble` of diploid individuals (see Details). Only
+#'   available when `x` is a *VCF* file read with parser "cpp", or a matrix of
+#'   haplotypes. Default is FALSE (the phase of phased *VCF* files is
+#'   ignored).
 #' @param quiet provide information on the files used to store the data
 #' @returns an object of the class `gen_tbl`.
 #' @rdname gen_tibble
@@ -127,6 +193,15 @@
 #'     package = "tidypopgen"
 #'   )
 #' gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile("anolis_"))
+#'
+#' # Create a phased gen_tibble from a phased .vcf file
+#' phased_vcf <-
+#'   system.file("extdata", "phased_example.vcf", package = "tidypopgen")
+#' phased_gt <- gen_tibble(phased_vcf,
+#'   phased = TRUE,
+#'   quiet = TRUE, backingfile = tempfile("phased_")
+#' )
+#' show_haplotypes(phased_gt)
 #'
 #' # Create a gen_tibble from a matrix of genotypes:
 #' test_indiv_meta <- data.frame(
@@ -182,6 +257,8 @@ gen_tibble.character <-
            backingfile = NULL,
            allow_duplicates = FALSE,
            names_as_int = FALSE,
+           chromosomes_as_int = FALSE,
+           phased = FALSE,
            quiet = FALSE) {
     # parser for vcf
     parser <- match.arg(parser)
@@ -218,6 +295,19 @@ gen_tibble.character <-
         "bigSNP rds files and VCF files read with parser = 'cpp'"
       )
     }
+    if (isTRUE(chromosomes_as_int) &&
+          !(ext %in% c("vcf", "gz") && parser == "cpp")) {
+      stop(
+        "chromosomes_as_int = TRUE is only available for VCF files read ",
+        "with parser = 'cpp'"
+      )
+    }
+    if (isTRUE(phased) && !(ext %in% c("vcf", "gz") && parser == "cpp")) {
+      stop(
+        "phased = TRUE is only available for VCF files read with ",
+        "parser = 'cpp' (and for matrices of haplotypes)"
+      )
+    }
 
     if ((tolower(file_ext(x)) == "bed") || (tolower(file_ext(x)) == "rds")) {
       rlang::check_dots_empty()
@@ -229,6 +319,7 @@ gen_tibble.character <-
         backingfile = backingfile,
         allow_duplicates = allow_duplicates,
         names_as_int = names_as_int,
+        n_cores = n_cores,
         quiet = quiet
       )
     } else if (
@@ -249,6 +340,8 @@ gen_tibble.character <-
         backingfile = backingfile,
         allow_duplicates = allow_duplicates,
         names_as_int = names_as_int,
+        chromosomes_as_int = chromosomes_as_int,
+        phased = phased,
         quiet = quiet
       )
     } else if (tolower(file_ext(x)) == "ped") {
@@ -259,9 +352,10 @@ gen_tibble.character <-
         missing_alleles = missing_alleles,
         backingfile = backingfile,
         allow_duplicates = allow_duplicates,
+        n_cores = n_cores,
         quiet = quiet
       )
-    } else if (tolower(file_ext(x)) == "geno") {
+    } else if (tolower(file_ext(x)) %in% c("geno", "tgeno")) {
       x_gt <- gen_tibble_packedancestry(
         x = x,
         ...,
@@ -269,43 +363,37 @@ gen_tibble.character <-
         missing_alleles = missing_alleles,
         backingfile = backingfile,
         allow_duplicates = allow_duplicates,
-        quiet = quiet,
-        chunk_size = chunk_size
+        n_cores = n_cores,
+        quiet = quiet
       )
     } else {
       stop(paste(
         "x should be a valid file path pointing to a either a PLINK .bed",
-        "or .ped file, a bigSNP .rds file or a VCF .vcf or",
-        ".vcf.gz file"
+        "or .ped file, a bigSNP .rds file, a VCF .vcf or",
+        ".vcf.gz file, or a packedancestrymap .geno or .tgeno file"
       ))
     }
 
-    # check alleles
-    loci <- show_loci(x_gt)
-    doubles <- which(is.na(loci$allele_ref) & is.na(loci$allele_alt))
+    # sidecars next to the new backing file are left from older files with
+    # the same name (they can not belong to the new data), unless the reader
+    # wrote them (VCF files with the cpp parser)
+    if (!(tolower(file_ext(x)) %in% c("vcf", "gz") && parser == "cpp")) {
+      remove_stale_sidecars(gt_get_file_names(x_gt)[2])
+    }
 
-    if (length(doubles) > 0) {
-      check_missing <- x_gt %>%
-        select_loci(all_of(doubles)) %>%
-        loci_missingness()
-      if (any(check_missing < 1, na.rm = TRUE)) {
-        # clean up files if we are stopping (dropping the gen_tibble first,
-        # so that its backing file can be unmapped, see remove_fbm_files())
-        files <- gt_get_file_names(x_gt)
-        rm(x_gt)
-        remove_fbm_files(files)
-        stop(paste(
-          "Some loci are missing both reference and alternate alleles.",
-          "Genotypes are not missing at these loci.",
-          "Please check the loci and genotype data."
-        ))
-      } else {
-        warning(
-          "Your data contain loci with no genotypes or allele ",
-          "information. Use loci_missingness() to identify them ",
-          "and select_loci() to remove them."
-        )
-      }
+    # check alleles
+    if (has_genotypes_without_alleles(x_gt)) {
+      # clean up files if we are stopping (dropping the gen_tibble first,
+      # so that its backing file can be unmapped, see remove_fbm_files());
+      # the sidecars are listed by path, as gt_get_file_names() would list
+      # them too (and twice) only when the loci table uses them
+      files <- c(
+        fbm_file_names(x_gt), loci_sidecar_path(x_gt),
+        chromosomes_sidecar_path(x_gt)
+      )
+      rm(x_gt)
+      remove_fbm_files(files)
+      stop_genotypes_without_alleles()
     }
 
     # the readers save the FBM (.rds), so only the gen_tibble is saved
@@ -333,9 +421,19 @@ gen_tibble.matrix <- function(
   missing_alleles = c("0", "."),
   backingfile = NULL,
   allow_duplicates = FALSE,
+  phased = FALSE,
   quiet = FALSE
 ) {
   rlang::check_dots_empty()
+  # a matrix of haplotypes (see R/phased_genotypes.R)
+  if (isTRUE(phased)) {
+    return(gen_tibble_haplotypes(x,
+      indiv_meta = indiv_meta, loci = loci, ploidy = ploidy,
+      valid_alleles = valid_alleles, missing_alleles = missing_alleles,
+      backingfile = backingfile, allow_duplicates = allow_duplicates,
+      quiet = quiet
+    ))
+  }
 
   # check that valid alleles does not contain zero
   if ("0" %in% valid_alleles) {
@@ -601,6 +699,43 @@ tbl_sum.gen_tbl <- function(x, ...) {
 }
 
 
+# whether a gen_tibble has loci whose reference and alternate alleles are both
+# missing (NA), but with genotypes that are not all missing, which the readers
+# of files do not allow (the caller then removes the files of the gen_tibble,
+# and stops with stop_genotypes_without_alleles()). If such loci only have
+# missing genotypes, it gives a warning (and returns FALSE)
+has_genotypes_without_alleles <- function(x_gt) {
+  loci <- show_loci(x_gt)
+  doubles <- which(is.na(loci$allele_ref) & is.na(loci$allele_alt))
+  if (length(doubles) == 0) {
+    return(FALSE)
+  }
+  check_missing <- x_gt %>%
+    select_loci(all_of(doubles)) %>%
+    loci_missingness()
+  if (any(check_missing < 1, na.rm = TRUE)) {
+    return(TRUE)
+  }
+  warning(
+    "Your data contain loci with no genotypes or allele ",
+    "information. Use loci_missingness() to identify them ",
+    "and select_loci() to remove them."
+  )
+  FALSE
+}
+
+# (the error is reported as coming from the caller, e.g. gen_tibble())
+stop_genotypes_without_alleles <- function() {
+  stop(simpleError(
+    paste(
+      "Some loci are missing both reference and alternate alleles.",
+      "Genotypes are not missing at these loci.",
+      "Please check the loci and genotype data."
+    ),
+    call = sys.call(-1)
+  ))
+}
+
 # function to check the allele alphabet
 check_allele_alphabet <- function(
   x,
@@ -687,7 +822,7 @@ change_duplicated_file_name <- function(file) {
   # remove the extensions of backing files and of input files (other dots in
   # the file name are kept)
   file <- sub(
-    "\\.(bk|rds|gt|bed|ped|geno|vcf\\.gz|vcf|gz)$",
+    "\\.(bk|rds|gt|bed|ped|geno|tgeno|vcf\\.gz|vcf|gz)$",
     "",
     file,
     ignore.case = TRUE
@@ -761,24 +896,44 @@ cast_chromosome_to_int <- function(chromosome) {
   if (is.character(chromosome)) {
     # attempt to strip chr from the chromosome
     strip_chr <- function(x) {
-      gsub("^(chromosome_|chr_|chromosome|chr)", "", x, ignore.case = TRUE)
+      # only names starting with "c" or "C" can be stripped, so the (slow)
+      # regular expression is only applied to them: with millions of
+      # chromosomes (e.g. RAD loci), gsub() on all of them takes seconds
+      maybe_chr <- which(startsWith(x, "c") | startsWith(x, "C"))
+      if (length(maybe_chr) > 0) {
+        x[maybe_chr] <- gsub("^(chromosome_|chr_|chromosome|chr)", "",
+          x[maybe_chr],
+          ignore.case = TRUE
+        )
+      }
+      x
     }
     chromosome <- strip_chr(chromosome)
-    # numeric names keep their own value
-    is_numeric <- grepl("^[0-9]+$", chromosome)
+    # numeric names keep their own value (PCRE is several times faster than
+    # the default engine here; "\\z" is the very end of the string, as "$" is
+    # for the default engine, whereas "$" in PCRE also matches before a final
+    # newline)
+    is_numeric <- grepl("^[0-9]+\\z", chromosome, perl = TRUE)
     chr_int <- rep(NA_integer_, length(chromosome))
     chr_int[is_numeric] <- as.integer(chromosome[is_numeric])
     # other names are coded above the largest numeric value, in order of first
     # appearance (or in the order of the levels for a factor)
     is_other <- !is_numeric & !is.na(chromosome)
     if (any(is_other)) {
-      if (is.null(chr_levels)) {
-        other_names <- unique(chromosome[is_other])
+      other <- chromosome[is_other]
+      if (is.null(chr_levels) || all(used_levels)) {
+        # the code of each name is the rank of its first appearance (for a
+        # factor whose levels are all used, this is their order), as with
+        # match(other, unique(other)), but with a single hash table: the
+        # first occurrence of each name, and a running count of new names
+        first <- match(other, other)
+        other_codes <- cumsum(first == seq_along(first))[first]
       } else {
-        other_names <- intersect(strip_chr(chr_levels), chromosome[is_other])
+        # with unused levels, the order of the levels (all of them) is kept
+        other_names <- intersect(strip_chr(chr_levels), other)
+        other_codes <- match(other, other_names)
       }
-      chr_int[is_other] <- max(c(0L, chr_int[is_numeric])) +
-        match(chromosome[is_other], other_names)
+      chr_int[is_other] <- max(c(0L, chr_int[is_numeric])) + other_codes
     }
     chromosome <- chr_int
   }

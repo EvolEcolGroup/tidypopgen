@@ -1,5 +1,5 @@
 ---
-title: "Working with aDNA pseuodhaploid samples"
+title: "Working with aDNA pseudohaploids"
 output:
   pdf_document: default
   html_document: default
@@ -52,6 +52,14 @@ ancient <- gen_tibble("./data/NearEastPublic/AncientLazaridis2016.geno",
   quiet = TRUE,
   backingfile = tempfile("test_")
 )
+```
+
+Both datasets include many populations, so we group them by population
+straight away, so that the functions that use groups (such as the pairwise
+Fst below) work within populations:
+```{r}
+ho_modern <- ho_modern %>% group_by(population)
+ancient <- ancient %>% group_by(population)
 ```
 
 # Assigning Pseudohaploid data
@@ -108,21 +116,7 @@ west_eurasian_pops <- c(
 ho_modern <- ho_modern %>% filter(population %in% west_eurasian_pops)
 ```
 
-To run a PCA on the modern Eurasian individuals, we need to impute any missing
-genotypes. But as we have subset our `gen_tibble` object, first we need to
-update our backingfile:
-```{r}
-ho_modern <- gt_update_backingfile(ho_modern,
-  quiet = TRUE
-)
-```
-
-And then we can impute, using:
-```{r}
-ho_modern <- gt_impute_simple(ho_modern, method = "mean")
-```
-
-We should also remove any monomorphic loci from our data, as these loci are
+We should remove any monomorphic loci from our data, as these loci are
 uninformative. Monomorphic markers must always be removed before a PCA is
 computed using any of the `gt_pca` functions.
 
@@ -134,7 +128,7 @@ ho_modern <- ho_modern %>% select_loci_if(loci_maf(genotypes) > 0)
 
 Now we can create our PCA object from the modern data:
 ```{r}
-modern_pca <- gt_pca_partialSVD(ho_modern, k = 2)
+modern_pca <- gt_pca(ho_modern, k = 2)
 ```
 
 We can then use `augment` to add the PCA coordinates for each individual to
@@ -174,7 +168,7 @@ predicted <- predict(
 )
 ```
 
-Here, we use the "least_squares" argument to generate a least squares
+Here, we use the default "least_squares" argument to generate a least squares
 projection that will be comparable to the approach used in `smartpca` (also
 implemented in the R package `smartsnp`).
 
@@ -218,14 +212,10 @@ ggplot() +
 
 Now let's replicate the pairwise Fst analysis from Lazaridis et al. (2016).
 
-First we need to merge the ancient and modern data:
+First we need to merge the ancient and modern data (the merged `gen_tibble`
+is grouped by population, as `ho_modern`):
 ```{r}
 ancient_modern <- rbind(ho_modern, ancient)
-```
-
-Then, we group the ancient and modern data by population:
-```{r}
-ancient_modern <- ancient_modern %>% group_by(population)
 ```
 
 As we are calculating Fst between populations, we will remove any populations that contain only one individual.

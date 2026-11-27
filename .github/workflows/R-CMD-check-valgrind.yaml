@@ -8,6 +8,10 @@ on:
 
 name: R-CMD-check-with-valgrind
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   R-CMD-check-with-valgrind:
     runs-on: ubuntu-latest

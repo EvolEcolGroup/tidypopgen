@@ -1,5 +1,5 @@
 ---
-title: "Benchmark on the HGDP"
+title: "Benchmark with the HGDP"
 ---
 
 
@@ -68,12 +68,14 @@ download.file(download_url, download_path, method = "wget")
 
 In the following vignette, we place these files into the subdirectory
 `data/hgdp/`, and we will use the paths to the bed file `hgdp650.qc.hg19.bed`
-and the metadata file `hgdp650_id_pop.txt` to read in our data.
+and the metadata file `hgdp650_id_pop.txt` to read in our data. We make the
+column names of the metadata lower case, as are those of the `gen_tibble`:
 
 
 ``` r
 bed_path <- "./data/hgdp/hgdp650.qc.hg19.bed"
-meta_info <- readr::read_tsv("./data/hgdp/hgdp650_id_pop.txt")
+meta_info <- readr::read_tsv("./data/hgdp/hgdp650_id_pop.txt") %>%
+  rename_with(tolower)
 #> Rows: 1064 Columns: 6
 #> ── Column specification ────────────────────────────────────────────────────────
 #> Delimiter: "\t"
@@ -97,15 +99,15 @@ hgdp <- gen_tibble(bed_path,
 )
 ```
 
-read_plink: 1.7s
+read_plink: 1s
 
 Add metadata
 
 
 ``` r
 hgdp <- hgdp %>% mutate(
-  population = meta_info$population[match(hgdp$id, meta_info$Id)],
-  region = meta_info$Region[match(hgdp$id, meta_info$Id)]
+  population = meta_info$population[match(hgdp$id, meta_info$id)],
+  region = meta_info$region[match(hgdp$id, meta_info$id)]
 )
 ```
 
@@ -131,18 +133,31 @@ hgdp
 #> # ℹ 1,033 more rows
 ```
 
+As this dataset includes information from multiple populations, we want to
+group the gen_tibble, so that quality control and the population statistics
+below work within populations:
+
+
+``` r
+hgdp <- hgdp %>%
+  group_by(population)
+```
+
+
 # Loci Report
 
 We can then call `qc_report_loci`. This function supplies minor allele
 frequency, rate of missingness, and a Hardy-Weinberg exact p-value for each SNP.
+As `hgdp` is grouped, Hardy-Weinberg equilibrium is tested within each
+population (with a Bonferroni correction across populations), while the minor
+allele frequency and the missingness are computed over all individuals.
 
 
 ``` r
 loci_report <- qc_report_loci(hgdp)
-#> This gen_tibble is not grouped. For Hardy-Weinberg equilibrium, `qc_report_loci()` will assume individuals are part of the same population and HWE test p-values will be calculated across all individuals. If you wish to calculate HWE p-values within populations or groups, please use`group_by()` before calling `qc_report_loci()`.
 ```
 
-loci_report: 302ms
+loci_report: 134ms
 The resulting report can be observed using `autoplot`.
 
 
@@ -154,17 +169,18 @@ autoplot(loci_report, type = "all")
 
 # Filter Loci
 
-Following this, we filter the loci to only including those with a minor allele
-frequency over 0.05, and a missingness rate below 0.05.
+Following this, we filter the loci to only include those with a minor allele
+frequency over 0.05, and a missingness rate below 0.05 (over all individuals).
+We do not need to compute them again: the loci report has one row per locus,
+in the same order as the loci of `hgdp`, so we can filter on its columns:
 
 
 ``` r
-to_keep_loci <-
-  subset(loci_report, loci_report$maf > 0.05 & loci_report$missingness < 0.05)
-hgdp <- hgdp %>% select_loci(to_keep_loci$snp_id)
+hgdp <- hgdp %>%
+  select_loci_if(loci_report$maf > 0.05 & loci_report$missingness < 0.05)
 ```
 
-filter_loci: 1.6s
+filter_loci: 17ms
 
 
 # Individual Report
@@ -178,7 +194,7 @@ individual, and rate of missingness per individual.
 indiv_report <- qc_report_indiv(hgdp)
 ```
 
-indiv_report: 212ms
+indiv_report: 178ms
 
 
 ``` r
@@ -190,46 +206,40 @@ autoplot(indiv_report, type = "scatter")
 # Filter individuals
 
 And we can filter individuals down to only include those with less than 1% of
-their genotypes missing.
+their genotypes missing. The individual report tells us how many individuals
+we would keep and lose with this threshold:
 
 
 ``` r
-to_keep_indiv <- which(indiv_report$missingness < 0.01)
-hgdp <- hgdp[to_keep_indiv, ]
+indiv_report %>% count(lost = missingness >= 0.01)
+#> # A tibble: 2 × 2
+#>   lost      n
+#>   <lgl> <int>
+#> 1 FALSE  1041
+#> 2 TRUE      2
 ```
 
-filter_indiv: 4ms
-
-# Update backingfile
-
-After removing individuals from the dataset, and before imputing, we need to
-update the file backing matrix with `gt_update_backingfile`.
+The missingness of an individual does not depend on its group, but `filter()`
+on a grouped `gen_tibble` evaluates its condition one group at a time (here,
+one pass over the genotypes for each of the 51 populations). We thus ungroup
+to filter, and group again afterwards:
 
 
 ``` r
-hgdp <- gt_update_backingfile(hgdp)
-#> 
-#> gen_backing files updated, now
-#> using FBM RDS: /tmp/RtmpGT02qf/test_12567f3f87ce84_v2.rds
-#> with FBM backing file: /tmp/RtmpGT02qf/test_12567f3f87ce84_v2.bk
-#> make sure that you do NOT delete those files!
-#> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpGT02qf/test_12567f3f87ce84_v2.gt')
+hgdp <- hgdp %>%
+  ungroup() %>%
+  filter(indiv_missingness(genotypes) < 0.01) %>%
+  group_by(population)
 ```
 
-# Impute data
+filter_indiv: 188ms
 
-Some functions, such as `loci_ld_clump` and the `gt_pca` functions, require that
-there is no missingness in the dataset, so we use `gt_impute_simple` to impute
-any remaining missing genotypes.
-
-
-``` r
-hgdp <- gt_impute_simple(hgdp, method = "mode", n_cores = n_cores)
-gt_set_imputed(hgdp, TRUE)
-```
-
-impute: 135ms
+A few missing genotypes remain after filtering. We do not need to impute
+them: LD clumping, the PCA and the DAPC below use, for each locus (or pair of
+loci), the individuals genotyped at it (see the article on
+[missing genotypes](missing_data.html)). Nor do we need to rewrite the backing
+file with `gt_update_backingfile()` after filtering: the following steps only
+use the individuals and loci that are left in the `gen_tibble`.
 
 # LD clumping
 
@@ -241,7 +251,7 @@ hgdp <- hgdp %>%
   select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, n_cores = n_cores))
 ```
 
-ld_clumping: 1.6s
+ld_clumping: 445ms
 
 # PCA
 
@@ -250,10 +260,10 @@ and LD clumped dataset.
 
 
 ``` r
-test_pca <- hgdp %>% gt_pca_partialSVD()
+test_pca <- hgdp %>% gt_pca(n_cores = n_cores)
 ```
 
-pca: 2.5s
+pca: 999ms
 
 Plot PCA:
 
@@ -269,14 +279,19 @@ autoplot(test_pca, type = "scores") +
 
 We can continue with a discriminant analysis of principal
 components using `gt_dapc`, setting 6 groups corresponding to
-the main geographic regions covered by the dataset.
+the main geographic regions covered by the dataset. As the PCA was computed
+with missing genotypes, we also give the `gen_tibble` (`data`), which
+`gt_dapc` uses to estimate the loadings of the loci.
 
 
 ``` r
-test_dapc <- gt_dapc(test_pca, pop = as.factor(hgdp$region))
+test_dapc <- gt_dapc(test_pca,
+  pop = as.factor(hgdp$region),
+  data = hgdp, n_cores = n_cores
+)
 ```
 
-dapc: 101ms
+dapc: 131ms
 
 Plot DAPC:
 
@@ -290,26 +305,25 @@ autoplot(test_dapc, type = "scores")
 # Calculate Fst
 
 To examine the differentiation between populations in the global HGDP set, we
-calculate pairwise Fst.
+calculate pairwise Fst between the populations that `hgdp` is grouped by.
 
 
 ``` r
-grouped_hgdp <- hgdp %>% group_by(population)
-pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(
+pairwise_fsts <- hgdp %>% pairwise_pop_fst(
   n_cores = n_cores,
   type = "pairwise"
 )
 ```
 
-pairwise_fst: 53ms
+pairwise_fst: 50ms
 
 Plot pairwise Fst:
 
 
 ``` r
 # Order by continents
-grouped_hgdp_order <- grouped_hgdp %>% arrange(region, population)
-regional_order <- unique(grouped_hgdp_order$population)
+hgdp_order <- hgdp %>% arrange(region, population)
+regional_order <- unique(hgdp_order$population)
 
 autoplot(pairwise_fsts, order = regional_order) +
   scale_fill_viridis_c() +
@@ -324,6 +338,8 @@ autoplot(pairwise_fsts, order = regional_order) +
   )
 ```
 
+![plot of chunk pairwise_fst_plot](./figure/hgdp_benchmark/pairwise_fst_plot-1.png)
+
 # Save in plink bed format
 
 Finally, we can save the resulting cleaned dataset to a PLINK .bed file.
@@ -335,10 +351,10 @@ gt_as_plink(hgdp,
   type = "bed",
   overwrite = TRUE
 )
-#> [1] "/tmp/RtmpGT02qf/file12567f106fc82f.bed"
+#> [1] "/tmp/RtmptYuzhk/file313a93ae8a12.bed"
 ```
 
-plink_save: 166ms
+plink_save: 162ms
 
 # Summary
 
@@ -347,18 +363,17 @@ Here is a summary of the time taken (in seconds) to perform each step of the ana
 
 ```
 #>            step time
-#> 1    read_plink 1.71
-#> 2   loci_report  0.3
-#> 3   filter_loci 1.61
-#> 4  indiv_report 0.21
-#> 5  filter_indiv    0
-#> 6        impute 0.13
-#> 7   ld_clumping 1.64
-#> 8           pca 2.47
-#> 9          dapc  0.1
-#> 10 pairwise_fst 0.05
-#> 11   plink_save 0.17
-#> 12        Total 8.39
+#> 1    read_plink 1.02
+#> 2   loci_report 0.13
+#> 3   filter_loci 0.02
+#> 4  indiv_report 0.18
+#> 5  filter_indiv 0.19
+#> 6   ld_clumping 0.44
+#> 7           pca    1
+#> 8          dapc 0.13
+#> 9  pairwise_fst 0.05
+#> 10   plink_save 0.16
+#> 11        Total 3.32
 ```
 # Running the benchmark on a laptop
 We will now run this benchmark on a laptop 

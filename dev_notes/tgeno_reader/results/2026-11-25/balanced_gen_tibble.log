@@ -1,0 +1,15 @@
+RESULT lib=lib_base file=aadr_like.geno cores=1 mode=gen_tibble buf=2.14748e+09 elapsed=11.86 user=6.56 sys=4.25
+RESULT lib=lib_new file=aadr_like.geno cores=1 mode=gen_tibble buf=2.14748e+09 elapsed=10.41 user=6.20 sys=3.56
+RESULT lib=lib_new file=aadr_like.geno cores=4 mode=gen_tibble buf=2.14748e+09 elapsed=9.23 user=6.77 sys=6.72
+RESULT lib=lib_new file=aadr_like.tgeno cores=1 mode=gen_tibble buf=2.14748e+09 elapsed=18.25 user=12.50 sys=4.79
+RESULT lib=lib_new file=aadr_like.tgeno cores=4 mode=gen_tibble buf=2.14748e+09 elapsed=14.35 user=14.67 sys=9.67
+RESULT lib=lib_new file=aadr_like.tgeno cores=4 mode=gen_tibble buf=2.14748e+09 elapsed=13.94 user=14.68 sys=8.83
+RESULT lib=lib_new file=aadr_like.tgeno cores=1 mode=gen_tibble buf=2.14748e+09 elapsed=17.34 user=11.78 sys=4.96
+RESULT lib=lib_new file=aadr_like.geno cores=4 mode=gen_tibble buf=2.14748e+09 elapsed=10.35 user=6.69 sys=10.73
+RESULT lib=lib_new file=aadr_like.geno cores=1 mode=gen_tibble buf=2.14748e+09 elapsed=9.30 user=5.07 sys=4.03
+RESULT lib=lib_base file=aadr_like.geno cores=1 mode=gen_tibble buf=2.14748e+09 elapsed=10.75 user=6.48 sys=3.92
+RESULT lib=lib_base file=aadr_like.geno cores=1 mode=gen_tibble buf=2.14748e+09 elapsed=10.61 user=6.16 sys=3.96
+RESULT lib=lib_new file=aadr_like.geno cores=1 mode=gen_tibble buf=2.14748e+09 elapsed=9.89 user=5.53 sys=4.18
+RESULT lib=lib_new file=aadr_like.geno cores=4 mode=gen_tibble buf=2.14748e+09 elapsed=9.97 user=7.05 sys=8.80
+RESULT lib=lib_new file=aadr_like.tgeno cores=1 mode=gen_tibble buf=2.14748e+09 elapsed=16.12 user=11.03 sys=4.87
+RESULT lib=lib_new file=aadr_like.tgeno cores=4 mode=gen_tibble buf=2.14748e+09 elapsed=12.53 user=10.94 sys=8.80

@@ -3,10 +3,10 @@ set -euo pipefail
 
 # Usage: create_sgdp_subset_s02.sh [out_dir]
 #
-# Create <out_dir>/all_subset.vcf.gz (and its .tbi index): a VCF of the SGDP
-# individuals listed in the ${pop}_subset.txt files in data_files/sgdp/, next
-# to this script (written by create_sgdp_subset_s01_metadata.R). <out_dir>
-# defaults to that folder (data-raw/data_files/sgdp/).
+# Download the VCFs of the SGDP individuals listed in the ${pop}_subset.txt
+# files in data_files/sgdp/, next to this script (written by
+# create_sgdp_subset_s01_metadata.R), into <out_dir>/sgdp_vcfs/ (one VCF per
+# individual). <out_dir> defaults to that folder (data-raw/data_files/sgdp/).
 #
 # SGDP distributes its per-individual VCFs as a single 57 GB tar archive. We
 # do not download the archive: SGDP also publishes its listing (`tar -tv`
@@ -18,11 +18,13 @@ set -euo pipefail
 # again.
 #
 # Each per-individual VCF only contains the sites where that individual
-# carries a non-reference allele. When merging, a site that is absent from an
-# individual's VCF is therefore set to homozygous reference (`bcftools merge
-# --missing-to-ref`), rather than to missing.
+# carries a non-reference allele. The VCFs are then merged in R with
+# tidypopgen::gt_merge_vcfs(variants = "union", missing_to_ref = TRUE), so that
+# a site that is absent from an individual's VCF is set to homozygous
+# reference (as with `bcftools merge --missing-to-ref`), rather than to
+# missing (see vignettes/articles/big_data.Rmd.orig).
 #
-# Requires: curl, awk, bcftools, and md5sum (or md5 on macOS).
+# Requires: curl, awk, and md5sum (or md5 on macOS).
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 SUBSET_DIR=$SCRIPT_DIR/data_files/sgdp # the ${pop}_subset.txt files
@@ -112,28 +114,21 @@ check_md5() {
   fi
 }
 
-# 2. Download each individual's VCF and index, and check them
-: > "$DL_DIR/merge_list.txt"
+# 2. Download each individual's VCF, and check it (no index is needed to
+#    merge them with gt_merge_vcfs())
+n_vcfs=0
 for pop in "${POPS[@]}"; do
   ids=$(sed '/^[[:space:]]*$/d' "$SUBSET_DIR/${pop}_subset.txt" | LC_ALL=C sort -u)
   echo "[$pop] downloading $(echo "$ids" | grep -c . || true) individuals"
   for id in $ids; do
     vcf=$id.annotated.nh2.variants.vcf.gz
-    for f in "$vcf" "$vcf.tbi" "$vcf.md5sum" "$vcf.tbi.md5sum"; do
+    for f in "$vcf" "$vcf.md5sum"; do
       fetch "$f"
     done
     check_md5 "$vcf"
-    check_md5 "$vcf.tbi"
-    echo "$DL_DIR/$vcf" >> "$DL_DIR/merge_list.txt"
+    n_vcfs=$((n_vcfs + 1))
   done
 done
 
-# 3. Merge them into a single VCF, treating absent sites as homozygous
-#    reference
-echo "Merging $(wc -l < "$DL_DIR/merge_list.txt" | tr -d ' ') individuals"
-bcftools merge --missing-to-ref -l "$DL_DIR/merge_list.txt" \
-  -Oz -o "$OUT_DIR/all_subset.vcf.gz"
-bcftools index -t "$OUT_DIR/all_subset.vcf.gz"
-
-echo "Done: $OUT_DIR/all_subset.vcf.gz"
-echo "The per-individual files in $DL_DIR/ can now be deleted."
+echo "Done: $n_vcfs VCFs in $DL_DIR/"
+echo "Merge them with tidypopgen::gt_merge_vcfs() (see the big data article)."

@@ -1,0 +1,6 @@
+09:44:42 load 2.79 old: load 17.14 save 20.88 size 0.305 GB
+09:45:31 load 1.87 new: load 4.18 save 7.28 size 0.225 GB
+09:45:53 load 1.72 new: load 4.13 save 7.25 size 0.225 GB
+09:46:15 load 1.64 old: load 17.26 save 21.01 size 0.305 GB
+09:47:04 load 1.50 old: load 17.21 save 20.89 size 0.305 GB
+09:47:52 load 1.16 new: load 4.12 save 7.20 size 0.225 GB

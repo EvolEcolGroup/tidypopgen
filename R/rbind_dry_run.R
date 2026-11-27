@@ -231,7 +231,14 @@ dry_run_loci <- function(x) {
     # duplicated loci are reported by rbind_dry_run()
     loci_from_bim(x, allow_duplicates = TRUE)
   } else {
-    show_loci(x)
+    loci <- show_loci(x)
+    # integer chromosomes (chromosomes_as_int) can not be compared across
+    # datasets (the same code may be different chromosomes), so loci are
+    # matched by the names of their chromosomes, from the chromosome sidecar
+    if (is_int_column(loci$chromosome)) {
+      loci$chromosome <- chromosome_sidecar_factor(x, loci$chromosome)
+    }
+    loci
   }
 }
 

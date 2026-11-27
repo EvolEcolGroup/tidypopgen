@@ -386,12 +386,7 @@ test_that(".pairwise_king_by_group matches pairwise_king on each group", {
     levels = c("A", "B", "C", "D")
   )
   grouped <- families %>% group_by(population, .drop = FALSE)
-  expected <- group_map(grouped, function(.x, .y) {
-    if (nrow(.x) == 0) {
-      return(NULL)
-    }
-    pairwise_king(.x, as_matrix = TRUE)
-  })
+  expected <- group_map(grouped, ~ pairwise_king(.x, as_matrix = TRUE))
   # one block of loci, or several
   expect_identical(.pairwise_king_by_group(grouped), expected)
   expect_identical(

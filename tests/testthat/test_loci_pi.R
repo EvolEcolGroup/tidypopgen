@@ -142,12 +142,17 @@ test_that("loci_pi on grouped tibbles", {
     loci_pi(n_cores = 2, block_size = 2)
   expect_true(all.equal(pi_grp, pi_grp_chunked))
 
-  # return NA if we have a single individual
+  # NA if we have a single individual, in the format given by type, as for
+  # more individuals (one row per locus for the single group)
   test_gt_single <- test_gt %>% filter(id == "a")
   pi_single <- test_gt_single %>% loci_pi()
-  expect_true(all(is.na(pi_single)))
-  # length should be the same as the number of loci
-  expect_equal(length(pi_single), nrow(test_loci))
+  expect_named(pi_single, c("loci", "group", "value"))
+  expect_true(all(is.na(pi_single$value)))
+  expect_equal(nrow(pi_single), nrow(test_loci))
+  pi_single_mat <- test_gt_single %>% loci_pi(type = "matrix")
+  expect_equal(dim(pi_single_mat), c(nrow(test_loci), 1))
+  expect_true(all(is.na(pi_single_mat)))
+  expect_length(loci_pi(test_gt_single, type = "list"), 1)
 
   # test a second grouping variable
   test_gt$region <- c("a", "a", "b", "b", "a", "b", "b")

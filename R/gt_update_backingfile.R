@@ -3,7 +3,8 @@
 #' This functions forces a re-write of the file backing matrix to match the
 #' [`gen_tibble`]. Individuals and loci are subsetted and reordered according to
 #' the current state of the `gen_tibble`. A `.gt`, `.bk` and `.rds` file will be
-#' created.
+#' created (and, if the names of the loci are integers, a new locus sidecar
+#' with their original names, see [gt_lookup_loci()]).
 #'
 #' This function does not check whether the positions of your genetic loci are
 #' sorted. To check this, and update the file backing matrix, use
@@ -89,9 +90,15 @@ gt_update_backingfile <- function(
       col_offset = chunks_vec[i],
       row_offset = 0,
       swap = logical(0),
-      swap_lut = 0:255
+      swap_lut = 0:255,
+      copy_lut = 0:255
     )
   }
+  # with integer loci names (or chromosomes), the sidecars of the new backing
+  # file have the original names of the loci (or chromosomes) that are kept
+  # (see R/loci_sidecar.R)
+  copy_sidecars(.x, new_bk_matrix$backingfile, show_loci(.x))
+
   # get fbm_ploidy
   fbm_ploidy <- attr(.x$genotypes, "fbm_ploidy")
   # if it is not null, then subset it to the new individuals
@@ -103,16 +110,20 @@ gt_update_backingfile <- function(
   if (rm_unsorted_dist) {
     # missing genetic distances can not be used either; otherwise, check the
     # genetic distances within each chromosome (in a single pass, without
-    # copying the column)
+    # copying the column). If they are sorted across the whole table (e.g.
+    # all zero, as when read from a VCF), they are sorted within each
+    # chromosome, and we skip grouping the loci by chromosome, which takes
+    # seconds with millions of chromosomes (e.g. RAD loci)
     if (anyNA(show_loci(.x)$genetic_dist)) {
       if (!quiet) {
         message("Some genetic distances are missing, setting them all to zero")
       }
       show_loci(.x)$genetic_dist <- 0
-    } else if (any_unsorted_by_chromosome(
-      show_loci(.x)$genetic_dist,
-      show_loci(.x)$chromosome
-    )[["unsorted"]]) {
+    } else if (is.unsorted(show_loci(.x)$genetic_dist) &&
+      any_unsorted_by_chromosome(
+        show_loci(.x)$genetic_dist,
+        show_loci(.x)$chromosome
+      )[["unsorted"]]) {
       if (!quiet) {
         message("Genetic distances are not sorted, setting them to zero")
       }
@@ -153,6 +164,7 @@ gt_update_backingfile <- function(
     message("\ngen_backing files updated, now")
     message("using FBM RDS: ", gt_get_file_names(new_gen_tbl)[1])
     message("with FBM backing file: ", gt_get_file_names(new_gen_tbl)[2])
+    message_sidecar_files(new_gen_tbl)
     message("make sure that you do NOT delete those files!")
     message("to reload the gen_tibble in another session, use:")
     message("gt_load('", file_name, "')")

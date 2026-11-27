@@ -27,7 +27,7 @@ pops_path <- system.file(
 )
 pops <- readr::read_csv(pops_path, show_col_types = FALSE)
 anole_gt <- anole_gt %>% mutate(id = gsub("punc_", "", .data$id, ))
-anole_gt <- anole_gt %>% mutate(population = pops$pop[match(pops$ID, .data$id)])
+anole_gt <- anole_gt %>% mutate(population = pops$pop[match(pops$id, .data$id)])
 
 # group by population
 anole_gt <- anole_gt %>% group_by(population)

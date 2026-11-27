@@ -1,4 +1,12 @@
-# A function to read ped files
+# A function to read ped files.
+# The genotypes are written straight into the backing file while the .ped file
+# is read (see ped_to_fbm() in src/ped_to_fbm.cpp), so that the genotype
+# matrix is never held in memory. The alleles of each locus are coded as in
+# snpStats::read.pedfile() (which an earlier R reader was modified from): the
+# reference allele is the first non-missing allele found in the file, and the
+# alternate allele the first one that differs from it; the coding of a
+# genotype is therefore known as soon as it is read, and only multi-allelic
+# loci (set to missing) have to be rewritten at the end.
 gen_tibble_ped <- function(
   x,
   ...,
@@ -6,6 +14,7 @@ gen_tibble_ped <- function(
   missing_alleles = c("0", "."),
   allow_duplicates = FALSE,
   backingfile = NULL,
+  n_cores = 1,
   quiet = FALSE
 ) {
   # Substitute .ped with .map
@@ -13,220 +22,142 @@ gen_tibble_ped <- function(
   if (!file.exists(map_file)) {
     stop("map file ", map_file, " does not exist")
   }
-  # 0 is always a missing value (as in check_allele_alphabet()), so that a
-  # missing genotype "0 0" (the PLINK default, also written by gt_as_plink())
-  # is never read as an allele "0" when custom missing_alleles are given
-  res <- read_pedfile(
-    file = x,
-    snps = map_file,
-    na_strings = union(missing_alleles, "0"),
-    quiet = quiet
-  )
-  # using the gen_tibble.matrix method, with the individual information
-  # stored as when reading a bed file (from the first six columns of the ped
-  # file, which are the same as in a fam file)
-  new_gen_tbl <- gen_tibble(
-    x = res$genotypes,
-    indiv_meta = indiv_meta_from_fam(res$fam),
-    loci = res$map,
-    valid_alleles = valid_alleles,
-    missing_alleles = missing_alleles,
-    allow_duplicates = allow_duplicates,
+  if (!is.numeric(n_cores) || length(n_cores) != 1 || !is.finite(n_cores) ||
+        n_cores < 1) {
+    stop("'n_cores' should be a positive integer")
+  }
+
+  # the number of individuals (the lines that are not blank), which the FBM
+  # needs before the genotypes are written to it
+  n_indiv <- count_ped_individuals(x, n_threads = n_cores)
+  if (n_indiv == 0) {
+    stop("Nothing read")
+  }
+  map <- read_ped_map(map_file)
+
+  # create the FBM (diploid dosages, with 3 for missing genotypes), and remove
+  # its files if we stop before the gen_tibble is created
+  if (is.null(backingfile)) {
+    backingfile <- tempfile()
+  } else {
+    backingfile <- change_duplicated_file_name(backingfile)
+  }
+  code256 <- rep(NA_real_, 256)
+  code256[1:3] <- 0:2
+  fbm_obj <- bigstatsr::FBM.code256(
+    nrow = n_indiv,
+    ncol = nrow(map),
+    code = code256,
     backingfile = backingfile,
-    quiet = quiet
+    init = NULL,
+    create_bk = TRUE
   )
-  return(new_gen_tbl)
+  fbm_files <- c(
+    fbm_obj$backingfile,
+    bigstatsr::sub_bk(fbm_obj$backingfile, ".rds")
+  )
+  fbm_done <- FALSE
+  # (the FBM is dropped first, so that its backing file can be unmapped, see
+  # remove_fbm_files())
+  on.exit(
+    if (!fbm_done) {
+      rm(fbm_obj)
+      remove_fbm_files(fbm_files)
+    },
+    add = TRUE
+  )
+  # sidecars next to the new backing file are left from older files with the
+  # same name, and can not belong to the new data
+  remove_stale_sidecars(fbm_obj$backingfile)
+
+  # read the genotypes into the FBM. 0 is always a missing value (as in
+  # check_allele_alphabet()), so that a missing genotype "0 0" (the PLINK
+  # default, also written by gt_as_plink()) is never read as an allele "0"
+  # when custom missing_alleles are given
+  res <- ped_to_fbm(x,
+    BM = fbm_obj,
+    locus_names = as.character(map[, 2]),
+    na_strings = union(missing_alleles, "0"),
+    n_threads = n_cores
+  )
+  if (!quiet) {
+    if (res$n_no_data > 0) {
+      message("no data for ", res$n_no_data, " loci")
+    }
+    if (res$n_monomorphic > 0) {
+      message(res$n_monomorphic, " loci were monomorphic")
+    }
+    if (res$n_multiallelic > 0) {
+      message(res$n_multiallelic, " loci were multi-allelic --- set to NA")
+    }
+  }
+
+  # the subjects need unique identifiers: the family IDs, the individual IDs,
+  # or their combination (as in snpStats::read.pedfile())
+  if (anyDuplicated(res$family_id) &&
+        anyDuplicated(res$sample_id) &&
+        anyDuplicated(paste(res$family_id, res$sample_id, sep = "."))) {
+    stop("could not create unique subject identifiers")
+  }
+  # the first six columns of the ped file, as a fam file (IDs as characters,
+  # and the type of sex and phenotype guessed, as for a fam file)
+  fam <- data.frame(
+    family_id = res$family_id,
+    sample_id = res$sample_id,
+    paternal_id = res$paternal_id,
+    maternal_id = res$maternal_id,
+    sex = utils::type.convert(res$sex, as.is = TRUE),
+    affection = utils::type.convert(res$affection, as.is = TRUE)
+  )
+  # the loci table, from the map file and the alleles found in the ped file
+  names(map) <- c("chromosome", "name", "genetic_dist", "position")
+  loci <- map[, c("name", "chromosome", "position", "genetic_dist")]
+  loci$allele_ref <- res$allele_ref
+  loci$allele_alt <- res$allele_alt
+  rm(map, res)
+
+  # validate the tables (as gen_tibble.matrix() does)
+  loci <- validate_loci(loci,
+    check_alphabet = TRUE,
+    check_duplicates = TRUE,
+    allow_duplicates = allow_duplicates,
+    harmonise_loci = TRUE,
+    valid_alleles = valid_alleles,
+    missing_alleles = missing_alleles
+  )
+  indiv_meta <- validate_indiv_meta(indiv_meta_from_fam(fam))
+
+  # save the FBM, and create the gen_tibble
+  fbm_path <- fbm_files[2]
+  saveRDS(fbm_obj, fbm_path)
+  indiv_id <- indiv_meta$id
+  indiv_meta <- as.list(indiv_meta)
+  indiv_meta$genotypes <- new_vctrs_bigsnp(
+    fbm_obj,
+    fbm_file = fbm_path,
+    loci = loci,
+    indiv_id = indiv_id,
+    ploidy = 2,
+    fbm_ploidy = rep(2, n_indiv)
+  )
+  new_gen_tbl <- tibble::new_tibble(
+    indiv_meta,
+    class = "gen_tbl"
+  )
+  fbm_done <- TRUE
+  new_gen_tbl
 }
 
-
-# modified from snpStats::read.pedfile
-
-read_pedfile <- function(
-  file,
-  n,
-  snps,
-  which,
-  split = "\t| +",
-  sep = ".",
-  na_strings = "0",
-  quiet = FALSE
-) {
-  # constants (integers, so that the matrix of genotypes is an integer
-  # matrix, rather than a double one)
-  r0 <- NA_integer_
-  r1 <- 0L
-  r2 <- 1L
-  r3 <- 2L
-
-  ## Input file
-  con <- gzfile(file)
-  open(con)
-  ## If no line count, find out
-  if (missing(n)) {
-    n <- 0
-    repeat {
-      line <- readLines(con, n = 1)
-      if (length(line) == 0) break
-      # do not count blank lines (e.g. a trailing empty line)
-      if (grepl("^\\s*$", line)) next
-      n <- n + 1
+# read the map file of a ped file (as snpStats::read.pedfile() does: the
+# names of the loci are the first column of the map file without duplicates)
+read_ped_map <- function(map_file) {
+  map <- utils::read.table(map_file, comment.char = "")
+  which <- 1
+  while (anyDuplicated(map[, which])) {
+    if (which == ncol(map)) {
+      stop("No unambiguous snp names found on file")
     }
-    if (n == 0) {
-      stop("Nothing read")
-    }
-    seek(con, 0)
+    which <- which + 1
   }
-  ## Find snp names
-  gen <- missing(snps)
-  map <- NULL
-  if (!gen) {
-    m <- length(snps)
-    if (m == 1) {
-      map <- utils::read.table(snps, comment.char = "")
-      m <- nrow(map)
-      if (missing(which)) {
-        which <- 1
-        repeat {
-          snps <- map[, which]
-          if (!any(duplicated(snps))) {
-            break
-          }
-          if (which == ncol(map)) {
-            stop("No unambiguous snp names found on file")
-          }
-          which <- which + 1
-        }
-      } else {
-        snps <- map[, which]
-      }
-    }
-  } else {
-    line <- readLines(con, n = 1)
-    fields <- strsplit(line, split)[[1]]
-    nf <- length(fields)
-    if (nf %% 2 != 0) {
-      stop("Odd number of fields")
-    }
-    m <- (nf - 6) / 2
-    seek(con, 0)
-  }
-  nf <- 6 + 2 * m
-  ## Generate empty matrix (of integers, so that it is not converted, and
-  ## copied, when the first row is filled in)
-  result <- matrix(NA_integer_, nrow = n, ncol = m)
-  ## Columns of subject dataframe
-  ped <- character(n)
-  mem <- character(n)
-  pa <- character(n)
-  ma <- character(n)
-  sex <- character(n)
-  aff <- character(n)
-  a1 <- a2 <- rep(NA, m)
-  a1m <- a2m <- rep(TRUE, m)
-  mallelic <- rep(FALSE, m) ## Multiallelic?
-  for (i in 1:n) {
-    line <- readLines(con, n = 1)
-    # skip blank lines
-    while (grepl("^\\s*$", line)) {
-      line <- readLines(con, n = 1)
-    }
-    fields <- strsplit(line, "\t| +")[[1]]
-    # the first six fields (as in a fam file) are kept as they are
-    ped[i] <- fields[1]
-    mem[i] <- fields[2]
-    pa[i] <- fields[3]
-    ma[i] <- fields[4]
-    sex[i] <- fields[5]
-    aff[i] <- fields[6]
-    # missing alleles are NA
-    alleles <- fields[7:nf]
-    alleles[alleles %in% na_strings] <- NA
-    alleles <- matrix(alleles, byrow = TRUE, ncol = 2)
-    one <- two <- rep(FALSE, m)
-    for (k in 1:2) {
-      ak <- alleles[, k]
-      akm <- is.na(ak)
-      br1 <- !akm & a1m
-      a1[br1] <- ak[br1]
-      a1m[br1] <- FALSE
-      br2 <- !akm & (a1 == ak)
-      one[br2] <- TRUE
-      br3 <- !akm & !a1m & (a1 != ak)
-      br4 <- br3 & a2m
-      a2[br4] <- ak[br4]
-      a2m[br4] <- FALSE
-      br5 <- br3 & (a2 == ak)
-      two[br5] <- TRUE
-      mallelic <- mallelic | !(akm | one | two)
-    }
-    gt <- rep(r0, m)
-    gt[one & !two] <- r1
-    gt[one & two] <- r2
-    gt[two & !one] <- r3
-    result[i, ] <- gt
-  }
-  close(con)
-  ## Warnin messages
-  mono <- (a2m & !a1m)
-
-  if (any(mallelic)) {
-    result[, mallelic] <- r0
-  }
-  if (!quiet) {
-    if (any(a1m)) {
-      message("no data for ", sum(a1m), " loci")
-    }
-    if (any(mono)) {
-      message(sum(mono), " loci were monomorphic")
-    }
-    if (any(mallelic)) {
-      message(sum(mallelic), " loci were multi-allelic --- set to NA")
-    }
-  }
-
-  ## SnpMatrix result
-  if (gen) {
-    snps <- paste("locus", 1:m, sep = sep)
-  }
-  if (any(duplicated(ped))) {
-    if (any(duplicated(mem))) {
-      rnames <- paste(ped, mem, sep = sep)
-      if (any(duplicated(rnames))) {
-        stop("could not create unique subject identifiers")
-      }
-    } else {
-      rnames <- mem
-    }
-  } else {
-    rnames <- ped
-  }
-  dimnames(result) <- list(rnames, snps)
-
-  ## Subject support file, with the columns of a fam file (IDs as characters,
-  ## and the type of sex and phenotype guessed, as for a fam file)
-  fam <- data.frame(
-    family_id = ped,
-    sample_id = mem,
-    paternal_id = pa,
-    maternal_id = ma,
-    sex = utils::type.convert(sex, as.is = TRUE),
-    affection = utils::type.convert(aff, as.is = TRUE)
-  )
-  ## map data frame
-  if (is.null(map)) {
-    map <- data.frame(
-      row.names = snps,
-      snp.name = snps,
-      allele.1 = a1,
-      allele.2 = a2
-    )
-  } else {
-    # mapfile
-    names(map) <- c("chromosome", "name", "genetic_dist", "position")
-    map <- map[, c("name", "chromosome", "position", "genetic_dist")]
-    map$allele_ref <- a1
-    map$allele_alt <- a2
-    map
-  }
-  list(genotypes = result, fam = fam, map = map)
+  map
 }
