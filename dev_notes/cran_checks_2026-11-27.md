@@ -46,7 +46,7 @@ submission.
 
 1. **Merge this branch into `dev`:** push it and open a PR (squash), or
    push the three commits to `dev` directly (small, no code). The draft of
-   `cran-comments.md` (below) is not committed yet.
+   `cran-comments.md` (below) is committed (`a9121e06`).
 2. **Release order** (as on 21 Nov): PR `dev` into `main` ("v1.1.0", as
    #225 for 1.0.0); pkgdown rebuilds the site; check that both articles
    exist and re-run `urlchecker::url_check()`.
@@ -73,7 +73,7 @@ submission.
   (`/etc/R/Makeconf`); local, as for 1.0.0.
 - **"Skipping checking math rendering: package 'V8' unavailable":** local.
 
-### Changes to `cran-comments.md` (draft, not committed)
+### Changes to `cran-comments.md` (approved by Andrea, `a9121e06`)
 
 - The update also brings: PCA of pseudohaploid data; reading the TGENO
   layout of packedancestrymap files (AADR), and packedancestrymap files in

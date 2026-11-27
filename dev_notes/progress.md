@@ -12,8 +12,8 @@ files, SFS, CRAN checks) is described in the topic documents listed in
   as copyright holder (`75a88d4e`, Andrea).
 - **Results:** `R CMD check --as-cran` 0/0/4 notes, all expected (admixtools,
   the two URLs that need the site rebuilt from `main`, three local ones);
-  tests 2.5 min with `NOT_CRAN=false`. `cran-comments.md` drafted, not
-  committed.
+  tests 2.5 min with `NOT_CRAN=false`. `cran-comments.md` updated and
+  committed (approved, `a9121e06`).
 - **Notes changed:** `cran_checks_2026-11-27.md` (new), `README.md`.
 
 ## 2026-11-25 (cloud session): TGENO files of the AADR
