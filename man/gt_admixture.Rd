@@ -66,6 +66,7 @@ This function is a wrapper around ADMIXTURE. We recommend you have a look
 at \code{tidygenclust}, which provides a much faster native R implementation of
 the ADMIXTURE algorithm through \code{gt_radmix()}, and is compatible with
 \code{gen_tibble} objects.
+
 This function runs ADMIXTURE, taking either a \code{gen_tibble} or a file as an
 input. This is a wrapper that runs ADMIXTURE from the command line, and reads
 the output into R. It can run multiple values of \code{k} and multiple repeats for
