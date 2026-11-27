@@ -2,7 +2,7 @@
 
 Updated 2026-11-26 (laptopX1: sex chromosomes and mtDNA, phase 1, on the
 local branch `sex_chromosomes`; 1.1.0 still waits only for the version and
-Andrea's release steps). One section: the package's issue in
+Andrea's release steps; the branch pushed as a backup on 27 Nov). One section: the package's issue in
 dramanica/claude_jobs, with the single list of its tasks. Its first
 paragraph, status and next steps are copied into the issue
 (`scripts/sync_issue.py`).
@@ -11,7 +11,7 @@ paragraph, status and next steps are copied into the issue
 
 Population genetics with `gen_tibble`s: faster input (VCF reading in `dev`, merging of VCFs prototyped), analyses with missing genotypes without imputation (PCA, DAPC, pcadapt, LD clumping and pruning), fast kinship and inbreeding within groups, and sex chromosomes and mtDNA.
 
-**Status.** `dev` holds everything for 1.1.0 (#231, #237-#242, #244; CRAN checks clean on 22 Nov), so the release waits only for the version bump and Andrea's steps. Sex chromosomes and mtDNA, phase 1 (chromosome types, hemizygous genotypes as 0/2 as in PLINK, `indiv_sex_check()` matching PLINK 1.9 exactly, autosome-only analyses), is on the local branch `sex_chromosomes` on the laptop, full test suite passing, waiting for Andrea's review before a PR. Handover: `dev_notes/handover.md` on `sex_chromosomes` (laptop; `split_plan` has the 23 Nov copy), `sex_chromosomes_plan.md`, `cran_checks_2026-11-21.md` (on `dev`).
+**Status.** `dev` holds everything for 1.1.0 (#231, #237-#242, #244; CRAN checks clean on 22 Nov), so the release waits only for the version bump and Andrea's steps. Sex chromosomes and mtDNA, phase 1 (chromosome types, hemizygous genotypes as 0/2 as in PLINK, `indiv_sex_check()` matching PLINK 1.9 exactly, autosome-only analyses), is on the branch `sex_chromosomes` (pushed, no PR), full test suite passing, waiting for Andrea's review before a PR. Handover: `dev_notes/handover.md` on `sex_chromosomes` (`split_plan` has the 23 Nov copy), `sex_chromosomes_plan.md`, `cran_checks_2026-11-21.md` (on `dev`).
 
 With missing genotypes, imputation pulls individuals with many missing
 genotypes together and makes missingness an axis of the PCA (on HGDP650, PC1
@@ -51,7 +51,7 @@ but Andrea judged it not worth the complexity (with that many loci
 `names_as_int = TRUE` is needed anyway): it is kept as a patch in the notes.
 
 **Next steps**
-- [ ] **P1** [review] Review the local branch `sex_chromosomes` (laptop; `sex_chromosomes_plan.md`, "As built"), then push it (plus an empty commit, as its head is `[skip ci]`) and open a PR into `dev`: done when merged (move its NEWS items if 1.1.0 is released first).
+- [ ] **P1** [review] Review the branch `sex_chromosomes` (pushed; `sex_chromosomes_plan.md`, "As built"), then push an empty commit (its head is `[skip ci]`) and open a PR into `dev`: done when merged (move its NEWS items if 1.1.0 is released first).
 - [ ] **P1** [andrea] Release 1.1.0 (CRAN checks re-run on the final `dev`, 22 Nov, all clean): set the version, merge `dev` into `main` (site rebuild fixes two article links), re-run `urlchecker::url_check()`, add the win-builder result (emailed; upload again if none came) to `cran-comments.md`, submit.
 - [ ] **P2** [desktop] Re-time the HGDP650 PCA/DAPC/pcadapt/LD benchmarks on the P-cores (not set up): medians in `gt_pca.md`, `ld_missing.md`.
 - [ ] **P2** [claude] Keep optimising: pcadapt's t-scores, the GRM's count of shared loci, the DAPC regression, the other KING and VCF merge ideas: done when >5% faster with identical outputs.

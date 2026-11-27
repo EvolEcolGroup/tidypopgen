@@ -1,7 +1,7 @@
 # tidypopgen: handover
 
 Updated 2026-11-26 (laptopX1: sex chromosomes and mtDNA, phase 1, on the
-local branch `sex_chromosomes`, waiting for Andrea's review; since 23 Nov
+branch `sex_chromosomes`, pushed as a backup, waiting for Andrea's review; since 23 Nov
 `dev` also has the TGENO reader, `8284e14d`, 25 Nov; 1.1.0 waits only for
 Andrea's release steps). These living documents were rewritten on
 `sex_chromosomes` from their newest copies on `split_plan` (23 Nov): merge
@@ -14,7 +14,7 @@ is in `progress.md`; designs are in the topic documents listed in
 
 | branch | purpose | base | pushed | merged |
 |---|---|---|---|---|
-| `sex_chromosomes` | phase 1 of sex chromosomes and mtDNA (`sex_chromosomes_plan.md`, "As built"): chromosome types, VCF haploid genotypes as 0/2, `indiv_sex_check()`, autosome-only analyses, haploid VCF output and PLINK codes, an article; worktree `/media/andrea/annex/tmp/claude/tidypopgen/wt_sexchr` | `dev` at `4374e70d` | no (Andrea reviews first) | no |
+| `sex_chromosomes` | phase 1 of sex chromosomes and mtDNA (`sex_chromosomes_plan.md`, "As built"): chromosome types, VCF haploid genotypes as 0/2, `indiv_sex_check()`, autosome-only analyses, haploid VCF output and PLINK codes, an article; worktree `/media/andrea/annex/tmp/claude/tidypopgen/wt_sexchr` | `dev` at `4374e70d` | yes, as a backup (27 Nov; no PR until Andrea's review) | no |
 | `split_plan` | dev notes only: the plan for the package split (`package_split.md`, `package_split/`) and these living documents; merge into `dev` (no code, `[skip ci]`) | `dev` at `e20145a2` | yes | no |
 | `cran_submission` | the commit R-hub checked on 21 Nov (`66e62aa5`); its content is in `dev` (#241): delete after the release | `dev` at `b4f81b26` | yes | squashed in #241 |
 | `vignette_filtering` | Andrea's vignette edits, the base of #242 (Andrea's checkout is on it): delete once he has switched | `dev` | yes | squashed in #242 |
@@ -71,7 +71,7 @@ worktree `/media/andrea/annex/tmp/claude/tidypopgen_notes` (on
   section). Only the laptop section of the HGDP benchmark still times the
   old pipeline (see the backlog).
 
-### 2. **P1** [review] Review `sex_chromosomes`, then push it and open a PR
+### 2. **P1** [review] Review `sex_chromosomes`, then open a PR
 
 - **Read first:** `dev_notes/sex_chromosomes_plan.md` on the branch
   (decisions, "As built", numbers); the article
@@ -87,8 +87,11 @@ worktree `/media/andrea/annex/tmp/claude/tidypopgen_notes` (on
   as fast as on `dev` (manica01, -O2, +0.5%/+1.2% at 1/8 threads, within
   noise, identical backing files). Behaviour changes for data with X/Y/MT
   are accepted (Andrea, 26 Nov). `R CMD check` not run yet.
-- **After the review:** push the branch; the head commit is `[skip ci]`,
-  so push an empty commit to get CI; open a PR into `dev`. Its NEWS items
+- **After the review:** the branch is pushed (27 Nov, as a backup after
+  the annex drive dropped out; `git fsck` clean, and a bundle in
+  `~/claude_work/tidypopgen_rescue/` on the laptop's root drive). Its head
+  commit is `[skip ci]`, so push an empty commit to get CI, then open a PR
+  into `dev`. Its NEWS items
   are in the 1.1.0 section: move them to the next version if 1.1.0 is
   released first.
 - **Done when:** the PR is merged.
