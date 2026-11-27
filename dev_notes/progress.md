@@ -4,6 +4,18 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-27 (manica01): final CRAN checks of 1.1.0
+
+- **Done:** the pre-submission checks re-run on `dev` (`4374e70d`) with the
+  version set to 1.1.0, on the branch `cran-fixes-2026-11-27` (not pushed):
+  version (`127b2b57`), `fbm` in `inst/WORDLIST` (`2e015189`), Jan Wigginton
+  as copyright holder (`75a88d4e`, Andrea).
+- **Results:** `R CMD check --as-cran` 0/0/4 notes, all expected (admixtools,
+  the two URLs that need the site rebuilt from `main`, three local ones);
+  tests 2.5 min with `NOT_CRAN=false`. `cran-comments.md` updated and
+  committed (approved, `a9121e06`).
+- **Notes changed:** `cran_checks_2026-11-27.md` (new), `README.md`.
+
 ## 2026-11-25 (cloud session): TGENO files of the AADR
 
 - **Done:** `gen_tibble()` reads packedancestrymap files in the TGENO layout

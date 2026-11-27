@@ -22,8 +22,11 @@ The update also brings:
 
 * PCA, DAPC, pcadapt and LD clumping and pruning with missing genotypes,
   without imputation, as in PLINK 1.9;
-* faster reading of VCF and PLINK files, and reading several VCF files at
-  once (`gt_merge_vcfs()`, `gt_concat_vcfs()`);
+* PCA of pseudohaploid (ancient DNA) data, as in PLINK;
+* faster reading of VCF, PLINK and packedancestrymap files, reading several
+  VCF files at once (`gt_merge_vcfs()`, `gt_concat_vcfs()`), and reading the
+  TGENO layout of packedancestrymap files (used by the Allen Ancient DNA
+  Resource);
 * faster kinship (KING) and IBS, also within groups;
 * integer chromosome names for datasets with many chromosomes;
 * phased genotypes (experimental);
@@ -31,7 +34,7 @@ The update also brings:
 
 ## Test environments
 
-- local Ubuntu 24.04, R 4.6.2: R CMD check --as-cran
+- local Ubuntu 24.04, R 4.5.2: R CMD check --as-cran
 - Github Actions R-CMD-check (ubuntu-24.04): r-devel, r-release, r-oldrel
 - Github Actions R-CMD-check (windows): r-release
 - Github Actions R-CMD-check (macOS): r-release
@@ -44,13 +47,16 @@ The update also brings:
 
 0 errors | 0 warnings | 1 note
 
-* Days since last update: 14 (see above).
+* CRAN incoming feasibility: Suggests or Enhances not in mainstream
+  repositories: admixtools is in Additional_repositories, as an r-universe
+  package, and the tests and examples that use it are skipped when it is not
+  installed.
+
+<!-- TODO: from the win-builder result of the final commit: add "Days since
+last update" if it is flagged (20 days on 27 Nov), and check the count -->
 
 with the following INFO:
 
-* Suggests or Enhances not in mainstream repositories: admixtools is in
-  Additional_repositories, as an r-universe package, and the tests and
-  examples that use it are skipped when it is not installed.
 * Installed package size: this is due to the C++ code compiled with Rcpp.
 
 ## Reverse dependencies

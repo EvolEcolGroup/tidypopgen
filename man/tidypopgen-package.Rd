@@ -36,7 +36,7 @@ Other contributors:
   \item Christopher Chang (Author of PLINK 1.90: Hardy-Weinberg exact test code used in loci_hwe() and qc_report_loci(); runs of homozygosity algorithm followed by windows_indiv_roh(); LD pruning algorithm followed by loci_ld_prune()) [contributor, copyright holder]
   \item Shaun Purcell (Author of PLINK 1.90: Hardy-Weinberg exact test code used in loci_hwe() and qc_report_loci(); runs of homozygosity algorithm followed by windows_indiv_roh(); LD pruning algorithm followed by loci_ld_prune()) [contributor, copyright holder]
   \item Henrik Bengtsson (Author of countLines() in R.utils, modified for .vcf in count_vcf_variants()) [contributor, copyright holder]
-  \item Jan Wigginton (Author of the original Hardy-Weinberg exact test code (SNPHWE), on which the PLINK 1.90 code used in loci_hwe() is based) [contributor]
+  \item Jan Wigginton (Author of the original Hardy-Weinberg exact test code (SNPHWE), on which the PLINK 1.90 code used in loci_hwe() is based) [contributor, copyright holder]
   \item Florian Privé (Author of bigsnpr and bigstatsr, code from which is adapted in read_packedancestry_to_fbm(), gt_as_plink(), predict.gt_pca(), autoplot.gt_dapc() and loci_ld_clump()) [contributor, copyright holder]
   \item Jérôme Goudet (Author of hierfstat, code from which is adapted in pop_global_stats(), pop_het_obs(), pop_het_exp() and indiv_inbreeding()) [contributor, copyright holder]
   \item Robert Maier (Author of admixtools, code from which is adapted in gt_extract_f2()) [contributor, copyright holder]
