@@ -56,7 +56,7 @@ combine files with different samples, use gt_merge_vcfs()."><meta property="og:i
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Concatenate VCF files of the same samples into a <code>gen_tibble</code></h1>
-      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/main/R/gt_concat_vcfs.R" class="external-link"><code>R/gt_concat_vcfs.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/dev/R/gt_concat_vcfs.R" class="external-link"><code>R/gt_concat_vcfs.R</code></a></small>
       <div class="d-none name"><code>gt_concat_vcfs.Rd</code></div>
     </div>
 
@@ -207,18 +207,18 @@ the chromosome and the position, as in <code><a href="gen_tibble.html">gen_tibbl
 <span class="r-in"><span>  names_as_int <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
 <span class="r-in"><span>  backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"concat_"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> reading the loci of /tmp/RtmpFbmLgh/file20415996de14.vcf</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> reading the loci of /tmp/RtmpFbmLgh/file204172e8af33.vcf</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> reading the loci of /tmp/RtmpRTEKeo/file1f706d738ae7.vcf</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> reading the loci of /tmp/RtmpRTEKeo/file1f7049e9ba67.vcf</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> concatenating 2 VCF files with 7 samples: 6 loci (biallelic SNPs)</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> reading the genotypes of /tmp/RtmpFbmLgh/file20415996de14.vcf</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> reading the genotypes of /tmp/RtmpFbmLgh/file204172e8af33.vcf</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> reading the genotypes of /tmp/RtmpRTEKeo/file1f706d738ae7.vcf</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> reading the genotypes of /tmp/RtmpRTEKeo/file1f7049e9ba67.vcf</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/RtmpFbmLgh/concat_204119e6308c.gt</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/RtmpFbmLgh/concat_204119e6308c.rds</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/RtmpFbmLgh/concat_204119e6308c.bk</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/RtmpRTEKeo/concat_1f70649e9fba.gt</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/RtmpRTEKeo/concat_1f70649e9fba.rds</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/RtmpRTEKeo/concat_1f70649e9fba.bk</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> make sure that you do NOT delete those files!</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> to reload the gen_tibble in another session, use:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/RtmpFbmLgh/concat_204119e6308c.gt')</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/RtmpRTEKeo/concat_1f70649e9fba.gt')</span>
 <span class="r-in"><span><span class="va">concat_gt</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A gen_tibble: 6 loci</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble:     7 × 2</span></span>
