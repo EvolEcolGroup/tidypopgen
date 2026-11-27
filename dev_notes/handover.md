@@ -32,7 +32,8 @@ History is in `progress.md`; designs are in the topic documents listed in
   the Debian one: `test_gen_tibble.R:514` got "truncated" for a gzipped
   `.ped` with a wrong CRC, as zlib >= 1.3.1.2 (Debian has 1.3.2) changed
   `gzread()`. Fixed on `dev` (`401e2a96`), with a "Resubmission" section in
-  `cran-comments.md` (`238487f3`); details in `cran_checks_2026-11-27.md`
+  `cran-comments.md` (`238487f3`; CI all green on it); details in
+  `cran_checks_2026-11-27.md`
   ("CRAN pre-test of the first submission"). Resubmit the same version,
   1.1.0, from `dev` (`git pull` first) with `devtools::submit_cran()`.
   `main` no longer matches `dev` (it lacks the zlib fix and two docs

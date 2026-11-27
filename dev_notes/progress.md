@@ -14,7 +14,8 @@ files, SFS, CRAN checks) is described in the topic documents listed in
   reported as truncated, because zlib >= 1.3.1.2 `gzread()` returns the
   data read before an error. Fixed in `src/line_reader.h` (`401e2a96`),
   checked with zlib 1.3 and 1.3.2 (preloaded from the `plink19` conda
-  env); resubmission note in `cran-comments.md` (`238487f3`).
+  env); resubmission note in `cran-comments.md` (`238487f3`). CI on
+  `238487f3`: all green.
 - **Next:** Andrea resubmits 1.1.0 from `dev`.
 - **Notes changed:** `cran_checks_2026-11-27.md`, `handover.md`,
   `summary.md`.

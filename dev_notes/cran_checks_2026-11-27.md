@@ -58,7 +58,10 @@ suite passed (5276 tests). Log saved while it lasts (7 days):
   Rscript ...`; `extSoftVersion()["zlib"]` shows the version in use), and
   with the system zlib 1.3: the 12 test files that read gzipped files
   pass under both. Building zlib 1.3.2 from source was blocked by the
-  permission classifier; the conda copy was enough.
+  permission classifier; the conda copy was enough. CI on `238487f3`:
+  all green (R-CMD-check on Ubuntu devel/release/oldrel, macOS and
+  Windows; no-suggests, lint, pkgdown, coverage), though its runners
+  have zlib 1.3 and cannot see this failure.
 - **`cran-comments.md`:** a "Resubmission" section explains the failure
   and the fix (`238487f3`).
 - **Also on `dev` since the submission:** a lint fix (trailing space,
