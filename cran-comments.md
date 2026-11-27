@@ -1,3 +1,14 @@
+## Resubmission
+
+This is a resubmission. In the first submission, one test failed on the
+Debian pre-test. It checks that a gzipped .ped file with a wrong CRC gives
+an error. From zlib 1.3.1.2 (Debian has 1.3.2), `gzread()` returns the data
+decompressed before an error instead of -1, so tidypopgen rejected the file,
+but with the message for a truncated file instead of a corrupted one.
+tidypopgen now checks zlib's error code, and gives the right message with
+both older and newer versions of zlib (tested locally with zlib 1.3 and
+1.3.2).
+
 ## Submission
 
 This is an update to 1.0.0, released on 2026-11-07. I am sorry for the quick
