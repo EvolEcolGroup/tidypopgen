@@ -1,6 +1,7 @@
 # tidypopgen: handover
 
-Updated 2026-11-27 (manica01: 1.1.0 ready to submit, `main` at `aee65ae5`). Rewritten on
+Updated 2026-11-27 (laptopX1: 1.1.0 failed CRAN's Debian pre-test, fixed
+on `dev`, ready to resubmit; earlier, manica01: `main` at `aee65ae5`). Rewritten on
 `dev` from the copy of 26-27 Nov on `sex_chromosomes` (itself from the
 23 Nov copy on `split_plan`): merge the living documents by hand when those
 branches reach `dev`. Some documents named below are only on those
@@ -24,8 +25,19 @@ History is in `progress.md`; designs are in the topic documents listed in
 
 ## Next tasks
 
-### 1. **P1** [andrea] Submit 1.1.0 to CRAN
+### 1. **P1** [andrea] Resubmit 1.1.0 to CRAN
 
+- **State (27 Nov, evening): ready to resubmit.** The first submission
+  (laptop checkout, `d0776110`) passed the Windows pre-test but failed
+  the Debian one: `test_gen_tibble.R:514` got "truncated" for a gzipped
+  `.ped` with a wrong CRC, as zlib >= 1.3.1.2 (Debian has 1.3.2) changed
+  `gzread()`. Fixed on `dev` (`401e2a96`), with a "Resubmission" section in
+  `cran-comments.md` (`238487f3`); details in `cran_checks_2026-11-27.md`
+  ("CRAN pre-test of the first submission"). Resubmit the same version,
+  1.1.0, from `dev` (`git pull` first) with `devtools::submit_cran()`.
+  `main` no longer matches `dev` (it lacks the zlib fix and two docs
+  commits): after acceptance, bring `main` up to `dev` through the merge
+  queue before tagging.
 - **State (27 Nov, 19:00): ready.** `main` (`aee65ae5`, "v1.1.0", #247)
   and `dev` hold the same package: version 1.1.0 (#246) and the Windows
   test fix (#248); `main` is merged back into `dev` (`c1311429`). The site

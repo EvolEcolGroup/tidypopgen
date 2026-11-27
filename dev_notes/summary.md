@@ -1,6 +1,7 @@
 # tidypopgen: summary
 
-Updated 2026-11-27 (manica01: 1.1.0 ready to submit; rewritten on
+Updated 2026-11-27 (laptopX1: 1.1.0 ready to resubmit after a CRAN
+pre-test failure; earlier, manica01: rewritten on
 `dev` from the copy on `sex_chromosomes`). One section: the package's issue in
 dramanica/claude_jobs, with the single list of its tasks. Its first
 paragraph, status and next steps are copied into the issue
@@ -10,7 +11,7 @@ paragraph, status and next steps are copied into the issue
 
 Population genetics with `gen_tibble`s: faster input (VCF reading in `dev`, merging of VCFs prototyped), analyses with missing genotypes without imputation (PCA, DAPC, pcadapt, LD clumping and pruning), fast kinship and inbreeding within groups, and sex chromosomes and mtDNA.
 
-**Status.** 1.1.0 is ready to submit to CRAN: `main` (`aee65ae5`, #247) and `dev` hold the same package, with the Windows test fix found by CI (#248); the site is rebuilt, the URL check is clean, R-hub is OK on four platforms and win-builder has only the expected note (`cran-comments.md` final on `dev`). Sex chromosomes and mtDNA, phase 1, is on the branch `sex_chromosomes` (pushed, no PR), waiting for Andrea's review. Handover: `dev_notes/handover.md` on `dev`, `cran_checks_2026-11-27.md`, `sex_chromosomes_plan.md` (on `sex_chromosomes`).
+**Status.** 1.1.0 is ready to resubmit to CRAN: the first submission failed the Debian pre-test on one test (a wrong error message with zlib 1.3.2), fixed on `dev` (`401e2a96`) with a resubmission note in `cran-comments.md`; before that, R-hub was OK on four platforms and win-builder had only the expected note. Sex chromosomes and mtDNA, phase 1, is on the branch `sex_chromosomes` (pushed, no PR), waiting for Andrea's review. Handover: `dev_notes/handover.md` on `dev`, `cran_checks_2026-11-27.md`, `sex_chromosomes_plan.md` (on `sex_chromosomes`).
 
 With missing genotypes, imputation pulls individuals with many missing
 genotypes together and makes missingness an axis of the PCA (on HGDP650, PC1
@@ -50,7 +51,7 @@ but Andrea judged it not worth the complexity (with that many loci
 `names_as_int = TRUE` is needed anyway): it is kept as a patch in the notes.
 
 **Next steps**
-- [ ] **P1** [andrea] Submit 1.1.0: `devtools::submit_cran()` from `~/git/tidypopgen` on `dev` (manica01; `cran-comments.md` final there), confirm the email: done when CRAN accepts it (then tag `main`, `use_dev_version()` on `dev`, delete `cran_submission`, `cran-fixes-2026-11-27`, `fix-tgeno-test-windows`).
+- [ ] **P1** [andrea] Resubmit 1.1.0 (the Debian pre-test failure is fixed on `dev`, `401e2a96`): `git pull`, then `devtools::submit_cran()` on `dev`, confirm the email: done when CRAN accepts it (then bring `main` up to `dev` through the merge queue, tag `main`, `use_dev_version()` on `dev`, delete `cran_submission`, `cran-fixes-2026-11-27`, `fix-tgeno-test-windows`).
 - [ ] **P1** [review] Review the branch `sex_chromosomes` (pushed; `sex_chromosomes_plan.md`, "As built"), then push an empty commit (its head is `[skip ci]`) and open a PR into `dev`: done when merged (move its NEWS items if 1.1.0 is released first).
 - [ ] **P2** [desktop] Re-time the HGDP650 PCA/DAPC/pcadapt/LD benchmarks on the P-cores (not set up): medians in `gt_pca.md`, `ld_missing.md`.
 - [ ] **P2** [claude] Keep optimising: pcadapt's t-scores, the GRM's count of shared loci, the DAPC regression, the other KING and VCF merge ideas: done when >5% faster with identical outputs.
@@ -60,6 +61,7 @@ but Andrea judged it not worth the complexity (with that many loci
 - [ ] **P3** [cleanup] Delete `vignette_filtering` once Andrea has switched his checkout; after the release, `cran_submission` and `revdep/` on the laptop's annex; ask before deleting the benchmark data and prototypes on the laptop's annex (`bench_*`, `test_timing/`, `proj_proto/`, `ld_src/`) and in `~/claude_work/tidypopgen/` (incl. `pr_timing/`, `articles_2026-11-22/`) on the desktop.
 
 **Done**
+- First submission of 1.1.0 (27 Nov, 19:32): Windows pre-test OK, Debian 1 ERROR (zlib 1.3.2 changed `gzread()`), fixed (`401e2a96`) with a resubmission note (`238487f3`); lint on `dev` fixed (`36643d2f`): 27 Nov.
 - #248 (Windows test fix) and #247 (`dev` into `main`, via the merge queue) merged, `main` merged back into `dev`; site rebuilt, URL check clean; R-hub OK on four platforms; win-builder 1 expected NOTE; `cran-comments.md` final: 27 Nov.
 - #246 merged (`8c2f1a6d`; version 1.1.0, `fbm` in WORDLIST, Jan Wigginton as `cph` (Andrea), `cran-comments.md`); local `R CMD check --as-cran` 0/0/4 expected notes; PR #247 (`dev` into `main`) and #248 (Windows test fix, CI passing) opened; R-hub and win-builder run: 27 Nov.
 - Sex chromosomes and mtDNA, phase 1, on the branch `sex_chromosomes` (`b1fb3203`..`f4de9505`); behaviour changes for data with X/Y/MT accepted (Andrea): 26 Nov.

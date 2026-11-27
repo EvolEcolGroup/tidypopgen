@@ -9,6 +9,10 @@ installed there; the 22 Nov checks ran on R 4.6.2 on the laptop), branch
 
 ## Summary
 
+**Resubmission** (27 Nov, evening): the first submission failed CRAN's
+Debian pre-test on one test, because zlib 1.3.2 changed `gzread()`; fixed
+on `dev` (`401e2a96`; "CRAN pre-test of the first submission" below).
+
 **Ready to submit** (27 Nov, 19:00): `dev` and `main` hold the same package
 (1.1.0, with the Windows test fix of #248), the site is rebuilt, the URL
 check is clean, and `cran-comments.md` is final on `dev` (`530d7af0`).
@@ -28,6 +32,38 @@ found a test failing on Windows (#248, see "Release steps").
 | `devtools::check(remote = TRUE, manual = TRUE, env_vars = c(NOT_CRAN = "false"))` | 0 errors, 0 warnings, 4 notes, all expected (below). Install 1.7 min, examples 1.0 min (0.9 with `--run-donttest`), tests 2.5 min, vignettes 0.5 min, 11.6 min in all. INFO installed size 43.4 Mb (`libs` 38.5 Mb, with debug symbols); INFO hexbin not installed on manica01 (its code paths were skipped, as on a CRAN machine without it) |
 | Hidden files | none: the tarball was built from the main clone, not a worktree, so no `.git` NOTE |
 | Reverse dependency `dartR.base` | not re-run: it only calls `gen_tibble()` on VCF files, `show_loci()` and `show_genotypes()`, none changed since its check on 22 Nov (the `gen_tibble()` changes are for packedancestry files only) |
+
+## CRAN pre-test of the first submission (27 Nov, 19:36): 1 ERROR, fixed
+
+Andrea submitted from the laptop checkout on `dev` at `d0776110` (19:32
+UTC). Windows pre-test: OK. Debian pre-test (R-devel r90998, clang 23,
+Debian forky/sid): 1 ERROR, in `test_gen_tibble.R:514`. A gzipped `.ped`
+file with a wrong CRC was rejected, but with "the gzipped file is
+truncated" instead of "error reading the gzipped file"; the rest of the
+suite passed (5276 tests). Log saved while it lasts (7 days):
+`https://win-builder.r-project.org/incoming_pretest/tidypopgen_1.1.0_20261127_203416/`.
+
+- **Cause:** zlib 1.3.1.2 changed `gzread()` to "return all available
+  uncompressed data on error": on a CRC error it now returns the bytes
+  decompressed so far, with `Z_DATA_ERROR` set, instead of -1. Debian sid
+  has zlib 1.3.2; Ubuntu 24.04 (laptop, desktop, GitHub Actions) has 1.3,
+  so CI could not see it. `LineReader::read()` (`src/line_reader.h`)
+  treated any error after a short read as truncation.
+- **Fix (`401e2a96`):** after a short read, `Z_BUF_ERROR` is truncation
+  ("unexpected end of file", in every zlib version); any other error stops
+  with "error reading the gzipped file: " and zlib's message.
+- **Tested:** the failure reproduces and the fix passes with zlib 1.3.2
+  preloaded from the `plink19` conda env
+  (`LD_PRELOAD=/home/andrea/miniconda3/envs/plink19/lib/libz.so.1.3.2
+  Rscript ...`; `extSoftVersion()["zlib"]` shows the version in use), and
+  with the system zlib 1.3: the 12 test files that read gzipped files
+  pass under both. Building zlib 1.3.2 from source was blocked by the
+  permission classifier; the conda copy was enough.
+- **`cran-comments.md`:** a "Resubmission" section explains the failure
+  and the fix (`238487f3`).
+- **Also on `dev` since the submission:** a lint fix (trailing space,
+  `36643d2f`) and the tidygenclust note of `gt_admixture()` as its own
+  paragraph of the Description (`b9ab348c`).
 
 ## Release steps (27 Nov, from 17:00)
 
@@ -124,7 +160,11 @@ found a test failing on Windows (#248, see "Release steps").
 
 - submit with `devtools::submit_cran()` from `~/git/tidypopgen` on `dev`
   (its `cran-comments.md` is final), and confirm the email from CRAN;
-- after acceptance: tag the release on `main` (`aee65ae5`;
+  the first submission failed the Debian pre-test (above): resubmit 1.1.0
+  (same version) from `dev` with the zlib fix, after `git pull`;
+- after acceptance: bring `main` up to `dev` (a PR through the merge
+  queue: `main` lacks the zlib fix and the docs commits), then tag the
+  release on `main` (not `aee65ae5` any more;
   `usethis::use_github_release()`), bump `dev` to a development version
   (`usethis::use_dev_version()`), and delete the branches `cran_submission`,
   `cran-fixes-2026-11-27` and `fix-tgeno-test-windows`.

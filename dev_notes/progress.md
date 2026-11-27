@@ -4,6 +4,21 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-27 (laptopX1): CRAN pre-test failure fixed (zlib 1.3.2), CI fixed
+
+- **Done:** lint on `dev` failed on a trailing space from "mention
+  tidygenclust": fixed (`36643d2f`); the tidygenclust note of
+  `gt_admixture()` made its own paragraph of the Description (`b9ab348c`,
+  asked by Andrea). The CRAN pre-test of 1.1.0 (submitted from
+  `d0776110`) failed on Debian: a gzipped `.ped` with a wrong CRC was
+  reported as truncated, because zlib >= 1.3.1.2 `gzread()` returns the
+  data read before an error. Fixed in `src/line_reader.h` (`401e2a96`),
+  checked with zlib 1.3 and 1.3.2 (preloaded from the `plink19` conda
+  env); resubmission note in `cran-comments.md` (`238487f3`).
+- **Next:** Andrea resubmits 1.1.0 from `dev`.
+- **Notes changed:** `cran_checks_2026-11-27.md`, `handover.md`,
+  `summary.md`.
+
 ## 2026-11-27 (manica01): 1.1.0 merged into `main`, ready to submit
 
 - **Done:** #248 squash-merged into `dev` (`fe0be84f`), #247 through
