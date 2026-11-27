@@ -9,13 +9,13 @@ installed there; the 22 Nov checks ran on R 4.6.2 on the laptop), branch
 
 ## Summary
 
-**Ready once #248 (a Windows test fix, found by CI after the checks below) and #247 are merged, and the remote checks and the URL check are done** (see "Release steps"). One issue
-found and fixed (a word for `inst/WORDLIST`). Nothing in the code or the
-docs blocks the submission. Left: merge the branch into `dev`, merge `dev`
-into `main` so that pkgdown publishes the two articles the README links to,
-re-run the URL check, then R-hub and win-builder on the final commit (with
-Andrea's go-ahead), the last lines of `cran-comments.md`, and the
-submission.
+**Ready to submit** (27 Nov, 19:00): `dev` and `main` hold the same package
+(1.1.0, with the Windows test fix of #248), the site is rebuilt, the URL
+check is clean, and `cran-comments.md` is final on `dev` (`530d7af0`).
+Andrea submits with `devtools::submit_cran()` from `~/git/tidypopgen` on
+`dev` (a normal clone; `main` lacks the final `cran-comments.md`). The
+local checks below found one issue (a word for `inst/WORDLIST`); CI then
+found a test failing on Windows (#248, see "Release steps").
 
 | Check | Result |
 |---|---|
@@ -42,20 +42,36 @@ submission.
   the test joined the folder and the name with `/`. A test bug, but CRAN's
   Windows checks would have failed. Fixed in **#248**
   (`fix-tgeno-test-windows`, normalised paths on both sides): all its CI
-  passes, Windows included. Waits for Andrea's merge.
-- **#247** (`dev` into `main`, "v1.1.0") opened; no CI on it (its head is
-  the `[skip ci]` squash of #246). Merge #248 first. If #247 is
-  squash-merged, its message has `[skip ci]` lines and pkgdown will not
-  run on `main`: the watcher of this session starts it
-  (`gh workflow run pkgdown.yaml --ref main`) if no run appears.
+  passes, Windows included. Merged (below).
+- **#248** squash-merged into `dev` (`fe0be84f`, Andrea's go-ahead); its
+  message has no `[skip ci]`, so CI ran on `dev`: R-CMD-check all green (R-CMD-check on macOS, Windows and Ubuntu devel, release and oldrel; no-suggests, lint, pkgdown, coverage).
+- **#247** (`dev` into `main`, "v1.1.0"): `main` has a merge queue (squash;
+  no required checks), so `gh pr merge` fails ("merge strategy set by the
+  merge queue", and auto-merge is off): enqueued with the GraphQL
+  `enqueuePullRequest` mutation, merged at 18:50 (`aee65ae5`). The queue's
+  squash message lists the commits, `[skip ci]` included, so nothing ran on
+  `main`; pkgdown was started by hand on `main`
+  (`gh workflow run pkgdown.yaml --ref main`), but the pkgdown run of the
+  push to `dev` (release mode, as the version has three components) had
+  already deployed the site at the root.
+- **Back-merge:** `main` merged into `dev` (`c1311429`, no file changes),
+  as after 1.0.0 (`6e26276c2`), so that `main` stays an ancestor of `dev`.
 - **R-hub:** run 46040022538 on `dev` (before #248): windows failed (the
   same test), then cancelled. Run 46042287173 on `fix-tgeno-test-windows`
-  (the package of `dev` after #248): Status OK on linux, windows, macos-arm64 and m1-san (R-devel), no notes.
-- **win-builder r-devel:** uploaded twice, both results emailed to Andrea:
-  at 17:15 from `dev` before #248 (expect the same test ERROR: ignore it),
-  and at about 17:50 from `fix-tgeno-test-windows` (the one for
-  `cran-comments.md`).
-- **URL check:** waits for the site rebuilt from `main` (after #247).
+  (the package of `dev` after #248): Status OK on linux, windows,
+  macos-arm64 and m1-san (R-devel), no notes.
+- **win-builder r-devel** (R-devel 2026-11-17 r90926 ucrt): uploaded twice;
+  the first (17:15, from `dev` before #248) has the Windows test ERROR and
+  does not count. The second
+  (https://win-builder.r-project.org/1WF5QzlQdEA5/, from
+  `fix-tgeno-test-windows`): Status 1 NOTE, CRAN incoming: admixtools in
+  `Additional_repositories`, the two articles (404 before the site
+  rebuild), and 504 Gateway Timeout from five GitHub URLs (transient, on
+  win-builder's side). "Days since last update" (20 days) not flagged; no
+  hidden-file NOTE. Tests 197 s, examples 85 s.
+- **URL check** after the site rebuild (19:00): no URL needs fixing.
+- **`cran-comments.md`:** the TODOs filled from win-builder (`530d7af0`,
+  on `dev`): 0 errors, 0 warnings, 1 note (admixtools).
 
 ## Fixed on `cran-fixes-2026-11-27`
 
@@ -72,18 +88,9 @@ submission.
 
 ## Needs your decision
 
-1. **Merge this branch into `dev`:** push it and open a PR (squash), or
-   push the three commits to `dev` directly (small, no code). The draft of
-   `cran-comments.md` (below) is committed (`a9121e06`).
-2. **Release order** (as on 21 Nov): PR `dev` into `main` ("v1.1.0", as
-   #225 for 1.0.0); pkgdown rebuilds the site; check that both articles
-   exist and re-run `urlchecker::url_check()`.
-3. **Remote checks on the final commit**, each with Andrea's go-ahead:
-   `rhub::rhub_check(branch = "main", platforms = c("linux", "m1-san",
-   "macos-arm64", "windows"))` and `devtools::check_win_devel()` from the
-   main clone (not a worktree). The R-hub and win-builder results of 22 Nov
-   predate #243, #244 and the TGENO reader (584 lines of C++).
-4. **Optional:** install hexbin on manica01, so that local checks cover its
+1. Done on 27 Nov (see "Release steps"): #246, #248 and #247 merged, the
+   site rebuilt, R-hub, win-builder and the URL check run.
+2. **Optional:** install hexbin on manica01, so that local checks cover its
    code paths (CI and R-hub install it).
 
 ## Ignored false positives and accepted notes
@@ -110,22 +117,14 @@ submission.
 - Check results: the one note is CRAN incoming (admixtools); "Days since
   last update" moved to a TODO, to fill in from the win-builder result;
   admixtools moved from INFO to the note.
-- Still to fill in: the win-builder result and the TODOs.
-
-## Commands to re-run once the branch is merged
-
-```r
-urlchecker::url_check()   # after the website is rebuilt from main
-rhub::rhub_check(branch = "main",
-                 platforms = c("linux", "m1-san", "macos-arm64", "windows"))
-devtools::check_win_devel()   # from the main clone, not a worktree
-```
+- The TODOs filled from the win-builder result (`530d7af0`): no "Days
+  since last update" note.
 
 ## What Andrea does by hand
 
-- update `cran-comments.md` with the remote results;
-- submit with `devtools::submit_cran()` (or `devtools::release()`), and
-  confirm the email from CRAN;
-- after acceptance: tag the release (`usethis::use_github_release()`), bump
-  to a development version (`usethis::use_dev_version()`), and delete the
-  branches `cran_submission` and `cran-fixes-2026-11-27`.
+- submit with `devtools::submit_cran()` from `~/git/tidypopgen` on `dev`
+  (its `cran-comments.md` is final), and confirm the email from CRAN;
+- after acceptance: tag the release on `main` (`aee65ae5`;
+  `usethis::use_github_release()`), bump `dev` to a development version
+  (`usethis::use_dev_version()`), and delete the branches `cran_submission`,
+  `cran-fixes-2026-11-27` and `fix-tgeno-test-windows`.
