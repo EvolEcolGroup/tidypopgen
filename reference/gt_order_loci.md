@@ -82,11 +82,11 @@ show_loci(example_gt)
 example_gt_ordered <- gt_order_loci(example_gt, ignore_genetic_dist = TRUE)
 #> 
 #> gen_backing files updated, now
-#> using FBM RDS: /tmp/RtmpkBUSq9/file20245b034f56_v2.rds
-#> with FBM backing file: /tmp/RtmpkBUSq9/file20245b034f56_v2.bk
+#> using FBM RDS: /tmp/RtmpRgvuq5/file1f504adb04bd_v2.rds
+#> with FBM backing file: /tmp/RtmpRgvuq5/file1f504adb04bd_v2.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpkBUSq9/file20245b034f56_v2.gt')
+#> gt_load('/tmp/RtmpRgvuq5/file1f504adb04bd_v2.gt')
 
 # Loci are now in the correct order
 show_loci(example_gt_ordered)
