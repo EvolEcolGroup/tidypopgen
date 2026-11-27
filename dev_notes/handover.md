@@ -88,8 +88,7 @@ worktree `/media/andrea/annex/tmp/claude/tidypopgen_notes` (on
   noise, identical backing files). Behaviour changes for data with X/Y/MT
   are accepted (Andrea, 26 Nov). `R CMD check` not run yet.
 - **After the review:** the branch is pushed (27 Nov, as a backup after
-  the annex drive dropped out; `git fsck` clean, and a bundle in
-  `~/claude_work/tidypopgen_rescue/` on the laptop's root drive). Its head
+  the annex drive dropped out; `git fsck` clean). Its head
   commit is `[skip ci]`, so push an empty commit to get CI, then open a PR
   into `dev`. Its NEWS items
   are in the 1.1.0 section: move them to the next version if 1.1.0 is
