@@ -1,10 +1,10 @@
-# Population genetic analysis with tidypopgen
+# Population genetic analysis
 
 ### An example workflow with real data
 
 We will explore the genetic structure of *Anolis punctatus* in South
-America, using data from Prates et al 2018. We downloaded the vcf file
-of the genotypes from
+America, using data from Prates et al. (2018). We downloaded the vcf
+file of the genotypes from
 “<https://github.com/ivanprates/2018_Anolis_EcolEvol/blob/master/data/VCFtools_SNMF_punctatus_t70_s10_n46/punctatus_t70_s10_n46_filtered.recode.vcf?raw=true>”
 and compressed it to a vcf.gz file.
 
@@ -30,6 +30,17 @@ vcf_path <-
 anole_gt <-
   gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile("anolis_"))
 ```
+
+This *VCF* is small, so we read it with the default options. For large
+*VCF* files, set `names_as_int = TRUE` in
+[`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/reference/gen_tibble.md)
+to store the names of the loci as integers, which greatly reduces the
+memory used by the `gen_tibble` (see the article [Working with large
+VCFs](https://evolecolgroup.github.io/tidypopgen/articles/big_data.html)).
+For RAD-seq data assembled de novo, where each RAD locus is its own
+chromosome, also set `chromosomes_as_int = TRUE` (see the article
+[Working with large RAD-seq
+datasets](https://evolecolgroup.github.io/tidypopgen/articles/rad_seq.html)).
 
 Now let’s inspect our `gen_tibble`:
 
@@ -124,6 +135,17 @@ not want to bring over the wrong data due to mismatched ordering.
 anole_gt <- anole_gt %>% left_join(pops, by = "id")
 ```
 
+As our lizards come from two populations, we group the `gen_tibble` by
+population straight away, so that the functions that use groups (e.g.
+quality control, or
+[`gt_admixture()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_admixture.md)
+and its plots below) take them into account:
+
+``` r
+
+anole_gt <- anole_gt %>% group_by(population)
+```
+
 Let us check that we have been successful:
 
 ``` r
@@ -132,6 +154,7 @@ anole_gt %>% glimpse()
 #> Rows: 46
 #> Columns: 6
 #> A tibble: 46 × 6
+#> Groups: population [2]
 #> $ id         <chr> "punc_BM288", "punc_GN71", "punc_H1907", "punc_H1911", "pun…
 #> $ genotypes  <vctr_SNP> [0,0,...], [2,0,...], [0,2,...], [0,2,...], [0,1,...],…
 #> $ population <chr> "Amazonian_Forest", "Amazonian_Forest", "Amazonian_Forest",…
@@ -160,6 +183,7 @@ anole_gt
 #> Geodetic CRS:  WGS 84
 #> # A gen_tibble: 3249 loci
 #> # A tibble:     46 × 7
+#> # Groups:       population [2]
 #>    id    genotypes population longitude latitude pop              geometry
 #>    <chr> <vctr_SN> <chr>          <dbl>    <dbl> <chr>         <POINT [°]>
 #>  1 punc… [0,0,...] Amazonian…     -51.8    -3.32 Eam    (-51.8448 -3.3228)
@@ -203,7 +227,7 @@ ggplot() +
   theme_minimal()
 ```
 
-![](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-8-1.png)
+![](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-9-1.png)
 
 From our map we can see that we have samples from the coastal Atlantic
 Forest and the Amazonian Forest.
@@ -216,25 +240,16 @@ PCA:
 
 ``` r
 
-anole_pca <- anole_gt %>% gt_pca_partialSVD(k = 30)
-#> Error:
-#> ! You can't have missing values in 'X'.
+anole_pca <- anole_gt %>% gt_pca(k = 30)
 ```
 
-OK, we jumped too quickly. There are missing data, and we need first to
-impute them:
-
-``` r
-
-anole_gt <- gt_impute_simple(anole_gt, method = "mode")
-```
-
-And now:
-
-``` r
-
-anole_pca <- anole_gt %>% gt_pca_partialSVD(k = 30)
-```
+There are missing data, but we do not need to impute them: the default
+method of
+[`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca.md)
+compares individuals over the loci genotyped in both (a few analyses,
+e.g. `gt_pca(method = "random")`, need complete data, and we would first
+impute the missing genotypes with
+[`gt_impute_simple()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_impute_simple.md)).
 
 Let us look at the object:
 
@@ -242,12 +257,14 @@ Let us look at the object:
 
 anole_pca
 #>  === PCA of gen_tibble object ===
-#> Method: [1] "partialSVD"
+#> Method: [1] "partial"
 #> 
-#> Call ($call):gt_pca_partialSVD(x = ., k = 30)
+#> Genotypes: with missing genotypes (compared pairwise) 
+#> 
+#> Call ($call):gt_pca(x = ., k = 30)
 #> 
 #> Eigenvalues ($d):
-#>  351.891 192.527 113.562 104.427 87.615 83.476 ...
+#>  368.184 197.144 116.402 104.697 90.059 84.124 ...
 #> 
 #> Principal component scores ($u):
 #>  matrix with 46 rows (individuals) and 30 columns (axes) 
@@ -269,16 +286,16 @@ tidy(anole_pca, matrix = "eigenvalues")
 #> # A tibble: 30 × 4
 #>       PC std.dev percent cumulative
 #>    <int>   <dbl>   <dbl>      <dbl>
-#>  1     1   52.5    45.9        45.9
-#>  2     2   28.7    13.7        59.7
-#>  3     3   16.9     4.78       64.5
-#>  4     4   15.6     4.05       68.5
-#>  5     5   13.1     2.85       71.4
-#>  6     6   12.4     2.58       73.9
-#>  7     7   10.3     1.79       75.7
-#>  8     8   10.0     1.68       77.4
-#>  9     9    9.23    1.42       78.8
-#> 10    10    8.90    1.32       80.2
+#>  1     1   54.9    49.6        49.6
+#>  2     2   29.4    14.2        63.9
+#>  3     3   17.4     4.96       68.8
+#>  4     4   15.6     4.01       72.8
+#>  5     5   13.4     2.97       75.8
+#>  6     6   12.5     2.59       78.4
+#>  7     7   10.6     1.83       80.2
+#>  8     8    9.26    1.41       81.6
+#>  9     9    9.17    1.39       83.0
+#> 10    10    8.89    1.30       84.3
 #> # ℹ 20 more rows
 ```
 
@@ -293,7 +310,7 @@ autoplot(anole_pca, type = "screeplot")
 ```
 
 ![Scree Plot of eigenvalues for each Principal
-Component](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-14-1.png)
+Component](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-13-1.png)
 
 To plot the sample in principal coordinates space, we can simply use:
 
@@ -303,7 +320,7 @@ autoplot(anole_pca, type = "scores")
 ```
 
 ![Score plot of individuals across the first and second Principal
-Components](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-15-1.png)
+Components](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-14-1.png)
 
 `autoplots` are deliberately kept simple: they are just a way to quickly
 inspect the results. To explore additional dimensions, we can use the
@@ -315,7 +332,7 @@ autoplot(anole_pca, type = "scores", k = c(1, 3))
 ```
 
 ![Score plot of individuals across the first and third Principal
-Components](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-16-1.png)
+Components](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-15-1.png)
 
 The autoplots generate `ggplot2` objects, and so they can be further
 embellished with the usual `ggplot2` grammar:
@@ -325,12 +342,17 @@ embellished with the usual `ggplot2` grammar:
 library(ggplot2)
 autoplot(anole_pca, type = "scores") +
   aes(color = anole_gt$population) +
-  labs(color = "population")
+  labs(color = "population") +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 9)
+  )
 ```
 
 ![Score plot of individuals across the first and second Principal
 Components, with individual samples coloured by
-population](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-17-1.png)
+population](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-16-1.png)
 
 For more complex/publication ready plots, we will want to add the PC
 scores to the tibble, so that we can create a custom plot with
@@ -353,7 +375,7 @@ anole_gt %>% ggplot(aes(.fittedPC1, .fittedPC2, color = population)) +
 ![Another score plot of individuals across the first and second
 Principal Components, with individual samples coloured by population,
 using
-ggplot2](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-19-1.png)
+ggplot2](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-18-1.png)
 
 We can see that the two population separate clearly in the PCA space,
 with individuals from the Atlantic Forest clustering closely together
@@ -369,7 +391,7 @@ autoplot(anole_pca, type = "loadings")
 ```
 
 ![Plot of the loadings of Principal Component 1 for each
-loci](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-20-1.png)
+loci](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-19-1.png)
 
 By using information from the loci table, we could easily embellish the
 plot, for example colouring by chromosome or maf.
@@ -410,7 +432,7 @@ tidy(anole_pca, matrix = "eigenvalues") %>%
 ```
 
 ![Plot of the cumulative loadings for each Principal
-Component](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-22-1.png)
+Component](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-21-1.png)
 
 Note that, as we were working with a truncated SVD algorithm for our
 PCA, we can not easily phrase the eigenvalues in terms of proportion of
@@ -437,7 +459,7 @@ autoplot(anole_clusters)
 ```
 
 ![Plot of BIC (Bayesian Information Criteria) for each value of
-k](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-24-1.png)
+k](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-23-1.png)
 
 We are looking for the minimum value of BIC. There is no clear elbow (a
 minimum after which BIC increases with increasing k). However, we notice
@@ -472,12 +494,23 @@ If we decided that we wanted to explore a different value, we could
 simply overwrite that number with `anole_clusters$best_k<-5`
 
 In this case, we are happy with the option of 3 clusters, and we can run
-a DAPC:
+a DAPC. Because the PCA was computed with missing genotypes, we also
+give the `gen_tibble` (`data`):
+[`gt_dapc()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_dapc.md)
+uses the genotypes to estimate the loadings of the loci without counting
+the missing genotypes as zeros:
 
 ``` r
 
-anole_dapc <- gt_dapc(anole_clusters)
+anole_dapc <- gt_dapc(anole_clusters, data = anole_gt)
 ```
+
+Loci with more than half of their genotypes missing (here, 13163 of the
+3249 loci) get `NA` loadings: estimated from few individuals, their
+loadings would be noisy, and would top the rankings of the loci. The
+fraction can be changed with `max_missing`; we could also remove such
+loci before the analysis, with
+`select_loci_if(anole_gt, loci_missingness(genotypes) <= 0.5)`.
 
 Note that
 [`gt_dapc()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_dapc.md)
@@ -493,10 +526,10 @@ important elements of the object and where to find them (as we saw for
 
 anole_dapc
 #>  === DAPC of gen_tibble object ===
-#> Call ($call):gt_dapc(x = anole_clusters)
+#> Call ($call):gt_dapc(x = anole_clusters, data = anole_gt)
 #> 
 #> Eigenvalues ($eig):
-#>  727.414 218.045 
+#>  814.278 353.848 
 #> 
 #> LD scores ($ind.coord):
 #>  matrix with 46 rows (individuals) and 2 columns (LD axes) 
@@ -517,8 +550,8 @@ tidy(anole_dapc, matrix = "eigenvalues")
 #> # A tibble: 2 × 3
 #>      LD eigenvalue cumulative
 #>   <int>      <dbl>      <dbl>
-#> 1     1       727.       727.
-#> 2     2       218.       945.
+#> 1     1       814.       814.
+#> 2     2       354.      1168.
 ```
 
 And they can be visualised with `autoplot`:
@@ -529,7 +562,7 @@ autoplot(anole_dapc, type = "screeplot")
 ```
 
 ![Scree plot of the eigenvalues on the two discriminant axes (defined by
-\`ld\`)](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-30-1.png)
+\`ld\`)](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-29-1.png)
 
 As for pca, there is a `tidy` method that can be used to extract
 information from `gt_dapc` objects. For example, if we want to create a
@@ -544,7 +577,7 @@ tidy(anole_dapc, matrix = "eigenvalues") %>%
 ```
 
 ![Bar plot of eigenvalues against the two discriminant
-axes](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-31-1.png)
+axes](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-30-1.png)
 
 We can plot the scores with:
 
@@ -555,7 +588,7 @@ autoplot(anole_dapc, type = "scores")
 
 ![Scatterplot of the scores of each individual on the two discriminant
 axes (defined by
-\`ld\`)](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-32-1.png)
+\`ld\`)](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-31-1.png)
 
 The DAPC plot shows the separation of individuals into 3 clusters.
 
@@ -568,7 +601,7 @@ autoplot(anole_dapc, type = "components", group = anole_gt$population)
 ```
 
 ![Bar plot showing the probability of assignment to each
-cluster](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-33-1.png)
+cluster](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-32-1.png)
 
 Here we can see that DAPC splits the Amazonian Forest individuals into
 two clusters. Because of the very clear separation we observed when
@@ -584,7 +617,7 @@ autoplot(anole_dapc, "loadings")
 ```
 
 ![Plot of the loadings of Principal Component 1 for each
-loci](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-34-1.png)
+loci](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-33-1.png)
 
 There is no strong outlier, suggesting drift across many loci has
 created the signal picked up by DAPC.
@@ -612,13 +645,22 @@ scatter(anole_dapc, posi.da = "bottomright")
 ![Scatterplot of individuals with ellipses surrounding each cluster of
 individuals identified by the DAPC analysis. Eigenvalues are displayed
 in an inset in the bottom right corner of the
-plot.](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-35-1.png)
+plot.](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-34-1.png)
 
-We can also plot these results onto the map we created earlier.
+We can also plot these results onto the map we created earlier. As
+`anole_gt` is grouped,
+[`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html) would
+work within each population, so we add the DAPC cluster of each
+individual by ungrouping temporarily (we could have also used the `$`
+operator: `anole_gt$dapc <- anole_dapc$grp` directly on the grouped
+object):
 
 ``` r
 
-anole_gt <- anole_gt %>% mutate(dapc = anole_dapc$grp)
+anole_gt <- anole_gt %>%
+  ungroup() %>%
+  mutate(dapc = anole_dapc$grp) %>%
+  group_by(population)
 
 ggplot() +
   geom_sf(data = map) +
@@ -631,7 +673,7 @@ ggplot() +
   theme_minimal()
 ```
 
-![](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-36-1.png)
+![](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-35-1.png)
 
 Atlantic forest lizards form distinct geographic cluster, separate from
 the Amazonian lizards.
@@ -651,8 +693,6 @@ k=6. We will use just one repeat, but ideally we should run multiple
 repetitions for each K:
 
 ``` r
-
-anole_gt <- anole_gt %>% group_by(population)
 
 anole_adm_original <- gt_admixture(
   x = anole_gt,
@@ -682,7 +722,7 @@ autoplot(anole_adm, type = "cv")
 
 ![Plot of cross-entropy for each value of K, showing K = 3 has the
 lowest
-cross-entropy](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-39-1.png)
+cross-entropy](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-38-1.png)
 
 Here we can see that K = 3 is a sensible choice, as K = 3 represents the
 ‘elbow’ in the plot, where cross-entropy is at it’s lowest.
@@ -700,7 +740,7 @@ autoplot(anole_adm,
 
 ![Barplot of individuals coloured by predicted ancestry proportion (Q)
 from each of K ancestral
-sources](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-40-1.png)
+sources](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-39-1.png)
 
 This plot is fine, but it is messy, and not a very helpful visualisation
 if we want to understand how our populations are structured.
@@ -718,7 +758,7 @@ autoplot(anole_adm,
 
 ![Barplot of individuals coloured by predicted ancestry proportion (Q)
 from each of K ancestral
-sources](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-41-1.png)
+sources](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-40-1.png)
 
 This plot is much better. Now the plot is labelled by population we can
 see that the individuals from each population are grouped together, with
@@ -739,7 +779,7 @@ autoplot(anole_adm,
 ![Barplot of individuals coloured by predicted ancestry proportion (Q)
 from each of K ancestral sources, with individuals arranged according to
 their dominant ancestry
-propotion](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-42-1.png)
+propotion](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-41-1.png)
 
 Now individuals are neatly ordered within each population.
 
@@ -810,21 +850,21 @@ And now we can use `ggplot2` directly to generate our custom plot:
 ``` r
 
 tidy_q <- tidy_q %>%
-  dplyr::group_by(id) %>%
-  dplyr::mutate(dominant_q = max(percentage)) %>%
-  dplyr::ungroup() %>%
-  dplyr::arrange(group, dplyr::desc(dominant_q)) %>%
-  dplyr::mutate(
-    plot_order = dplyr::row_number(),
+  group_by(id) %>%
+  mutate(dominant_q = max(percentage)) %>%
+  ungroup() %>%
+  arrange(group, desc(dominant_q)) %>%
+  mutate(
+    plot_order = row_number(),
     id = factor(id, levels = unique(id))
   )
 
-plt <- ggplot2::ggplot(tidy_q, ggplot2::aes(x = id, y = percentage, fill = q)) +
-  ggplot2::geom_col(
+plt <- ggplot(tidy_q, aes(x = id, y = percentage, fill = q)) +
+  geom_col(
     width = 1,
-    position = ggplot2::position_stack(reverse = TRUE)
+    position = position_stack(reverse = TRUE)
   ) +
-  ggplot2::labs(
+  labs(
     y = "Population Structure for K = 3",
     title = "ADMIXTURE algorithm on A. punctatus"
   ) +
@@ -836,7 +876,7 @@ plt
 
 ![Barplot of individuals coloured by predicted ancestry proportion (Q)
 from each of K ancestral
-sources](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-46-1.png)
+sources](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-45-1.png)
 
 In the Prates et al 2018 data, anolis lizards were assigned to three
 regions, described as Af, Eam, and Wam, acronyms which correspond to the
@@ -865,7 +905,7 @@ autoplot(anole_adm,
 
 ![Barplot of individuals coloured by predicted ancestry proportion (Q)
 from each of K ancestral sources, labelled Atlantic forest or Amazonian
-forest](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-48-1.png)
+forest](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-47-1.png)
 
 And here we can see the clear distinction between the three regions,
 with a few individuals that have admixed ancestry.
@@ -935,7 +975,14 @@ autoplot(get_q_matrix(q_list, k = 3, run = 1),
 
 ![Barplot of individuals coloured by predicted ancestry proportion (Q)
 from each of K ancestral
-sources](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-53-1.png)
+sources](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-52-1.png)
 
 In this way, `tidypopgen` integrates with external clustering software
 seamlessly for quick, easy plotting.
+
+## References
+
+Prates I., Penna A., Rodrigues M.T. and Carnaval A.C. (2018) Local
+adaptation in mainland anole lizards: integrating population history and
+genome-environment associations. *Ecology and Evolution* 8: 11932-11944.
+<doi:10.1002/ece3.4650>

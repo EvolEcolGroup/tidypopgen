@@ -11,7 +11,16 @@ description of the method, and the vignette in the package `adegenet`
 ## Usage
 
 ``` r
-gt_dapc(x, pop = NULL, n_pca = NULL, n_da = NULL, loadings_by_locus = TRUE)
+gt_dapc(
+  x,
+  pop = NULL,
+  n_pca = NULL,
+  n_da = NULL,
+  loadings_by_locus = TRUE,
+  data = NULL,
+  max_missing = 0.5,
+  n_cores = bigstatsr::nb_cores()
+)
 ```
 
 ## Arguments
@@ -45,6 +54,28 @@ gt_dapc(x, pop = NULL, n_pca = NULL, n_da = NULL, loadings_by_locus = TRUE)
   locus should be stored (TRUE, default) or not (FALSE). Such output can
   be useful, but can also create large matrices when there are a lot of
   loci and many dimensions.
+
+- data:
+
+  the `gen_tibble` the PCA `x` was computed on (it can have more loci
+  than the PCA). It is needed only for the loadings of the loci of a PCA
+  with missing genotypes (see Details), and ignored otherwise.
+
+- max_missing:
+
+  with a PCA of missing genotypes, the largest fraction of missing
+  genotypes at a locus for its loadings to be estimated (see Details);
+  loci with more get `NA` loadings. Default is `0.5`. The fraction is
+  that of the genotypes without imputation, as given by
+  [`loci_missingness()`](https://evolecolgroup.github.io/tidypopgen/reference/loci_missingness.md)
+  when `data` is not set to use imputed genotypes. Ignored with a PCA of
+  complete or imputed genotypes.
+
+- n_cores:
+
+  the number of cores used to estimate the loadings of the loci of a PCA
+  with missing genotypes. Default is
+  [`bigstatsr::nb_cores()`](https://rdrr.io/pkg/bigparallelr/man/nb_cores.html).
 
 ## Value
 
@@ -89,6 +120,29 @@ but caution is advised when adjusting `n_pca` to avoid potential
 overfitting. We recommend users consult these guidelines and consider
 their individual dataset to ensure best practices.
 
+With missing genotypes, the PCA does not need imputed genotypes: the
+default method of
+[`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca.md)
+compares individuals over the loci genotyped in both (as PLINK does),
+and the discriminant analysis uses its scores as it would those of any
+PCA. The loadings of the loci (`loadings_by_locus`) are then estimated
+by regressing the standardised genotypes of each locus on the scores of
+the `n_pca` components (with an intercept), over the individuals
+genotyped at that locus, and multiplying these coefficients by the
+loadings of the discriminant functions. This needs the genotypes: give
+the `gen_tibble` of the PCA as `data`. With complete genotypes, the
+regression coefficients are the loadings of the PCA, so the results are
+the same as with the usual matrix product. With missing genotypes, the
+loadings of the PCA (which count missing genotypes as 0) would shrink
+loci with many missing genotypes, and hide them in the loadings plots.
+Loci with more than a fraction `max_missing` of their genotypes missing
+(by default, more than half), or genotyped in fewer than `n_pca + 1`
+individuals, get `NA` loadings: estimated from few individuals, their
+loadings are noisy (the more so the fewer the individuals), and would
+top the rankings of the loci. The posterior probabilities of group
+membership do not account for the noisier scores of individuals with
+many missing genotypes.
+
 Note that there is no current method to predict scores for individuals
 not included in the original analysis. This is because we currently do
 not have a mechanism to store the pca information in the object, and
@@ -121,21 +175,22 @@ lobsters <- gen_tibble(bed_file,
   quiet = TRUE
 )
 
-# Remove monomorphic loci and impute
+# Remove monomorphic loci
 lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
-lobsters <- gt_impute_simple(lobsters, method = "mode")
 
-# Create PCA object
-pca <- gt_pca_partialSVD(lobsters)
+# Create PCA object (the lobsters have some missing genotypes, which do not
+# need to be imputed)
+pca <- gt_pca(lobsters)
 
-# Run DAPC on the `gt_pca` object, providing `pop` as factor
+# Run DAPC on the `gt_pca` object, providing `pop` as factor; with missing
+# genotypes, the loadings of the loci need the genotypes (`data`)
 populations <- as.factor(lobsters$population)
-gt_dapc(pca, n_pca = 6, n_da = 2, pop = populations)
+gt_dapc(pca, n_pca = 6, n_da = 2, pop = populations, data = lobsters)
 #>  === DAPC of gen_tibble object ===
-#> Call ($call):gt_dapc(x = pca, pop = populations, n_pca = 6, n_da = 2)
+#> Call ($call):gt_dapc(x = pca, pop = populations, n_pca = 6, n_da = 2, data = lobsters)
 #> 
 #> Eigenvalues ($eig):
-#>  225.2 33.397 2.285 0.283 
+#>  282.181 32.81 1.268 0.72 
 #> 
 #> LD scores ($ind.coord):
 #>  matrix with 176 rows (individuals) and 2 columns (LD axes) 
@@ -166,12 +221,12 @@ cluster_pca <- gt_cluster_pca_best_k(cluster_pca,
 #> Using BIC with criterion min: 5 clusters
 
 # Run DAPC on the `gt_cluster_pca` object
-gt_dapc(cluster_pca, n_pca = 10, n_da = 2)
+gt_dapc(cluster_pca, n_pca = 10, n_da = 2, data = lobsters)
 #>  === DAPC of gen_tibble object ===
-#> Call ($call):gt_dapc(x = cluster_pca, n_pca = 10, n_da = 2)
+#> Call ($call):gt_dapc(x = cluster_pca, n_pca = 10, n_da = 2, data = lobsters)
 #> 
 #> Eigenvalues ($eig):
-#>  193.764 77.308 49.957 43.352 
+#>  213.229 90.907 37.988 27.495 
 #> 
 #> LD scores ($ind.coord):
 #>  matrix with 176 rows (individuals) and 2 columns (LD axes) 

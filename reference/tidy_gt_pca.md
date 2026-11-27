@@ -97,6 +97,7 @@ If `"eigenvalues"`, the columns are:
 
 ## See also
 
+[`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca.md)
 [`gt_pca_autoSVD()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca_autoSVD.md)
 [augment_gt_pca](https://evolecolgroup.github.io/tidypopgen/reference/augment_gt_pca.md)
 
@@ -111,60 +112,59 @@ lobsters <- gen_tibble(bed_file,
   quiet = TRUE
 )
 
-# Remove monomorphic loci and impute
+# Remove monomorphic loci
 lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
-lobsters <- gt_impute_simple(lobsters, method = "mode")
 
 # Create PCA object
-pca <- gt_pca_partialSVD(lobsters)
+pca <- gt_pca(lobsters)
 
 # Tidy the PCA object
 tidy(pca)
 #> # A tibble: 10 × 4
 #>       PC std.dev percent cumulative
 #>    <int>   <dbl>   <dbl>      <dbl>
-#>  1     1    2.75    8.91       8.91
-#>  2     2    2.32    6.37      15.3 
-#>  3     3    1.70    3.40      18.7 
-#>  4     4    1.56    2.89      21.6 
-#>  5     5    1.52    2.74      24.3 
-#>  6     6    1.52    2.73      27.0 
-#>  7     7    1.48    2.59      29.6 
-#>  8     8    1.46    2.52      32.1 
-#>  9     9    1.40    2.31      34.5 
-#> 10    10    1.38    2.25      36.7 
+#>  1     1    3.02   10.6        10.6
+#>  2     2    2.41    6.77       17.4
+#>  3     3    1.71    3.38       20.8
+#>  4     4    1.62    3.04       23.8
+#>  5     5    1.59    2.95       26.8
+#>  6     6    1.55    2.78       29.5
+#>  7     7    1.53    2.71       32.2
+#>  8     8    1.50    2.62       34.9
+#>  9     9    1.46    2.48       37.3
+#> 10    10    1.43    2.37       39.7
 
 # Tidy the PCA object for eigenvalues
 tidy(pca, matrix = "eigenvalues")
 #> # A tibble: 10 × 4
 #>       PC std.dev percent cumulative
 #>    <int>   <dbl>   <dbl>      <dbl>
-#>  1     1    2.75    8.91       8.91
-#>  2     2    2.32    6.37      15.3 
-#>  3     3    1.70    3.40      18.7 
-#>  4     4    1.56    2.89      21.6 
-#>  5     5    1.52    2.74      24.3 
-#>  6     6    1.52    2.73      27.0 
-#>  7     7    1.48    2.59      29.6 
-#>  8     8    1.46    2.52      32.1 
-#>  9     9    1.40    2.31      34.5 
-#> 10    10    1.38    2.25      36.7 
+#>  1     1    3.02   10.6        10.6
+#>  2     2    2.41    6.77       17.4
+#>  3     3    1.71    3.38       20.8
+#>  4     4    1.62    3.04       23.8
+#>  5     5    1.59    2.95       26.8
+#>  6     6    1.55    2.78       29.5
+#>  7     7    1.53    2.71       32.2
+#>  8     8    1.50    2.62       34.9
+#>  9     9    1.46    2.48       37.3
+#> 10    10    1.43    2.37       39.7
 
 # Tidy the PCA object for loadings
 tidy(pca, matrix = "loadings")
 #> # A tibble: 790 × 3
-#>    column    PC    value
-#>    <chr>  <int>    <dbl>
-#>  1 rs3441     1  0.0464 
-#>  2 rs3441     2 -0.00611
-#>  3 rs3441     3 -0.0927 
-#>  4 rs3441     4  0.131  
-#>  5 rs3441     5  0.188  
-#>  6 rs3441     6  0.0378 
-#>  7 rs3441     7  0.136  
-#>  8 rs3441     8  0.0756 
-#>  9 rs3441     9 -0.107  
-#> 10 rs3441    10 -0.0705 
+#>    column    PC   value
+#>    <chr>  <int>   <dbl>
+#>  1 rs3441     1 -0.0376
+#>  2 rs3441     2  0.0189
+#>  3 rs3441     3 -0.0306
+#>  4 rs3441     4 -0.0691
+#>  5 rs3441     5 -0.186 
+#>  6 rs3441     6  0.147 
+#>  7 rs3441     7 -0.0132
+#>  8 rs3441     8 -0.0921
+#>  9 rs3441     9  0.214 
+#> 10 rs3441    10 -0.139 
 #> # ℹ 780 more rows
 
 # Tidy the PCA object for scores
@@ -172,15 +172,15 @@ tidy(pca, matrix = "scores")
 #> # A tibble: 1,760 × 3
 #>    row      PC  value
 #>    <chr> <int>  <dbl>
-#>  1 Ale04     1  3.43 
-#>  2 Ale04     2 -2.93 
-#>  3 Ale04     3  1.96 
-#>  4 Ale04     4  0.103
-#>  5 Ale04     5 -1.83 
-#>  6 Ale04     6  1.01 
-#>  7 Ale04     7 -1.25 
-#>  8 Ale04     8  0.212
-#>  9 Ale04     9  0.199
-#> 10 Ale04    10  1.17 
+#>  1 Ale04     1 -8.17 
+#>  2 Ale04     2 -1.61 
+#>  3 Ale04     3 -1.23 
+#>  4 Ale04     4  1.04 
+#>  5 Ale04     5 -0.301
+#>  6 Ale04     6 -3.21 
+#>  7 Ale04     7 -4.95 
+#>  8 Ale04     8  4.40 
+#>  9 Ale04     9 -2.45 
+#> 10 Ale04    10  0.760
 #> # ℹ 1,750 more rows
 ```

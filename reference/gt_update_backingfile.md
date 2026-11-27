@@ -4,7 +4,9 @@ This functions forces a re-write of the file backing matrix to match the
 [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/reference/gen_tibble.md).
 Individuals and loci are subsetted and reordered according to the
 current state of the `gen_tibble`. A `.gt`, `.bk` and `.rds` file will
-be created.
+be created (and, if the names of the loci are integers, a new locus
+sidecar with their original names, see
+[`gt_lookup_loci()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_lookup_loci.md)).
 
 ## Usage
 
@@ -68,11 +70,11 @@ example_gt <- load_example_gt("gen_tbl")
 gt_update_backingfile(example_gt)
 #> 
 #> gen_backing files updated, now
-#> using FBM RDS: /tmp/RtmprPFH4U/file1f4175cf6cc3_v2.rds
-#> with FBM backing file: /tmp/RtmprPFH4U/file1f4175cf6cc3_v2.bk
+#> using FBM RDS: /tmp/RtmpslFmVS/file204870d1ca54_v2.rds
+#> with FBM backing file: /tmp/RtmpslFmVS/file204870d1ca54_v2.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmprPFH4U/file1f4175cf6cc3_v2.gt')
+#> gt_load('/tmp/RtmpslFmVS/file204870d1ca54_v2.gt')
 #> # A gen_tibble: 6 loci
 #> # A tibble:     7 × 3
 #>   id    population  genotypes
@@ -90,9 +92,9 @@ gt_update_backingfile(example_gt)
 example_gt <- example_gt %>% gt_update_backingfile()
 #> 
 #> gen_backing files updated, now
-#> using FBM RDS: /tmp/RtmprPFH4U/file1f4175cf6cc3_v3.rds
-#> with FBM backing file: /tmp/RtmprPFH4U/file1f4175cf6cc3_v3.bk
+#> using FBM RDS: /tmp/RtmpslFmVS/file204870d1ca54_v3.rds
+#> with FBM backing file: /tmp/RtmpslFmVS/file204870d1ca54_v3.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmprPFH4U/file1f4175cf6cc3_v3.gt')
+#> gt_load('/tmp/RtmpslFmVS/file204870d1ca54_v3.gt')
 ```

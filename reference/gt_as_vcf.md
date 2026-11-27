@@ -1,8 +1,11 @@
 # Convert a `gen_tibble` to a VCF
 
-This function write a VCF from a `gen_tibble`. The genotypes are read
-and written in chunks of loci, so that this works on datasets that do
-not fit in memory.
+This function write a VCF from a `gen_tibble`. Phased genotypes (see
+`phased` in
+[`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/reference/gen_tibble.md))
+are written as phased (e.g. `0|1`), and unphased ones as unphased (e.g.
+`0/1`). The genotypes are read and written in chunks of loci, so that
+this works on datasets that do not fit in memory.
 
 ## Usage
 
@@ -25,8 +28,9 @@ gt_as_vcf(x, file = NULL, chunk_size = NULL, overwrite = FALSE)
 
 - chunk_size:
 
-  the number of loci processed at a time. If left to NULL, 100,000 loci
-  are processed at a time.
+  the number of loci processed at a time (also used for the number of
+  chromosomes processed at a time when writing the contig lines of the
+  header). If left to NULL, 100,000 loci are processed at a time.
 
 - overwrite:
 
@@ -43,5 +47,5 @@ example_gt <- load_example_gt("gen_tbl")
 
 # Write a vcf file
 example_gt %>% gt_as_vcf()
-#> [1] "/tmp/RtmprPFH4U/file1f414c36069f.vcf"
+#> [1] "/tmp/RtmpslFmVS/file20486f2b1e12.vcf"
 ```

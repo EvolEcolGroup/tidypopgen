@@ -3,11 +3,17 @@
 .bk files have not
 been moved, they should be found automatically. If they were moved, use
 reattach_to to point to the .rds file (the .bk file needs to be in the
-same directory as the .rds file)."><meta property="og:description" content="Load a gen_tibble previously saved with gt_save(). If the .rds and
+same directory as the .rds file). Sidecar files with the original names
+of loci and chromosomes stored as integers (.loci.tsv and
+.chromosomes.tsv, see gt_lookup_loci() and gt_lookup_chromosomes())
+are found next to the .bk file, so move any of them with it."><meta property="og:description" content="Load a gen_tibble previously saved with gt_save(). If the .rds and
 .bk files have not
 been moved, they should be found automatically. If they were moved, use
 reattach_to to point to the .rds file (the .bk file needs to be in the
-same directory as the .rds file)."><meta property="og:image" content="https://evolecolgroup.github.io/tidypopgen/logo.png"></head><body>
+same directory as the .rds file). Sidecar files with the original names
+of loci and chromosomes stored as integers (.loci.tsv and
+.chromosomes.tsv, see gt_lookup_loci() and gt_lookup_chromosomes())
+are found next to the .bk file, so move any of them with it."><meta property="og:image" content="https://evolecolgroup.github.io/tidypopgen/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -15,7 +21,7 @@ same directory as the .rds file)."><meta property="og:image" content="https://ev
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,14 +35,16 @@ same directory as the .rds file)."><meta property="og:image" content="https://ev
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/a01_overview.html">The grammar of population genetics</a></li>
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
-    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis with tidypopgen</a></li>
-    <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
-    <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
-    <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
-    <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
+    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/missing_data.html">Missing genotypes: impute only when you must</a></li>
+    <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseudohaploids</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
-    <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity in the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
+    <li><a class="dropdown-item" href="../articles/big_data.html">Working with large VCFs</a></li>
+    <li><a class="dropdown-item" href="../articles/rad_seq.html">Working with large RAD-seq datasets</a></li>
+    <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark with the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -50,7 +58,7 @@ same directory as the .rds file)."><meta property="og:image" content="https://ev
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Load a gen_tibble</h1>
-      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/v1.0.0/R/gt_load.R" class="external-link"><code>R/gt_load.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/dev/R/gt_load.R" class="external-link"><code>R/gt_load.R</code></a></small>
       <div class="d-none name"><code>gt_load.Rd</code></div>
     </div>
 
@@ -59,7 +67,10 @@ same directory as the .rds file)."><meta property="og:image" content="https://ev
 <em>.bk</em> files have not
 been moved, they should be found automatically. If they were moved, use
 <code>reattach_to</code> to point to the <em>.rds</em> file (the <em>.bk</em> file needs to be in the
-same directory as the <em>.rds</em> file).</p>
+same directory as the <em>.rds</em> file). Sidecar files with the original names
+of loci and chromosomes stored as integers (<em>.loci.tsv</em> and
+<em>.chromosomes.tsv</em>, see <code><a href="gt_lookup_loci.html">gt_lookup_loci()</a></code> and <code><a href="gt_lookup_loci.html">gt_lookup_chromosomes()</a></code>)
+are found next to the <em>.bk</em> file, so move any of them with it.</p>
     </div>
 
     <div class="section level2">
@@ -103,16 +114,16 @@ You should be able to leave this to NULL unless you have moved the files.</p></d
 <span class="r-in"><span>  file_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"_example_filtered"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/RtmprPFH4U/file1f41701ff187_example_filtered.gt</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/RtmprPFH4U/file1f41711f5889.rds</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/RtmprPFH4U/file1f41711f5889.bk</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/RtmpslFmVS/file20481362101e_example_filtered.gt</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/RtmpslFmVS/file2048586cb9f8.rds</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/RtmpslFmVS/file2048586cb9f8.bk</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> make sure that you do NOT delete those files!</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> to reload the gen_tibble in another session, use:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/RtmprPFH4U/file1f41701ff187_example_filtered.gt')</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/RtmpslFmVS/file20481362101e_example_filtered.gt')</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># backing_files[1] contains the name of the saved .gt file</span></span></span>
 <span class="r-in"><span><span class="va">backing_files</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmprPFH4U/file1f41701ff187_example_filtered.gt"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpslFmVS/file20481362101e_example_filtered.gt"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># To load the saved gen_tibble object, use the path to the saved .gt file</span></span></span>
 <span class="r-in"><span><span class="va">reloaded_gt</span> <span class="op">&lt;-</span> <span class="fu">gt_load</span><span class="op">(</span><span class="va">backing_files</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>

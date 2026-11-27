@@ -7,6 +7,15 @@ loci and across individuals: `qc_report_loci` and `qc_report_indiv`.
 This vignette uses a simulated data set to illustrate these methods of
 data cleaning.
 
+If your `gen_tibble` includes several populations, group it by
+population with
+[`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html) as
+soon as you have read it, before any quality control: `qc_report_loci`
+then tests Hardy-Weinberg equilibrium within each population, and
+`qc_report_indiv` estimates relatedness within each population (see
+[Grouping data](#grouping-data) below). The simulated data set that we
+use here is a single population.
+
 ## Read data into gen_tibble format
 
 ``` r
@@ -97,11 +106,15 @@ consider how to filter datasets.
 We can see above that most individuals have low missingness, none are
 above the default 5% threshold. However, if we wanted to filter
 individuals to remove those with more than 4.5% of their genotypes
-missing, we can use `filter`.
+missing, we can use `filter`. The report has one row per individual, in
+the same order as `data`, so we take the ids of the individuals to keep
+and filter on them; this also works on a grouped `gen_tibble`, where
+`filter` works on one group at a time.
 
 ``` r
 
-data <- data %>% filter(indiv_missingness(genotypes) < 0.045)
+keep_ids <- data$id[individual_report$missingness < 0.045]
+data <- data %>% filter(id %in% keep_ids)
 nrow(data)
 ```
 
@@ -158,7 +171,7 @@ We can then remove the recommended individuals by using:
 ``` r
 
 data <- data %>%
-  filter(id %in% individual_report$id & individual_report$to_keep == TRUE)
+  filter(id %in% individual_report$id[individual_report$to_keep])
 ```
 
 We can now view a summary of our cleaned data set again, showing that
@@ -265,8 +278,14 @@ and a histogram of significant HWE exact test
 p-values](a02_qc_files/figure-html/unnamed-chunk-13-1.png)
 
 We can then begin to consider how to quality control this raw data set.
-Let’s start by filtering SNPs according to their minor allele frequency.
-We can visualise the MAF distribution using:
+The loci report already contains the minor allele frequency (`maf`), the
+rate of missingness (`missingness`) and the Hardy-Weinberg exact p-value
+(`hwe_p`) of every SNP, so we can use it to decide which SNPs to keep
+without calculating these statistics again. First, let’s look at each
+measure in turn to choose our thresholds.
+
+Let’s start with the minor allele frequency. We can visualise the MAF
+distribution using:
 
 ``` r
 
@@ -276,22 +295,13 @@ autoplot(loci_report, type = "maf")
 ![Histogram of minor allele
 frequency](a02_qc_files/figure-html/unnamed-chunk-14-1.png)
 
-Here we can see there are some monomorphic SNPs in the data set. Let’s
-filter out loci with a minor allele frequency lower than 2%, by using
-`select_loci_if`. Here, we select all SNPs with a MAF greater than 2%.
-This operation is equivalent to plink –maf 0.02.
+Here we can see there are some monomorphic SNPs in the data set. We will
+remove loci with a minor allele frequency lower than 2%, which is
+equivalent to using plink –maf 0.02.
 
-``` r
-
-data <- data %>% select_loci_if(loci_maf(genotypes) > 0.02)
-count_loci(data)
-```
-
-    ## [1] 929
-
-Following this, we can remove SNPs with a high rate of missingness. Lets
-say we want to remove SNPs that are missing in more than 5% of
-individuals, equivalent to using plink –geno 0.05
+Next, we can look at the rate of missingness. Lets say we want to remove
+SNPs that are missing in more than 5% of individuals, equivalent to
+using plink –geno 0.05
 
 ``` r
 
@@ -299,19 +309,10 @@ autoplot(loci_report, type = "missing", miss_threshold = 0.05)
 ```
 
 ![Histogram of the proportion of missing
-data](a02_qc_files/figure-html/unnamed-chunk-16-1.png)
+data](a02_qc_files/figure-html/unnamed-chunk-15-1.png)
 
 We can see here that most SNPs have low missingness, under our 5%
-threshold, some do, however, have missingness over our threshold. To
-remove these SNPs, we can again use `select_loci_if`.
-
-``` r
-
-data <- data %>% select_loci_if(loci_missingness(genotypes) < 0.05)
-count_loci(data)
-```
-
-    ## [1] 693
+threshold, some do, however, have missingness over our threshold.
 
 Finally, we may want to remove SNPs that show significant deviation from
 Hardy-Weinberg equilibrium, if our study design requires. To visualise
@@ -324,69 +325,86 @@ autoplot(loci_report, type = "significant hwe", hwe_p = 0.01)
 ```
 
 ![Histogram of significant HWE exact test
-p-values](a02_qc_files/figure-html/unnamed-chunk-18-1.png)
+p-values](a02_qc_files/figure-html/unnamed-chunk-16-1.png)
 
 None of the SNPs in our data are significant, however there may be
 circumstances where we would want to cut out the most extreme cases, if
 these data were real, these cases could indicate genotyping errors.
 
+Now that we have chosen our thresholds, we can apply all three in one
+go, using the `loci_report` we have just created. Each column of the
+report has one value per SNP, in the same order as the loci in our
+`gen_tibble`. We can therefore combine the three conditions into a
+single logical vector, which is `TRUE` for the SNPs that we want to
+keep, and pass it to `select_loci_if`:
+
 ``` r
 
-data <- data %>% select_loci_if(loci_hwe(genotypes) > 0.01)
+loci_to_keep <- loci_report$maf > 0.02 &
+  loci_report$missingness < 0.05 &
+  loci_report$hwe_p > 0.01
+
+data <- data %>% select_loci_if(loci_to_keep)
 count_loci(data)
 ```
 
     ## [1] 693
 
+Note that we need to apply all of the filters at once. The `loci_report`
+was calculated on a `gen_tibble` with 961 SNPs, so it has one row for
+each of those 961 SNPs. As soon as `select_loci_if` has removed some
+SNPs, `data` has fewer loci than the `loci_report` has rows, and the two
+no longer match: a logical vector built from the old report
+(e.g. `loci_report$missingness < 0.05`) would have the wrong length for
+the reduced `gen_tibble`. For the same reason, a report cannot be reused
+to filter a `gen_tibble` that has since been reduced. The report also
+describes the data as it was when it was created, so its values would be
+out of date for the reduced data anyway.
+
+If we want to apply the filters in separate steps, there are two
+options. We can calculate the statistics again within `select_loci_if`,
+which always operates on the current loci of the `gen_tibble`:
+
+``` r
+
+data <- data %>% select_loci_if(loci_maf(genotypes) > 0.02)
+data <- data %>% select_loci_if(loci_missingness(genotypes) < 0.05)
+data <- data %>% select_loci_if(loci_hwe(genotypes) > 0.01)
+```
+
+Or we can create a new report with
+[`qc_report_loci()`](https://evolecolgroup.github.io/tidypopgen/reference/qc_report_loci.md)
+after each step, so that it matches the reduced `gen_tibble`. On a
+grouped `gen_tibble`, only the second option tests Hardy-Weinberg
+equilibrium within each population: `select_loci_if` evaluates its
+condition on all the individuals, ignoring the groups, so
+`loci_hwe(genotypes)` within it tests all the individuals together (see
+[Grouping data](#grouping-data)).
+
 ## Linkage Disequilibrium
 
 For further analyses, it may be necessary to control for linkage in the
-data set. tidypopgen provides LD clumping. This option is similar to the
-–indep-pairwise flag in plink, but results in a more even distribution
-of loci when compared to LD pruning.
+data set. tidypopgen provides LD clumping, with
+[`loci_ld_clump()`](https://evolecolgroup.github.io/tidypopgen/reference/loci_ld_clump.md).
+This option is similar to the –indep-pairwise flag in plink, but results
+in a more even distribution of loci when compared to LD pruning.
+Pruning, as plink –indep-pairwise, is available with
+[`loci_ld_prune()`](https://evolecolgroup.github.io/tidypopgen/reference/loci_ld_prune.md).
 
 To explore why clumping is preferable to pruning, see
 <https://privefl.github.io/bigsnpr/articles/pruning-vs-clumping.html>
 
-LD clumping requires a data set with no missingness. This means we need
-to create an imputed data set before LD pruning, which we can do quickly
-with `gt_impute_simple`.
-
-Because we have removed individuals through our filtering, we first need
-to update the backingfiles with:
-
-``` r
-
-data <- gt_update_backingfile(data)
-```
-
-    ## 
-    ## gen_backing files updated, now
-
-    ## using FBM RDS: /tmp/RtmpNsBgXc/file29b8723426d0_v2.rds
-
-    ## with FBM backing file: /tmp/RtmpNsBgXc/file29b8723426d0_v2.bk
-
-    ## make sure that you do NOT delete those files!
-
-    ## to reload the gen_tibble in another session, use:
-
-    ## gt_load('/tmp/RtmpNsBgXc/file29b8723426d0_v2.gt')
-
-And then we can impute using:
-
-``` r
-
-imputed_data <- gt_impute_simple(data, method = "random")
-```
+Missing genotypes do not need to be imputed: the correlation between two
+loci is computed over the individuals genotyped at both (as in PLINK).
 
 In this example, if we want to remove SNPs with a correlation greater
-than 0.2 in windows of 10 SNPs at a time, we can set these parameters
-with `thr_r2` and `size` respectively.
+than 0.2 within windows of 10 kb, we can set these parameters with
+`thr_r2` and `size` respectively (with `use_positions = FALSE`, `size`
+would be a number of SNPs instead).
 
 ``` r
 
-to_keep_ld <- loci_ld_clump(imputed_data, thr_r2 = 0.2, size = 10)
+to_keep_ld <- loci_ld_clump(data, thr_r2 = 0.2, size = 10)
 head(to_keep_ld)
 ```
 
@@ -398,9 +416,21 @@ list to create a pruned version of our data:
 
 ``` r
 
-ld_data <- imputed_data %>%
+ld_data <- data %>%
   select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, size = 10))
 ```
+
+Pruning as `plink --indep-pairwise 10 1 0.2` (a window of 10 SNPs, moved
+by 1 SNP at a time) keeps this number of SNPs:
+
+``` r
+
+data %>%
+  loci_ld_prune(window_size = 10, step_size = 1, thr_r2 = 0.2) %>%
+  sum()
+```
+
+    ## [1] 203
 
 ## Save
 
@@ -416,21 +446,21 @@ gt_save(ld_data, file_name = tempfile())
 ```
 
     ## 
-    ## gen_tibble saved to /tmp/RtmpNsBgXc/file29b875dd29bb.gt
+    ## gen_tibble saved to /tmp/RtmpicwZFs/file2b467cc74638.gt
 
-    ## using FBM RDS: /tmp/RtmpNsBgXc/file29b8723426d0_v2.rds
+    ## using FBM RDS: /tmp/RtmpicwZFs/file2b467c43410b.rds
 
-    ## with FBM backing file: /tmp/RtmpNsBgXc/file29b8723426d0_v2.bk
+    ## with FBM backing file: /tmp/RtmpicwZFs/file2b467c43410b.bk
 
     ## make sure that you do NOT delete those files!
 
     ## to reload the gen_tibble in another session, use:
 
-    ## gt_load('/tmp/RtmpNsBgXc/file29b875dd29bb.gt')
+    ## gt_load('/tmp/RtmpicwZFs/file2b467cc74638.gt')
 
-    ## [1] "/tmp/RtmpNsBgXc/file29b875dd29bb.gt"    
-    ## [2] "/tmp/RtmpNsBgXc/file29b8723426d0_v2.rds"
-    ## [3] "/tmp/RtmpNsBgXc/file29b8723426d0_v2.bk"
+    ## [1] "/tmp/RtmpicwZFs/file2b467cc74638.gt" 
+    ## [2] "/tmp/RtmpicwZFs/file2b467c43410b.rds"
+    ## [3] "/tmp/RtmpicwZFs/file2b467c43410b.bk"
 
 ## Grouping data
 
@@ -445,12 +475,18 @@ First, lets add some imaginary population data to our gen_tibble:
 data <- data %>% mutate(population = c(rep("A", 4), rep("B", 4)))
 ```
 
-We can then group by population and run quality control on each group:
+We can then group by population:
 
 ``` r
 
-grouped_loci_report <- data %>%
-  group_by(population) %>%
+grouped_data <- data %>% group_by(population)
+```
+
+and run quality control on each group:
+
+``` r
+
+grouped_loci_report <- grouped_data %>%
   qc_report_loci()
 head(grouped_loci_report)
 ```
@@ -474,8 +510,7 @@ each population:
 
 ``` r
 
-grouped_individual_report <- data %>%
-  group_by(population) %>%
+grouped_individual_report <- grouped_data %>%
   qc_report_indiv(kings_threshold = 0.177)
 head(grouped_individual_report)
 ```
@@ -502,10 +537,28 @@ gen_tibbles.
 
 ``` r
 
-loci_maf_grouped <- data %>%
-  group_by(population) %>%
+loci_maf_grouped <- grouped_data %>%
   loci_maf()
 ```
 
 Grouped functions are built for efficiency and surpass the use of
 applying a function with `group_map`.
+
+Note that `select_loci_if` ignores the groups: all populations share the
+same loci, so a locus is kept or removed for all of them, and
+`select_loci_if(loci_maf(genotypes) > 0.02)` uses the minor allele
+frequency over all individuals, even on a grouped `gen_tibble` (as
+`qc_report_loci` does for the minor allele frequency and missingness).
+To filter on the frequencies within populations, we combine the results
+of the grouped `loci_maf` into one value per locus. For example, to keep
+the loci with a minor allele frequency above 2% in every population:
+
+``` r
+
+maf_by_pop <- grouped_data %>% loci_maf(type = "matrix")
+grouped_data_maf <- grouped_data %>%
+  select_loci_if(apply(maf_by_pop, 1, min) > 0.02)
+count_loci(grouped_data_maf)
+```
+
+    ## [1] 534

@@ -1,9 +1,16 @@
 # Sets a `gen_tibble` to use imputed data
 
-This function sets or unsets the use of imputed data. For some analysis,
-such as PCA, that does not allow for missing data, we have to use
-imputation, but for other analysis it might be preferable to allow for
-missing data.
+This function sets or unsets the use of imputed data. For some analysis
+that does not allow for missing data (e.g. PCA with
+`gt_pca(method = "random")`, or
+[`gt_pca_autoSVD()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca_autoSVD.md)),
+we have to use imputation, but for other analysis it might be preferable
+to allow for missing data (e.g.
+[`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca.md),
+[`loci_ld_clump()`](https://evolecolgroup.github.io/tidypopgen/reference/loci_ld_clump.md)
+and
+[`loci_ld_prune()`](https://evolecolgroup.github.io/tidypopgen/reference/loci_ld_prune.md)
+handle missing genotypes, and use imputed ones only if they are set).
 
 ## Usage
 

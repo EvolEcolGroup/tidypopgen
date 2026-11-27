@@ -116,12 +116,12 @@ example_gt <- gen_tibble(example_genotypes,
   backingfile = tempfile()
 )
 #> 
-#> gen_tibble saved to /tmp/RtmpBAa4UI/file296c654ac707.gt
-#> using FBM RDS: /tmp/RtmpBAa4UI/file296c654ac707.rds
-#> with FBM backing file: /tmp/RtmpBAa4UI/file296c654ac707.bk
+#> gen_tibble saved to /tmp/RtmprYKBTB/file2afc2dbefcf5.gt
+#> using FBM RDS: /tmp/RtmprYKBTB/file2afc2dbefcf5.rds
+#> with FBM backing file: /tmp/RtmprYKBTB/file2afc2dbefcf5.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpBAa4UI/file296c654ac707.gt')
+#> gt_load('/tmp/RtmprYKBTB/file2afc2dbefcf5.gt')
 ```
 
 We are provided information on where the three files underlying the
@@ -479,6 +479,16 @@ example_gt %>%
 #> 2 pop2           3
 ```
 
+Note that we only temporarily grouped the `gen_tibble` for this
+operation, and the original tibble is unchanged. Most of the time we
+want the grouping to be permanent, so we can use `group_by` to create a
+new grouped tibble:
+
+``` r
+
+example_gt <- example_gt %>% group_by(population)
+```
+
 For functions that return one result per individual (such as
 `indiv_het_obs` that we used before), we can use `summarise`, which
 returns a new `tibble` with one line per population. For example, we can
@@ -488,7 +498,6 @@ heterozygosity with :
 ``` r
 
 example_gt %>%
-  group_by(population) %>%
   summarise(n = n(), mean_het = mean(indiv_het_obs(genotypes)))
 #> # A tibble: 2 × 3
 #>   population     n mean_het
@@ -497,13 +506,19 @@ example_gt %>%
 #> 2 pop2           3    0.478
 ```
 
-However, note that this is somewhat inefficient, as computing the pop
-averages requires multiple access to the data. A more efficient approach
-is to:
+However, note that this is somewhat inefficient: on a grouped tibble,
+[`summarise()`](https://dplyr.tidyverse.org/reference/summarise.html)
+(and [`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html))
+call
+[`indiv_het_obs()`](https://evolecolgroup.github.io/tidypopgen/reference/indiv_het_obs.md)
+on each population in turn, so the genotypes are read once per
+population. A more efficient approach is to compute the heterozygosities
+on the ungrouped data, and then group them again:
 
 ``` r
 
 example_gt %>%
+  ungroup() %>%
   mutate(het_obs = indiv_het_obs(genotypes)) %>%
   group_by(population) %>%
   summarise(n = n(), mean_het = mean(het_obs))
@@ -516,43 +531,20 @@ example_gt %>%
 
 In this way, we compute all individual heterozygosities in one go
 (optimising our file access time), and then generate the population
-summaries.
+summaries. Calling
+[`indiv_het_obs()`](https://evolecolgroup.github.io/tidypopgen/reference/indiv_het_obs.md)
+directly on the grouped tibble also reads the genotypes only once, and
+returns one value per individual, in the order of the rows
+(e.g. `example_gt$het_obs <- indiv_het_obs(example_gt)`).
 
-When working with loci, you can use `reframe` to apply functions across
-groups. To use `reframe` correctly, be sure to select the `genotype`
-column within the loci verbs:
-
-``` r
-
-example_gt %>%
-  group_by(population) %>%
-  reframe(loci_hwe = loci_hwe(genotypes))
-#> # A tibble: 12 × 2
-#>    population loci_hwe
-#>    <chr>         <dbl>
-#>  1 pop1            0.5
-#>  2 pop1            0.5
-#>  3 pop1            0.5
-#>  4 pop1            0.5
-#>  5 pop1            0.5
-#>  6 pop1            0.5
-#>  7 pop2            0.6
-#>  8 pop2            0.5
-#>  9 pop2            0.5
-#> 10 pop2            0.7
-#> 11 pop2            0.6
-#> 12 pop2            0.6
-```
-
-Some functions, such as
-[`loci_maf()`](https://evolecolgroup.github.io/tidypopgen/reference/loci_alt_freq.md),
-also have a method for grouped tibbles that allows an even easier
-syntax:
+When working with loci, functions have inbuilt grouped methods that
+return the information for each verb by group; for example, if we use
+[`loci_maf()`](https://evolecolgroup.github.io/tidypopgen/reference/loci_alt_freq.md)
+on a grouped tibble, we get the MAF for each locus in each population:
 
 ``` r
 
 example_gt %>%
-  group_by(population) %>%
   loci_maf()
 #> # A tibble: 12 × 3
 #>    loci  group value
@@ -571,8 +563,34 @@ example_gt %>%
 #> 12 x2    pop2  0.333
 ```
 
-These methods are coded in C++ to be very efficient, and they should be
-preferred to the
+If you have functions that you have written, you can use `reframe` to
+apply them across groups. To use `reframe` correctly on functions from
+`tidypopgen`, be sure to select the `genotype` column within the loci
+verbs:
+
+``` r
+
+example_gt %>%
+  reframe(loci_hwe = loci_hwe(genotypes))
+#> # A tibble: 12 × 2
+#>    population loci_hwe
+#>    <chr>         <dbl>
+#>  1 pop1            0.5
+#>  2 pop1            0.5
+#>  3 pop1            0.5
+#>  4 pop1            0.5
+#>  5 pop1            0.5
+#>  6 pop1            0.5
+#>  7 pop2            0.6
+#>  8 pop2            0.5
+#>  9 pop2            0.5
+#> 10 pop2            0.7
+#> 11 pop2            0.6
+#> 12 pop2            0.6
+```
+
+These inbuilt grouped methods are coded in C++ to be very efficient, and
+they should be preferred to the
 [`reframe()`](https://dplyr.tidyverse.org/reference/reframe.html)
 option. By default, their outputs will return a tidy tibble, with one
 row per locus per population (i.e. the same as we would get with
@@ -583,7 +601,6 @@ list:
 ``` r
 
 example_gt %>%
-  group_by(population) %>%
   loci_maf(type = "list")
 #> [[1]]
 #> [1] 0.25 0.25 0.00 0.25 0.50 0.00
@@ -597,7 +614,6 @@ Or a matrix:
 ``` r
 
 example_gt %>%
-  group_by(population) %>%
   loci_maf(type = "matrix")
 #> Matrix with character rownames and character colnames
 #> Dimensions: 6 x 2 
@@ -610,6 +626,36 @@ example_gt %>%
 #> x2  0.00 0.3333333
 ```
 
+Note that
+[`select_loci_if()`](https://evolecolgroup.github.io/tidypopgen/reference/select_loci_if.md)
+ignores groups. Unlike in
+[`reframe()`](https://dplyr.tidyverse.org/reference/reframe.html), where
+`genotypes` refers to the individuals of each group, in
+[`select_loci_if()`](https://evolecolgroup.github.io/tidypopgen/reference/select_loci_if.md)
+`genotypes` always refers to all individuals: as all populations share
+the same loci, a locus is either kept or dropped for all of them. So, on
+a grouped `gen_tibble`, `select_loci_if(loci_maf(genotypes) > 0.2)` uses
+the minor allele frequency over all individuals. To select loci on
+statistics computed within each population, we combine the
+per-population results of the grouped method into one value per locus.
+For example, to keep only the loci that are polymorphic in every
+population:
+
+``` r
+
+maf_by_pop <- example_gt %>% loci_maf(type = "matrix")
+example_gt %>%
+  select_loci_if(apply(maf_by_pop, 1, min) > 0) %>%
+  show_loci()
+#> # A tibble: 4 × 7
+#>   big_index name  chromosome position genetic_dist allele_ref allele_alt
+#>       <int> <chr> <fct>         <dbl>        <dbl> <chr>      <chr>     
+#> 1         1 rs1   1                 3            0 A          T         
+#> 2         2 rs2   1                 5            0 T          C         
+#> 3         4 rs4   1               343            0 G          C         
+#> 4         5 x1    2                23            0 C          G
+```
+
 Certain metrics and analyses are naturally defined by a grouped tibble
 as they refer to populations, such as population-specific Fst. For
 example:
@@ -617,7 +663,6 @@ example:
 ``` r
 
 example_gt %>%
-  group_by(population) %>%
   pop_fst()
 #>        pop1        pop2 
 #>  0.34146341 -0.04878049
@@ -668,12 +713,12 @@ for example, if we want to read a PLINK bed file, we can simply use:
 bed_path_pop_a <- system.file("extdata/pop_a.bed", package = "tidypopgen")
 pop_a_gt <- gen_tibble(bed_path_pop_a, backingfile = tempfile("pop_a_"))
 #> 
-#> gen_tibble saved to /tmp/RtmpBAa4UI/pop_a_296c20a88fac.gt
-#> using FBM RDS: /tmp/RtmpBAa4UI/pop_a_296c20a88fac.rds
-#> with FBM backing file: /tmp/RtmpBAa4UI/pop_a_296c20a88fac.bk
+#> gen_tibble saved to /tmp/RtmprYKBTB/pop_a_2afc46d3198d.gt
+#> using FBM RDS: /tmp/RtmprYKBTB/pop_a_2afc46d3198d.rds
+#> with FBM backing file: /tmp/RtmprYKBTB/pop_a_2afc46d3198d.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpBAa4UI/pop_a_296c20a88fac.gt')
+#> gt_load('/tmp/RtmprYKBTB/pop_a_2afc46d3198d.gt')
 ```
 
 For this vignette, we don’t want to keep files, so we are using again a
@@ -698,7 +743,7 @@ use:
 ``` r
 
 gt_as_plink(example_gt, file = tempfile("new_bed_"))
-#> [1] "/tmp/RtmpBAa4UI/new_bed_296c35bf180.bed"
+#> [1] "/tmp/RtmprYKBTB/new_bed_2afc6e50d56d.bed"
 ```
 
 This will also write a .bim and .fam file and save them together with
@@ -735,21 +780,21 @@ the bed file is stored):
 bed_path_pop_a <- system.file("extdata/pop_a.bed", package = "tidypopgen")
 pop_a_gt <- gen_tibble(bed_path_pop_a, backingfile = tempfile("pop_a_"))
 #> 
-#> gen_tibble saved to /tmp/RtmpBAa4UI/pop_a_296c5a531904.gt
-#> using FBM RDS: /tmp/RtmpBAa4UI/pop_a_296c5a531904.rds
-#> with FBM backing file: /tmp/RtmpBAa4UI/pop_a_296c5a531904.bk
+#> gen_tibble saved to /tmp/RtmprYKBTB/pop_a_2afc2b5e8e74.gt
+#> using FBM RDS: /tmp/RtmprYKBTB/pop_a_2afc2b5e8e74.rds
+#> with FBM backing file: /tmp/RtmprYKBTB/pop_a_2afc2b5e8e74.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpBAa4UI/pop_a_296c5a531904.gt')
+#> gt_load('/tmp/RtmprYKBTB/pop_a_2afc2b5e8e74.gt')
 bed_path_pop_b <- system.file("extdata/pop_b.bed", package = "tidypopgen")
 pop_b_gt <- gen_tibble(bed_path_pop_b, backingfile = tempfile("pop_b_"))
 #> 
-#> gen_tibble saved to /tmp/RtmpBAa4UI/pop_b_296c615e8aec.gt
-#> using FBM RDS: /tmp/RtmpBAa4UI/pop_b_296c615e8aec.rds
-#> with FBM backing file: /tmp/RtmpBAa4UI/pop_b_296c615e8aec.bk
+#> gen_tibble saved to /tmp/RtmprYKBTB/pop_b_2afc4f23b218.gt
+#> using FBM RDS: /tmp/RtmprYKBTB/pop_b_2afc4f23b218.rds
+#> with FBM backing file: /tmp/RtmprYKBTB/pop_b_2afc4f23b218.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpBAa4UI/pop_b_296c615e8aec.gt')
+#> gt_load('/tmp/RtmprYKBTB/pop_b_2afc4f23b218.gt')
 ```
 
 And inspect them:
@@ -838,12 +883,12 @@ merged_gt <- rbind(pop_a_gt, pop_b_gt,
 #> ( 5 were flipped to match the reference set)
 #> ( 2 are ambiguous, of which 2 were removed)
 #> 
-#> gen_tibble saved to /tmp/RtmpBAa4UI/gt_merged.gt
-#> using FBM RDS: /tmp/RtmpBAa4UI/gt_merged.rds
-#> with FBM backing file: /tmp/RtmpBAa4UI/gt_merged.bk
+#> gen_tibble saved to /tmp/RtmprYKBTB/gt_merged.gt
+#> using FBM RDS: /tmp/RtmprYKBTB/gt_merged.rds
+#> with FBM backing file: /tmp/RtmprYKBTB/gt_merged.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpBAa4UI/gt_merged.gt')
+#> gt_load('/tmp/RtmprYKBTB/gt_merged.gt')
 ```
 
 Let’s check the resulting `gen_tibble`:
@@ -900,10 +945,19 @@ datasets were aligned to the same reference genome assembly.
 
 ## Imputation
 
-Many genetic analysis (e.g. PCA) do not allow missing data. In many
-software implementations, missing genotypes are imputed on the fly,
-often in a simplistic manner. In `tidypopgen`, we encourage taking this
-step explicitly, before running any analysis.
+Most analyses in `tidypopgen` deal with missing genotypes directly: for
+example, the default PCA
+([`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca.md)),
+DAPC, pcadapt, LD clumping and pruning, and the summary statistics.
+Imputation pulls individuals with many missing genotypes towards the
+centre of the data, so it is best avoided where it is not needed (see
+the article “Missing genotypes: impute only when you must”). A few
+methods do not allow missing data (e.g. the randomised PCA,
+`gt_pca(method = "random")`, or
+[`gt_pca_autoSVD()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca_autoSVD.md)).
+In many software implementations, missing genotypes are imputed on the
+fly, often in a simplistic manner. In `tidypopgen`, we encourage taking
+this step explicitly, when it is required.
 
 Let us start with a dataset that has some missing genotypes:
 
@@ -912,12 +966,12 @@ Let us start with a dataset that has some missing genotypes:
 bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
 missing_gt <- gen_tibble(bed_file, backingfile = tempfile("missing_"))
 #> 
-#> gen_tibble saved to /tmp/RtmpBAa4UI/missing_296c3193df7f.gt
-#> using FBM RDS: /tmp/RtmpBAa4UI/missing_296c3193df7f.rds
-#> with FBM backing file: /tmp/RtmpBAa4UI/missing_296c3193df7f.bk
+#> gen_tibble saved to /tmp/RtmprYKBTB/missing_2afc3ae9bcc1.gt
+#> using FBM RDS: /tmp/RtmprYKBTB/missing_2afc3ae9bcc1.rds
+#> with FBM backing file: /tmp/RtmprYKBTB/missing_2afc3ae9bcc1.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpBAa4UI/missing_296c3193df7f.gt')
+#> gt_load('/tmp/RtmprYKBTB/missing_2afc3ae9bcc1.gt')
 missing_gt
 #> # A gen_tibble: 500 loci
 #> # A tibble:     200 × 3
@@ -947,19 +1001,17 @@ missing_gt %>%
 
 ![Histogram of loci missingness, showing that most loci have no missing
 data, while some have a small proportion of missing
-data](a01_overview_files/figure-html/unnamed-chunk-43-1.png)
+data](a01_overview_files/figure-html/unnamed-chunk-45-1.png)
 
-If we attempt to run a PCA on this dataset, we get:
+If we attempt to run a randomised PCA on this dataset, with
+`gt_pca(method = "random")`, we get:
 
 ``` r
 
-missing_pca <- missing_gt %>% gt_pca_autoSVD()
+missing_pca <- gt_pca(missing_gt, k = 2, method = "random")
 #> Error:
-#> ! You can't have missing values in 'G'.
+#> ! gt_pca(method = "random") needs complete or imputed genotypes, but some genotypes are missing: impute them (e.g. with gt_impute_simple()), and the imputed genotypes are used automatically; or use method = "partial"
 ```
-
-Note that using gt_pca_autoSVD with a small dataset will likely cause an
-error, see manual page for details.
 
 It is possible to obviate to this problem by filtering loci with missing
 data, but that might lose a lot of loci. The alternative is to impute
@@ -1006,7 +1058,7 @@ missing_gt %>%
 
 ![Histogram of loci missingness as above, showing that the use of
 imputed data is not
-automatic](a01_overview_files/figure-html/unnamed-chunk-48-1.png)
+automatic](a01_overview_files/figure-html/unnamed-chunk-50-1.png)
 
 We can manually force a `gen_tibble` to use the imputed data:
 
@@ -1020,7 +1072,7 @@ missing_gt %>%
 
 ![Histogram of loci missingness after setting use of imputed data to
 true, showing that there is no
-missingness](a01_overview_files/figure-html/unnamed-chunk-49-1.png)
+missingness](a01_overview_files/figure-html/unnamed-chunk-51-1.png)
 
 However, this is generally not needed, we can keep our `gen_tibble` set
 to use the raw data:
@@ -1034,27 +1086,30 @@ missing_gt %>%
 ```
 
 ![Histogram of loci missingness after setting use of imputed data to
-false again](a01_overview_files/figure-html/unnamed-chunk-50-1.png)
+false again](a01_overview_files/figure-html/unnamed-chunk-52-1.png)
 
-And let functions that need imputation use it automatically:
+And let functions that need imputation use it automatically (here,
+`gt_pca(method = "random")` will use the imputed genotypes):
 
 ``` r
 
-missing_pca <- missing_gt %>% gt_pca_partialSVD()
+missing_pca <- gt_pca(missing_gt, k = 2, method = "random")
 missing_pca
 #>  === PCA of gen_tibble object ===
-#> Method: [1] "partialSVD"
+#> Method: [1] "random"
 #> 
-#> Call ($call):gt_pca_partialSVD(x = .)
+#> Genotypes: imputed 
+#> 
+#> Call ($call):gt_pca(x = missing_gt, k = 2, method = "random")
 #> 
 #> Eigenvalues ($d):
-#>  146.859 106.219 90.352 80.983 69.332 68.427 ...
+#>  146.859 106.219 
 #> 
 #> Principal component scores ($u):
-#>  matrix with 200 rows (individuals) and 10 columns (axes) 
+#>  matrix with 200 rows (individuals) and 2 columns (axes) 
 #> 
 #> Loadings (Principal axes) ($v):
-#>  matrix with 500 rows (SNPs) and 10 columns (axes)
+#>  matrix with 500 rows (SNPs) and 2 columns (axes)
 ```
 
 Note that, when the function is finished, the `gen_tibble` is back to
@@ -1071,10 +1126,11 @@ missing_gt %>%
 
 ![Histogram of loci missingness, showing that use of imputed data is not
 automatically set to true, after using a PCA
-function](a01_overview_files/figure-html/unnamed-chunk-52-1.png)
+function](a01_overview_files/figure-html/unnamed-chunk-54-1.png)
 
-More details about PCA and other analysis is found in the vignette on
-population genetic analysis.
+More details about using imputed data for specific PCA methods can be
+found in the documentation of
+[`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca.md).
 
 ## Saving data and updating backingfiles
 
@@ -1114,16 +1170,16 @@ So, let us save our file:
 
 gt_file_name <- gt_save(example_gt)
 #> 
-#> gen_tibble saved to /tmp/RtmpBAa4UI/file296c654ac707.gt
-#> using FBM RDS: /tmp/RtmpBAa4UI/file296c654ac707.rds
-#> with FBM backing file: /tmp/RtmpBAa4UI/file296c654ac707.bk
+#> gen_tibble saved to /tmp/RtmprYKBTB/file2afc2dbefcf5.gt
+#> using FBM RDS: /tmp/RtmprYKBTB/file2afc2dbefcf5.rds
+#> with FBM backing file: /tmp/RtmprYKBTB/file2afc2dbefcf5.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpBAa4UI/file296c654ac707.gt')
+#> gt_load('/tmp/RtmprYKBTB/file2afc2dbefcf5.gt')
 gt_file_name
-#> [1] "/tmp/RtmpBAa4UI/file296c654ac707.gt" 
-#> [2] "/tmp/RtmpBAa4UI/file296c654ac707.rds"
-#> [3] "/tmp/RtmpBAa4UI/file296c654ac707.bk"
+#> [1] "/tmp/RtmprYKBTB/file2afc2dbefcf5.gt" 
+#> [2] "/tmp/RtmprYKBTB/file2afc2dbefcf5.rds"
+#> [3] "/tmp/RtmprYKBTB/file2afc2dbefcf5.bk"
 ```
 
 And if we ever need to retrieve the location of the `.bk` and `.rds`
@@ -1132,8 +1188,8 @@ files for a gen_tibble, we can use:
 ``` r
 
 gt_get_file_names(example_gt)
-#> [1] "/tmp/RtmpBAa4UI/file296c654ac707.rds"
-#> [2] "/tmp/RtmpBAa4UI/file296c654ac707.bk"
+#> [1] "/tmp/RtmprYKBTB/file2afc2dbefcf5.rds"
+#> [2] "/tmp/RtmprYKBTB/file2afc2dbefcf5.bk"
 ```
 
 In a later session, we could reload the data with:
@@ -1152,11 +1208,19 @@ new_example_gt %>% show_genotypes()
 
 We can see that our genotypes were recovered correctly.
 
-Occasionally, we may need to update the backing files of a `gen_tibble`
-(the `.rds` and `.bk` files), as some functions require that the number
-of individuals in the `gen_tibble` object loaded in the R session
-matches the number of individuals in the backing files that are stored
-on disk. The schematic below illustrates this.
+Imputation is the only case that might require us to update the backing
+files of a `gen_tibble`. Simple imputation is based on the frequency of
+the alleles at each locus, and so it depends on the individuals that are
+included in the `gen_tibble`. If we subset the individuals, the imputed
+genotypes will be different. Therefore, if we have removed individuals
+from our `gen_tibble`, and we want to impute, we need to update the
+backing files to reflect the new set of individuals. For more complex
+imputation methods
+([`gt_impute_xgboost()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_impute_xgboost.md)),
+we may also need to update the backing files if we have removed loci, as
+the imputation model has to be trained on the whole backing file. The
+schematic below illustrates a situation when the backing file has to be
+reduced before imputation.
 
 ![Figure 3: Visual representation of updating backingfiles for a
 gen_tibble object](img/update_backingfile.jpg)
@@ -1164,8 +1228,8 @@ gen_tibble object](img/update_backingfile.jpg)
 Figure 3: Visual representation of updating backingfiles for a
 gen_tibble object
 
-For example, lets assume we want to impute missing values in our data.
-In our QC step we may have filtered out some individuals, like so:
+For example, let’s assume that, in our QC step, we have filtered out
+some individuals, like so:
 
 ``` r
 
@@ -1179,7 +1243,7 @@ get the following error:
 
 gt_impute_simple(new_example_gt)
 #> Error in `gt_impute_simple()`:
-#> ! The number of individuals in the gen_tibble does not match the number of rows in the file backing matrix. Before imputing, use gt_update_backingfile to update your file backing matrix.
+#> ! The individuals in the gen_tibble do not match the rows of the file backing matrix. The imputation estimates the allele frequencies from all the individuals in the file backing matrix, not only those in the gen_tibble, so the file backing matrix has to be resaved first: use gt_update_backingfile() to create a new file backing matrix with only the individuals in the gen_tibble, and then impute it.
 ```
 
 To fix this, we need to update the backing files to reflect the new set
@@ -1197,11 +1261,11 @@ new_example_gt <- gt_update_backingfile(new_example_gt,
 )
 #> 
 #> gen_backing files updated, now
-#> using FBM RDS: /tmp/RtmpBAa4UI/file296c67241994.rds
-#> with FBM backing file: /tmp/RtmpBAa4UI/file296c67241994.bk
+#> using FBM RDS: /tmp/RtmprYKBTB/file2afc7f2ec7eb.rds
+#> with FBM backing file: /tmp/RtmprYKBTB/file2afc7f2ec7eb.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpBAa4UI/file296c67241994.gt')
+#> gt_load('/tmp/RtmprYKBTB/file2afc7f2ec7eb.gt')
 ```
 
 And now we can impute without any problems:
@@ -1211,6 +1275,7 @@ And now we can impute without any problems:
 gt_impute_simple(new_example_gt)
 #> # A gen_tibble: 6 loci
 #> # A tibble:     3 × 3
+#> # Groups:       population [1]
 #>   id    population  genotypes
 #>   <chr> <chr>      <vctr_SNP>
 #> 1 c     pop2        [1,2,...]
@@ -1283,11 +1348,11 @@ the `gen_tibble` object:
 reorder_test_gt <- gt_order_loci(test_gt)
 #> 
 #> gen_backing files updated, now
-#> using FBM RDS: /tmp/RtmpBAa4UI/file296c2ae0d76e_v2.rds
-#> with FBM backing file: /tmp/RtmpBAa4UI/file296c2ae0d76e_v2.bk
+#> using FBM RDS: /tmp/RtmprYKBTB/file2afc47912ccb_v2.rds
+#> with FBM backing file: /tmp/RtmprYKBTB/file2afc47912ccb_v2.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpBAa4UI/file296c2ae0d76e_v2.gt')
+#> gt_load('/tmp/RtmprYKBTB/file2afc47912ccb_v2.gt')
 ```
 
 And we can check that the loci are now ordered:
@@ -1311,11 +1376,11 @@ reorder_test_gt_again <- gt_order_loci(reorder_test_gt,
 )
 #> 
 #> gen_backing files updated, now
-#> using FBM RDS: /tmp/RtmpBAa4UI/file296c2ae0d76e_v3.rds
-#> with FBM backing file: /tmp/RtmpBAa4UI/file296c2ae0d76e_v3.bk
+#> using FBM RDS: /tmp/RtmprYKBTB/file2afc47912ccb_v3.rds
+#> with FBM backing file: /tmp/RtmprYKBTB/file2afc47912ccb_v3.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpBAa4UI/file296c2ae0d76e_v3.gt')
+#> gt_load('/tmp/RtmprYKBTB/file2afc47912ccb_v3.gt')
 ```
 
 And, again, we can check that the loci are ordered with respect to

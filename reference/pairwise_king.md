@@ -6,11 +6,33 @@ reimplementing the KING algorithm of Manichaikul et al. (2010).
 ## Usage
 
 ``` r
+pairwise_king(x, ...)
+
+# S3 method for class 'tbl_df'
 pairwise_king(
   x,
   as_matrix = FALSE,
   block_size = bigstatsr::block_size(nrow(x)),
-  n_cores = bigstatsr::nb_cores()
+  n_cores = bigstatsr::nb_cores(),
+  ...
+)
+
+# S3 method for class 'vctrs_bigSNP'
+pairwise_king(
+  x,
+  as_matrix = FALSE,
+  block_size = bigstatsr::block_size(length(x)),
+  n_cores = bigstatsr::nb_cores(),
+  ...
+)
+
+# S3 method for class 'grouped_df'
+pairwise_king(
+  x,
+  as_matrix = FALSE,
+  block_size = bigstatsr::block_size(nrow(x)),
+  n_cores = bigstatsr::nb_cores(),
+  ...
 )
 ```
 
@@ -18,7 +40,14 @@ pairwise_king(
 
 - x:
 
-  a `gen_tibble` object.
+  a `gen_tibble` object, or a vector of class `vctrs_bigSNP` (the
+  `genotypes` column of a
+  [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/reference/gen_tibble.md),
+  whose individuals are then labelled with the names of the vector).
+
+- ...:
+
+  other arguments passed to specific methods, currently unused.
 
 - as_matrix:
 
@@ -39,13 +68,35 @@ pairwise_king(
 
 a square symmetrical matrix of relationship coefficients between
 individuals if `as_matrix` is TRUE, or a tidied tibble of coefficients
-if `as_matrix` is FALSE.
+if `as_matrix` is FALSE. For a grouped
+[`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/reference/gen_tibble.md),
+a list of matrices (one per group), or a tidied tibble of the pairs
+within each group, with the group columns first.
 
 ## Details
 
 Imputed genotypes are used if `x` is set to use them (see
 [`gt_set_imputed()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_set_imputed.md)),
 and treated as missing otherwise.
+
+`pairwise_king()` is an S3 generic. The method for a
+[`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/reference/gen_tibble.md)
+computes the matrix with the method for its `genotypes` column (of class
+`vctrs_bigSNP`), and labels it with the `id` of the individuals. Other
+packages can add methods for their own classes of genotypes (e.g.
+genotype likelihoods).
+
+For a grouped
+[`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/reference/gen_tibble.md),
+kinship is computed within each group (e.g. within each population),
+giving the same results as `group_map(x, ~ pairwise_king(.x))`, but much
+faster: the genotypes are read only once, and only the pairs of
+individuals within each group are compared. With `as_matrix = TRUE`, the
+result is a list of matrices, one per group in the order of
+[`dplyr::group_keys()`](https://dplyr.tidyverse.org/reference/group_data.html)
+(an empty group gives an empty matrix); otherwise, it is a tibble with
+the pairs of individuals of all groups, preceded by a `group` column (or
+by one column per grouping variable, if there are several).
 
 ## References
 
@@ -107,4 +158,17 @@ pairwise_king(example_gt, block_size = 2)
 #>  9 b     e      -1.25 
 #> 10 b     f      -1    
 #> # ℹ 11 more rows
+
+# Kinship within each population
+example_gt %>%
+  group_by(population) %>%
+  pairwise_king()
+#> # A tibble: 5 × 4
+#>   group item1 item2  value
+#>   <chr> <chr> <chr>  <dbl>
+#> 1 pop1  a     b       0   
+#> 2 pop1  a     e       0.25
+#> 3 pop1  b     e      -1.25
+#> 4 pop2  c     d       0   
+#> 5 pop3  f     g     NaN   
 ```

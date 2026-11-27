@@ -92,6 +92,24 @@ allele1 and allele2 according to minor allele frequency when merging
 datasets. rbind flips and/or swaps alleles according to the reference
 dataset, not according to allele frequency.
 
+If both `gen_tibble`s are phased (see `phased` in
+[`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/reference/gen_tibble.md)),
+the merged `gen_tibble` is phased too, and the alleles of phased
+genotypes are never swapped or flipped: `rbind` stops with an error if
+`flip_strand = TRUE`, or if the reference and alternate alleles of any
+locus in common are swapped between the two datasets (use
+[`rbind_dry_run()`](https://evolecolgroup.github.io/tidypopgen/reference/rbind_dry_run.md)
+to find these loci, in the column `to_swap` of its `target` table, and
+[`select_loci()`](https://evolecolgroup.github.io/tidypopgen/reference/select_loci.md)
+to remove them). If only one of them is phased, the phase of its
+genotypes is discarded (with a message), and the two datasets are merged
+as unphased data (swapping alleles as needed).
+
+If the first `gen_tibble` is grouped, the merged `gen_tibble` is grouped
+by the same variables (as with
+[`dplyr::bind_rows()`](https://dplyr.tidyverse.org/reference/bind_rows.html));
+the grouping of the second `gen_tibble` is ignored.
+
 ## Examples
 
 ``` r
@@ -138,12 +156,12 @@ merged_gt <- rbind(ref = example_gt, target = test_gt, flip_strand = TRUE)
 #> ( 0 were flipped to match the reference set)
 #> ( 4 are ambiguous, of which 4 were removed)
 #> 
-#> gen_tibble saved to /tmp/RtmprPFH4U/gt_merged_1f4114c39b15.gt
-#> using FBM RDS: /tmp/RtmprPFH4U/gt_merged_1f4114c39b15.rds
-#> with FBM backing file: /tmp/RtmprPFH4U/gt_merged_1f4114c39b15.bk
+#> gen_tibble saved to /tmp/RtmpslFmVS/gt_merged_204827b5725c.gt
+#> using FBM RDS: /tmp/RtmpslFmVS/gt_merged_204827b5725c.rds
+#> with FBM backing file: /tmp/RtmpslFmVS/gt_merged_204827b5725c.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmprPFH4U/gt_merged_1f4114c39b15.gt')
+#> gt_load('/tmp/RtmpslFmVS/gt_merged_204827b5725c.gt')
 
 merged_gt
 #> # A gen_tibble: 2 loci

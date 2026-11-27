@@ -21,7 +21,7 @@ its genotypes column, and then dispatch again."><meta property="og:image" conten
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,14 +35,16 @@ its genotypes column, and then dispatch again."><meta property="og:image" conten
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/a01_overview.html">The grammar of population genetics</a></li>
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
-    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis with tidypopgen</a></li>
-    <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
-    <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
-    <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
-    <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
+    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/missing_data.html">Missing genotypes: impute only when you must</a></li>
+    <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseudohaploids</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
-    <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity in the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
+    <li><a class="dropdown-item" href="../articles/big_data.html">Working with large VCFs</a></li>
+    <li><a class="dropdown-item" href="../articles/rad_seq.html">Working with large RAD-seq datasets</a></li>
+    <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark with the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -56,7 +58,7 @@ its genotypes column, and then dispatch again."><meta property="og:image" conten
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Restore the class of a tibble from its genotypes column</h1>
-      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/v1.0.0/R/genotypes_tbl_class.R" class="external-link"><code>R/genotypes_tbl_class.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/dev/R/genotypes_tbl_class.R" class="external-link"><code>R/genotypes_tbl_class.R</code></a></small>
       <div class="d-none name"><code>genotypes_tbl_class.Rd</code></div>
     </div>
 
@@ -118,8 +120,8 @@ otherwise dispatch to the fallback method again.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Packages that build their own tibbles on <code>tidypopgen</code> (e.g. the
-<code>gl_tibble</code> of <code>tidypopgl</code>) add a method to <code>genotypes_tbl_class()</code> for the
+    <p>Packages that build their own tibbles on <code>tidypopgen</code> (e.g. for genotype
+likelihoods) add a method to <code>genotypes_tbl_class()</code> for the
 class of their <code>genotypes</code> column, so that their own methods of the
 <code>tidypopgen</code> generics are used after the class is restored.</p>
     </div>

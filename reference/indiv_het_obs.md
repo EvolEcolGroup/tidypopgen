@@ -17,6 +17,9 @@ indiv_het_obs(.x, as_counts = FALSE, ...)
 # S3 method for class 'tbl_df'
 indiv_het_obs(.x, as_counts = FALSE, ...)
 
+# S3 method for class 'grouped_gen_tbl'
+indiv_het_obs(.x, as_counts = FALSE, ...)
+
 # S3 method for class 'vctrs_bigSNP'
 indiv_het_obs(.x, as_counts = FALSE, ...)
 ```
@@ -28,7 +31,8 @@ indiv_het_obs(.x, as_counts = FALSE, ...)
   a vector of class `vctrs_bigSNP` (usually the `genotype` column of a
   [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/reference/gen_tibble.md)
   object), or a
-  [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/reference/gen_tibble.md).
+  [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/reference/gen_tibble.md)
+  (grouped or not).
 
 - as_counts:
 
@@ -50,6 +54,19 @@ either:
 - a matrix with two columns, where the first is the number of
   heterozygous loci for each individual and the second is the number of
   missing values for each individual
+
+## Details
+
+On a grouped
+[`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/reference/gen_tibble.md),
+heterozygosity is computed for all the individuals in a single pass over
+the genotypes (it does not depend on the groups), and returned in the
+order of the rows. Within a grouped `mutate()` or `summarise()`, `dplyr`
+calls `indiv_het_obs()` on the genotypes of each group in turn: this
+gives the same values, but reads the genotypes once for each group. With
+many groups and large datasets, compute it on the whole grouped tibble
+instead (e.g. `grouped_gt$het_obs <- indiv_het_obs(grouped_gt)`), or
+before grouping.
 
 ## Examples
 

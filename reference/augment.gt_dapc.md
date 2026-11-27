@@ -60,14 +60,16 @@ lobsters <- gen_tibble(bed_file,
   quiet = TRUE
 )
 
-# Remove monomorphic loci and impute
+# Remove monomorphic loci
 lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
-lobsters <- gt_impute_simple(lobsters, method = "mode")
 
-# Create PCA and run DAPC
-pca <- gt_pca_partialSVD(lobsters)
+# Create PCA and run DAPC (with missing genotypes, the loadings of the
+# loci need the genotypes, `data`)
+pca <- gt_pca(lobsters)
 populations <- as.factor(lobsters$population)
-dapc_res <- gt_dapc(pca, n_pca = 6, n_da = 2, pop = populations)
+dapc_res <- gt_dapc(pca,
+  n_pca = 6, n_da = 2, pop = populations, data = lobsters
+)
 
 # Augment the gen_tibble with the DAPC scores
 augment(dapc_res, data = lobsters, k = 2)
@@ -75,15 +77,15 @@ augment(dapc_res, data = lobsters, k = 2)
 #> # A tibble:     176 × 6
 #>    id    population  genotypes .rownames .fittedLD1 .fittedLD2
 #>    <chr> <chr>      <vctr_SNP> <chr>          <dbl>      <dbl>
-#>  1 Ale04 Ale         [0,.,...] Ale04           3.87      0.132
-#>  2 Ale05 Ale         [1,0,...] Ale05           3.96     -0.402
-#>  3 Ale06 Ale         [.,0,...] Ale06           3.25     -0.801
-#>  4 Ale08 Ale         [.,2,...] Ale08           3.06      0.398
-#>  5 Ale13 Ale         [0,.,...] Ale13           1.60      1.05 
-#>  6 Ale15 Ale         [1,0,...] Ale15           2.80     -0.499
-#>  7 Ale16 Ale         [0,.,...] Ale16           4.85     -0.194
-#>  8 Ale17 Ale         [1,.,...] Ale17           4.66      0.420
-#>  9 Ale18 Ale         [0,0,...] Ale18           4.71      1.00 
-#> 10 Ale19 Ale         [2,.,...] Ale19           3.62     -1.37 
+#>  1 Ale04 Ale         [0,.,...] Ale04           7.37    0.0636 
+#>  2 Ale05 Ale         [1,0,...] Ale05           4.27   -0.303  
+#>  3 Ale06 Ale         [.,0,...] Ale06           5.73   -1.50   
+#>  4 Ale08 Ale         [.,2,...] Ale08           5.02    0.828  
+#>  5 Ale13 Ale         [0,.,...] Ale13           3.51    2.55   
+#>  6 Ale15 Ale         [1,0,...] Ale15           5.68   -1.09   
+#>  7 Ale16 Ale         [0,.,...] Ale16           7.95    0.845  
+#>  8 Ale17 Ale         [1,.,...] Ale17           4.56    0.00265
+#>  9 Ale18 Ale         [0,0,...] Ale18           5.05    1.00   
+#> 10 Ale19 Ale         [2,.,...] Ale19           5.37   -2.69   
 #> # ℹ 166 more rows
 ```

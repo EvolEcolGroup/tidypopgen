@@ -9,6 +9,17 @@ Functions for creating, saving, and loading `gen_tibble` objects.
 
   Constructor for a `gen_tibble`
 
+- [`is_phased()`](https://evolecolgroup.github.io/tidypopgen/reference/is_phased.md)
+  :
+
+  Test whether a `gen_tibble` contains phased genotypes
+
+- [`code_phased`](https://evolecolgroup.github.io/tidypopgen/reference/phased_encoding.md)
+  [`phased_bytes`](https://evolecolgroup.github.io/tidypopgen/reference/phased_encoding.md)
+  :
+
+  Encoding of phased genotypes in a `gen_tibble`
+
 - [`gt_save()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_save.md)
   : Save a gen_tibble
 
@@ -25,6 +36,12 @@ Functions for creating, saving, and loading `gen_tibble` objects.
 
 - [`gt_update_backingfile()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_update_backingfile.md)
   : Update the backing matrix
+
+- [`gt_lookup_loci()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_lookup_loci.md)
+  [`gt_lookup_chromosomes()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_lookup_loci.md)
+  [`gt_restore_loci()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_lookup_loci.md)
+  : Look up the original names of loci and chromosomes stored as
+  integers
 
 - [`gt_add_sf()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_add_sf.md)
   :
@@ -45,6 +62,11 @@ Functions to view loci and genotype information stored in a
   :
 
   Show the genotypes of a `gen_tibble`
+
+- [`show_haplotypes()`](https://evolecolgroup.github.io/tidypopgen/reference/show_haplotypes.md)
+  :
+
+  Show the haplotypes of a phased `gen_tibble`
 
 - [`show_loci()`](https://evolecolgroup.github.io/tidypopgen/reference/show_loci.md)
   [`` `show_loci<-`() ``](https://evolecolgroup.github.io/tidypopgen/reference/show_loci.md)
@@ -115,12 +137,25 @@ Functions for imputing missing data in a `gen_tibble`.
 
 Functions for merging `gen_tibble` objects.
 
+- [`gt_merge_vcfs()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_merge_vcfs.md)
+  :
+
+  Merge several VCF files into a `gen_tibble`
+
+- [`gt_concat_vcfs()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_concat_vcfs.md)
+  :
+
+  Concatenate VCF files of the same samples into a `gen_tibble`
+
 - [`rbind_dry_run()`](https://evolecolgroup.github.io/tidypopgen/reference/rbind_dry_run.md)
   : Generate a report of what would happen to each SNP in a merge
+
 - [`rbind(`*`<gen_tbl>`*`)`](https://evolecolgroup.github.io/tidypopgen/reference/rbind.gen_tbl.md)
   : Combine two gen_tibbles
+
 - [`summary(`*`<rbind_report>`*`)`](https://evolecolgroup.github.io/tidypopgen/reference/summary_rbind_dry_run.md)
   : Print a summary of a merge report
+
 - [`cbind(`*`<gen_tbl>`*`)`](https://evolecolgroup.github.io/tidypopgen/reference/cbind.gen_tbl.md)
   [`cbind(`*`<grouped_gen_tbl>`*`)`](https://evolecolgroup.github.io/tidypopgen/reference/cbind.gen_tbl.md)
   : Combine a gen_tibble to a data.frame or tibble by column
@@ -213,6 +248,9 @@ Functions operating across loci.
 - [`loci_ld_clump()`](https://evolecolgroup.github.io/tidypopgen/reference/loci_ld_clump.md)
   : Clump loci based on a Linkage Disequilibrium threshold
 
+- [`loci_ld_prune()`](https://evolecolgroup.github.io/tidypopgen/reference/loci_ld_prune.md)
+  : Prune loci based on a Linkage Disequilibrium threshold, as PLINK
+
 - [`loci_missingness()`](https://evolecolgroup.github.io/tidypopgen/reference/loci_missingness.md)
   : Estimate missingness at each locus
 
@@ -273,6 +311,12 @@ Functions comparing individuals or populations.
   :
 
   Compute the Pairwise Allele Sharing Matrix for a `gen_tibble` object
+
+- [`pairwise_dist()`](https://evolecolgroup.github.io/tidypopgen/reference/pairwise_dist.md)
+  :
+
+  Compute the Genetic Distances between individuals of a `gen_tibble`
+  object
 
 - [`pairwise_grm()`](https://evolecolgroup.github.io/tidypopgen/reference/pairwise_grm.md)
   :
@@ -401,7 +445,7 @@ standard errors.
 
 Functions for performing Principal Component Analysis.
 
-- [`gt_pca`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca.md)
+- [`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca.md)
   :
 
   Principal Component Analysis for `gen_tibble` objects
@@ -412,12 +456,12 @@ Functions for performing Principal Component Analysis.
   PCA controlling for LD for `gen_tibble` objects
 
 - [`gt_pca_partialSVD()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca_partialSVD.md)
-  :
+  **\[deprecated\]** :
 
   PCA for `gen_tibble` objects by partial SVD
 
 - [`gt_pca_randomSVD()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca_randomSVD.md)
-  :
+  **\[deprecated\]** :
 
   PCA for `gen_tibble` objects by randomized partial SVD
 
@@ -556,10 +600,12 @@ Functions for other analyses within `R`.
 
 ## Example data
 
-Function for loading an example `gen_tibble`.
+Functions for loading an example `gen_tibble`, or simulating a toy one.
 
 - [`load_example_gt()`](https://evolecolgroup.github.io/tidypopgen/reference/load_example_gt.md)
   : Load example gen_tibble
+- [`gt_simulate_bn()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_simulate_bn.md)
+  : Simulate a toy dataset of unlinked loci
 
 ## tidyverse methods
 

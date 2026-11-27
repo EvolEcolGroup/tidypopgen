@@ -12,7 +12,7 @@ for that feature.
 ## Usage
 
 ``` r
-select_loci(.data, .sel_arg)
+select_loci(.data, .sel_arg, .engine = c("auto", "tidyselect"))
 ```
 
 ## Arguments
@@ -28,6 +28,13 @@ select_loci(.data, .sel_arg)
   to select loci. Variable names can be used as if they were positions
   in the data frame, so expressions like x:y can be used to select a
   range of variables.
+
+- .engine:
+
+  how the selection is resolved: "auto" (the default) resolves the
+  common selections described in Details directly, and leaves the others
+  to `tidyselect`; "tidyselect" always uses `tidyselect`, which is slow
+  and memory hungry with millions of loci.
 
 ## Value
 
@@ -47,14 +54,22 @@ with helpers that match names (such as
 [`dplyr::starts_with()`](https://tidyselect.r-lib.org/reference/starts_with.html)
 or
 [`dplyr::everything()`](https://tidyselect.r-lib.org/reference/everything.html)),
-or with numeric positions written as numbers (e.g. `1:100` or
-`-c(1, 5)`), each optionally negated with `-` or `!`. These selections
-are resolved directly, which is much faster and uses much less memory
-than the general `tidyselect` machinery, which has to create an R symbol
-for every locus name (and R never frees symbols). Other expressions
-(e.g. combinations such as `c(all_of(x), starts_with("rs"))`, bare loci
-names, or expressions such as `which(...)`) still work, but are slow and
-memory hungry on very large datasets: use `all_of(which(...))` instead.
+with numeric positions written as numbers (e.g. `1:100` or `-c(1, 5)`),
+with a function call that gives positions or names (e.g. `which(...)`,
+`sample(...)` or `sort(x)`), or with a variable that holds positions or
+names (e.g. `select_loci(x, idx)`), each optionally negated with `-` or
+`!`. These selections are resolved directly, which is much faster and
+uses much less memory than the general `tidyselect` machinery, which has
+to create an R symbol for every locus name (and R never frees symbols).
+As in `tidyselect`, a locus with the same name as the variable is
+selected instead of the value of the variable, and selecting with a
+variable gives the deprecation warning of `tidyselect`: prefer
+`all_of(idx)`, which can not be confused with a locus named `idx`. Other
+expressions (e.g. combinations such as
+`c(all_of(x), starts_with("rs"))`, or bare loci names) still work, but
+are slow and memory hungry on very large datasets. To always use
+`tidyselect` (e.g. if a selection is not resolved as `tidyselect` would
+resolve it), set `.engine = "tidyselect"`.
 
 ## See also
 
@@ -85,4 +100,8 @@ show_loci(example_gt_subset)
 #> 1         4 rs4   chr1            343            0 G          C         
 #> 2         2 rs2   chr1              5            0 T          C         
 #> 3         1 rs1   chr1              3            0 A          T         
+
+# Always use tidyselect to resolve the selection
+example_gt_subset <- example_gt %>%
+  select_loci(all_of(c(4, 2, 1)), .engine = "tidyselect")
 ```

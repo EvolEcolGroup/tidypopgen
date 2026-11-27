@@ -9,7 +9,7 @@ here the format"><meta property="og:image" content="https://evolecolgroup.github
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -23,14 +23,16 @@ here the format"><meta property="og:image" content="https://evolecolgroup.github
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/a01_overview.html">The grammar of population genetics</a></li>
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
-    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis with tidypopgen</a></li>
-    <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
-    <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
-    <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
-    <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
+    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/missing_data.html">Missing genotypes: impute only when you must</a></li>
+    <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseudohaploids</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
-    <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity in the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
+    <li><a class="dropdown-item" href="../articles/big_data.html">Working with large VCFs</a></li>
+    <li><a class="dropdown-item" href="../articles/rad_seq.html">Working with large RAD-seq datasets</a></li>
+    <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark with the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -44,7 +46,7 @@ here the format"><meta property="og:image" content="https://evolecolgroup.github
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Constructor for a <code>gen_tibble</code></h1>
-      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/v1.0.0/R/gen_tibble.R" class="external-link"><code>R/gen_tibble.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/dev/R/gen_tibble.R" class="external-link"><code>R/gen_tibble.R</code></a></small>
       <div class="d-none name"><code>gen_tibble.Rd</code></div>
     </div>
 
@@ -77,6 +79,8 @@ here the format</p>
 <span>  backingfile <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  allow_duplicates <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  names_as_int <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  chromosomes_as_int <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  phased <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  quiet <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -91,6 +95,7 @@ here the format</p>
 <span>  missing_alleles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"0"</span>, <span class="st">"."</span><span class="op">)</span>,</span>
 <span>  backingfile <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  allow_duplicates <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  phased <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  quiet <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -107,11 +112,13 @@ same directory and have the same file name.</p></li>
 the <code>bigsnpr</code> package (usually created with <code><a href="https://privefl.github.io/bigsnpr/reference/snp_readBed.html" class="external-link">bigsnpr::snp_readBed()</a></code>)</p></li>
 <li><p>a string giving the path to a vcf file. Only biallelic SNPs will be
 considered.</p></li>
-<li><p>a string giving the path to a <em>packedancestry</em> .geno file. The associated
-.ind and .snp files are expected to be in the same directory and share the
-same file name prefix.</p></li>
+<li><p>a string giving the path to a <em>packedancestry</em> .geno (or .tgeno) file,
+in GENO or TGENO layout (see Details). The associated .ind and .snp files
+are expected to be in the same directory and share the same file name
+prefix.</p></li>
 <li><p>a genotype matrix of dosages (0, 1, 2, NA) giving the dosage of the
 alternate allele.</p></li>
+<li><p>with <code>phased = TRUE</code>, a matrix of haplotypes (see Details).</p></li>
 </ul></dd>
 
 
@@ -167,8 +174,15 @@ in case your
 
 
 <dt id="arg-n-cores">n_cores<a class="anchor" aria-label="anchor" href="#arg-n-cores"></a></dt>
-<dd><p>currently ignored (reading files is not parallelised); kept
-for backwards compatibility</p></dd>
+<dd><p>the number of cores used to read a <em>VCF</em> file with
+<code>parser = "cpp"</code>: the genotypes are parsed in parallel, and a <em>.vcf.gz</em>
+file compressed with <code>bgzip</code> (as most are) is also decompressed in
+parallel (other gzipped files are decompressed on a single core). For
+a PLINK <em>.ped</em> file, the lines are split and the genotypes coded in
+parallel, for a PLINK <em>.bed</em> file and a <em>packedancestry</em> GENO file the
+genotypes are decoded in parallel, and for a <em>packedancestry</em> TGENO file
+they are transposed in parallel. It is ignored for other formats and for
+<code>parser = "vcfR"</code>.</p></dd>
 
 
 <dt id="arg-chunk-size">chunk_size<a class="anchor" aria-label="anchor" href="#arg-chunk-size"></a></dt>
@@ -185,7 +199,35 @@ names as string can use a large amount of memory. Integer names are the
 index of each locus in the <em>VCF</em> (or <em>bim</em>) file, so they can not be used
 to match loci across datasets: <a href="rbind.gen_tbl.html">rbind()</a> and
 <code><a href="rbind_dry_run.html">rbind_dry_run()</a></code> always match loci with integer names by chromosome and
-position.</p></dd>
+position. For <em>VCF</em> files, the original names (with the chromosomes and
+positions) are written to a sidecar file next to the backing file
+(<em>.loci.tsv</em>), from which <code><a href="gt_lookup_loci.html">gt_lookup_loci()</a></code> and <code><a href="gt_lookup_loci.html">gt_restore_loci()</a></code> get
+them back.</p></dd>
+
+
+<dt id="arg-chromosomes-as-int">chromosomes_as_int<a class="anchor" aria-label="anchor" href="#arg-chromosomes-as-int"></a></dt>
+<dd><p>logical. If TRUE, chromosomes will be stored as
+integer codes rather than as a factor. Only used when <code>x</code> is a <em>VCF</em> file
+with parser "cpp". Default is FALSE. This saves memory and time with
+many chromosomes (e.g. RAD loci assembled de novo, each its own
+"chromosome"). A chromosome whose name is a positive number (after an
+optional "chr" or "chromosome" prefix, e.g. "7", "chr7" or "Chr07")
+keeps that number as its code, unless an earlier name has the same
+number (e.g. "chr1" after "1"); these names, "0", numbers larger than
+the largest integer, and other names are numbered after the largest
+number, in order of first appearance. The names are written to a sidecar
+file
+next to the backing file (<em>.chromosomes.tsv</em>), from which
+<code><a href="gt_lookup_loci.html">gt_lookup_chromosomes()</a></code>, <code><a href="gt_lookup_loci.html">gt_lookup_loci()</a></code> and <code><a href="gt_lookup_loci.html">gt_restore_loci()</a></code>
+get them back.</p></dd>
+
+
+<dt id="arg-phased">phased<a class="anchor" aria-label="anchor" href="#arg-phased"></a></dt>
+<dd><p>logical. If TRUE, the genotypes are stored with their phase,
+giving a phased <code>gen_tibble</code> of diploid individuals (see Details). Only
+available when <code>x</code> is a <em>VCF</em> file read with parser "cpp", or a matrix of
+haplotypes. Default is FALSE (the phase of phased <em>VCF</em> files is
+ignored).</p></dd>
 
 
 <dt id="arg-indiv-meta">indiv_meta<a class="anchor" aria-label="anchor" href="#arg-indiv-meta"></a></dt>
@@ -230,7 +272,8 @@ other individuals (or 2, if no ploidy is known). Currently, only biallelic
 SNPs are supported. If haploid variants (e.g. sex chromosomes) are included
 in the <em>VCF</em>, they are not transformed into homozygous calls. Instead,
 reference alleles will be coded as 0 and alternative alleles will be coded
-as 1.</p></li>
+as 1. The phase of phased genotypes (e.g. <code>0|1</code>) is ignored, unless
+<code>phased = TRUE</code> (see below).</p></li>
 <li><p><em>PLINK</em> files (.bed, .ped, or a bigSNP .rds): the individual information
 (from the .fam file, or the first six columns of the .ped file) is stored
 in the same columns for all formats: the individual ID as <code>id</code>; the family
@@ -244,8 +287,41 @@ parents and sex, 0 or -9 for a case/control phenotype, and -9 for a
 quantitative one) are NA, and <code>paternal_ID</code>, <code>maternal_ID</code>, <code>sex</code> and
 <code>phenotype</code> are only created if they have some non-missing values.
 <code><a href="gt_as_plink.html">gt_as_plink()</a></code> writes these columns back to PLINK files.</p></li>
-<li><p><em>packedancestry</em> files: When loading <em>packedancestry</em> files,
+<li><p><em>packedancestry</em> files: the genotype file can be in either of the two
+layouts of EIGENSOFT, GENO (one record per locus) or TGENO (one record per
+individual, "transposed", as in recent releases of the Allen Ancient DNA
+Resource, AADR); the layout is detected from the header of the file,
+whatever its extension (.geno or .tgeno). A TGENO file is read into memory
+in one go if it is smaller than 2 GB (and otherwise in slabs of loci,
+using up to 2 GB of memory). When loading <em>packedancestry</em> files,
 missing alleles will be converted from 'X' to NA</p></li>
+<li><p>Phased genotypes: with <code>phased = TRUE</code>, <code>gen_tibble()</code> creates a phased
+<code>gen_tibble</code> of diploid individuals, which also knows which allele of each
+genotype is on the first and which on the second haplotype (e.g. <code>0|1</code>
+versus <code>1|0</code>), as needed by haplotype based statistics. Phased genotypes
+are stored in the same file backed matrix as unphased ones (see
+<a href="phased_encoding.html">phased_encoding</a>), so that all other
+functions work on phased <code>gen_tibble</code>s as usual, treating their genotypes
+as ordinary dosages of the alternate allele. <code><a href="is_phased.html">is_phased()</a></code> tests whether a
+<code>gen_tibble</code> is phased, and <code><a href="show_haplotypes.html">show_haplotypes()</a></code> returns its haplotypes.
+Phased genotypes can be read from <em>VCF</em> files (with parser "cpp"), in which
+all individuals have to be diploid and all genotypes phased (with <code>|</code>, e.g.
+<code>0|1</code>): any unphased genotype (with <code>/</code>, including <code>0/0</code> and <code>./.</code>) is an
+error, naming the individual and the locus, and a genotype with a missing
+allele (e.g. <code>.|.</code>, <code>0|.</code>, or a single <code>.</code>) is missing. They can also be
+created from a matrix of haplotypes, with two rows per individual (the
+first and second haplotypes of individual <code>i</code> are rows <code>2 * i - 1</code> and
+<code>2 * i</code>) and one column per locus, containing 0 (reference allele), 1
+(alternate allele) or <code>NA</code> (if either haplotype is missing, the genotype is
+missing). <code><a href="gt_merge_vcfs.html">gt_merge_vcfs()</a></code> and <code><a href="gt_concat_vcfs.html">gt_concat_vcfs()</a></code> also read phased <em>VCF</em>
+files with <code>phased = TRUE</code>. Functions that write genotypes keep the phase
+where they can: <code><a href="gt_as_vcf.html">gt_as_vcf()</a></code> writes phased genotypes (<code>0|1</code>), subsetting,
+<code><a href="gt_save.html">gt_save()</a></code>, <code><a href="gt_load.html">gt_load()</a></code>, <code><a href="gt_order_loci.html">gt_order_loci()</a></code> and <code><a href="gt_update_backingfile.html">gt_update_backingfile()</a></code>
+keep phased data phased, and <a href="rbind.gen_tbl.html">rbind()</a> keeps the phase when
+both <code>gen_tibble</code>s are phased (it then never swaps or flips alleles), and
+discards it (with a message) when only one of them is phased. Imputation
+(<code><a href="gt_impute_simple.html">gt_impute_simple()</a></code>, <code><a href="gt_impute_xgboost.html">gt_impute_xgboost()</a></code>) is not available for phased
+<code>gen_tibble</code>s.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
@@ -300,6 +376,26 @@ checking gen_tibble ploidy can be found in gt_helper_functions.R</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> punc_JFT773        [0,0,...]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> punc_LG1299        [0,0,...]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 36 more rows</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Create a phased gen_tibble from a phased .vcf file</span></span></span>
+<span class="r-in"><span><span class="va">phased_vcf</span> <span class="op">&lt;-</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"phased_example.vcf"</span>, package <span class="op">=</span> <span class="st">"tidypopgen"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">phased_gt</span> <span class="op">&lt;-</span> <span class="fu">gen_tibble</span><span class="op">(</span><span class="va">phased_vcf</span>,</span></span>
+<span class="r-in"><span>  phased <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  quiet <span class="op">=</span> <span class="cn">TRUE</span>, backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"phased_"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="show_haplotypes.html">show_haplotypes</a></span><span class="op">(</span><span class="va">phased_gt</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        rs1 rs2 rs4 rs5 rs6 rs7 rs8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ind1_1   0   1   0   0   1   0   1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ind1_2   0   0   1   0   1   0   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ind2_1   0   1   0   1   0   0   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ind2_2   1   1   0   0   1   0   1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ind3_1   1   0   0   0   1   1   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ind3_2   0   0   0   1   0   1   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ind4_1   1   0   1   0   0   0   1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ind4_2   1   1   0   0   0   1   1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ind5_1   0  NA   1   1   0  NA   1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ind5_2   1  NA   1   0   1  NA   0</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create a gen_tibble from a matrix of genotypes:</span></span></span>
 <span class="r-in"><span><span class="va">test_indiv_meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>

@@ -9,7 +9,7 @@ genotypes in an individual)."><meta property="og:image" content="https://evoleco
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -23,14 +23,16 @@ genotypes in an individual)."><meta property="og:image" content="https://evoleco
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/a01_overview.html">The grammar of population genetics</a></li>
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
-    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis with tidypopgen</a></li>
-    <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
-    <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
-    <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
-    <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
+    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/missing_data.html">Missing genotypes: impute only when you must</a></li>
+    <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseudohaploids</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
-    <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity in the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
+    <li><a class="dropdown-item" href="../articles/big_data.html">Working with large VCFs</a></li>
+    <li><a class="dropdown-item" href="../articles/rad_seq.html">Working with large RAD-seq datasets</a></li>
+    <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark with the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -44,7 +46,7 @@ genotypes in an individual)."><meta property="og:image" content="https://evoleco
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Estimate individual missingness</h1>
-      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/v1.0.0/R/indiv_missingness.R" class="external-link"><code>R/indiv_missingness.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/dev/R/indiv_missingness.R" class="external-link"><code>R/indiv_missingness.R</code></a></small>
       <div class="d-none name"><code>indiv_missingness.Rd</code></div>
     </div>
 
@@ -58,6 +60,14 @@ genotypes in an individual).</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">indiv_missingness</span><span class="op">(</span><span class="va">.x</span>, <span class="va">as_counts</span>, <span class="va">block_size</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'tbl_df'</span></span>
+<span><span class="fu">indiv_missingness</span><span class="op">(</span></span>
+<span>  <span class="va">.x</span>,</span>
+<span>  as_counts <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  block_size <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://privefl.github.io/bigstatsr/reference/block_size.html" class="external-link">block_size</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">.x</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'grouped_gen_tbl'</span></span>
 <span><span class="fu">indiv_missingness</span><span class="op">(</span></span>
 <span>  <span class="va">.x</span>,</span>
 <span>  as_counts <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -80,7 +90,7 @@ genotypes in an individual).</p>
 
 <dl><dt id="arg--x">.x<a class="anchor" aria-label="anchor" href="#arg--x"></a></dt>
 <dd><p>a vector of class <code>vctrs_bigSNP</code> (usually the <code>genotype</code> column of
-a <code><a href="gen_tibble.html">gen_tibble</a></code> object), or a <code><a href="gen_tibble.html">gen_tibble</a></code>.</p></dd>
+a <code><a href="gen_tibble.html">gen_tibble</a></code> object), or a <code><a href="gen_tibble.html">gen_tibble</a></code> (grouped or not).</p></dd>
 
 
 <dt id="arg-as-counts">as_counts<a class="anchor" aria-label="anchor" href="#arg-as-counts"></a></dt>
@@ -101,6 +111,18 @@ default).</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>a vector of missingness, one per individuals in the
 <code><a href="gen_tibble.html">gen_tibble</a></code></p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>On a grouped <code><a href="gen_tibble.html">gen_tibble</a></code>, missingness is computed for all the
+individuals in a single pass over the genotypes (it does not depend on the
+groups), and returned in the order of the rows. Within a grouped
+<code>mutate()</code> or <code>summarise()</code>, <code>dplyr</code> calls <code>indiv_missingness()</code> on the
+genotypes of each group in turn: this gives the same values, but reads the
+genotypes once for each group. With many groups and large datasets,
+compute it on the whole grouped tibble instead (e.g.
+<code>grouped_gt$missingness &lt;- indiv_missingness(grouped_gt)</code>), or before
+grouping.</p>
     </div>
 
     <div class="section level2">

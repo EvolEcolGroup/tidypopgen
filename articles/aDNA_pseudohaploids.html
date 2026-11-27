@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Working with aDNA pseuodhaploid samples • tidypopgen</title>
+<title>Working with aDNA pseudohaploids • tidypopgen</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -14,7 +14,7 @@
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Working with aDNA pseuodhaploid samples">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Working with aDNA pseudohaploids">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,14 +40,16 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/a01_overview.html">The grammar of population genetics</a></li>
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
-    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis with tidypopgen</a></li>
-    <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
-    <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
-    <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
-    <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
+    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/missing_data.html">Missing genotypes: impute only when you must</a></li>
+    <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseudohaploids</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
-    <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity in the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
+    <li><a class="dropdown-item" href="../articles/big_data.html">Working with large VCFs</a></li>
+    <li><a class="dropdown-item" href="../articles/rad_seq.html">Working with large RAD-seq datasets</a></li>
+    <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark with the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -69,10 +71,10 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>Working with aDNA pseuodhaploid samples</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Working with aDNA pseudohaploids</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/v1.0.0/vignettes/articles/aDNA_pseudohaploids.Rmd" class="external-link"><code>vignettes/articles/aDNA_pseudohaploids.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/dev/vignettes/articles/aDNA_pseudohaploids.Rmd" class="external-link"><code>vignettes/articles/aDNA_pseudohaploids.Rmd</code></a></small>
       <div class="d-none name"><code>aDNA_pseudohaploids.Rmd</code></div>
     </div>
 
@@ -114,6 +116,12 @@ the modern data:</p>
 <span>  quiet <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"test_"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<p>Both datasets include many populations, so we group them by
+population straight away, so that the functions that use groups (such as
+the pairwise Fst below) work within populations:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ho_modern</span> <span class="op">&lt;-</span> <span class="va">ho_modern</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span></span>
+<span><span class="va">ancient</span> <span class="op">&lt;-</span> <span class="va">ancient</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="assigning-pseudohaploid-data">Assigning Pseudohaploid data<a class="anchor" aria-label="anchor" href="#assigning-pseudohaploid-data"></a>
@@ -130,7 +138,7 @@ individual).</p>
 function <code>gt_pseudohaploid</code> to assign the ploidy of each
 individual in our <code>gen_tibble</code> object (based on whether the
 first <code>test_n_loci</code> are all homozygote):</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ancient</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_pseudohaploid.html">gt_pseudohaploid</a></span><span class="op">(</span><span class="va">ancient</span>, test_n_loci <span class="op">=</span> <span class="fl">100000</span><span class="op">)</span></span></code></pre></div>
 <p>Once the ploidy has been assigned, pseudohaploid data is handled
 automatically by functions that are designed to work with pseudohaploid
@@ -139,9 +147,10 @@ and these functions will return an error.</p>
 <p>For example, attempting to run <code>indiv_inbreeding</code> on
 pseudohaploid data will tell us that this function only works on diploid
 data:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/indiv_inbreeding.html">indiv_inbreeding</a></span><span class="op">(</span><span class="va">ancient</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error in stopifnot_diploid(.x): this function only works on diploid data</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/indiv_inbreeding.html">indiv_inbreeding</a></span><span class="op">(</span><span class="va">ancient</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Error in `stopifnot_diploid()`:</span></span>
+<span><span class="co">## ! this function only works on diploid data</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="pca">PCA<a class="anchor" aria-label="anchor" href="#pca"></a>
@@ -151,7 +160,7 @@ individuals. Therefore, we need to subset the modern data to only modern
 West Eurasian populations. We can select these populations by filtering
 the <code>gen_tibble</code> object using the <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code>
 function from the <code>dplyr</code> package:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">west_eurasian_pops</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  <span class="st">"Abkhasian"</span>, <span class="st">"Adygei"</span>, <span class="st">"Albanian"</span>, <span class="st">"Armenian"</span>, <span class="st">"Assyrian"</span>, <span class="st">"Balkar"</span>, <span class="st">"Basque"</span>,</span>
 <span>  <span class="st">"BedouinA"</span>, <span class="st">"BedouinB"</span>, <span class="st">"Belarusian"</span>, <span class="st">"Bulgarian"</span>, <span class="st">"Canary_Islander"</span>,</span>
@@ -168,20 +177,9 @@ function from the <code>dplyr</code> package:</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">ho_modern</span> <span class="op">&lt;-</span> <span class="va">ho_modern</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">population</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">west_eurasian_pops</span><span class="op">)</span></span></code></pre></div>
-<p>To run a PCA on the modern Eurasian individuals, we need to impute
-any missing genotypes. But as we have subset our <code>gen_tibble</code>
-object, first we need to update our backingfile:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ho_modern</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_update_backingfile.html">gt_update_backingfile</a></span><span class="op">(</span><span class="va">ho_modern</span>,</span>
-<span>  quiet <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p>And then we can impute, using:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ho_modern</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_impute_simple.html">gt_impute_simple</a></span><span class="op">(</span><span class="va">ho_modern</span>, method <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span></span></code></pre></div>
-<p>We should also remove any monomorphic loci from our data, as these
-loci are uninformative. Monomorphic markers must always be removed
-before a PCA is computed using any of the <code>gt_pca</code>
-functions.</p>
+<p>We should remove any monomorphic loci from our data, as these loci
+are uninformative. Monomorphic markers must always be removed before a
+PCA is computed using any of the <code>gt_pca</code> functions.</p>
 <p>To do this, we use the <code>select_loci_if</code> function together
 with <code>loci_maf</code> to select only genotypes where MAF is greater
 than 0:</p>
@@ -189,7 +187,7 @@ than 0:</p>
 <code class="sourceCode R"><span><span class="va">ho_modern</span> <span class="op">&lt;-</span> <span class="va">ho_modern</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_alt_freq.html">loci_maf</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
 <p>Now we can create our PCA object from the modern data:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">modern_pca</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_pca_partialSVD.html">gt_pca_partialSVD</a></span><span class="op">(</span><span class="va">ho_modern</span>, k <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">modern_pca</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_pca.html">gt_pca</a></span><span class="op">(</span><span class="va">ho_modern</span>, k <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <p>We can then use <code>augment</code> to add the PCA coordinates for
 each individual to our <code>gen_tibble</code> object:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
@@ -222,8 +220,8 @@ function:</p>
 <span>  project_method <span class="op">=</span> <span class="st">"least_squares"</span>,</span>
 <span>  as_matrix <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Here, we use the “least_squares” argument to generate a least squares
-projection that will be comparable to the approach used in
+<p>Here, we use the default “least_squares” argument to generate a least
+squares projection that will be comparable to the approach used in
 <code>smartpca</code> (also implemented in the R package
 <code>smartsnp</code>).</p>
 <p>Finally, we can tidy up our data ready to plot by converting the
@@ -258,8 +256,7 @@ modern individuals, using the same syntax as <code>smartsnp</code>:</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>    x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"PC 1 ("</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">pca_variance</span><span class="op">$</span><span class="va">percent</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"%)"</span><span class="op">)</span>,</span>
 <span>    y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"PC 2 ("</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">pca_variance</span><span class="op">$</span><span class="va">percent</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"%)"</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: ggrepel: 247 unlabeled data points (too many overlaps). Consider increasing max.overlaps</span></span></code></pre></div>
+<span>  <span class="op">)</span></span></code></pre></div>
 <div class="float">
 <img src="figure/aDNA_pseudohaploids/pca_projected_aDNA-1.png" alt="plot of chunk pca_projected_aDNA"><div class="figcaption">plot of chunk pca_projected_aDNA</div>
 </div>
@@ -269,37 +266,36 @@ modern individuals, using the same syntax as <code>smartsnp</code>:</p>
 </h2>
 <p>Now let’s replicate the pairwise Fst analysis from Lazaridis et
 al. (2016).</p>
-<p>First we need to merge the ancient and modern data:</p>
+<p>First we need to merge the ancient and modern data (the merged
+<code>gen_tibble</code> is grouped by population, as
+<code>ho_modern</code>):</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ancient_modern</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">ho_modern</span>, <span class="va">ancient</span><span class="op">)</span></span>
-<span><span class="co">#&gt; harmonising loci between two datasets</span></span>
-<span><span class="co">#&gt; flip_strand =  FALSE  ; remove_ambiguous =  FALSE </span></span>
-<span><span class="co">#&gt; -----------------------------</span></span>
-<span><span class="co">#&gt; dataset: reference </span></span>
-<span><span class="co">#&gt; number of SNPs: 548749 reduced to 548749 </span></span>
-<span><span class="co">#&gt; ( 0 are ambiguous, of which 0  were removed)</span></span>
-<span><span class="co">#&gt; -----------------------------</span></span>
-<span><span class="co">#&gt; dataset: target </span></span>
-<span><span class="co">#&gt; number of SNPs: 1233553 reduced to 548749 </span></span>
-<span><span class="co">#&gt; ( 0 were flipped to match the reference set)</span></span>
-<span><span class="co">#&gt; ( 36301 are ambiguous, of which 36301 were removed)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpptKMxO/gt_merged_42bc4e3e7eb.gt</span></span>
-<span><span class="co">#&gt; using bigSNP file: /tmp/RtmpptKMxO/gt_merged_42bc4e3e7eb.rds</span></span>
-<span><span class="co">#&gt; with backing file: /tmp/RtmpptKMxO/gt_merged_42bc4e3e7eb.bk</span></span>
-<span><span class="co">#&gt; make sure that you do NOT delete those files!</span></span>
-<span><span class="co">#&gt; to reload the gen_tibble in another session, use:</span></span>
-<span><span class="co">#&gt; gt_load('/tmp/RtmpptKMxO/gt_merged_42bc4e3e7eb.gt')</span></span></code></pre></div>
-<p>Then, we group the ancient and modern data by population:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ancient_modern</span> <span class="op">&lt;-</span> <span class="va">ancient_modern</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">ancient_modern</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">ho_modern</span>, <span class="va">ancient</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## harmonising loci between two datasets</span></span>
+<span><span class="co">## flip_strand =  FALSE  ; remove_ambiguous =  FALSE </span></span>
+<span><span class="co">## -----------------------------</span></span>
+<span><span class="co">## dataset: reference </span></span>
+<span><span class="co">## number of SNPs: 548749 reduced to 548749 </span></span>
+<span><span class="co">## ( 0 are ambiguous, of which 0  were removed)</span></span>
+<span><span class="co">## -----------------------------</span></span>
+<span><span class="co">## dataset: target </span></span>
+<span><span class="co">## number of SNPs: 1233553 reduced to 548749 </span></span>
+<span><span class="co">## ( 0 were flipped to match the reference set)</span></span>
+<span><span class="co">## ( 36301 are ambiguous, of which 36301 were removed)</span></span></code></pre>
+<pre><code><span><span class="co">## </span></span>
+<span><span class="co">## gen_tibble saved to /tmp/RtmpCiUGZs/gt_merged_2a451c66a8d408.gt</span></span></code></pre>
+<pre><code><span><span class="co">## using FBM RDS: /tmp/RtmpCiUGZs/gt_merged_2a451c66a8d408.rds</span></span></code></pre>
+<pre><code><span><span class="co">## with FBM backing file: /tmp/RtmpCiUGZs/gt_merged_2a451c66a8d408.bk</span></span></code></pre>
+<pre><code><span><span class="co">## make sure that you do NOT delete those files!</span></span></code></pre>
+<pre><code><span><span class="co">## to reload the gen_tibble in another session, use:</span></span></code></pre>
+<pre><code><span><span class="co">## gt_load('/tmp/RtmpCiUGZs/gt_merged_2a451c66a8d408.gt')</span></span></code></pre>
 <p>As we are calculating Fst between populations, we will remove any
 populations that contain only one individual.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ancient_modern</span> <span class="op">&lt;-</span> <span class="va">ancient_modern</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <p>And then we can calculate Fst:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pairwise_fst_tidy</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pairwise_pop_fst.html">pairwise_pop_fst</a></span><span class="op">(</span><span class="va">ancient_modern</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"Hudson"</span>,</span>
 <span>  type <span class="op">=</span> <span class="st">"tidy"</span></span>
@@ -307,7 +303,7 @@ populations that contain only one individual.</p>
 <p>We can then assign time ranges to the populations based on their
 names. This will allow us to group populations by time period when
 creating our plot:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pairwise_fst_tidy</span> <span class="op">&lt;-</span> <span class="va">pairwise_fst_tidy</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>time_range_pop1 <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case-and-replace-when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
 <span>    <span class="fu">str_detect</span><span class="op">(</span><span class="va">population_1</span>, <span class="st">"BA"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Bronze Age"</span>,</span>
@@ -330,7 +326,7 @@ creating our plot:</p>
 <p>After adding the time ranges, we can filter the pairwise Fst data to
 only include comparisons between populations from the same time range,
 and set these ranges as factor levels to order the plot:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pairwise_fst_tidy</span> <span class="op">&lt;-</span> <span class="va">pairwise_fst_tidy</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">time_range_pop1</span> <span class="op">==</span> <span class="va">time_range_pop2</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>time_range_pop1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">time_range_pop1</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
@@ -341,7 +337,7 @@ and set these ranges as factor levels to order the plot:</p>
 <span>  <span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Finally, we will calculate the median, minimum, and maximum values
 for each time range, so that these can be added to the plot:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">medians</span> <span class="op">&lt;-</span> <span class="va">pairwise_fst_tidy</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">time_range_pop1</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>median_value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">value</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
@@ -358,7 +354,7 @@ for each time range, so that these can be added to the plot:</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>max_value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">value</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>We can create our plot using ggplot2, adding the median, minimum, and
 maximum values as lines and text labels:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">pairwise_fst_tidy</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">value</span>, y <span class="op">=</span> <span class="va">time_range_pop1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span></span>
@@ -374,6 +370,7 @@ maximum values as lines and text labels:</p>
 <span>    label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">max_value</span>, <span class="fl">3</span><span class="op">)</span>, vjust <span class="op">=</span> <span class="op">-</span><span class="fl">0.7</span></span>
 <span>  <span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="st">"F"</span><span class="op">[</span><span class="va">ST</span><span class="op">]</span><span class="op">)</span>, y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning: `label` cannot be a &lt;ggplot2::element_blank&gt; object.</span></span></code></pre>
 <div class="float">
 <img src="figure/aDNA_pseudohaploids/pairwise_fst-1.png" alt="plot of chunk pairwise_fst"><div class="figcaption">plot of chunk pairwise_fst</div>
 </div>
@@ -388,7 +385,7 @@ statistics from a <code>gen_tibble</code> object, operating in the same
 way as the <code>extract_f2</code> function of
 <code>admixtools</code>.</p>
 <p><code>gt_extract_f2</code> can be used as follows:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f2s</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_extract_f2.html">gt_extract_f2</a></span><span class="op">(</span><span class="va">ancient_modern</span>,</span>
 <span>  outdir <span class="op">=</span> <span class="st">"./data/NearEastPublic/f2"</span></span>
 <span><span class="op">)</span></span></code></pre></div>

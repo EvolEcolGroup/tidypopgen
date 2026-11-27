@@ -1,5 +1,15 @@
 # PCA for `gen_tibble` objects by partial SVD
 
+**\[deprecated\]**
+
+This function is deprecated: use
+[`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca.md),
+whose default method gives the same results on complete or imputed
+genotypes (it uses imputed genotypes only if the `gen_tibble` is set to
+use them, see
+[`gt_set_imputed()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_set_imputed.md)),
+is faster, and handles missing genotypes as PLINK does.
+
 This function performs Principal Component Analysis on a `gen_tibble`,
 by partial SVD through the eigen decomposition of the covariance. It
 works well if the number of individuals is much smaller than the number
@@ -7,6 +17,21 @@ of loci; otherwise,
 [`gt_pca_randomSVD()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca_randomSVD.md)
 is a better option. This function is a wrapper for
 [`bigstatsr::big_SVD()`](https://privefl.github.io/bigstatsr/reference/big_SVD.html).
+
+With up to a few thousand individuals, this is usually much faster than
+[`gt_pca_randomSVD()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca_randomSVD.md)
+(on 1,043 individuals and 643,733 loci, about 31 s on one core against
+about 175 s). The covariance between individuals is kept in memory,
+which takes 8 bytes per pair of individuals (about 0.2 GB for 5,000
+individuals, and 3.2 GB for 20,000); with many more individuals,
+[`gt_pca_randomSVD()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca_randomSVD.md)
+uses much less memory.
+
+The genotypes are read in blocks of loci, decoded as doubles, of about 1
+GB (set by `options(bigstatsr.block.sizeGB)`). A smaller size reduces
+the memory used, at the cost of some speed: on the same data, blocks of
+0.25 GB (`options(bigstatsr.block.sizeGB = 0.25)`) reduced the peak
+memory from about 2.0 to 0.6 GB, and took about 25% longer.
 
 ## Usage
 
@@ -70,23 +95,6 @@ with elements: A named list (an S3 class "big_SVD") of
 - `square_frobenius`, used to compute the proportion of variance
   explained by the components (optional)
 
-## Details
-
-With up to a few thousand individuals, this is usually much faster than
-[`gt_pca_randomSVD()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca_randomSVD.md)
-(on 1,043 individuals and 643,733 loci, about 31 s on one core against
-about 175 s). The covariance between individuals is kept in memory,
-which takes 8 bytes per pair of individuals (about 0.2 GB for 5,000
-individuals, and 3.2 GB for 20,000); with many more individuals,
-[`gt_pca_randomSVD()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca_randomSVD.md)
-uses much less memory.
-
-The genotypes are read in blocks of loci, decoded as doubles, of about 1
-GB (set by `options(bigstatsr.block.sizeGB)`). A smaller size reduces
-the memory used, at the cost of some speed: on the same data, blocks of
-0.25 GB (`options(bigstatsr.block.sizeGB = 0.25)`) reduced the peak
-memory from about 2.0 to 0.6 GB, and took about 25% longer.
-
 ## Note
 
 Rather than accessing these elements directly, it is better to use
@@ -103,7 +111,7 @@ attempting to scale.' indicates that monomorphic markers are present.
 which this function wraps.
 
 Other gt_pca_functions:
-[`gt_pca`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca.md),
+[`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca.md),
 [`gt_pca_autoSVD()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca_autoSVD.md),
 [`gt_pca_randomSVD()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca_randomSVD.md)
 
@@ -127,8 +135,12 @@ gt_pca_partialSVD(lobsters,
   k = 10,
   total_var = TRUE
 )
+#> Warning: `gt_pca_partialSVD()` was deprecated in tidypopgen 1.1.0.
+#> ℹ Please use `gt_pca()` instead.
 #>  === PCA of gen_tibble object ===
 #> Method: [1] "partialSVD"
+#> 
+#> Genotypes: imputed 
 #> 
 #> Call ($call):gt_pca_partialSVD(x = lobsters, k = 10, total_var = TRUE)
 #> 
@@ -148,6 +160,8 @@ gt_pca_partialSVD(lobsters,
 )
 #>  === PCA of gen_tibble object ===
 #> Method: [1] "partialSVD"
+#> 
+#> Genotypes: imputed 
 #> 
 #> Call ($call):gt_pca_partialSVD(x = lobsters, k = 5, total_var = FALSE)
 #> 
