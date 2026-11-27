@@ -4,6 +4,20 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-27 (manica01): 1.1.0 release PRs, and a Windows test fix
+
+- **Done:** #246 squash-merged (`8c2f1a6d`, Andrea); its CI found the TGENO
+  test (`8284e14d`) failing on Windows (path separators; never checked, as
+  it was pushed with a `[skip ci]` commit): fixed in #248, CI passing.
+  #247 (`dev` into `main`, "v1.1.0") opened. R-hub on
+  `fix-tgeno-test-windows`: Status OK on linux, windows, macos-arm64 and m1-san (R-devel), no notes. win-builder uploaded from `dev`
+  (old ERROR) and from the fix branch (results by email).
+- **Decisions:** merge #248 before #247 (Claude); the `[skip ci]` rule
+  added to `.claude/CLAUDE.md`.
+- **Notes changed:** `cran_checks_2026-11-27.md` ("Release steps"),
+  `handover.md` and `summary.md` (rewritten on `dev` from the
+  `sex_chromosomes` copy), `.claude/CLAUDE.md`.
+
 ## 2026-11-27 (manica01): final CRAN checks of 1.1.0
 
 - **Done:** the pre-submission checks re-run on `dev` (`4374e70d`) with the

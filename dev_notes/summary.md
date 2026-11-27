@@ -1,15 +1,16 @@
 # tidypopgen: summary
 
-Updated 2026-11-21 (laptopX1, `pca_missing` merged into `grouping`). One section: the package's issue in
+Updated 2026-11-27 (manica01: release of 1.1.0 under way; rewritten on
+`dev` from the copy on `sex_chromosomes`). One section: the package's issue in
 dramanica/claude_jobs, with the single list of its tasks. Its first
 paragraph, status and next steps are copied into the issue
 (`scripts/sync_issue.py`).
 
 ## tidypopgen: dramanica/claude_jobs#5
 
-Population genetics with `gen_tibble`s: faster input (VCF reading in `dev`, merging of VCFs prototyped), analyses with missing genotypes without imputation (PCA, DAPC, pcadapt, LD clumping and pruning), and fast kinship and inbreeding within groups.
+Population genetics with `gen_tibble`s: faster input (VCF reading in `dev`, merging of VCFs prototyped), analyses with missing genotypes without imputation (PCA, DAPC, pcadapt, LD clumping and pruning), fast kinship and inbreeding within groups, and sex chromosomes and mtDNA.
 
-**Status.** PR #231 (`pca_missing` into `dev`, with #232 and #233, the review fixes, and grouped `pairwise_king()` and `indiv_inbreeding()` in one pass) passes CI except codecov (patch coverage 94.7%, target 95.5%), and waits for Andrea's review; PR #235 (`grouping` into `pca_missing`: vignettes grouped early, grouped `rbind()` and `gt_add_sf()` fixed) is open, without conflicts. Prototypes on `merge_vcf_speed` make `gt_merge_vcfs()` 1.6x faster on many single-sample files with identical outputs (desktop, sgdp-like, 8 threads, 16.7 -> 10.5 s), and on `king_plink_ideas` a two-path KING kernel makes the full matrix 1.76x faster on the desktop with AVX2 (6.56 -> 3.72 s on 1 thread, 1.4x faster than PLINK 2) and 1.3x faster without, outputs identical; for large PLINK files, the parallel `.bed` reader with size checks (PR #234) is merged into `pca_missing`. Handover: `dev_notes/handover.md` on `pca_missing`; `vcf_merge.md`, `pairwise_bitpacked.md`, `bed_reader.md`, `gt_save_speed.md`.
+**Status.** 1.1.0 is ready for CRAN once Andrea merges #248 (a test that failed on Windows, found by CI; its CI passes) and #247 (`dev` into `main`, which rebuilds the site for two README links): `dev` has the version and `cran-comments.md` (#246), and the local `R CMD check --as-cran` is clean (0/0/4 expected notes); R-hub on the fix branch is OK on all four platforms, with no notes. Sex chromosomes and mtDNA, phase 1, is on the branch `sex_chromosomes` (pushed, no PR), waiting for Andrea's review. Handover: `dev_notes/handover.md` on `dev`, `cran_checks_2026-11-27.md`, `sex_chromosomes_plan.md` (on `sex_chromosomes`).
 
 With missing genotypes, imputation pulls individuals with many missing
 genotypes together and makes missingness an axis of the PCA (on HGDP650, PC1
@@ -19,16 +20,25 @@ genotyped individuals and leave out loci with more than half their genotypes
 missing; clumping is 33 times faster than bigsnpr and much closer to the
 complete-data clumps; pruning reproduces PLINK's `--indep-pairwise`. Within
 groups, KING on HGDP650 by population takes 0.081 s on 8 cores (10.3 s with
-`group_map()`), and inbreeding 0.44 s (4.4 s). Version 1.1.0 (with the VCF
-work) is not released yet.
+`group_map()`), and inbreeding 0.44 s (4.4 s). All this is in 1.1.0, being
+released.
 
 `gt_merge_vcfs()` read each file twice; reading it once and parsing lines in
 parallel removes most of the cost (1.6x on files with one sample, 1.1-1.25x
 on files with 100). On the desktop it is 3.4-7.1x faster than
 `bcftools merge`, and on a par with plink2 on files with 100 samples (3.5-4.4x
 faster on single-sample files). For KING, the two paths Andrea proposed (AVX2 where available, the tiles
-elsewhere) are implemented, tested and timed on the desktop; a PR needs a
-build without AVX2 checked, and Andrea's decision.
+elsewhere) are merged (#239).
+
+Sex chromosomes and mtDNA (26 Nov): chromosomes named X, Y, Z, W, XY/PAR
+and MT are recognised, and numeric codes are declared (e.g. PLINK's human
+23-26 with `chr_set = "human"`). VCF readers now store a haploid call of a
+diploid as a homozygote (0/2), as PLINK does (it was 0/1, like a
+heterozygote), and a VCF starting with chrX gives diploid males. About 40
+functions that assume diploid autosomes (PCA, KING, IBS, GRM, inbreeding,
+ROH, f2, ADMIXTURE, sNMF, `pop_*`) leave out X/Y/MT with a message, as
+PLINK; `gt_as_plink()` wrote MT as 23 (X for PLINK), now fixed. Sex-aware
+statistics on X and MT are phase 2.
 
 On the baboon data (486 x 166M SNPs; its `.bim` was truncated at 91M loci,
 which `gen_tibble()` now reports as an error; the redownloaded `.bim`
@@ -40,21 +50,17 @@ but Andrea judged it not worth the complexity (with that many loci
 `names_as_int = TRUE` is needed anyway): it is kept as a patch in the notes.
 
 **Next steps**
-- [ ] **P1** [review] Review and merge PR #235 (`grouping` into `pca_missing`), then review the fixes (boxes of the review report) and the grouped `pairwise_king()` and `indiv_inbreeding()`, and merge PR #231: done when #231 is in `dev`.
+- [ ] **P1** [review] Release 1.1.0: merge #248 (Windows test fix), then #247 (`dev` into `main`; if squash-merged, start pkgdown on `main` by hand, as its message has `[skip ci]`); then `urlchecker::url_check()`, fill the two TODOs of `cran-comments.md` from the second win-builder email (from `fix-tgeno-test-windows`; the first has the old Windows ERROR), and `devtools::submit_cran()` from a clone of `main`: done when CRAN accepts it (then tag, `use_dev_version()`).
+- [ ] **P1** [review] Review the branch `sex_chromosomes` (pushed; `sex_chromosomes_plan.md`, "As built"), then push an empty commit (its head is `[skip ci]`) and open a PR into `dev`: done when merged (move its NEWS items if 1.1.0 is released first).
 - [ ] **P2** [desktop] Re-time the HGDP650 PCA/DAPC/pcadapt/LD benchmarks on the P-cores (not set up): medians in `gt_pca.md`, `ld_missing.md`.
-- [ ] **P2** [claude] Make `merge_vcf_speed` ready for a PR (file names in pass-1 errors, a cache-vs-reread test, full suite, `gen_tibble()` timing): done when a PR into `dev` is open, after #231.
-- [ ] **P2** [claude] Keep optimising: pcadapt's t-scores, the GRM's count of shared loci, the DAPC regression, KING: check a build of the two-path kernel without AVX2 (`king_plink_ideas` `e2692136`; 1.76x on the desktop), then a PR if Andrea agrees: done when >5% faster with identical outputs.
-- [ ] **P2** [review] Release 1.1.0 after #231: set the version, merge `dev` into `main`, re-run `urlchecker::url_check()` and submit (from 15 Nov; not rechecked).
-- [ ] **P3** [cleanup] Delete merged branches (`bed_reader` on origin, `pca_missing`, then `merge_vcf_speed`, `king_*` once decided); review the other local branches on the laptop; ask before deleting the benchmark data on the laptop's annex and in `~/claude_work/tidypopgen/` on the desktop.
+- [ ] **P2** [claude] Keep optimising: pcadapt's t-scores, the GRM's count of shared loci, the DAPC regression, the other KING and VCF merge ideas: done when >5% faster with identical outputs.
+- [ ] **P3** [decide] The GRM diagonal of pseudohaploids in `gt_pca(method = "partial")`: coded 0/2 with the diploid scaling, their relationships are unbiased but their self-term is about 2 instead of 1; subtract their expected extra sampling variance from the diagonal (as GCTA does), never rescale them? Test on NORNE against projection (handover, task 5).
+- [ ] **P3** [decide] Sex chromosomes and mtDNA, phase 2: which sex-aware statistics first (frequencies and missingness on X, HWE on X, Fst on X/MT, heterozygous haploid counts)? Recommended: frequencies and missingness on X first, as most others build on them.
+- [ ] **P3** [decide] Look into the package split when ready (`package_split.md`: decisions, phases, open questions; Phase 0 after 1.1.0).
+- [ ] **P3** [cleanup] Delete `vignette_filtering` once Andrea has switched his checkout; after the release, `cran_submission` and `revdep/` on the laptop's annex; ask before deleting the benchmark data and prototypes on the laptop's annex (`bench_*`, `test_timing/`, `proj_proto/`, `ld_src/`) and in `~/claude_work/tidypopgen/` (incl. `pr_timing/`, `articles_2026-11-22/`) on the desktop.
 
 **Done**
-- `pca_missing` merged into `grouping` (conflicts only in the dev notes): 21 Nov.
-- Desktop timings of the VCF merge and KING prototypes, 1 and 8 threads, against bcftools, plink2 and PLINK 2 (job `vcf_merge_king`; outputs identical): 20 Nov.
-- PR #234 (parallel `.bed` reader) merged into `pca_missing` (`58821fab`); the redownloaded baboon `.bim` and `.fam` checked against the `.bed` (all 166M loci) and put in place; local `bed_reader` branch and its work folder (14 GB) deleted: 20 Nov.
-- Readable a03 figures and tidy HGDP benchmark filters on `grouping` (re-rendered on the desktop), PR #235 opened: 20 Nov.
-- Parallel `.bed` reader with size and magic checks (PR #234; `.bed` step 1.5x on 8 cores from an SSD, none from a hard disk), on the baboon data; `.gt` alleles as codes prototyped and not adopted (Andrea; patch in `dev_notes/gt_save_speed/`): 20 Nov.
-- Balanced laptop timings of the VCF merge prototypes (4 threads) and of the KING prototypes against PLINK 2 (1 and 4 threads), written up: 20 Nov.
-- VCF merge prototypes and PLINK 2 KING comparison written up, both branches pushed after the annex failure (`git fsck` clean): 20 Nov.
-- Grouped `indiv_inbreeding()` in one pass (4.4 -> 0.44 s by population), KING fallback removed: 19 Nov (`5718c15c`, `f6110412`).
-- `pairwise_king()` within groups, faster bit-packed packing (4.5-5.4x on grouped KING, ~20% on full matrices); SIMD packing left on `king_simd_packing` (below the 1.5x bar): 19 Nov.
-- Review fixes (hang with custom scalings, `max_missing` for DAPC and pcadapt, pcadapt with a complete PCA, at most `n_cores` cores in the randomised SVDs, LD and #232 test gaps, input checks), verified, merged into `pca_missing` and pushed; decisions on chromosome "0" and pcadapt (Andrea): 19 Nov.
+- #246 merged (`8c2f1a6d`; version 1.1.0, `fbm` in WORDLIST, Jan Wigginton as `cph` (Andrea), `cran-comments.md`); local `R CMD check --as-cran` 0/0/4 expected notes; PR #247 (`dev` into `main`) and #248 (Windows test fix, CI passing) opened; R-hub and win-builder run: 27 Nov.
+- Sex chromosomes and mtDNA, phase 1, on the branch `sex_chromosomes` (`b1fb3203`..`f4de9505`); behaviour changes for data with X/Y/MT accepted (Andrea): 26 Nov.
+- TGENO reader (AADR) on `dev` (`8284e14d`): 25 Nov.
+- #244 merged (`bd2e5082`; `gt_pca()` accepts pseudohaploids, coded as homozygous diploids): 23 Nov (Andrea).

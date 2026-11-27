@@ -9,7 +9,7 @@ installed there; the 22 Nov checks ran on R 4.6.2 on the laptop), branch
 
 ## Summary
 
-**Ready, apart from the release order and the remote checks.** One issue
+**Ready once #248 (a Windows test fix, found by CI after the checks below) and #247 are merged, and the remote checks and the URL check are done** (see "Release steps"). One issue
 found and fixed (a word for `inst/WORDLIST`). Nothing in the code or the
 docs blocks the submission. Left: merge the branch into `dev`, merge `dev`
 into `main` so that pkgdown publishes the two articles the README links to,
@@ -28,6 +28,34 @@ submission.
 | `devtools::check(remote = TRUE, manual = TRUE, env_vars = c(NOT_CRAN = "false"))` | 0 errors, 0 warnings, 4 notes, all expected (below). Install 1.7 min, examples 1.0 min (0.9 with `--run-donttest`), tests 2.5 min, vignettes 0.5 min, 11.6 min in all. INFO installed size 43.4 Mb (`libs` 38.5 Mb, with debug symbols); INFO hexbin not installed on manica01 (its code paths were skipped, as on a CRAN machine without it) |
 | Hidden files | none: the tarball was built from the main clone, not a worktree, so no `.git` NOTE |
 | Reverse dependency `dartR.base` | not re-run: it only calls `gen_tibble()` on VCF files, `show_loci()` and `show_genotypes()`, none changed since its check on 22 Nov (the `gen_tibble()` changes are for packedancestry files only) |
+
+## Release steps (27 Nov, from 17:00)
+
+- **#246** (this branch) squash-merged into `dev` (`8c2f1a6d`, 17:12).
+  Its squash message lists the `[skip ci]` notes commits, so no CI ran on
+  `dev` after the merge (see `.claude/CLAUDE.md`); the CI of #246 ran on
+  the same tree (`b89d9ec5`).
+- **Windows failure:** that CI failed on windows-latest (release), 2
+  failures at `test_gen_tibble_packedancestry.R:37` (the TGENO test of
+  `8284e14d`, never checked by CI, as it was pushed with a `[skip ci]`
+  commit): `gt_get_file_names()` gives the backing file with backslashes,
+  the test joined the folder and the name with `/`. A test bug, but CRAN's
+  Windows checks would have failed. Fixed in **#248**
+  (`fix-tgeno-test-windows`, normalised paths on both sides): all its CI
+  passes, Windows included. Waits for Andrea's merge.
+- **#247** (`dev` into `main`, "v1.1.0") opened; no CI on it (its head is
+  the `[skip ci]` squash of #246). Merge #248 first. If #247 is
+  squash-merged, its message has `[skip ci]` lines and pkgdown will not
+  run on `main`: the watcher of this session starts it
+  (`gh workflow run pkgdown.yaml --ref main`) if no run appears.
+- **R-hub:** run 46040022538 on `dev` (before #248): windows failed (the
+  same test), then cancelled. Run 46042287173 on `fix-tgeno-test-windows`
+  (the package of `dev` after #248): Status OK on linux, windows, macos-arm64 and m1-san (R-devel), no notes.
+- **win-builder r-devel:** uploaded twice, both results emailed to Andrea:
+  at 17:15 from `dev` before #248 (expect the same test ERROR: ignore it),
+  and at about 17:50 from `fix-tgeno-test-windows` (the one for
+  `cran-comments.md`).
+- **URL check:** waits for the site rebuilt from `main` (after #247).
 
 ## Fixed on `cran-fixes-2026-11-27`
 
