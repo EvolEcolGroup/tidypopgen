@@ -3,7 +3,7 @@
 Updated 2026-11-28 (laptopX1: 1.1.0 accepted by CRAN on 27 Nov, tagged
 `v1.1.0`; `main` is the release (#249); #245 and #250 (ancestry tracts,
 sex chromosomes) merged into `dev`, now 1.1.0.9001; #251 (version-bump
-check) open). Rewritten on
+check) merged). Rewritten on
 `dev` from the copy of 26-27 Nov on `sex_chromosomes` (itself from the
 23 Nov copy on `split_plan`): merge the living documents by hand when those
 branches reach `dev`. Some documents named below are only on those
@@ -17,25 +17,20 @@ History is in `progress.md`; designs are in the topic documents listed in
 
 | branch | purpose | base | pushed | merged |
 |---|---|---|---|---|
-| `version_bump_check` | #251: CI workflow `version-bump.yaml`, fails PRs into `dev` that change the built package without a version bump | `dev` at `ad21fc61` | yes | PR #251 |
 | `split_plan` | dev notes only: the plan for the package split (`package_split.md`, `package_split/`) and older living documents; merge into `dev` (no code, `[skip ci]`) | `dev` at `e20145a2` | yes | no |
 | `ploidy_roadmap` | Max Brown's dev notes: roadmap to arbitrary ploidy and the ploidy audit (`dev_notes/ploidy/`); not in `dev`, no PR | `dev` | yes | no |
 | `as_fbm`, `skill` | `gt_as_fbm()` (Aug) and tooling to build a Claude skill (Oct); not in `dev`, kept (Andrea, 21 Nov) | old `dev` | yes | no |
 
 ## Next tasks
 
-### 1. **P1** [review] Review and merge #251 (version-bump check)
+### Done: #251 (version-bump check), 28 Nov
 
-- **What:** `.github/workflows/version-bump.yaml` fails a PR into `dev`
-  that changes the built package without a `Version` above `dev`'s tip;
-  `.Rbuildignore`d files need no bump; label `skip-version-bump` skips it.
-  Tested locally: fails the original #245, passes #250, an article-only
-  change and #251 itself (`.github/` only, so no bump needed).
-- **Why:** #245 was merged without a bump (no rule said so). The rule is
-  now in `~/.claude/CLAUDE.md` ("bump the development version with each
-  merged PR") and `r-package-development` (claude_jobs `3040b72`).
-- **Done when:** merged; optionally make it a required check on `dev`
-  (unprotected now).
+- `.github/workflows/version-bump.yaml` (squashed, `f0554dd6`) fails a PR
+  into `dev` that changes the built package without a `Version` above
+  `dev`'s tip; `.Rbuildignore`d files need no bump; label
+  `skip-version-bump` skips it. Not a required check (`dev` is
+  unprotected): make it one if wanted. The rule is also in
+  `~/.claude/CLAUDE.md` and `r-package-development`.
 
 ### Done: #250 (sex chromosomes and mtDNA, phase 1), 28 Nov
 
@@ -126,7 +121,7 @@ History is in `progress.md`; designs are in the topic documents listed in
   `release_1.1.0`, the three 1.1.0 release branches, the local
   `gt_pca_pseudohaploid`, and the worktrees `wt_sexchr`,
   `tidypopgen_phased_ancestry`, `tidypopgen_pseudo`.
-- Branches: `version_bump_check` after #251 is merged; on manica01 the
+- Branches: on manica01 the
   local `cran-fixes-2026-11-27` and `fix-tgeno-test-windows` (deleted on
   origin, merged). The worktree
   `/media/andrea/annex/tmp/claude/tidypopgen_notes` (on `split_plan`).

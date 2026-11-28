@@ -10,7 +10,7 @@ paragraph, status and next steps are copied into the issue
 
 Population genetics with `gen_tibble`s: faster input (VCF reading in `dev`, merging of VCFs prototyped), analyses with missing genotypes without imputation (PCA, DAPC, pcadapt, LD clumping and pruning), fast kinship and inbreeding within groups, and sex chromosomes and mtDNA.
 
-**Status.** 1.1.0 is on CRAN (27 Nov), tagged `v1.1.0` on the submitted commit (`e865cf14`, `dev`); `dev` is 1.1.0.9000, `main` is the release plus the updated laptop benchmark numbers (#249); extended phased codes for ancestry tracts (#245) and sex chromosomes and mtDNA, phase 1 (#250) are merged into `dev` (1.1.0.9001, both experimental), and a stress test shows their attributes survive any order of operations. #251 (CI check of version bumps in PRs into `dev`) waits for review. Handover: `dev_notes/handover.md` on `dev`, `cran_checks_2026-11-27.md`, `sex_chromosomes_plan.md` (on `sex_chromosomes`).
+**Status.** 1.1.0 is on CRAN (27 Nov), tagged `v1.1.0` on the submitted commit (`e865cf14`, `dev`); `dev` is 1.1.0.9000, `main` is the release plus the updated laptop benchmark numbers (#249); extended phased codes for ancestry tracts (#245) and sex chromosomes and mtDNA, phase 1 (#250) are merged into `dev` (1.1.0.9001, both experimental), and a stress test shows their attributes survive any order of operations. #251 (CI check of version bumps in PRs into `dev`) is merged. Handover: `dev_notes/handover.md` on `dev`, `cran_checks_2026-11-27.md`, `sex_chromosomes_plan.md` (on `sex_chromosomes`).
 
 With missing genotypes, imputation pulls individuals with many missing
 genotypes together and makes missingness an axis of the PCA (on HGDP650, PC1
@@ -49,16 +49,16 @@ but Andrea judged it not worth the complexity (with that many loci
 `names_as_int = TRUE` is needed anyway): it is kept as a patch in the notes.
 
 **Next steps**
-- [ ] **P1** [review] Review and merge #251 (CI: PRs into `dev` that change the package must bump the version): done when merged; optionally a required check on `dev`.
 - [ ] **P2** [andrea] Make a GitHub release for `v1.1.0` (blocked for Claude by a permission check): `gh release create v1.1.0 --verify-tag` with the 1.1.0 NEWS.
 - [ ] **P2** [desktop] Re-time the HGDP650 PCA/DAPC/pcadapt/LD benchmarks on the P-cores (not set up): medians in `gt_pca.md`, `ld_missing.md`.
 - [ ] **P2** [claude] Keep optimising: pcadapt's t-scores, the GRM's count of shared loci, the DAPC regression, the other KING and VCF merge ideas: done when >5% faster with identical outputs.
 - [ ] **P3** [decide] The GRM diagonal of pseudohaploids in `gt_pca(method = "partial")`: coded 0/2 with the diploid scaling, their relationships are unbiased but their self-term is about 2 instead of 1; subtract their expected extra sampling variance from the diagonal (as GCTA does), never rescale them? Test on NORNE against projection (handover, task 5).
 - [ ] **P3** [decide] Sex chromosomes and mtDNA, phase 2: which sex-aware statistics first (frequencies and missingness on X, HWE on X, Fst on X/MT, heterozygous haploid counts)? Recommended: frequencies and missingness on X first, as most others build on them.
 - [ ] **P3** [decide] Look into the package split when ready (`package_split.md`: decisions, phases, open questions; Phase 0 after 1.1.0).
-- [ ] **P3** [cleanup] Delete `version_bump_check` after #251; on manica01 the local `cran-fixes-2026-11-27` and `fix-tgeno-test-windows`; `revdep/` on the laptop's annex and the 27 Nov `R CMD check` output on manica01; ask before deleting the benchmark data and prototypes on the laptop's annex (`bench_*`, `test_timing/`, `proj_proto/`, `ld_src/`) and in `~/claude_work/tidypopgen/` (incl. `pr_timing/`, `articles_2026-11-22/`) on the desktop.
+- [ ] **P3** [cleanup] On manica01, delete the local `cran-fixes-2026-11-27` and `fix-tgeno-test-windows`; `revdep/` on the laptop's annex and the 27 Nov `R CMD check` output on manica01; ask before deleting the benchmark data and prototypes on the laptop's annex (`bench_*`, `test_timing/`, `proj_proto/`, `ld_src/`) and in `~/claude_work/tidypopgen/` (incl. `pr_timing/`, `articles_2026-11-22/`) on the desktop.
 
 **Done**
+- #251 merged (`f0554dd6`, CI check of version bumps), `version_bump_check` deleted: 28 Nov.
 - Deleted `sex_chromosomes`, `phased_ancestry`, `vignette_filtering`, `ccr-2e473cc7-1prukj` and the local `gt_pca_pseudohaploid`, with their worktrees; both checkouts (laptop, manica01) on `dev`: 28 Nov.
 - #250 squashed into `dev` (`2fe8fded`, 1.1.0.9001, README: experimental features); attribute stress test passed (`dev_notes/attribute_stress/`); version-bump rule in CLAUDE.md and `r-package-development`, #251 opened: 28 Nov.
 - #249 merged (`main` = `v1.1.0` + laptop benchmark, `f9619a81`); #245 squashed into `dev` (`a8cb2501`); PR #250 opened (sex chromosomes); `release_1.1.0` and `update_benchmark` deleted: 28 Nov.
