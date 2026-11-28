@@ -17,13 +17,8 @@ History is in `progress.md`; designs are in the topic documents listed in
 
 | branch | purpose | base | pushed | merged |
 |---|---|---|---|---|
-| `sex_chromosomes` | #250, squashed into `dev` (`2fe8fded`); its worktree `/media/andrea/annex/tmp/claude/tidypopgen/wt_sexchr`: delete both (waiting for Andrea's OK) | `dev` | yes | squashed in #250 |
 | `version_bump_check` | #251: CI workflow `version-bump.yaml`, fails PRs into `dev` that change the built package without a version bump | `dev` at `ad21fc61` | yes | PR #251 |
 | `split_plan` | dev notes only: the plan for the package split (`package_split.md`, `package_split/`) and older living documents; merge into `dev` (no code, `[skip ci]`) | `dev` at `e20145a2` | yes | no |
-| `vignette_filtering` | Andrea's vignette edits, the base of #242: delete once he has switched (about 13 of its lines are not in `dev`: older `big_data` timings, a 0.045 missingness threshold, some wording, probably superseded) | `dev` | yes | squashed in #242 |
-| `phased_ancestry` | #245 (extended phased codes), squashed into `dev` (`a8cb2501`); its worktree `/media/andrea/annex/git/tidypopgen_phased_ancestry`: delete both (waiting for Andrea's OK) | `dev` | yes | squashed in #245 |
-| `gt_pca_pseudohaploid` | local only (#244, code identical to `dev`), worktree `/media/andrea/annex/tmp/claude/tidypopgen_pseudo`: delete (waiting for Andrea's OK) | old `dev` | no | squashed in #244 |
-| `ccr-2e473cc7-1prukj` | no commits beyond `dev`: delete (waiting for Andrea's OK) | `dev` | yes | yes |
 | `ploidy_roadmap` | Max Brown's dev notes: roadmap to arbitrary ploidy and the ploidy audit (`dev_notes/ploidy/`); not in `dev`, no PR | `dev` | yes | no |
 | `as_fbm`, `skill` | `gt_as_fbm()` (Aug) and tooling to build a Claude skill (Oct); not in `dev`, kept (Andrea, 21 Nov) | old `dev` | yes | no |
 
@@ -126,21 +121,20 @@ History is in `progress.md`; designs are in the topic documents listed in
 - Done on 22 Nov: the merged branches, the worktrees and the scratch of
   the CRAN checks on the laptop; on manica01, the worktree `wt_grouping`
   (its local branch `grouping` is kept) and the stopped `revdep/`.
-- Branches: `vignette_filtering` (once Andrea has switched his checkout),
-  and `update_benchmark` (applied; ask Andrea); the local `gt_pca_pseudohaploid`
-  and its worktree `/media/andrea/annex/tmp/claude/tidypopgen_pseudo`, and
-  the worktree `/media/andrea/annex/tmp/claude/tidypopgen_notes` (#244,
-  23 Nov). The worktree `wt_notes` (on
-  `split_plan`) on the laptop's annex.
-- `sex_chromosomes`: its worktree
-  `/media/andrea/annex/tmp/claude/tidypopgen/wt_sexchr` once the PR is
-  merged; the parser timings in
+- Done on 28 Nov: `sex_chromosomes`, `phased_ancestry`,
+  `vignette_filtering`, `ccr-2e473cc7-1prukj`, `update_benchmark`,
+  `release_1.1.0`, the three 1.1.0 release branches, the local
+  `gt_pca_pseudohaploid`, and the worktrees `wt_sexchr`,
+  `tidypopgen_phased_ancestry`, `tidypopgen_pseudo`.
+- Branches: `version_bump_check` after #251 is merged; on manica01 the
+  local `cran-fixes-2026-11-27` and `fix-tgeno-test-windows` (deleted on
+  origin, merged). The worktree
+  `/media/andrea/annex/tmp/claude/tidypopgen_notes` (on `split_plan`).
+- The parser timings of `sex_chromosomes` in
   `/media/andrea/annex/tmp/claude/tidypopgen/parser_ab/` (the two source
   archives and scripts) and `~/project_temp/claude/tidypopgen/parser_ab/`
   on manica01 (the two -O2 libraries of `4374e70d` and `815611fa`, their
-  source archives and the scripts, 94 MB): ask Andrea before deleting. The
-  PLINK 1.9 binary downloaded for the fixture was deleted (Andrea's choice:
-  download to scratch, delete at the end).
+  source archives and the scripts, 94 MB): ask Andrea before deleting.
 - Now that 1.1.0 is released: `revdep/` and `revdep.sh` under
   `/media/andrea/annex/tmp/claude/tidypopgen/` (the scratch library with
   `dartR.data` and the `dartR.base` checks).
