@@ -46,6 +46,25 @@ byte 4 as 1.
 second haplotype of an individual (\code{NA} for missing, and for bytes that are
 not used).
 }
+\section{Extended phased codes}{
+Other packages can annotate the haplotypes of phased genotypes (e.g. with
+their local ancestry) by using bytes above 4. An \emph{extended phased code}
+keeps bytes 0 to 4 of \code{code_phased}, and adds blocks of five bytes with the
+same meaning: byte \code{b >= 5} stores the genotype of byte \code{(b - 5) \%\% 5}, so
+that its \code{code256} repeats \code{c(0, 1, 2, NA, 1)} for each block (bytes 0 to
+\code{5 * n - 1}, for \code{n} blocks of five bytes including the first one) and is
+\code{NA} for the bytes after. Functions that decode genotypes through \code{code256}
+therefore see ordinary dosages, and \code{\link[=is_phased]{is_phased()}}, \code{\link[=show_haplotypes]{show_haplotypes()}} and
+\code{\link[=gt_as_vcf]{gt_as_vcf()}} decode the genotype of each byte (and write the phased
+genotype only). What the blocks mean is up to the package that writes them;
+tidypopgen only carries, unchanged, the attribute \code{"ancestry_labels"} of
+the \code{genotypes} column. \link[=rbind.gen_tbl]{rbind()} keeps the bytes only if
+both datasets use the same code and the same \code{"ancestry_labels"};
+otherwise it recodes each byte into the genotype it stores (bytes 0 to 4),
+uses \code{code_phased}, and drops the annotations with a message.
+\code{\link[=gt_set_imputed]{gt_set_imputed()}} does not work on phased data.
+}
+
 \examples{
 code_phased[1:6]
 phased_bytes[1:6, ]

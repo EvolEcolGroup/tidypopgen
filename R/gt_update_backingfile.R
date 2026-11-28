@@ -64,6 +64,11 @@ gt_update_backingfile <- function(
   # get the 256 code
   original_256code <- attr(.x$genotypes, "fbm")$code256
   original_imputation_code <- attr(.x$genotypes, "imputed")
+  # the labels of extended phased codes (see ?phased_encoding), whose bytes
+  # are copied unchanged
+  original_ancestry_labels <- attr(.x$genotypes, "ancestry_labels",
+    exact = TRUE
+  )
 
   # initialise a FBM with the dimensions of the data used in the gen_tibble
   new_bk_matrix <- bigstatsr::FBM.code256(
@@ -156,6 +161,10 @@ gt_update_backingfile <- function(
   # add imputation code
   if (!is.null(original_imputation_code)) {
     attr(new_gen_tbl$genotypes, "imputed") <- original_imputation_code
+  }
+  # and the ancestry labels
+  if (!is.null(original_ancestry_labels)) {
+    attr(new_gen_tbl$genotypes, "ancestry_labels") <- original_ancestry_labels
   }
 
   gt_save_light(new_gen_tbl, file_name = file_name, quiet = TRUE)

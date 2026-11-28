@@ -83,9 +83,14 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE) {
   )
   if (is_phased(x)) {
     # phased genotypes: the string of each raw value gives the alleles of the
-    # two haplotypes (see phased_bytes)
-    genotypes_lut <- paste0(phased_bytes[, 1], "|", phased_bytes[, 2])
-    genotypes_lut[is.na(phased_bytes[, 1]) | is.na(phased_bytes[, 2])] <- ".|."
+    # two haplotypes (see phased_bytes; with an extended phased code, bytes
+    # above 4 give the genotype of byte (b - 5) %% 5, and only the phased
+    # genotype is written)
+    bytes_table <- phased_bytes_table(
+      phased_code_blocks(.gt_get_fbm(x)$code256)
+    )
+    genotypes_lut <- paste0(bytes_table[, 1], "|", bytes_table[, 2])
+    genotypes_lut[is.na(bytes_table[, 1]) | is.na(bytes_table[, 2])] <- ".|."
   } else {
     # create a lookup table with the string for each raw value of the FBM, by
     # recoding its decoded dosages (dosages other than 0, 1 and 2, e.g. imputed
