@@ -1,6 +1,7 @@
 # tidypopgen: handover
 
-Updated 2026-11-27 (manica01: release of 1.1.0 under way). Rewritten on
+Updated 2026-11-27 (laptopX1: 1.1.0 failed CRAN's Debian pre-test, fixed
+on `dev`, ready to resubmit; earlier, manica01: `main` at `aee65ae5`). Rewritten on
 `dev` from the copy of 26-27 Nov on `sex_chromosomes` (itself from the
 23 Nov copy on `split_plan`): merge the living documents by hand when those
 branches reach `dev`. Some documents named below are only on those
@@ -14,8 +15,7 @@ History is in `progress.md`; designs are in the topic documents listed in
 
 | branch | purpose | base | pushed | merged |
 |---|---|---|---|---|
-| `fix-tgeno-test-windows` | #248: the TGENO test compares normalised backing file paths (it failed on Windows, found by the CI of #246); all CI passes, Windows included | `dev` at `8c2f1a6d` | yes | no (PR #248) |
-| `dev` | #247 into `main` ("v1.1.0"): the release | | yes | no (PR #247) |
+| `fix-tgeno-test-windows` | #248: the TGENO test compares normalised backing file paths (it failed on Windows); delete after the release | `dev` at `8c2f1a6d` | yes | squashed in #248 (`fe0be84f`) |
 | `sex_chromosomes` | phase 1 of sex chromosomes and mtDNA (`sex_chromosomes_plan.md`, "As built"): chromosome types, VCF haploid genotypes as 0/2, `indiv_sex_check()`, autosome-only analyses, haploid VCF output and PLINK codes, an article; worktree `/media/andrea/annex/tmp/claude/tidypopgen/wt_sexchr` on the laptop | `dev` at `4374e70d` | yes, as a backup (27 Nov; no PR until Andrea's review) | no |
 | `split_plan` | dev notes only: the plan for the package split (`package_split.md`, `package_split/`) and older living documents; merge into `dev` (no code, `[skip ci]`) | `dev` at `e20145a2` | yes | no |
 | `cran-fixes-2026-11-27` | #246 (version 1.1.0, WORDLIST, Jan Wigginton as `cph`, `cran-comments.md`): delete | `dev` at `4374e70d` | yes | squashed in #246 (`8c2f1a6d`) |
@@ -25,39 +25,40 @@ History is in `progress.md`; designs are in the topic documents listed in
 
 ## Next tasks
 
-### 1. **P1** [review] Release 1.1.0: merge #248 and #247, then submit
+### 1. **P1** [andrea] Resubmit 1.1.0 to CRAN
 
-- **State (27 Nov, 18:00):** `dev` (`8c2f1a6d`) has version 1.1.0 and the
-  final `cran-comments.md` (#246). Local `R CMD check --as-cran` on
-  manica01 (R 4.5.2): 0 errors, 0 warnings, 4 expected notes
-  (`cran_checks_2026-11-27.md`). The CI of #246 then found a test failing
-  on Windows (the TGENO test of `8284e14d`, pushed with a `[skip ci]`
-  commit, so never checked): fixed in #248, whose CI passes everywhere.
-  R-hub on `fix-tgeno-test-windows` (run 46042287173): Status OK on linux, windows, macos-arm64 and m1-san (R-devel), no notes.
-  win-builder r-devel: two uploads, results emailed to Andrea; only the
-  second (from `fix-tgeno-test-windows`, about 17:50) counts, the first
-  (from `dev`, 17:15) has the Windows test ERROR.
-- **Order:**
-  1. Merge #248 (squash) into `dev`.
-  2. Merge #247 (`dev` into `main`). If squash-merged, delete the
-     `[skip ci]` lines from its message, or pkgdown will not run on `main`
-     (then start it: `gh workflow run pkgdown.yaml --ref main`); the
-     session of 27 Nov runs a watcher that does it, if it is still alive.
-     Check that `articles/missing_data.html` and `articles/rad_seq.html`
-     exist on https://evolecolgroup.github.io/tidypopgen/.
-  3. `urlchecker::url_check()`: no 404s expected.
-  4. `cran-comments.md`: fill the two TODOs from the second win-builder
-     result (its notes; "Days since last update" if it is flagged), on
-     `main` and `dev`.
-  5. Submit from a clone of `main`, not a worktree (a worktree's `.git`
-     file gives a hidden-file NOTE): `devtools::submit_cran()`, and
-     confirm CRAN's email.
-  6. After acceptance: tag the release (`usethis::use_github_release()`),
-     `usethis::use_dev_version()` on `dev`, delete `cran_submission`,
-     `cran-fixes-2026-11-27` and `fix-tgeno-test-windows`; then re-check
-     CRAN's test times (`test_times_2026-11.md`, on `split_plan`).
-- **Gotcha:** `[skip ci]` anywhere in a squash message skips CI and
-  pkgdown (`.claude/CLAUDE.md`).
+- **State (27 Nov, evening): ready to resubmit.** The first submission
+  (laptop checkout, `d0776110`) passed the Windows pre-test but failed
+  the Debian one: `test_gen_tibble.R:514` got "truncated" for a gzipped
+  `.ped` with a wrong CRC, as zlib >= 1.3.1.2 (Debian has 1.3.2) changed
+  `gzread()`. Fixed on `dev` (`401e2a96`), with a "Resubmission" section in
+  `cran-comments.md` (`238487f3`; CI all green on it); details in
+  `cran_checks_2026-11-27.md`
+  ("CRAN pre-test of the first submission"). Resubmit the same version,
+  1.1.0, from `dev` (`git pull` first) with `devtools::submit_cran()`.
+  `main` no longer matches `dev` (it lacks the zlib fix and two docs
+  commits): after acceptance, bring `main` up to `dev` through the merge
+  queue before tagging.
+- **State (27 Nov, 19:00): ready.** `main` (`aee65ae5`, "v1.1.0", #247)
+  and `dev` hold the same package: version 1.1.0 (#246) and the Windows
+  test fix (#248); `main` is merged back into `dev` (`c1311429`). The site
+  is rebuilt and `urlchecker::url_check()` is clean. Checks: local
+  `R CMD check --as-cran` 0/0/4 expected notes; R-hub (linux, windows,
+  macos-arm64, m1-san) Status OK; win-builder r-devel 1 NOTE (CRAN
+  incoming: admixtools, plus GitHub time-outs and the two articles, then
+  not yet online); CI on `dev` after #248: all green (R-CMD-check on macOS, Windows and Ubuntu devel, release and oldrel; no-suggests, lint, pkgdown, coverage). Details in
+  `cran_checks_2026-11-27.md`.
+- **Submit:** `devtools::submit_cran()` from `~/git/tidypopgen` on `dev`
+  (manica01, a normal clone: a worktree's `.git` file gives a hidden-file
+  NOTE; `main` lacks the final `cran-comments.md`, `530d7af0`), then
+  confirm CRAN's email.
+- **After acceptance:** tag the release on `main`
+  (`usethis::use_github_release()`), `usethis::use_dev_version()` on
+  `dev`, delete `cran_submission`, `cran-fixes-2026-11-27` and
+  `fix-tgeno-test-windows`; re-check CRAN's test times
+  (`test_times_2026-11.md`, on `split_plan`).
+- **Gotchas:** `main` takes PRs only through its merge queue (squash), and
+  `[skip ci]` in a squash message skips CI and pkgdown (`.claude/CLAUDE.md`).
 - **Done when:** CRAN accepts 1.1.0.
 
 ### 2. **P1** [review] Review `sex_chromosomes`, then open a PR

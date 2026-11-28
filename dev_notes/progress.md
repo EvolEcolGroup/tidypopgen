@@ -4,6 +4,33 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-27 (laptopX1): CRAN pre-test failure fixed (zlib 1.3.2), CI fixed
+
+- **Done:** lint on `dev` failed on a trailing space from "mention
+  tidygenclust": fixed (`36643d2f`); the tidygenclust note of
+  `gt_admixture()` made its own paragraph of the Description (`b9ab348c`,
+  asked by Andrea). The CRAN pre-test of 1.1.0 (submitted from
+  `d0776110`) failed on Debian: a gzipped `.ped` with a wrong CRC was
+  reported as truncated, because zlib >= 1.3.1.2 `gzread()` returns the
+  data read before an error. Fixed in `src/line_reader.h` (`401e2a96`),
+  checked with zlib 1.3 and 1.3.2 (preloaded from the `plink19` conda
+  env); resubmission note in `cran-comments.md` (`238487f3`). CI on
+  `238487f3`: all green.
+- **Next:** Andrea resubmits 1.1.0 from `dev`.
+- **Notes changed:** `cran_checks_2026-11-27.md`, `handover.md`,
+  `summary.md`.
+
+## 2026-11-27 (manica01): 1.1.0 merged into `main`, ready to submit
+
+- **Done:** #248 squash-merged into `dev` (`fe0be84f`), #247 through
+  `main`'s merge queue (`aee65ae5`), `main` merged back into `dev`
+  (`c1311429`), all with Andrea's go-ahead; site rebuilt, URL check clean;
+  win-builder (the fix branch): 1 NOTE, admixtools (plus transient GitHub
+  504s); `cran-comments.md` final (`530d7af0`). CI on `dev`: all green (R-CMD-check on macOS, Windows and Ubuntu devel, release and oldrel; no-suggests, lint, pkgdown, coverage).
+- **Next:** Andrea submits from `~/git/tidypopgen` on `dev`.
+- **Notes changed:** `cran_checks_2026-11-27.md`, `handover.md`,
+  `summary.md`, `.claude/CLAUDE.md` (the merge queue of `main`).
+
 ## 2026-11-27 (manica01): 1.1.0 release PRs, and a Windows test fix
 
 - **Done:** #246 squash-merged (`8c2f1a6d`, Andrea); its CI found the TGENO

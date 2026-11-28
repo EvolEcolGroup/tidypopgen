@@ -40,3 +40,10 @@
   the squash message.
 - So: push code commits on their own (or end the push with a commit without
   `[skip ci]`), and check that CI ran (`gh run list --commit <sha>`).
+- `main` takes PRs only through a merge queue (squash; no required checks):
+  `gh pr merge` fails there ("merge strategy set by the merge queue", and
+  auto-merge is off). Enqueue with
+  `gh api graphql -f query='mutation($id:ID!){enqueuePullRequest(input:{pullRequestId:$id}){mergeQueueEntry{position state}}}' -f id=$(gh pr view <n> --json id -q .id)`.
+  Its squash message lists all the commits, so a release from `dev` skips
+  CI and pkgdown on `main`. Then merge `main` back into `dev` (no file
+  changes), so that `main` stays an ancestor of `dev`.
