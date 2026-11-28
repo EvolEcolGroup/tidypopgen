@@ -156,12 +156,12 @@ merged_gt <- rbind(ref = example_gt, target = test_gt, flip_strand = TRUE)
 #> ( 0 were flipped to match the reference set)
 #> ( 4 are ambiguous, of which 4 were removed)
 #> 
-#> gen_tibble saved to /tmp/RtmppG3Wt3/gt_merged_1f7a4e1b1c5.gt
-#> using FBM RDS: /tmp/RtmppG3Wt3/gt_merged_1f7a4e1b1c5.rds
-#> with FBM backing file: /tmp/RtmppG3Wt3/gt_merged_1f7a4e1b1c5.bk
+#> gen_tibble saved to /tmp/Rtmpo1kR2l/gt_merged_1f4d1c1c57ef.gt
+#> using FBM RDS: /tmp/Rtmpo1kR2l/gt_merged_1f4d1c1c57ef.rds
+#> with FBM backing file: /tmp/Rtmpo1kR2l/gt_merged_1f4d1c1c57ef.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmppG3Wt3/gt_merged_1f7a4e1b1c5.gt')
+#> gt_load('/tmp/Rtmpo1kR2l/gt_merged_1f4d1c1c57ef.gt')
 
 merged_gt
 #> # A gen_tibble: 2 loci
