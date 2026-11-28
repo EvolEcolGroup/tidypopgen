@@ -399,16 +399,15 @@ Core(TM) Ultra 7 155H, 22 CPU and 31 GiB of RAM, limiting the number of
 cores to 4. Here is a summary of the time taken (in seconds) to perform
 each step of the analyses:
 
-    #>            step  time
-    #> 1    read_plink  2.01
-    #> 2   loci_report  0.11
-    #> 3   filter_loci  3.17
-    #> 4  indiv_report  0.37
-    #> 5  filter_indiv  0.01
-    #> 6        impute  0.96
-    #> 7   ld_clumping  6.83
-    #> 8           pca  5.06
-    #> 9          dapc  0.32
-    #> 10 pairwise_fst  0.33
-    #> 11   plink_save   0.3
-    #> 12        Total 19.47
+    #>            step time
+    #> 1    read_plink 1.31
+    #> 2   loci_report 0.25
+    #> 3   filter_loci 0.03
+    #> 4  indiv_report 0.44
+    #> 5  filter_indiv 0.51
+    #> 6   ld_clumping 1.62
+    #> 7           pca 2.06
+    #> 8          dapc 0.86
+    #> 9  pairwise_fst 0.29
+    #> 10   plink_save 0.38
+    #> 11        Total 7.75
