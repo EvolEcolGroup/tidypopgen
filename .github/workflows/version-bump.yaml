@@ -1,0 +1,83 @@
+# Fails a pull request into dev that changes the built package without
+# bumping the development version in DESCRIPTION (e.g. 1.1.0.9001 to
+# 1.1.0.9002). Files left out of the built package (.Rbuildignore, as
+# R CMD build applies it) need no bump. The label "skip-version-bump" skips
+# the check.
+on:
+  pull_request:
+    branches: [dev]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+name: version-bump.yaml
+
+permissions: read-all
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  version-bump:
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-version-bump') }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check the version in DESCRIPTION
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          python3 - <<'PY'
+          import os, re, subprocess, sys
+
+          def git(*args):
+              return subprocess.run(["git", *args], capture_output=True,
+                                    text=True, check=True).stdout
+
+          base, head = os.environ["BASE_SHA"], os.environ["HEAD_SHA"]
+          merge_base = git("merge-base", base, head).strip()
+          changed = [f for f in git("diff", "--name-only", merge_base, head).splitlines() if f]
+
+          # .Rbuildignore patterns (Perl regular expressions, case-insensitive),
+          # matched against each file and each of its parent directories
+          patterns = []
+          try:
+              for line in git("show", f"{head}:.Rbuildignore").splitlines():
+                  line = line.strip()
+                  if line and not line.startswith("#"):
+                      patterns.append(re.compile(line, re.IGNORECASE))
+          except subprocess.CalledProcessError:
+              pass
+
+          def ignored(path):
+              parts = path.split("/")
+              prefixes = ["/".join(parts[:i]) for i in range(1, len(parts) + 1)]
+              return any(p.search(q) for p in patterns for q in prefixes)
+
+          built = [f for f in changed if not ignored(f)]
+          if not built:
+              print("Only files left out of the built package changed: no bump needed.")
+              sys.exit(0)
+
+          def version(ref):
+              desc = git("show", f"{ref}:DESCRIPTION")
+              m = re.search(r"^Version:\s*(\S+)", desc, re.MULTILINE)
+              return m.group(1)
+
+          def as_tuple(v):
+              return tuple(int(x) for x in re.split(r"[.-]", v))
+
+          v_base, v_head = version(base), version(head)
+          print(f"Files of the built package changed: {len(built)}, e.g. {built[:5]}")
+          print(f"Version: {v_base} (dev) -> {v_head} (this PR)")
+          if as_tuple(v_head) <= as_tuple(v_base):
+              print(f"::error file=DESCRIPTION::Bump the development version "
+                    f"(e.g. {v_base} -> a higher fourth component) and put the "
+                    f"NEWS items under the development version heading, or add "
+                    f"the label 'skip-version-bump'.")
+              sys.exit(1)
+          print("Version bumped.")
+          PY
