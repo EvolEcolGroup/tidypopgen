@@ -40,6 +40,15 @@ gt_as_plink(
 - chromosomes_as_int:
 
   boolean whether to use the integer representation of the chromosomes
+  (for "bed" files): numbers are kept, and sex chromosomes and mtDNA
+  (see
+  [`gt_chromosome_types()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_chromosome_types.md))
+  get PLINK's codes: with n autosomes, X (or Z) is n+1, Y (or W) n+2,
+  the pseudo-autosomal regions (XY) n+3 and MT n+4, where n is the
+  number of autosomes declared with `chr_set` in
+  [`gt_set_chromosome_types()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_chromosome_types.md),
+  or 22 (PLINK's default, for humans), or the largest number of an
+  autosome if it is larger; other names are numbered after n+4.
 
 ## Value
 
@@ -79,13 +88,13 @@ example_gt <- load_example_gt("gen_tbl")
 
 # Write a bed file
 example_gt %>% gt_as_plink(type = "bed", file = paste0(tempfile(), "_plink"))
-#> [1] "/tmp/Rtmp30nl4q/file209e673dfe40_plink.bed"
+#> [1] "/tmp/Rtmp8cEXfI/file20364977dc3e_plink.bed"
 
 # Write a ped file
 example_gt %>% gt_as_plink(type = "ped", file = paste0(tempfile(), "_plink"))
-#> [1] "/tmp/Rtmp30nl4q/file209e56bdfc41_plink.ped"
+#> [1] "/tmp/Rtmp8cEXfI/file20361e67733f_plink.ped"
 
 # Write a raw file
 example_gt %>% gt_as_plink(type = "raw", file = paste0(tempfile(), "_plink"))
-#> [1] "/tmp/Rtmp30nl4q/file209e5eb1f0dc_plink.raw"
+#> [1] "/tmp/Rtmp8cEXfI/file20366209b470_plink.raw"
 ```

@@ -37,6 +37,13 @@ install.packages("pak")
 pak::pak("EvolEcolGroup/tidypopgen@dev")
 ```
 
+**Experimental features in the development version:** phased genotypes
+(including the extended phased codes used to store ancestry tracts) and
+sex chromosomes and mtDNA (chromosome types, haploid genotypes and
+[`indiv_sex_check()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_sex_check.md))
+are experimental. Their syntax might change whilst they are in the
+development version.
+
 ## Examples
 
 There are several vignettes designed to teach you how to use
@@ -176,6 +183,11 @@ Functions for creating, saving, and loading `gen_tibble` objects.
   :
 
   Set the ploidy of a `gen_tibble` to include pseudohaploids
+
+- [`gt_set_chromosome_types()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_chromosome_types.md)
+  [`gt_chromosome_types()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_chromosome_types.md)
+  [`loci_chromosome_types()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_chromosome_types.md)
+  : Types of chromosomes: autosomes, sex chromosomes and mtDNA
 
 ## Show
 
@@ -357,6 +369,11 @@ Functions reporting summary statistics for a `gen_tibble`.
 
 Functions operating across loci.
 
+- [`gt_set_chromosome_types()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_chromosome_types.md)
+  [`gt_chromosome_types()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_chromosome_types.md)
+  [`loci_chromosome_types()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_chromosome_types.md)
+  : Types of chromosomes: autosomes, sex chromosomes and mtDNA
+
 - [`loci_alt_freq()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_alt_freq.md)
   [`loci_maf()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_alt_freq.md)
   : Estimate allele frequencies at each locus
@@ -404,6 +421,8 @@ Functions operating across individuals.
   : Estimate individual missingness
 - [`indiv_ploidy()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_ploidy.md)
   : Return individual ploidy
+- [`indiv_sex_check()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_sex_check.md)
+  : Check the sex of individuals from their sex chromosomes
 
 ## Population
 
@@ -818,6 +837,8 @@ objects.
   must](https://evolecolgroup.github.io/tidypopgen/dev/articles/missing_data.md):
 - [Working with aDNA
   pseudohaploids](https://evolecolgroup.github.io/tidypopgen/dev/articles/aDNA_pseudohaploids.md):
+- [Sex chromosomes and
+  mtDNA](https://evolecolgroup.github.io/tidypopgen/dev/articles/sex_chromosomes.md):
 - [Spatial interpolation of genetic
   data](https://evolecolgroup.github.io/tidypopgen/dev/articles/interpolating.md):
 - [Runs of

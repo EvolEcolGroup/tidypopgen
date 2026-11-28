@@ -15,7 +15,7 @@ memory."><meta property="og:image" content="https://evolecolgroup.github.io/tidy
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.1.0.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.1.0.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,6 +32,7 @@ memory."><meta property="og:image" content="https://evolecolgroup.github.io/tidy
     <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis</a></li>
     <li><a class="dropdown-item" href="../articles/missing_data.html">Missing genotypes: impute only when you must</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseudohaploids</a></li>
+    <li><a class="dropdown-item" href="../articles/sex_chromosomes.html">Sex chromosomes and mtDNA</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
     <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
@@ -97,6 +98,19 @@ exists?</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>the path of the .vcf file</p>
     </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>On sex chromosomes and the mitochondrial genome (see
+<code><a href="gt_chromosome_types.html">gt_chromosome_types()</a></code>), hemizygous genotypes (stored as homozygotes, as
+in PLINK) are written as haploid genotypes (e.g. <code>1</code> rather than <code>1/1</code>):
+those of individuals of the heterogametic sex (males with X and Y, females
+with Z and W; from the <code>sex</code> column) on X (or Z) outside the
+pseudo-autosomal regions and on Y (or W), and those of all individuals on
+MT (and on Y or W if their sex is unknown). Heterozygous genotypes of
+hemizygous individuals are written as missing (<code>.</code>), as PLINK treats them
+as missing, with a message giving their number, and the genotypes of the
+homogametic sex on Y (or W) are written as missing.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
@@ -104,7 +118,7 @@ exists?</p></dd>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Write a vcf file</span></span></span>
 <span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">gt_as_vcf</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/Rtmp30nl4q/file209e4c103c44.vcf"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/Rtmp8cEXfI/file20367456f6dc.vcf"</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

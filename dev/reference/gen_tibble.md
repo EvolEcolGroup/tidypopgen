@@ -220,22 +220,28 @@ an object of the class `gen_tbl`.
 ## Details
 
 - *VCF* files: the fast `cpp` parser is used by default. Both `cpp` and
-  `vcfR` parsers attempt to establish ploidy from the first variant; if
-  that variant is found in a sex chromosome (or mtDNA), the parser will
-  fail with 'Error: a genotype has more than max_ploidy alleles...'. To
-  successful import such a *VCF*, change the order of variants so that
-  the first chromosome is an autosome using a tool such as `vcftools`.
-  Individuals with a missing genotype ('.') on the first variant get
-  their ploidy from their first genotype that is not '.': the `cpp`
-  parser looks for it in the next 1,000 variants only (so that the
-  search does not slow down parsing), the `vcfR` parser in the whole
-  file. Individuals with no such genotype get the largest ploidy of the
-  other individuals (or 2, if no ploidy is known). Currently, only
-  biallelic SNPs are supported. If haploid variants (e.g. sex
-  chromosomes) are included in the *VCF*, they are not transformed into
-  homozygous calls. Instead, reference alleles will be coded as 0 and
-  alternative alleles will be coded as 1. The phase of phased genotypes
-  (e.g. `0|1`) is ignored, unless `phased = TRUE` (see below).
+  `vcfR` parsers establish the ploidy of each individual from its
+  genotype at the first variant. Genotypes that give no information on
+  ploidy are skipped: missing genotypes ('.'), and haploid genotypes on
+  chromosomes recognised as sex chromosomes or mtDNA (e.g. the X of a
+  male; see
+  [`gt_chromosome_types()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_chromosome_types.md)).
+  Individuals with such a genotype on the first variant get their ploidy
+  from their first informative genotype: the `cpp` parser looks for it
+  in the next 1,000 variants only (so that the search does not slow down
+  parsing), the `vcfR` parser in the whole file. Individuals with no
+  such genotype get the largest ploidy of the other individuals (or 2,
+  if no ploidy is known). Sex chromosomes named with numbers (e.g. 23)
+  are not recognised: if the first variant is on such a chromosome, the
+  parser may fail with 'Error: a genotype has more than max_ploidy
+  alleles...'; change the order of variants so that the first chromosome
+  is an autosome using a tool such as `vcftools`. Currently, only
+  biallelic SNPs are supported. A haploid genotype of an individual of
+  higher ploidy (e.g. the X chromosome of a diploid male) is stored as a
+  homozygote, as PLINK stores hemizygous genotypes: a reference allele
+  is coded as 0, and an alternative allele as the ploidy of the
+  individual (2 for a diploid). The phase of phased genotypes (e.g.
+  `0|1`) is ignored, unless `phased = TRUE` (see below).
 
 - *PLINK* files (.bed, .ped, or a bigSNP .rds): the individual
   information (from the .fam file, or the first six columns of the .ped
@@ -261,7 +267,8 @@ an object of the class `gen_tbl`.
   read into memory in one go if it is smaller than 2 GB (and otherwise
   in slabs of loci, using up to 2 GB of memory). When loading
   *packedancestry* files, missing alleles will be converted from 'X' to
-  NA
+  NA. The sex of individuals (M or F in the .ind file) is stored as
+  `sex`, as for PLINK files (U is NA).
 
 - Phased genotypes: with `phased = TRUE`, `gen_tibble()` creates a
   phased `gen_tibble` of diploid individuals, which also knows which
@@ -279,10 +286,11 @@ an object of the class `gen_tbl`.
   (with parser "cpp"), in which all individuals have to be diploid and
   all genotypes phased (with `|`, e.g. `0|1`): any unphased genotype
   (with `/`, including `0/0` and `./.`) is an error, naming the
-  individual and the locus, and a genotype with a missing allele (e.g.
-  `.|.`, `0|.`, or a single `.`) is missing. They can also be created
-  from a matrix of haplotypes, with two rows per individual (the first
-  and second haplotypes of individual `i` are rows `2 * i - 1` and
+  individual and the locus, a genotype with a missing allele (e.g.
+  `.|.`, `0|.`, or a single `.`) is missing, and a haploid genotype
+  (e.g. `1`, the X of a male) is a homozygote (`1|1`). They can also be
+  created from a matrix of haplotypes, with two rows per individual (the
+  first and second haplotypes of individual `i` are rows `2 * i - 1` and
   `2 * i`) and one column per locus, containing 0 (reference allele), 1
   (alternate allele) or `NA` (if either haplotype is missing, the
   genotype is missing).

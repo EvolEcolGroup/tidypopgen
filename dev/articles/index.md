@@ -12,6 +12,8 @@
   must](https://evolecolgroup.github.io/tidypopgen/dev/articles/missing_data.md):
 - [Working with aDNA
   pseudohaploids](https://evolecolgroup.github.io/tidypopgen/dev/articles/aDNA_pseudohaploids.md):
+- [Sex chromosomes and
+  mtDNA](https://evolecolgroup.github.io/tidypopgen/dev/articles/sex_chromosomes.md):
 - [Spatial interpolation of genetic
   data](https://evolecolgroup.github.io/tidypopgen/dev/articles/interpolating.md):
 - [Runs of

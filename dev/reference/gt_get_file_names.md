@@ -40,6 +40,6 @@ example_gt <- load_example_gt("gen_tbl")
 
 # To retrieve the names of and paths to the .bk and .rds files use:
 gt_get_file_names(example_gt)
-#> [1] "/tmp/Rtmp30nl4q/file209e43af5cb8.rds"
-#> [2] "/tmp/Rtmp30nl4q/file209e43af5cb8.bk" 
+#> [1] "/tmp/Rtmp8cEXfI/file203647e44b90.rds"
+#> [2] "/tmp/Rtmp8cEXfI/file203647e44b90.bk" 
 ```

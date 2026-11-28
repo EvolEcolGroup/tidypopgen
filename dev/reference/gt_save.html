@@ -25,7 +25,7 @@ default level of saveRDS() is slow."><meta property="og:image" content="https://
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.1.0.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.1.0.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,6 +42,7 @@ default level of saveRDS() is slow."><meta property="og:image" content="https://
     <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis</a></li>
     <li><a class="dropdown-item" href="../articles/missing_data.html">Missing genotypes: impute only when you must</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseudohaploids</a></li>
+    <li><a class="dropdown-item" href="../articles/sex_chromosomes.html">Sex chromosomes and mtDNA</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
     <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
@@ -133,15 +134,15 @@ that <code><a href="gt_load.html">gt_load()</a></code> with <code>reattach_to</c
 <span class="r-in"><span><span class="co"># save filtered gen_tibble object</span></span></span>
 <span class="r-in"><span><span class="fu">gt_save</span><span class="op">(</span><span class="va">example_gt</span>, file_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"_example_filtered"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/Rtmp30nl4q/file209e7183f193_example_filtered.gt</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/Rtmp30nl4q/file209e25837d4b.rds</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/Rtmp30nl4q/file209e25837d4b.bk</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/Rtmp8cEXfI/file203657812f80_example_filtered.gt</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/Rtmp8cEXfI/file20362f31d05f.rds</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/Rtmp8cEXfI/file20362f31d05f.bk</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> make sure that you do NOT delete those files!</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> to reload the gen_tibble in another session, use:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/Rtmp30nl4q/file209e7183f193_example_filtered.gt')</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/Rtmp30nl4q/file209e7183f193_example_filtered.gt"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2] "/tmp/Rtmp30nl4q/file209e25837d4b.rds"                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3] "/tmp/Rtmp30nl4q/file209e25837d4b.bk"                 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/Rtmp8cEXfI/file203657812f80_example_filtered.gt')</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/Rtmp8cEXfI/file203657812f80_example_filtered.gt"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2] "/tmp/Rtmp8cEXfI/file20362f31d05f.rds"                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3] "/tmp/Rtmp8cEXfI/file20362f31d05f.bk"                 </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

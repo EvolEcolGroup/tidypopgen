@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.1.0.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.1.0.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,6 +44,7 @@
     <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis</a></li>
     <li><a class="dropdown-item" href="../articles/missing_data.html">Missing genotypes: impute only when you must</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseudohaploids</a></li>
+    <li><a class="dropdown-item" href="../articles/sex_chromosomes.html">Sex chromosomes and mtDNA</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
     <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
@@ -158,7 +159,9 @@ to PLINK flags such as –extract or –autosome, it is necessary to use the
 <code>gen_tibble</code> with <code><a href="../reference/select_loci_if.html">select_loci_if()</a></code>. For
 example:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_chromosomes.html">loci_chromosomes</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">22</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/gt_chromosome_types.html">gt_set_chromosome_types</a></span><span class="op">(</span>chr_set <span class="op">=</span> <span class="st">"human"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/gt_chromosome_types.html">loci_chromosome_types</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op">==</span> <span class="st">"autosome"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A gen_tibble: 15 loci</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble:     5 × 4</span></span></span>
 <span><span class="co">#&gt;   id    population sex    genotypes</span></span>
@@ -168,8 +171,10 @@ example:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> GRC26 pop_a      male   [0,1,...]</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> GRC27 pop_a      male   [0,0,...]</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> GRC28 pop_a      male   [0,0,...]</span></span></code></pre></div>
-<p>will select autosomal loci in the same way as –autosome. Or
-alternatively:</p>
+<p>will select autosomal loci in the same way as –autosome
+(<code>chr_set = "human"</code> declares PLINK’s numeric codes of the
+human sex chromosomes and mtDNA, 23 to 26; chromosomes named X, Y, XY
+and MT are recognised without it). Or alternatively:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_snps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rs4477212"</span>, <span class="st">"rs3094315"</span>, <span class="st">"rs3131972"</span>, <span class="st">"rs12124819"</span>, <span class="st">"rs11240777"</span><span class="op">)</span></span>
 <span></span>
@@ -278,6 +283,48 @@ columns ‘id’ and ‘to_keep’, showing the ID of individuals and a logical
 column of whether the individual should be removed to retain the largest
 possible set of individuals with no relationships above the
 threshold.</p>
+</div>
+<div class="section level2">
+<h2 id="sex-chromosomes-and-mtdna">Sex chromosomes and mtDNA:<a class="anchor" aria-label="anchor" href="#sex-chromosomes-and-mtdna"></a>
+</h2>
+<table class="table">
+<colgroup>
+<col width="28%">
+<col width="71%">
+</colgroup>
+<thead><tr class="header">
+<th>PLINK</th>
+<th><code>tidypopgen</code></th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>–chr-set 22</td>
+<td><code>gt_set_chromosome_types(data, chr_set = 22)</code></td>
+</tr>
+<tr class="even">
+<td>–split-x b37</td>
+<td><code>gt_set_chromosome_types(data, par = "b37")</code></td>
+</tr>
+<tr class="odd">
+<td>–autosome</td>
+<td><code>select_loci_if(loci_chromosome_types(genotypes) == "autosome")</code></td>
+</tr>
+<tr class="even">
+<td>–check-sex</td>
+<td><code>indiv_sex_check(data)</code></td>
+</tr>
+<tr class="odd">
+<td>–check-sex ycount</td>
+<td><code>indiv_sex_check(data, ycount = TRUE)</code></td>
+</tr>
+</tbody>
+</table>
+<p>As in PLINK, hemizygous genotypes (e.g. the X of a male) are stored
+as homozygotes, and analyses that assume diploid autosomes
+(e.g. <code><a href="../reference/gt_pca.html">gt_pca()</a></code>, <code><a href="../reference/pairwise_king.html">pairwise_king()</a></code>,
+<code><a href="../reference/indiv_het_obs.html">indiv_het_obs()</a></code>, <code><a href="../reference/pop_fst.html">pop_fst()</a></code>) only use autosomal
+loci, saying how many they left out. See the article on sex chromosomes
+and mtDNA.</p>
 </div>
 <div class="section level2">
 <h2 id="merging-datasets">Merging datasets:<a class="anchor" aria-label="anchor" href="#merging-datasets"></a>

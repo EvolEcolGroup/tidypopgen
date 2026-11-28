@@ -14,6 +14,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/missing_data.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/rad_seq.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/roh_hgdp.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/sex_chromosomes.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/sfs.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/tidypopgen.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/authors.html</loc></url>
@@ -67,6 +68,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_as_hierfstat.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_as_plink.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_as_vcf.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_chromosome_types.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_cluster_pca.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_cluster_pca_best_k.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_concat_vcfs.html</loc></url>
@@ -104,6 +106,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_inbreeding.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_missingness.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_ploidy.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_sex_check.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/is_loci_table_ordered.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/is_phased.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/jackknife_nwise_pop_pbs.html</loc></url>

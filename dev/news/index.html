@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.1.0.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.1.0.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,6 +24,7 @@
     <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis</a></li>
     <li><a class="dropdown-item" href="../articles/missing_data.html">Missing genotypes: impute only when you must</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseudohaploids</a></li>
+    <li><a class="dropdown-item" href="../articles/sex_chromosomes.html">Sex chromosomes and mtDNA</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
     <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
@@ -49,8 +50,26 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="tidypopgen-development-version">tidypopgen (development version)<a class="anchor" aria-label="anchor" href="#tidypopgen-development-version"></a></h2>
-<ul><li>extended phased codes, whose bytes above 4 repeat the phased genotypes in blocks of five so that other packages can annotate haplotypes (e.g. with local ancestry), are recognised by <code><a href="../reference/is_phased.html">is_phased()</a></code>, decoded by <code><a href="../reference/show_haplotypes.html">show_haplotypes()</a></code> and <code><a href="../reference/gt_as_vcf.html">gt_as_vcf()</a></code>, kept with their <code>"ancestry_labels"</code> by <code><a href="../reference/gt_update_backingfile.html">gt_update_backingfile()</a></code> and by <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code> (when both datasets match), and refused by <code><a href="../reference/gt_set_imputed.html">gt_set_imputed()</a></code> (see <code><a href="../reference/phased_encoding.html">?phased_encoding</a></code>)</li>
+<div class="section level3">
+<h3 id="new-features-and-changes-development-version">New features and changes<a class="anchor" aria-label="anchor" href="#new-features-and-changes-development-version"></a></h3>
+<ul><li>new <code><a href="../reference/gt_chromosome_types.html">gt_set_chromosome_types()</a></code>, <code><a href="../reference/gt_chromosome_types.html">gt_chromosome_types()</a></code> and <code><a href="../reference/gt_chromosome_types.html">loci_chromosome_types()</a></code> tell autosomes from sex chromosomes (X, Y, Z, W), pseudo-autosomal regions and mtDNA, recognised from their names or declared (e.g. PLINK’s numeric codes with <code>chr_set = "human"</code>)</li>
+<li>the VCF readers (<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code>, <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code>, <code><a href="../reference/gt_concat_vcfs.html">gt_concat_vcfs()</a></code>) store a haploid genotype of a diploid individual (e.g. the X of a male) as a homozygote (0 or 2), as PLINK does, rather than as 0 or 1; haploid genotypes on sex chromosomes and mtDNA no longer set the ploidy of individuals</li>
+<li>
+<code>gen_tibble(phased = TRUE)</code> reads haploid genotypes as homozygotes</li>
+<li>
+<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code> keeps the sex of individuals from packedancestrymap <code>.ind</code> files</li>
+<li>new <code><a href="../reference/indiv_sex_check.html">indiv_sex_check()</a></code> checks the recorded sex of individuals against their X (and Y) genotypes, as <code>plink --check-sex</code> (PLINK 1.9)</li>
+<li>functions that assume diploid autosomes (e.g. <code><a href="../reference/gt_pca.html">gt_pca()</a></code>, <code><a href="../reference/pairwise_king.html">pairwise_king()</a></code>, <code><a href="../reference/indiv_het_obs.html">indiv_het_obs()</a></code>, <code><a href="../reference/pop_fst.html">pop_fst()</a></code>, <code><a href="../reference/gt_extract_f2.html">gt_extract_f2()</a></code>) use autosomal loci only and say how many loci on X, Y or MT they leave out, as PLINK; declare a chromosome as an autosome with <code><a href="../reference/gt_chromosome_types.html">gt_set_chromosome_types()</a></code> to keep it</li>
+<li>
+<code><a href="../reference/gt_as_vcf.html">gt_as_vcf()</a></code> writes haploid genotypes for males on X and Y (females on Z and W) and for everyone on MT</li>
+<li>extended phased codes, whose bytes above 4 repeat the phased genotypes in blocks of five so that other packages can annotate haplotypes (e.g. with local ancestry), are recognised by <code><a href="../reference/is_phased.html">is_phased()</a></code>, decoded by <code><a href="../reference/show_haplotypes.html">show_haplotypes()</a></code> and <code><a href="../reference/gt_as_vcf.html">gt_as_vcf()</a></code>, kept with their <code>"ancestry_labels"</code> by <code><a href="../reference/gt_update_backingfile.html">gt_update_backingfile()</a></code> and by <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code> (when both datasets match), and refused by <code><a href="../reference/gt_set_imputed.html">gt_set_imputed()</a></code> (see <code><a href="../reference/phased_encoding.html">?phased_encoding</a></code>)</li>
 </ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
+<ul><li>
+<code>gt_as_plink(chromosomes_as_int = TRUE)</code>: fix the codes of X, Y, XY and MT, which now follow PLINK (23 to 26 in humans; MT was coded before X)</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.1.0" id="tidypopgen-110">tidypopgen 1.1.0<a class="anchor" aria-label="anchor" href="#tidypopgen-110"></a></h2><p class="text-muted">CRAN release: 2026-11-27</p>
 <div class="section level3">

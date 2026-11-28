@@ -2,6 +2,44 @@
 
 ## tidypopgen (development version)
 
+### New features and changes
+
+- new
+  [`gt_set_chromosome_types()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_chromosome_types.md),
+  [`gt_chromosome_types()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_chromosome_types.md)
+  and
+  [`loci_chromosome_types()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_chromosome_types.md)
+  tell autosomes from sex chromosomes (X, Y, Z, W), pseudo-autosomal
+  regions and mtDNA, recognised from their names or declared
+  (e.g. PLINK’s numeric codes with `chr_set = "human"`)
+- the VCF readers
+  ([`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md),
+  [`gt_merge_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.md),
+  [`gt_concat_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_concat_vcfs.md))
+  store a haploid genotype of a diploid individual (e.g. the X of a
+  male) as a homozygote (0 or 2), as PLINK does, rather than as 0 or 1;
+  haploid genotypes on sex chromosomes and mtDNA no longer set the
+  ploidy of individuals
+- `gen_tibble(phased = TRUE)` reads haploid genotypes as homozygotes
+- [`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
+  keeps the sex of individuals from packedancestrymap `.ind` files
+- new
+  [`indiv_sex_check()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_sex_check.md)
+  checks the recorded sex of individuals against their X (and Y)
+  genotypes, as `plink --check-sex` (PLINK 1.9)
+- functions that assume diploid autosomes
+  (e.g. [`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca.md),
+  [`pairwise_king()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_king.md),
+  [`indiv_het_obs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_het_obs.md),
+  [`pop_fst()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pop_fst.md),
+  [`gt_extract_f2()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_extract_f2.md))
+  use autosomal loci only and say how many loci on X, Y or MT they leave
+  out, as PLINK; declare a chromosome as an autosome with
+  [`gt_set_chromosome_types()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_chromosome_types.md)
+  to keep it
+- [`gt_as_vcf()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_as_vcf.md)
+  writes haploid genotypes for males on X and Y (females on Z and W) and
+  for everyone on MT
 - extended phased codes, whose bytes above 4 repeat the phased genotypes
   in blocks of five so that other packages can annotate haplotypes
   (e.g. with local ancestry), are recognised by
@@ -17,6 +55,12 @@
   [`gt_set_imputed()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_set_imputed.md)
   (see
   [`?phased_encoding`](https://evolecolgroup.github.io/tidypopgen/dev/reference/phased_encoding.md))
+
+### Bug fixes
+
+- `gt_as_plink(chromosomes_as_int = TRUE)`: fix the codes of X, Y, XY
+  and MT, which now follow PLINK (23 to 26 in humans; MT was coded
+  before X)
 
 ## tidypopgen 1.1.0
 

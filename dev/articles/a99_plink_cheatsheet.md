@@ -35,7 +35,9 @@ For example:
 
 ``` r
 
-data %>% select_loci_if(loci_chromosomes(genotypes) %in% c(1:22))
+data %>%
+  gt_set_chromosome_types(chr_set = "human") %>%
+  select_loci_if(loci_chromosome_types(genotypes) == "autosome")
 #> # A gen_tibble: 15 loci
 #> # A tibble:     5 × 4
 #>   id    population sex    genotypes
@@ -47,8 +49,10 @@ data %>% select_loci_if(loci_chromosomes(genotypes) %in% c(1:22))
 #> 5 GRC28 pop_a      male   [0,0,...]
 ```
 
-will select autosomal loci in the same way as –autosome. Or
-alternatively:
+will select autosomal loci in the same way as –autosome
+(`chr_set = "human"` declares PLINK’s numeric codes of the human sex
+chromosomes and mtDNA, 23 to 26; chromosomes named X, Y, XY and MT are
+recognised without it). Or alternatively:
 
 ``` r
 
@@ -136,6 +140,25 @@ returns a dataframe including columns ‘id’ and ‘to_keep’, showing the ID
 of individuals and a logical column of whether the individual should be
 removed to retain the largest possible set of individuals with no
 relationships above the threshold.
+
+## Sex chromosomes and mtDNA:
+
+| PLINK | `tidypopgen` |
+|----|----|
+| –chr-set 22 | `gt_set_chromosome_types(data, chr_set = 22)` |
+| –split-x b37 | `gt_set_chromosome_types(data, par = "b37")` |
+| –autosome | `select_loci_if(loci_chromosome_types(genotypes) == "autosome")` |
+| –check-sex | `indiv_sex_check(data)` |
+| –check-sex ycount | `indiv_sex_check(data, ycount = TRUE)` |
+
+As in PLINK, hemizygous genotypes (e.g. the X of a male) are stored as
+homozygotes, and analyses that assume diploid autosomes
+(e.g. [`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca.md),
+[`pairwise_king()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_king.md),
+[`indiv_het_obs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_het_obs.md),
+[`pop_fst()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pop_fst.md))
+only use autosomal loci, saying how many they left out. See the article
+on sex chromosomes and mtDNA.
 
 ## Merging datasets:
 

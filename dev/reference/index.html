@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.1.0.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.1.0.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,6 +24,7 @@
     <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis</a></li>
     <li><a class="dropdown-item" href="../articles/missing_data.html">Missing genotypes: impute only when you must</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseudohaploids</a></li>
+    <li><a class="dropdown-item" href="../articles/sex_chromosomes.html">Sex chromosomes and mtDNA</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
     <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
@@ -132,6 +133,13 @@
 
         </dt>
         <dd>Set the ploidy of a <code>gen_tibble</code> to include pseudohaploids</dd>
+
+        <dt>
+
+          <code><a href="gt_chromosome_types.html">gt_set_chromosome_types()</a></code> <code><a href="gt_chromosome_types.html">gt_chromosome_types()</a></code> <code><a href="gt_chromosome_types.html">loci_chromosome_types()</a></code>
+
+        </dt>
+        <dd>Types of chromosomes: autosomes, sex chromosomes and mtDNA</dd>
       </dl></div><div class="section level2">
       <h2 id="show">Show<a class="anchor" aria-label="anchor" href="#show"></a></h2>
 
@@ -445,6 +453,13 @@
 
       <dl><dt>
 
+          <code><a href="gt_chromosome_types.html">gt_set_chromosome_types()</a></code> <code><a href="gt_chromosome_types.html">gt_chromosome_types()</a></code> <code><a href="gt_chromosome_types.html">loci_chromosome_types()</a></code>
+
+        </dt>
+        <dd>Types of chromosomes: autosomes, sex chromosomes and mtDNA</dd>
+
+        <dt>
+
           <code><a href="loci_alt_freq.html">loci_alt_freq()</a></code> <code><a href="loci_alt_freq.html">loci_maf()</a></code>
 
         </dt>
@@ -549,6 +564,13 @@
 
         </dt>
         <dd>Return individual ploidy</dd>
+
+        <dt>
+
+          <code><a href="indiv_sex_check.html">indiv_sex_check()</a></code>
+
+        </dt>
+        <dd>Check the sex of individuals from their sex chromosomes</dd>
       </dl></div><div class="section level2">
       <h2 id="population">Population<a class="anchor" aria-label="anchor" href="#population"></a></h2>
 

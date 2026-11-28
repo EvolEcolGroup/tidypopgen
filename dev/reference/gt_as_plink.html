@@ -11,7 +11,7 @@ PLINK bed, ped or raw file (and associated files, i.e. .bim and .fam for
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.1.0.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.1.0.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,6 +28,7 @@ PLINK bed, ped or raw file (and associated files, i.e. .bim and .fam for
     <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis</a></li>
     <li><a class="dropdown-item" href="../articles/missing_data.html">Missing genotypes: impute only when you must</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseudohaploids</a></li>
+    <li><a class="dropdown-item" href="../articles/sex_chromosomes.html">Sex chromosomes and mtDNA</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
     <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
@@ -93,7 +94,13 @@ backingfile.</p></dd>
 
 <dt id="arg-chromosomes-as-int">chromosomes_as_int<a class="anchor" aria-label="anchor" href="#arg-chromosomes-as-int"></a></dt>
 <dd><p>boolean whether to use the integer representation
-of the chromosomes</p></dd>
+of the chromosomes (for "bed" files): numbers are kept, and sex
+chromosomes and mtDNA (see <code><a href="gt_chromosome_types.html">gt_chromosome_types()</a></code>) get PLINK's codes:
+with n autosomes, X (or Z) is n+1, Y (or W) n+2, the pseudo-autosomal
+regions (XY) n+3 and MT n+4, where n is the number of autosomes declared
+with <code>chr_set</code> in <code><a href="gt_chromosome_types.html">gt_set_chromosome_types()</a></code>, or 22 (PLINK's default,
+for humans), or the largest number of an autosome if it is larger; other
+names are numbered after n+4.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -132,15 +139,15 @@ Pseudohaploid data is simply treated as regular diploid genotype counts
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Write a bed file</span></span></span>
 <span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">gt_as_plink</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"bed"</span>, file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"_plink"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/Rtmp30nl4q/file209e673dfe40_plink.bed"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/Rtmp8cEXfI/file20364977dc3e_plink.bed"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Write a ped file</span></span></span>
 <span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">gt_as_plink</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"ped"</span>, file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"_plink"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/Rtmp30nl4q/file209e56bdfc41_plink.ped"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/Rtmp8cEXfI/file20361e67733f_plink.ped"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Write a raw file</span></span></span>
 <span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">gt_as_plink</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"raw"</span>, file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"_plink"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/Rtmp30nl4q/file209e5eb1f0dc_plink.raw"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/Rtmp8cEXfI/file20366209b470_plink.raw"</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

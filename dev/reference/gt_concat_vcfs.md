@@ -138,10 +138,14 @@ As in
 [`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md),
 the ploidy of each individual is estimated from the first variants of
 each file; the ploidy of an individual in the `gen_tibble` is its
-largest ploidy across files (e.g. with a file of the X chromosome in
-which males are haploid, males are still diploid). Files in which the
-genotypes of an individual are all missing in the first variants are
-ignored for its ploidy (unless they all are).
+largest ploidy across files (e.g. with a file of a chromosome in which
+some individuals are haploid, they are still diploid). Files in which
+the genotypes of an individual are all missing in the first variants are
+ignored for its ploidy (unless they all are). As in
+[`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md),
+haploid genotypes on sex chromosomes and mtDNA do not set the ploidy
+(males are diploid in a file of the X chromosome), and haploid genotypes
+of diploid individuals are stored as homozygotes.
 
 Unlike
 [`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md),
@@ -174,18 +178,18 @@ concat_gt <- gt_concat_vcfs(c(vcf_chr1, vcf_chr2),
   names_as_int = FALSE,
   backingfile = tempfile("concat_")
 )
-#> reading the loci of /tmp/Rtmp30nl4q/file209e4d70ea2.vcf
-#> reading the loci of /tmp/Rtmp30nl4q/file209e3f4a2891.vcf
+#> reading the loci of /tmp/Rtmp8cEXfI/file203692a1d27.vcf
+#> reading the loci of /tmp/Rtmp8cEXfI/file20361b6008a6.vcf
 #> concatenating 2 VCF files with 7 samples: 6 loci (biallelic SNPs)
-#> reading the genotypes of /tmp/Rtmp30nl4q/file209e4d70ea2.vcf
-#> reading the genotypes of /tmp/Rtmp30nl4q/file209e3f4a2891.vcf
+#> reading the genotypes of /tmp/Rtmp8cEXfI/file203692a1d27.vcf
+#> reading the genotypes of /tmp/Rtmp8cEXfI/file20361b6008a6.vcf
 #> 
-#> gen_tibble saved to /tmp/Rtmp30nl4q/concat_209e793097b6.gt
-#> using FBM RDS: /tmp/Rtmp30nl4q/concat_209e793097b6.rds
-#> with FBM backing file: /tmp/Rtmp30nl4q/concat_209e793097b6.bk
+#> gen_tibble saved to /tmp/Rtmp8cEXfI/concat_2036226900be.gt
+#> using FBM RDS: /tmp/Rtmp8cEXfI/concat_2036226900be.rds
+#> with FBM backing file: /tmp/Rtmp8cEXfI/concat_2036226900be.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/Rtmp30nl4q/concat_209e793097b6.gt')
+#> gt_load('/tmp/Rtmp8cEXfI/concat_2036226900be.gt')
 concat_gt
 #> # A gen_tibble: 6 loci
 #> # A tibble:     7 × 2

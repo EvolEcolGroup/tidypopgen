@@ -53,6 +53,11 @@ Functions for creating, saving, and loading `gen_tibble` objects.
 
   Set the ploidy of a `gen_tibble` to include pseudohaploids
 
+- [`gt_set_chromosome_types()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_chromosome_types.md)
+  [`gt_chromosome_types()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_chromosome_types.md)
+  [`loci_chromosome_types()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_chromosome_types.md)
+  : Types of chromosomes: autosomes, sex chromosomes and mtDNA
+
 ## Show
 
 Functions to view loci and genotype information stored in a
@@ -233,6 +238,11 @@ Functions reporting summary statistics for a `gen_tibble`.
 
 Functions operating across loci.
 
+- [`gt_set_chromosome_types()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_chromosome_types.md)
+  [`gt_chromosome_types()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_chromosome_types.md)
+  [`loci_chromosome_types()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_chromosome_types.md)
+  : Types of chromosomes: autosomes, sex chromosomes and mtDNA
+
 - [`loci_alt_freq()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_alt_freq.md)
   [`loci_maf()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_alt_freq.md)
   : Estimate allele frequencies at each locus
@@ -280,6 +290,8 @@ Functions operating across individuals.
   : Estimate individual missingness
 - [`indiv_ploidy()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_ploidy.md)
   : Return individual ploidy
+- [`indiv_sex_check()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_sex_check.md)
+  : Check the sex of individuals from their sex chromosomes
 
 ## Population
 

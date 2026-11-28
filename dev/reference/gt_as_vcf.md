@@ -40,6 +40,20 @@ gt_as_vcf(x, file = NULL, chunk_size = NULL, overwrite = FALSE)
 
 the path of the .vcf file
 
+## Details
+
+On sex chromosomes and the mitochondrial genome (see
+[`gt_chromosome_types()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_chromosome_types.md)),
+hemizygous genotypes (stored as homozygotes, as in PLINK) are written as
+haploid genotypes (e.g. `1` rather than `1/1`): those of individuals of
+the heterogametic sex (males with X and Y, females with Z and W; from
+the `sex` column) on X (or Z) outside the pseudo-autosomal regions and
+on Y (or W), and those of all individuals on MT (and on Y or W if their
+sex is unknown). Heterozygous genotypes of hemizygous individuals are
+written as missing (`.`), as PLINK treats them as missing, with a
+message giving their number, and the genotypes of the homogametic sex on
+Y (or W) are written as missing.
+
 ## Examples
 
 ``` r
@@ -47,5 +61,5 @@ example_gt <- load_example_gt("gen_tbl")
 
 # Write a vcf file
 example_gt %>% gt_as_vcf()
-#> [1] "/tmp/Rtmp30nl4q/file209e4c103c44.vcf"
+#> [1] "/tmp/Rtmp8cEXfI/file20367456f6dc.vcf"
 ```

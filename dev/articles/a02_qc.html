@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.1.0.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.1.0.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,6 +44,7 @@
     <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis</a></li>
     <li><a class="dropdown-item" href="../articles/missing_data.html">Missing genotypes: impute only when you must</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseudohaploids</a></li>
+    <li><a class="dropdown-item" href="../articles/sex_chromosomes.html">Sex chromosomes and mtDNA</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
     <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
@@ -398,15 +399,15 @@ using <code>gt_save</code>.</p>
 <div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/gt_save.html">gt_save</a></span><span class="op">(</span><span class="va">ld_data</span>, file_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
-<span><span class="co">## gen_tibble saved to /tmp/Rtmpz2V3bE/file2b9556d566ee.gt</span></span></code></pre>
-<pre><code><span><span class="co">## using FBM RDS: /tmp/Rtmpz2V3bE/file2b956355d148.rds</span></span></code></pre>
-<pre><code><span><span class="co">## with FBM backing file: /tmp/Rtmpz2V3bE/file2b956355d148.bk</span></span></code></pre>
+<span><span class="co">## gen_tibble saved to /tmp/Rtmp7qmTNu/file2b3e796fec91.gt</span></span></code></pre>
+<pre><code><span><span class="co">## using FBM RDS: /tmp/Rtmp7qmTNu/file2b3e63eccecd.rds</span></span></code></pre>
+<pre><code><span><span class="co">## with FBM backing file: /tmp/Rtmp7qmTNu/file2b3e63eccecd.bk</span></span></code></pre>
 <pre><code><span><span class="co">## make sure that you do NOT delete those files!</span></span></code></pre>
 <pre><code><span><span class="co">## to reload the gen_tibble in another session, use:</span></span></code></pre>
-<pre><code><span><span class="co">## gt_load('/tmp/Rtmpz2V3bE/file2b9556d566ee.gt')</span></span></code></pre>
-<pre><code><span><span class="co">## [1] "/tmp/Rtmpz2V3bE/file2b9556d566ee.gt" </span></span>
-<span><span class="co">## [2] "/tmp/Rtmpz2V3bE/file2b956355d148.rds"</span></span>
-<span><span class="co">## [3] "/tmp/Rtmpz2V3bE/file2b956355d148.bk"</span></span></code></pre>
+<pre><code><span><span class="co">## gt_load('/tmp/Rtmp7qmTNu/file2b3e796fec91.gt')</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "/tmp/Rtmp7qmTNu/file2b3e796fec91.gt" </span></span>
+<span><span class="co">## [2] "/tmp/Rtmp7qmTNu/file2b3e63eccecd.rds"</span></span>
+<span><span class="co">## [3] "/tmp/Rtmp7qmTNu/file2b3e63eccecd.bk"</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="grouping-data">Grouping data<a class="anchor" aria-label="anchor" href="#grouping-data"></a>
