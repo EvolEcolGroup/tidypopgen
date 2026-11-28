@@ -1,7 +1,8 @@
 # tidypopgen: handover
 
 Updated 2026-11-28 (laptopX1: 1.1.0 accepted by CRAN on 27 Nov, tagged
-`v1.1.0`; `dev` is 1.1.0.9000; `main` brought to the release by #249). Rewritten on
+`v1.1.0`; `dev` is 1.1.0.9000; `main` is the release (#249); #245 merged
+into `dev`; #250 (sex chromosomes) open). Rewritten on
 `dev` from the copy of 26-27 Nov on `sex_chromosomes` (itself from the
 23 Nov copy on `split_plan`): merge the living documents by hand when those
 branches reach `dev`. Some documents named below are only on those
@@ -15,34 +16,18 @@ History is in `progress.md`; designs are in the topic documents listed in
 
 | branch | purpose | base | pushed | merged |
 |---|---|---|---|---|
-| `sex_chromosomes` | phase 1 of sex chromosomes and mtDNA (`sex_chromosomes_plan.md`, "As built"): chromosome types, VCF haploid genotypes as 0/2, `indiv_sex_check()`, autosome-only analyses, haploid VCF output and PLINK codes, an article; worktree `/media/andrea/annex/tmp/claude/tidypopgen/wt_sexchr` on the laptop | `dev` at `4374e70d` | yes, as a backup (27 Nov; no PR until Andrea's review) | no |
+| `sex_chromosomes` | phase 1 of sex chromosomes and mtDNA (`sex_chromosomes_plan.md`, "As built"): chromosome types, VCF haploid genotypes as 0/2, `indiv_sex_check()`, autosome-only analyses, haploid VCF output and PLINK codes, an article; worktree `/media/andrea/annex/tmp/claude/tidypopgen/wt_sexchr` on the laptop | `dev` at `4374e70d`, `dev` merged in on 28 Nov | yes | PR #250 |
 | `split_plan` | dev notes only: the plan for the package split (`package_split.md`, `package_split/`) and older living documents; merge into `dev` (no code, `[skip ci]`) | `dev` at `e20145a2` | yes | no |
-| `release_1.1.0` | #249: `main` brought to the tree of `v1.1.0` plus the laptop benchmark numbers (two commits, no `[skip ci]`); delete after the merge | `main` at `aee65ae5` | yes | through the merge queue (#249) |
-| `update_benchmark` | Evie's updated laptop numbers of the HGDP benchmark article (`a6f4279c`), cherry-picked to `dev` (`562d1bf5`) and #249: delete once Andrea agrees | `dev` at `4374e70d` | yes | cherry-picked |
-| `vignette_filtering` | Andrea's vignette edits, the base of #242: delete once he has switched | `dev` | yes | squashed in #242 |
+| `vignette_filtering` | Andrea's vignette edits, the base of #242: delete once he has switched (about 13 of its lines are not in `dev`: older `big_data` timings, a 0.045 missingness threshold, some wording, probably superseded) | `dev` | yes | squashed in #242 |
+| `phased_ancestry` | #245 (extended phased codes), squashed into `dev` (`a8cb2501`); its worktree `/media/andrea/annex/git/tidypopgen_phased_ancestry`: delete both | `dev` | yes | squashed in #245 |
+| `gt_pca_pseudohaploid` | local only (#244, code identical to `dev`), worktree `/media/andrea/annex/tmp/claude/tidypopgen_pseudo`: delete (waiting for Andrea's OK) | old `dev` | no | squashed in #244 |
+| `ccr-2e473cc7-1prukj` | no commits beyond `dev`: delete (waiting for Andrea's OK) | `dev` | yes | yes |
+| `ploidy_roadmap` | Max Brown's dev notes: roadmap to arbitrary ploidy and the ploidy audit (`dev_notes/ploidy/`); not in `dev`, no PR | `dev` | yes | no |
 | `as_fbm`, `skill` | `gt_as_fbm()` (Aug) and tooling to build a Claude skill (Oct); not in `dev`, kept (Andrea, 21 Nov) | old `dev` | yes | no |
 
 ## Next tasks
 
-### 1. **P1** [claude] Check that #249 has landed on `main`
-
-- **Done (27-28 Nov):** CRAN accepted 1.1.0 (published 27 Nov 21:10 UTC),
-  submitted from `dev` at `e865cf14` (the SHA in `CRAN-SUBMISSION`, which
-  is deleted). Annotated tag `v1.1.0` on `e865cf14` (no GitHub release yet:
-  `gh release create v1.1.0 --verify-tag` with the 1.1.0 NEWS, Andrea).
-  `dev` is 1.1.0.9000 (`cc7ebeec`, NEWS has a development version heading),
-  with the updated laptop benchmark (`562d1bf5`). `cran_submission`,
-  `cran-fixes-2026-11-27` and `fix-tgeno-test-windows` deleted (all their
-  content was in `dev`).
-- **#249** (`release_1.1.0` into `main`, via the merge queue): one commit
-  whose tree is `v1.1.0` (the zlib fix, the resubmission note, the
-  `gt_admixture()` docs, the dev notes, missing from #247) plus the
-  benchmark commit. No `[skip ci]`, so CI and pkgdown run on `main`.
-- **Done when:** #249 is merged, the pkgdown site is rebuilt from `main`,
-  and `release_1.1.0` is deleted. Do not merge `main` back into `dev`:
-  the squash adds nothing `dev` lacks.
-
-### 2. **P1** [review] Review `sex_chromosomes`, then open a PR
+### 1. **P1** [review] Review and merge #250 (`sex_chromosomes`)
 
 - **Read first:** `dev_notes/sex_chromosomes_plan.md` on the branch
   (decisions, "As built", numbers); the article
@@ -58,13 +43,22 @@ History is in `progress.md`; designs are in the topic documents listed in
   as fast as on `dev` (manica01, -O2, +0.5%/+1.2% at 1/8 threads, within
   noise, identical backing files). Behaviour changes for data with X/Y/MT
   are accepted (Andrea, 26 Nov). `R CMD check` not run yet.
-- **After the review:** the branch is pushed (27 Nov, as a backup after
-  the annex drive dropped out; `git fsck` clean). Its head
-  commit is `[skip ci]`, so push an empty commit to get CI, then open a PR
-  into `dev`. Its NEWS items
-  are in the 1.1.0 section: move them to the development version section
-  (1.1.0 is released).
-- **Done when:** the PR is merged.
+- **PR #250** (28 Nov): `dev` (1.1.0 released, #245) merged into the
+  branch; NEWS items moved to the development version section; living
+  notes taken from `dev` plus the branch's progress entries. After the
+  merge, the related test files pass (`load_all()`: chromosome types,
+  sex check, `gen_tibble`, VCF, PLINK, packedancestrymap); CI on the PR.
+- **Done when:** #250 is squash-merged into `dev`; then delete the branch
+  and the worktree `wt_sexchr`.
+
+### 2. **P2** [andrea] A GitHub release for `v1.1.0`
+
+- 1.1.0 is on CRAN (27 Nov), tag `v1.1.0` on `e865cf14` (the submitted
+  commit on `dev`); `main` is that tree plus the laptop benchmark numbers
+  (#249, `f9619a81`). Earlier versions had a GitHub release
+  (`usethis::use_github_release()`); the session's attempt was blocked by
+  a permission check: `gh release create v1.1.0 --verify-tag --title
+  "tidypopgen 1.1.0"` with the 1.1.0 section of `NEWS.md` as notes.
 
 ### 3. **P2** [desktop] Re-time on the P-cores
 
