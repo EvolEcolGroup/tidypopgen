@@ -55,7 +55,7 @@ but Andrea judged it not worth the complexity (with that many loci
 - [ ] **P3** [decide] The GRM diagonal of pseudohaploids in `gt_pca(method = "partial")`: coded 0/2 with the diploid scaling, their relationships are unbiased but their self-term is about 2 instead of 1; subtract their expected extra sampling variance from the diagonal (as GCTA does), never rescale them? Test on NORNE against projection (handover, task 5).
 - [ ] **P3** [decide] Sex chromosomes and mtDNA, phase 2: which sex-aware statistics first (frequencies and missingness on X, HWE on X, Fst on X/MT, heterozygous haploid counts)? Recommended: frequencies and missingness on X first, as most others build on them.
 - [ ] **P3** [decide] Look into the package split when ready (`package_split.md`: decisions, phases, open questions; Phase 0 after 1.1.0).
-- [ ] **P3** [cleanup] On manica01, delete the local `cran-fixes-2026-11-27` and `fix-tgeno-test-windows`; `revdep/` on the laptop's annex and the 27 Nov `R CMD check` output on manica01; ask before deleting the benchmark data and prototypes on the laptop's annex (`bench_*`, `test_timing/`, `proj_proto/`, `ld_src/`) and in `~/claude_work/tidypopgen/` (incl. `pr_timing/`, `articles_2026-11-22/`) on the desktop.
+- [ ] **P3** [cleanup] `revdep/` on the laptop's annex and the 27 Nov `R CMD check` output on manica01; ask before deleting the benchmark data and prototypes on the laptop's annex (`bench_*`, `test_timing/`, `proj_proto/`, `ld_src/`) and in `~/claude_work/tidypopgen/` (incl. `pr_timing/`, `articles_2026-11-22/`) on the desktop.
 
 **Done**
 - #251 merged (`f0554dd6`, CI check of version bumps), `version_bump_check` deleted: 28 Nov.

@@ -121,9 +121,9 @@ History is in `progress.md`; designs are in the topic documents listed in
   `release_1.1.0`, the three 1.1.0 release branches, the local
   `gt_pca_pseudohaploid`, and the worktrees `wt_sexchr`,
   `tidypopgen_phased_ancestry`, `tidypopgen_pseudo`.
-- Branches: on manica01 the
-  local `cran-fixes-2026-11-27` and `fix-tgeno-test-windows` (deleted on
-  origin, merged). The worktree
+- Done on 28 Nov, on manica01: the local `cran-fixes-2026-11-27` and
+  `fix-tgeno-test-windows` (merged in #246, #248).
+- The worktree
   `/media/andrea/annex/tmp/claude/tidypopgen_notes` (on `split_plan`).
 - The parser timings of `sex_chromosomes` in
   `/media/andrea/annex/tmp/claude/tidypopgen/parser_ab/` (the two source
