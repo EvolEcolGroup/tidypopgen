@@ -69,6 +69,9 @@ pop_fis <- function(
   allele_sharing_mat = NULL,
   n_cores = bigstatsr::nb_cores()
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   method <- match.arg(method)
   if (method == "Nei87") {
     if (!is.null(allele_sharing_mat)) {

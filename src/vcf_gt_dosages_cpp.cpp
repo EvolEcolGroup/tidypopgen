@@ -11,10 +11,14 @@ using namespace Rcpp;
 // allele, as with strsplit()); a genotype with more than max_ploidy alleles
 // is an error; a genotype is missing (max_ploidy + 1) if it is NA, empty or
 // has a missing allele ("."); otherwise its dosage is the sum of its allele
-// indices, which must be smaller than max_ploidy + 1.
+// indices, which must be smaller than max_ploidy + 1. A haploid genotype
+// (e.g. "1", the X of a male) of an individual of higher ploidy is stored as
+// a homozygote (0, or the ploidy of the individual for the ALT allele), as
+// PLINK stores hemizygous genotypes.
 //
 // gt: a character matrix of genotypes, with loci as rows and individuals as
 //   columns (as returned by vcfR::extract.gt())
+// ploidy: the ploidy of each individual (a column of gt)
 // Returns a list with `dosages`, a raw matrix with individuals as rows and
 // loci as columns (as in the FBM), and `error`: 0 if all genotypes are
 // valid, 1 if a genotype has more than max_ploidy alleles or a dosage larger
@@ -22,9 +26,13 @@ using namespace Rcpp;
 // dosages are not complete).
 
 // [[Rcpp::export]]
-List vcf_gt_dosages_cpp(const CharacterMatrix& gt, int max_ploidy) {
+List vcf_gt_dosages_cpp(const CharacterMatrix& gt, int max_ploidy,
+                        const IntegerVector& ploidy) {
   size_t n_loci = gt.nrow();
   size_t n_indiv = gt.ncol();
+  if ((size_t) ploidy.size() != n_indiv) {
+    stop("'ploidy' should have one value for each individual");
+  }
   RawMatrix dosages(n_indiv, n_loci);
   const unsigned char missing = (unsigned char) (max_ploidy + 1);
   int error = 0;
@@ -82,6 +90,9 @@ List vcf_gt_dosages_cpp(const CharacterMatrix& gt, int max_ploidy) {
       } else if (dosage >= max_ploidy + 1) {
         error = 1;
         break;
+      } else if ((n_alleles == 1) && (dosage == 1)) {
+        // a haploid ALT allele: a homozygote of the ploidy of the individual
+        dosages(i, j) = (unsigned char) ploidy[i];
       } else {
         dosages(i, j) = (unsigned char) dosage;
       }

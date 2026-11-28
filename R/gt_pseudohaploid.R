@@ -79,6 +79,9 @@ gt_pseudohaploid <- function(x, test_n_loci = 10000) {
 #' @keywords internal
 #' @noRd
 identify_pseudohaploids <- function(x, n_test = 1000) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  x <- .gt_autosomes_only(x)
   if (n_test > count_loci(x)) {
     n_test <- count_loci(x)
   }

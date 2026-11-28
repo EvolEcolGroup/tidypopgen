@@ -328,3 +328,41 @@ test_that("missing chromosomes are written as '.'", {
     )
   }
 })
+
+test_that("gt_as_vcf writes haploid genotypes on sex chromosomes and MT", {
+  # the fixture of indiv_sex_check(): males (and individual 3, a female
+  # recorded as male) are hemizygous on X and Y, and everyone on MT
+  sex_gt <- gen_tibble(
+    test_path("testdata", "plink_sexcheck", "sexcheck.bed"),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  sex <- .gt_sex(sex_gt)
+  types <- as.character(loci_chromosome_types(sex_gt))
+  geno <- show_genotypes(sex_gt)
+  # the heterozygous genotypes of recorded males on X are written as missing
+  n_het <- sum(geno[sex %in% 1, types == "X"] == 1, na.rm = TRUE)
+  expect_message(
+    vcf_path <- gt_as_vcf(sex_gt, file = tempfile(fileext = ".vcf")),
+    paste(n_het, "heterozygous genotypes of hemizygous individuals")
+  )
+  vcf_body <- readLines(vcf_path)
+  vcf_body <- vcf_body[!startsWith(vcf_body, "#")]
+  vcf_gt <- do.call(rbind, lapply(strsplit(vcf_body, "\t"), `[`, -(1:9)))
+  # haploid genotypes: males on X and Y, everyone on MT; diploid otherwise
+  haploid <- matrix(!grepl("/", vcf_gt), nrow = nrow(vcf_gt))
+  expect_true(all(haploid[types == "X", sex %in% 1]))
+  expect_false(any(haploid[types == "X", !sex %in% 1]))
+  expect_true(all(haploid[types %in% c("Y", "MT"), ]))
+  expect_false(any(haploid[types == "autosome", ]))
+  # females are missing on Y
+  expect_true(all(vcf_gt[types == "Y", sex %in% 2] == "."))
+  # read back, the genotypes are the same, but for the heterozygous haploid
+  # genotypes and those of females on Y (missing)
+  back_gt <- gen_tibble(vcf_path, backingfile = tempfile(), quiet = TRUE)
+  expected <- geno
+  expected[sex %in% 1, types == "X"][
+    geno[sex %in% 1, types == "X"] %in% 1
+  ] <- NA
+  expected[sex %in% 2, types == "Y"] <- NA
+  expect_identical(show_genotypes(back_gt), expected)
+})

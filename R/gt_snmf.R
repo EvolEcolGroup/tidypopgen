@@ -55,6 +55,9 @@ gt_snmf <- function(
   ploidy = 2,
   seed = -1
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  x <- .gt_autosomes_only(x)
   # a single seed of -1 (the default) lets LEA draw a random seed for each run
   if (
     !is.null(seed) &&

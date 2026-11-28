@@ -935,3 +935,36 @@ test_that("ped and raw write missing reference alleles as 0", {
   expect_equal(bim$V5, c("T", "0"))
   expect_equal(bim$V6, c("0", "0"))
 })
+
+test_that("gt_as_plink gives PLINK's integer codes to X, Y, XY and MT", {
+  # loci on 1, X, Y and MT (the fixture of indiv_sex_check()), and a few
+  # loci of the first chromosome renamed as a scaffold and as XY
+  sex_gt <- gen_tibble(
+    test_path("testdata", "plink_sexcheck", "sexcheck.bed"),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  loci <- show_loci(sex_gt)
+  loci$chromosome <- as.character(loci$chromosome)
+  loci$chromosome[1:2] <- c("scaffold_1", "XY")
+  show_loci(sex_gt) <- loci
+  bim_codes <- function(x) {
+    bed_path <- gt_as_plink(x,
+      file = paste0(tempfile(), ".bed"),
+      chromosomes_as_int = TRUE
+    )
+    utils::read.table(sub("\\.bed$", ".bim", bed_path))$V1
+  }
+  # 22 autosomes by default (X is 23, Y 24, XY 25, MT 26; MT used to be
+  # coded before X, as names after the largest number)
+  codes <- bim_codes(sex_gt)
+  expect_identical(
+    codes,
+    as.integer(c(27, 25, rep(1, 18), rep(23, 200), rep(24, 10), rep(26, 5)))
+  )
+  # or the number of autosomes declared with chr_set
+  codes <- bim_codes(gt_set_chromosome_types(sex_gt, chr_set = 38))
+  expect_identical(
+    codes[c(1, 2, 3, 21, 221, 231)],
+    c(43L, 41L, 1L, 39L, 40L, 42L)
+  )
+})

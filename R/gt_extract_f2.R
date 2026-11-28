@@ -113,6 +113,9 @@ gt_extract_f2 <- function(
   n_cores = 1,
   quiet = FALSE
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   if (!requireNamespace("admixtools", quietly = TRUE)) {
     stop(
       "to use this function, first install package 'admixtools' with\n",

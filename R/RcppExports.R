@@ -81,8 +81,8 @@ gt_pi_polyploid <- function(BM, rowInd, colInd, ploidy, is_pseudohaploid, ncores
     .Call(`_tidypopgen_gt_pi_polyploid`, BM, rowInd, colInd, ploidy, is_pseudohaploid, ncores, block_size)
 }
 
-gt_write_text_by_locus <- function(BM, rowInd, colInd, lut, prefix, sep, file) {
-    invisible(.Call(`_tidypopgen_gt_write_text_by_locus`, BM, rowInd, colInd, lut, prefix, sep, file))
+gt_write_text_by_locus <- function(BM, rowInd, colInd, lut, prefix, sep, file, indiv_lut = as.integer( c()), flag = as.logical( c())) {
+    .Call(`_tidypopgen_gt_write_text_by_locus`, BM, rowInd, colInd, lut, prefix, sep, file, indiv_lut, flag)
 }
 
 gt_write_text_by_indiv <- function(BM, rowInd, colInd, byte_cat, lut, n_cat, locus_lut, prefix, sep, file, block_bytes = 256e6) {
@@ -237,8 +237,8 @@ tajimas_d_window_sums_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, plo
     .Call(`_tidypopgen_tajimas_d_window_sums_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, locus_first, locus_last, n_windows, ncores, block_size)
 }
 
-vcf_gt_dosages_cpp <- function(gt, max_ploidy) {
-    .Call(`_tidypopgen_vcf_gt_dosages_cpp`, gt, max_ploidy)
+vcf_gt_dosages_cpp <- function(gt, max_ploidy, ploidy) {
+    .Call(`_tidypopgen_vcf_gt_dosages_cpp`, gt, max_ploidy, ploidy)
 }
 
 merge_sites_new <- function(split_alt, ref_rule, missing_alleles) {

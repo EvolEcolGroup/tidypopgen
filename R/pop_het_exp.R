@@ -58,6 +58,9 @@ pop_het_exp <- function(
   include_global = FALSE,
   n_cores = bigstatsr::nb_cores()
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   stopifnot_diploid(.x)
   # compute Hs for each population (and the global Hs, which is part of the
   # global statistics) in a single pass over the genotypes
@@ -98,6 +101,9 @@ pop_gene_div <- function(
   include_global = FALSE,
   n_cores = bigstatsr::nb_cores()
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   pop_het_exp(
     .x = .x,
     by_locus = by_locus,

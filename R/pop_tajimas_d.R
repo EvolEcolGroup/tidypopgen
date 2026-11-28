@@ -76,6 +76,9 @@ pop_tajimas_d.tbl_df <- function(
   # for openMP
   ...
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   # TODO this is a hack to deal with the class being dropped when going
   # through group_map
   stopifnot_has_genotypes(.x)
@@ -91,6 +94,9 @@ pop_tajimas_d.vctrs_bigSNP <- function(
   block_size = bigstatsr::block_size(length(.x), 1),
   ...
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   rlang::check_dots_empty()
 
   # as long as we have more than one individual
@@ -121,6 +127,9 @@ pop_tajimas_d.grouped_gen_tbl <- function(
   block_size = bigstatsr::block_size(nrow(.x), 1),
   ...
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   rlang::check_dots_empty()
   # sum the quantities needed for tajimas d across all loci for each group
   # (this deals with polyploids and pseudohaploids)

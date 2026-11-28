@@ -151,6 +151,24 @@ test_that("bad packedancestry files are caught", {
   }
 })
 
+test_that("gen_tibble reads the sex of individuals from the .ind file", {
+  ext_dir <- system.file("extdata", package = "tidypopgen")
+  geno_gt <- gen_tibble(file.path(ext_dir, "pop_b.geno"),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  bed_gt <- gen_tibble(file.path(ext_dir, "pop_b.bed"),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  expect_identical(geno_gt$sex, bed_gt$sex)
+  # no sex column if all sexes are unknown ("U")
+  prefix <- write_packed_snp_ind(tempfile("packed_"), n = 2, m = 3)
+  geno_file <- write_packed_geno(matrix(0, nrow = 2, ncol = 3),
+    paste0(prefix, ".geno")
+  )
+  u_gt <- gen_tibble(geno_file, backingfile = tempfile(), quiet = TRUE)
+  expect_false("sex" %in% names(u_gt))
+})
+
 test_that("packedancestry files are decoded with any code table", {
   # a random code table, which is not made of codes of 2-bit genotypes, so
   # that TGENO files are decoded one byte at a time (as on big-endian

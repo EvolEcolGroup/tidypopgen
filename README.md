@@ -37,6 +37,12 @@ install.packages("pak")
 pak::pak("EvolEcolGroup/tidypopgen@dev")
 ```
 
+**Experimental features in the development version:** phased genotypes
+(including the extended phased codes used to store ancestry tracts) and
+sex chromosomes and mtDNA (chromosome types, haploid genotypes and
+`indiv_sex_check()`) are experimental. Their syntax might change whilst
+they are in the development version.
+
 ## Examples
 
 There are several vignettes designed to teach you how to use `tidypopgen`.

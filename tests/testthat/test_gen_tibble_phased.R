@@ -222,8 +222,12 @@ test_that("gen_tibble(phased = TRUE) refuses genotypes that are not diploid", {
   # haploid individual (found when estimating ploidy)
   vcf <- write_test_vcf(list(c("0|0", "1"), c("0|1", "0")))
   expect_error(read_phased(vcf), "only be read for diploid individuals")
-  # a haploid genotype after the first locus
+  # a haploid genotype after the first locus (e.g. the X of a male) is read
+  # as a homozygote, as PLINK stores hemizygous genotypes
   vcf <- write_test_vcf(list(c("0|0", "1|1"), c("0|1", "1")))
+  expect_identical(show_genotypes(read_phased(vcf)), rbind(c(0, 1), c(2, 2)))
+  # a triploid genotype after the first locus
+  vcf <- write_test_vcf(list(c("0|0", "1|1"), c("0|1", "1|0|1")))
   expect_error(
     read_phased(vcf),
     "individual s2 at locus 1:200 is not diploid"

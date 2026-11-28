@@ -678,13 +678,14 @@ if (rlang::is_installed("vcfR")) {
         parser = "vcfR"
       )
 
-    # vcfr reads correctly
+    # vcfr reads correctly (a haploid genotype of a diploid individual is a
+    # homozygote, as in PLINK)
     expect_equal(
       show_genotypes(pop_a_vcf_gt_hapmid_vcfr)[
         ,
         show_loci(pop_a_vcf_gt_hapmid_vcfr)$chromosome == 23
       ],
-      c(1, 0, 0, 0, 0)
+      c(2, 0, 0, 0, 0)
     )
     # cpp reads correctly
     expect_equal(
@@ -692,8 +693,44 @@ if (rlang::is_installed("vcfR")) {
         ,
         show_loci(pop_a_vcf_gt_hapmid_cpp)$chromosome == 23
       ],
-      c(1, 0, 0, 0, 0)
+      c(2, 0, 0, 0, 0)
     )
+  })
+
+  test_that("haploid genotypes on sex chromosomes do not set the ploidy", {
+    # males (m1, m2) are haploid on X, which comes first; their ploidy is
+    # found on the autosome, and their haploid genotypes are homozygotes
+    vcf <- write_merge_vcf(c("m1", "f1", "m2"),
+      data.frame(
+        chrom = c("chrX", "chrX", "1"), pos = c(10, 20, 30),
+        id = c("x1", "x2", "a1"), ref = c("A", "C", "G"),
+        alt = c("G", "T", "A")
+      ),
+      rbind(c("1", "0/1", "0"), c("0", "1/1", "."), c("0/1", "0/0", "1/1"))
+    )
+    # and in a file of the X chromosome only, they get the ploidy of the
+    # females (or 2, without females)
+    x_vcf <- write_merge_vcf(c("m1", "m2"),
+      data.frame(chrom = "X", pos = 10, id = "x1", ref = "A", alt = "G"),
+      rbind(c("1", "0"))
+    )
+    for (parser in c("cpp", "vcfR")) {
+      x_gt <- gen_tibble(vcf,
+        backingfile = tempfile(), quiet = TRUE,
+        parser = parser
+      )
+      expect_identical(as.numeric(indiv_ploidy(x_gt)), c(2, 2, 2))
+      expect_equal(
+        show_genotypes(x_gt),
+        rbind(c(2, 0, 1), c(1, 2, 0), c(0, NA, 2))
+      )
+      x_only_gt <- gen_tibble(x_vcf,
+        backingfile = tempfile(), quiet = TRUE,
+        parser = parser
+      )
+      expect_identical(as.numeric(indiv_ploidy(x_only_gt)), c(2, 2))
+      expect_equal(show_genotypes(x_only_gt), rbind(2, 0))
+    }
   })
 }
 
@@ -929,6 +966,10 @@ test_that("vcf_gt_dosages_cpp reads genotypes as the R code did", {
     }
     if (length(x) > 0 && !anyNA(x) && !any(x == ".")) {
       dosage <- sum(as.numeric(x))
+      # a haploid genotype (of a diploid) is a homozygote
+      if (length(x) == 1) {
+        dosage <- dosage * max_ploidy
+      }
       if (dosage < (max_ploidy + 1)) as.raw(dosage) else "error"
     } else {
       as.raw(max_ploidy + 1)
@@ -938,7 +979,7 @@ test_that("vcf_gt_dosages_cpp reads genotypes as the R code did", {
     c("0/1", "1|1", "./.", ".", NA, "", "0|0", "./1", "0/", "1"),
     nrow = 5
   )
-  res <- vcf_gt_dosages_cpp(gt, max_ploidy = 2)
+  res <- vcf_gt_dosages_cpp(gt, max_ploidy = 2, ploidy = c(2L, 2L))
   expect_identical(res$error, 0L)
   # individuals are rows
   expect_identical(
@@ -949,14 +990,19 @@ test_that("vcf_gt_dosages_cpp reads genotypes as the R code did", {
   )
   # polyploids
   gt <- matrix(c("0/1/1/0", "1/1/1/1", "0/./1/1", "0/0/0/0"), nrow = 2)
-  res <- vcf_gt_dosages_cpp(gt, max_ploidy = 4)
+  res <- vcf_gt_dosages_cpp(gt, max_ploidy = 4, ploidy = c(4L, 4L))
   expect_identical(res$dosages, matrix(as.raw(c(2, 5, 4, 0)), nrow = 2))
   # too many alleles, a dosage that is too large, and alleles that are not
   # numbers
-  expect_identical(vcf_gt_dosages_cpp(matrix("0/1/1"), 2)$error, 1L)
-  expect_identical(vcf_gt_dosages_cpp(matrix("2/1"), 2)$error, 1L)
-  expect_identical(vcf_gt_dosages_cpp(matrix("a/1"), 2)$error, 2L)
-  expect_identical(vcf_gt_dosages_cpp(matrix("0//1"), 3)$error, 2L)
+  expect_identical(vcf_gt_dosages_cpp(matrix("0/1/1"), 2, 2L)$error, 1L)
+  expect_identical(vcf_gt_dosages_cpp(matrix("2/1"), 2, 2L)$error, 1L)
+  expect_identical(vcf_gt_dosages_cpp(matrix("a/1"), 2, 2L)$error, 2L)
+  expect_identical(vcf_gt_dosages_cpp(matrix("0//1"), 3, 3L)$error, 2L)
+  # a haploid genotype of a haploid individual is not changed
+  expect_identical(
+    vcf_gt_dosages_cpp(matrix(c("1", "1"), nrow = 1), 2, c(1L, 2L))$dosages,
+    matrix(as.raw(c(1, 2)), nrow = 2)
+  )
 })
 
 test_that("the md5 sum of the FBM is that of its saved rds for VCF inputs", {

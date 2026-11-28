@@ -166,6 +166,9 @@ pop_sfs.tbl_df <- function(
   block_size = bigstatsr::block_size(nrow(.x), 1),
   ...
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   # TODO this is a hack to deal with the class being dropped when going
   # through group_map
   stopifnot_has_genotypes(.x)
@@ -187,6 +190,9 @@ pop_sfs.vctrs_bigSNP <- function(
   block_size = bigstatsr::block_size(length(.x), 1),
   ...
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   rlang::check_dots_empty()
   .pop_sfs(.x,
     n_proj = n_proj, folded = folded, ancestral = ancestral, type = type,
@@ -206,6 +212,9 @@ pop_sfs.grouped_gen_tbl <- function(
   block_size = bigstatsr::block_size(nrow(.x), 1),
   ...
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   rlang::check_dots_empty()
   .pop_sfs(.x,
     n_proj = n_proj, folded = folded, ancestral = ancestral, type = type,
@@ -337,6 +346,9 @@ pop_sfs_preview.tbl_df <- function(
   block_size = bigstatsr::block_size(nrow(.x), 1),
   ...
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   stopifnot_has_genotypes(.x)
   pop_sfs_preview(.x$genotypes,
     ancestral = ancestral, n_cores = n_cores, block_size = block_size, ...
@@ -352,6 +364,9 @@ pop_sfs_preview.vctrs_bigSNP <- function(
   block_size = bigstatsr::block_size(length(.x), 1),
   ...
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   rlang::check_dots_empty()
   .pop_sfs_preview(.x,
     ancestral = ancestral, n_cores = n_cores, block_size = block_size
@@ -367,6 +382,9 @@ pop_sfs_preview.grouped_gen_tbl <- function(
   block_size = bigstatsr::block_size(nrow(.x), 1),
   ...
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   rlang::check_dots_empty()
   .pop_sfs_preview(.x,
     ancestral = ancestral, n_cores = n_cores, block_size = block_size

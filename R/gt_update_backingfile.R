@@ -64,6 +64,8 @@ gt_update_backingfile <- function(
   # get the 256 code
   original_256code <- attr(.x$genotypes, "fbm")$code256
   original_imputation_code <- attr(.x$genotypes, "imputed")
+  # and the declared types of chromosomes (see gt_set_chromosome_types())
+  original_chr_types <- attr(.x$genotypes, "chr_types")
   # the labels of extended phased codes (see ?phased_encoding), whose bytes
   # are copied unchanged
   original_ancestry_labels <- attr(.x$genotypes, "ancestry_labels",
@@ -162,6 +164,8 @@ gt_update_backingfile <- function(
   if (!is.null(original_imputation_code)) {
     attr(new_gen_tbl$genotypes, "imputed") <- original_imputation_code
   }
+  # keep the declared types of chromosomes
+  attr(new_gen_tbl$genotypes, "chr_types") <- original_chr_types
   # and the ancestry labels
   if (!is.null(original_ancestry_labels)) {
     attr(new_gen_tbl$genotypes, "ancestry_labels") <- original_ancestry_labels

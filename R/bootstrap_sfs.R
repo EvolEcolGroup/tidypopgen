@@ -100,6 +100,9 @@ bootstrap_pop_sfs.gen_tbl <- function(
   n_cores = bigstatsr::nb_cores(),
   ...
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   rlang::check_dots_empty()
   stopifnot_gen_tibble(.x)
   type <- match.arg(type)

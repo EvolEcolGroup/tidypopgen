@@ -22,10 +22,13 @@
 #'
 #' As in [gen_tibble()], the ploidy of each individual is estimated from the
 #' first variants of each file; the ploidy of an individual in the
-#' `gen_tibble` is its largest ploidy across files (e.g. with a file of the X
-#' chromosome in which males are haploid, males are still diploid). Files in
-#' which the genotypes of an individual are all missing in the first variants
-#' are ignored for its ploidy (unless they all are).
+#' `gen_tibble` is its largest ploidy across files (e.g. with a file of a
+#' chromosome in which some individuals are haploid, they are still diploid).
+#' Files in which the genotypes of an individual are all missing in the first
+#' variants are ignored for its ploidy (unless they all are). As in
+#' [gen_tibble()], haploid genotypes on sex chromosomes and mtDNA do not set
+#' the ploidy (males are diploid in a file of the X chromosome), and haploid
+#' genotypes of diploid individuals are stored as homozygotes.
 #'
 #' Unlike [gen_tibble()], by default (`names_as_int = TRUE`) the loci are
 #' named with integers (their index in the `gen_tibble`), rather than with

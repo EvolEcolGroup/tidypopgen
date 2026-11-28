@@ -83,6 +83,9 @@ gt_admixture <- function(
   conda_env = "auto",
   outdir = NULL
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  x <- .gt_autosomes_only(x)
   # check that we have the right number of repeats
   if (!is.null(seed) && length(seed) != n_runs && length(seed) != (n_runs * length(k))) { # nolint
     stop(

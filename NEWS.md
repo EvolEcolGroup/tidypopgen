@@ -1,11 +1,37 @@
 # tidypopgen (development version)
 
+## New features and changes
+
+* new `gt_set_chromosome_types()`, `gt_chromosome_types()` and
+  `loci_chromosome_types()` tell autosomes from sex chromosomes (X, Y, Z, W),
+  pseudo-autosomal regions and mtDNA, recognised from their names or declared
+  (e.g. PLINK's numeric codes with `chr_set = "human"`)
+* the VCF readers (`gen_tibble()`, `gt_merge_vcfs()`, `gt_concat_vcfs()`)
+  store a haploid genotype of a diploid individual (e.g. the X of a male) as a
+  homozygote (0 or 2), as PLINK does, rather than as 0 or 1; haploid genotypes
+  on sex chromosomes and mtDNA no longer set the ploidy of individuals
+* `gen_tibble(phased = TRUE)` reads haploid genotypes as homozygotes
+* `gen_tibble()` keeps the sex of individuals from packedancestrymap `.ind`
+  files
+* new `indiv_sex_check()` checks the recorded sex of individuals against
+  their X (and Y) genotypes, as `plink --check-sex` (PLINK 1.9)
+* functions that assume diploid autosomes (e.g. `gt_pca()`, `pairwise_king()`,
+  `indiv_het_obs()`, `pop_fst()`, `gt_extract_f2()`) use autosomal loci only
+  and say how many loci on X, Y or MT they leave out, as PLINK; declare a
+  chromosome as an autosome with `gt_set_chromosome_types()` to keep it
+* `gt_as_vcf()` writes haploid genotypes for males on X and Y (females on Z
+  and W) and for everyone on MT
 * extended phased codes, whose bytes above 4 repeat the phased genotypes in
   blocks of five so that other packages can annotate haplotypes (e.g. with
   local ancestry), are recognised by `is_phased()`, decoded by
   `show_haplotypes()` and `gt_as_vcf()`, kept with their `"ancestry_labels"`
   by `gt_update_backingfile()` and by `rbind()` (when both datasets match),
   and refused by `gt_set_imputed()` (see `?phased_encoding`)
+
+## Bug fixes
+
+* `gt_as_plink(chromosomes_as_int = TRUE)`: fix the codes of X, Y, XY and MT,
+  which now follow PLINK (23 to 26 in humans; MT was coded before X)
 
 # tidypopgen 1.1.0
 

@@ -68,6 +68,9 @@
 #' # Create a gt_pcadapt object
 #' gt_pcadapt(lobsters, pca, k = 2)
 gt_pcadapt <- function(x, pca, k, n_cores = 1, max_missing = 0.5) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  x <- .gt_autosomes_only(x)
   stopifnot_gen_tibble(x)
   stopifnot_max_missing(max_missing)
   if (n_cores > 1) {

@@ -200,6 +200,9 @@ gt_pca <- function(x, k = 10, method = c("partial", "random"),
                    fun_prod = bigstatsr::big_prodVec,
                    fun_cprod = bigstatsr::big_cprodVec,
                    total_var = TRUE) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  x <- .gt_autosomes_only(x)
   stopifnot_dip_pseudo(x)
   method <- match.arg(method)
   engine <- match.arg(engine)

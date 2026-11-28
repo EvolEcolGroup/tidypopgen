@@ -50,6 +50,7 @@ They were in `data-raw/dev_notes/` until 19 Nov 2026. Start with
 | `loci_sidecar_plan.md` | The plan for integer chromosomes and sidecar files for loci names. |
 | `loci_sidecar_handover.md` | What was built for integer chromosomes and sidecar files (branch `vcf_names_tsv`), how it differs from the plan, benchmarks and open points. |
 | `sfs_plan.md` | The plan for the site frequency spectra (implemented in #221). |
+| `sex_chromosomes_plan.md` | The plan for sex chromosomes and mtDNA: chromosome types, hemizygous genotypes stored as 0/2, autosome-only defaults, the sex check (branch `sex_chromosomes`). |
 | `cran_checks_2026-11-27.md` | The final pre-submission checks for CRAN of version 1.1.0 (27 Nov, after #243, #244 and the TGENO reader): one spelling fix, the release order and the remote checks left. |
 | `cran_checks_2026-11-21.md` | The pre-submission checks for CRAN of version 1.1.0 (21 Nov, re-run on the final `dev` on 22 Nov): fixes, decisions, reverse dependency, and the release order. |
 | `cran_checks_2026-11-07.md` | The pre-submission checks for CRAN of version 1.0.0: what was fixed, what needs a decision, and a draft of `cran-comments.md`. |

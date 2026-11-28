@@ -141,6 +141,9 @@ pairwise_ibs.tbl_df <- function(
   allele_freqs = NULL,
   ...
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  x <- .gt_autosomes_only(x)
   stopifnot_has_genotypes(x)
   # hand the genotypes column over to its method, which returns a
   # pairwise_matrix (or a list of two count matrices for "raw_counts"), and
@@ -187,6 +190,9 @@ pairwise_ibs.vctrs_bigSNP <- function(
   allele_freqs = NULL,
   ...
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  x <- .gt_autosomes_only(x)
   rlang::check_dots_empty()
   stopifnot_diploid(x)
   type <- match.arg(type)

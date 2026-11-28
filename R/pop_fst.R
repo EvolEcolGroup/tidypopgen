@@ -32,6 +32,9 @@
 #' example_gt %>% pop_fst(allele_sharing_mat = allele_sharing_mat)
 #'
 pop_fst <- function(.x, include_global = FALSE, allele_sharing_mat = NULL) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   stopifnot_diploid(.x)
   if (!inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")

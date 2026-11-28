@@ -37,22 +37,35 @@ inline std::vector<std::string> as_string_vector(const CharacterVector& x) {
 // appended to `file` (which is opened in text mode, as done by
 // utils::write.table()).
 //
+// Individuals can also use different sets of strings (e.g. to write the
+// haploid genotypes of males on the X chromosome): `lut` then holds 256
+// strings for each set, and `indiv_lut` gives the (0-based) set of each
+// individual.
+//
 // @param BM the FBM.code256
 // @param rowInd the (1-based) rows of the FBM (individuals) to write
 // @param colInd the (1-based) columns of the FBM (loci) to write
-// @param lut a vector of 256 strings, one for each raw value
+// @param lut a vector of 256 strings for each set (one for each raw value)
 // @param prefix a vector of strings to start each line (one per locus), or an
 //   empty vector
 // @param sep the separator between genotypes
 // @param file the file to append to
+// @param indiv_lut the set of strings of each individual, or an empty vector
+//   (all individuals use the first set)
+// @param flag an empty vector, or a logical for each string of `lut`
+// @return the number of genotypes written with a string that is flagged
 // [[Rcpp::export]]
-void gt_write_text_by_locus(Environment BM,
-                            const IntegerVector& rowInd,
-                            const IntegerVector& colInd,
-                            const CharacterVector& lut,
-                            const CharacterVector& prefix,
-                            const std::string& sep,
-                            const std::string& file) {
+double gt_write_text_by_locus(Environment BM,
+                              const IntegerVector& rowInd,
+                              const IntegerVector& colInd,
+                              const CharacterVector& lut,
+                              const CharacterVector& prefix,
+                              const std::string& sep,
+                              const std::string& file,
+                              const IntegerVector& indiv_lut =
+                                IntegerVector::create(),
+                              const LogicalVector& flag =
+                                LogicalVector::create()) {
   XPtr<FBM> xpBM = BM["address"];
   const unsigned char* fbm_ptr =
     static_cast<const unsigned char*>(xpBM->matrix());
@@ -61,18 +74,43 @@ void gt_write_text_by_locus(Environment BM,
   size_t n = rowInd.size(); // number of individuals to write
   size_t m = colInd.size(); // number of loci to write
   bool has_prefix = prefix.size() > 0;
-  if (lut.size() != 256) {
-    stop("'lut' should have 256 elements");
+  if ((lut.size() == 0) || (lut.size() % 256 != 0)) {
+    stop("'lut' should have 256 elements for each set of strings");
+  }
+  size_t n_sets = lut.size() / 256;
+  bool by_indiv = indiv_lut.size() > 0;
+  if (by_indiv && ((size_t) indiv_lut.size() != n)) {
+    stop("'indiv_lut' should have one element per individual");
   }
   if (has_prefix && ((size_t) prefix.size() != m)) {
     stop("'prefix' should have one element per locus");
   }
+  bool has_flag = flag.size() > 0;
+  if (has_flag && (flag.size() != lut.size())) {
+    stop("'flag' should have one element per string of 'lut'");
+  }
   std::vector<std::string> lut_str = as_string_vector(lut);
-  // convert the rows to 0-based indices once
+  // convert the rows to 0-based indices once, and find the offset of the set
+  // of strings of each individual in lut
   std::vector<size_t> rows(n);
+  std::vector<size_t> lut_offset(n, 0);
   for (size_t i = 0; i < n; i++) {
     rows[i] = rowInd[i] - 1;
+    if (by_indiv) {
+      if ((indiv_lut[i] == NA_INTEGER) || (indiv_lut[i] < 0) ||
+          ((size_t) indiv_lut[i] >= n_sets)) {
+        stop("'indiv_lut' should give sets of strings of 'lut'");
+      }
+      lut_offset[i] = 256 * (size_t) indiv_lut[i];
+    }
   }
+  std::vector<char> flag_vec(lut.size(), 0);
+  if (has_flag) {
+    for (R_xlen_t k = 0; k < flag.size(); k++) {
+      flag_vec[k] = (flag[k] == TRUE);
+    }
+  }
+  double n_flagged = 0;
 
   std::ofstream out(file.c_str(), std::ios::out | std::ios::app);
   if (!out.is_open()) {
@@ -91,7 +129,9 @@ void gt_write_text_by_locus(Environment BM,
       if ((i > 0) || has_prefix) {
         line += sep;
       }
-      line += lut_str[col_ptr[rows[i]]];
+      size_t k = lut_offset[i] + col_ptr[rows[i]];
+      line += lut_str[k];
+      n_flagged += flag_vec[k];
     }
     line += '\n';
     out.write(line.data(), line.size());
@@ -104,6 +144,7 @@ void gt_write_text_by_locus(Environment BM,
   if (out.fail()) {
     stop("error when writing to the file " + file);
   }
+  return n_flagged;
 }
 
 /******************************************************************************/

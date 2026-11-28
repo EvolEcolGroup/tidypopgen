@@ -403,7 +403,9 @@ test_that("the runs are the same with and without chromosomes_as_int", {
   # (numbers keep their value, and "X" comes after them: 1, 2, 10, 11)
   set.seed(42)
   n_per_chrom <- 20
-  chrom_names <- c("2", "10", "1", "X")
+  # (a non-numeric name, which is not that of a sex chromosome, as those are
+  # left out of the runs)
+  chrom_names <- c("2", "10", "1", "Un")
   loci <- data.frame(
     chrom = rep(chrom_names, each = n_per_chrom),
     pos = rep(seq_len(n_per_chrom) * 1000, 4),

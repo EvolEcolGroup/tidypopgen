@@ -64,6 +64,9 @@ indiv_inbreeding.gen_tbl <- function(
   allele_sharing_mat = NULL,
   ...
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   stopifnot_has_genotypes(.x)
   # the matrix of allele sharing is computed from the whole gen_tibble (it is
   # labelled with its ids), then the genotypes column is handed over to its
@@ -87,6 +90,9 @@ indiv_inbreeding.vctrs_bigSNP <- function(
   allele_sharing_mat = NULL,
   ...
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
   if (is.null(allele_sharing_mat)) {
@@ -112,6 +118,9 @@ indiv_inbreeding.grouped_gen_tbl <- function(
   type = c("vector", "list"),
   ...
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  .x <- .gt_autosomes_only(.x)
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
   if (!is.null(allele_sharing_mat)) {

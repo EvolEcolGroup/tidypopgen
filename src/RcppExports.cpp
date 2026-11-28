@@ -348,9 +348,10 @@ BEGIN_RCPP
 END_RCPP
 }
 // gt_write_text_by_locus
-void gt_write_text_by_locus(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const CharacterVector& lut, const CharacterVector& prefix, const std::string& sep, const std::string& file);
-RcppExport SEXP _tidypopgen_gt_write_text_by_locus(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP lutSEXP, SEXP prefixSEXP, SEXP sepSEXP, SEXP fileSEXP) {
+double gt_write_text_by_locus(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const CharacterVector& lut, const CharacterVector& prefix, const std::string& sep, const std::string& file, const IntegerVector& indiv_lut, const LogicalVector& flag);
+RcppExport SEXP _tidypopgen_gt_write_text_by_locus(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP lutSEXP, SEXP prefixSEXP, SEXP sepSEXP, SEXP fileSEXP, SEXP indiv_lutSEXP, SEXP flagSEXP) {
 BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
@@ -359,8 +360,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const CharacterVector& >::type prefix(prefixSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type sep(sepSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type file(fileSEXP);
-    gt_write_text_by_locus(BM, rowInd, colInd, lut, prefix, sep, file);
-    return R_NilValue;
+    Rcpp::traits::input_parameter< const IntegerVector& >::type indiv_lut(indiv_lutSEXP);
+    Rcpp::traits::input_parameter< const LogicalVector& >::type flag(flagSEXP);
+    rcpp_result_gen = Rcpp::wrap(gt_write_text_by_locus(BM, rowInd, colInd, lut, prefix, sep, file, indiv_lut, flag));
+    return rcpp_result_gen;
 END_RCPP
 }
 // gt_write_text_by_indiv
@@ -984,14 +987,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // vcf_gt_dosages_cpp
-List vcf_gt_dosages_cpp(const CharacterMatrix& gt, int max_ploidy);
-RcppExport SEXP _tidypopgen_vcf_gt_dosages_cpp(SEXP gtSEXP, SEXP max_ploidySEXP) {
+List vcf_gt_dosages_cpp(const CharacterMatrix& gt, int max_ploidy, const IntegerVector& ploidy);
+RcppExport SEXP _tidypopgen_vcf_gt_dosages_cpp(SEXP gtSEXP, SEXP max_ploidySEXP, SEXP ploidySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const CharacterMatrix& >::type gt(gtSEXP);
     Rcpp::traits::input_parameter< int >::type max_ploidy(max_ploidySEXP);
-    rcpp_result_gen = Rcpp::wrap(vcf_gt_dosages_cpp(gt, max_ploidy));
+    Rcpp::traits::input_parameter< const IntegerVector& >::type ploidy(ploidySEXP);
+    rcpp_result_gen = Rcpp::wrap(vcf_gt_dosages_cpp(gt, max_ploidy, ploidy));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1158,7 +1162,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_pca_project_cpp", (DL_FUNC) &_tidypopgen_pca_project_cpp, 10},
     {"_tidypopgen_gt_pi_diploid", (DL_FUNC) &_tidypopgen_gt_pi_diploid, 5},
     {"_tidypopgen_gt_pi_polyploid", (DL_FUNC) &_tidypopgen_gt_pi_polyploid, 7},
-    {"_tidypopgen_gt_write_text_by_locus", (DL_FUNC) &_tidypopgen_gt_write_text_by_locus, 7},
+    {"_tidypopgen_gt_write_text_by_locus", (DL_FUNC) &_tidypopgen_gt_write_text_by_locus, 9},
     {"_tidypopgen_gt_write_text_by_indiv", (DL_FUNC) &_tidypopgen_gt_write_text_by_indiv, 11},
     {"_tidypopgen_SNPHWE2_R", (DL_FUNC) &_tidypopgen_SNPHWE2_R, 4},
     {"_tidypopgen_hwe_on_matrix", (DL_FUNC) &_tidypopgen_hwe_on_matrix, 2},
@@ -1197,7 +1201,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_which_in_cpp", (DL_FUNC) &_tidypopgen_which_in_cpp, 2},
     {"_tidypopgen_any_duplicated_strings_cpp", (DL_FUNC) &_tidypopgen_any_duplicated_strings_cpp, 1},
     {"_tidypopgen_tajimas_d_window_sums_cpp", (DL_FUNC) &_tidypopgen_tajimas_d_window_sums_cpp, 12},
-    {"_tidypopgen_vcf_gt_dosages_cpp", (DL_FUNC) &_tidypopgen_vcf_gt_dosages_cpp, 2},
+    {"_tidypopgen_vcf_gt_dosages_cpp", (DL_FUNC) &_tidypopgen_vcf_gt_dosages_cpp, 3},
     {"_tidypopgen_merge_sites_new", (DL_FUNC) &_tidypopgen_merge_sites_new, 3},
     {"_tidypopgen_merge_sites_add_file", (DL_FUNC) &_tidypopgen_merge_sites_add_file, 5},
     {"_tidypopgen_merge_sites_result", (DL_FUNC) &_tidypopgen_merge_sites_result, 1},

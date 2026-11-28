@@ -92,6 +92,9 @@ gt_pca_partialSVD <- function(
   fun_scaling = bigsnpr::snp_scaleBinom(),
   total_var = TRUE
 ) {
+  # only the autosomal loci (and pseudo-autosomal regions) are used
+  # (see gt_chromosome_types())
+  x <- .gt_autosomes_only(x)
   lifecycle::deprecate_soft("1.1.0", "gt_pca_partialSVD()", "gt_pca()")
   # a scaling given by the user (see scaling_lookup())
   custom_scaling <- !missing(fun_scaling)
