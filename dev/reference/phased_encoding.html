@@ -89,6 +89,25 @@ second haplotype of an individual (<code>NA</code> for missing, and for bytes th
 not used).</p>
     </div>
     <div class="section level2">
+    <h2 id="extended-phased-codes">Extended phased codes<a class="anchor" aria-label="anchor" href="#extended-phased-codes"></a></h2>
+    <p>Other packages can annotate the haplotypes of phased genotypes (e.g. with
+their local ancestry) by using bytes above 4. An <em>extended phased code</em>
+keeps bytes 0 to 4 of <code>code_phased</code>, and adds blocks of five bytes with the
+same meaning: byte <code>b &gt;= 5</code> stores the genotype of byte <code>(b - 5) %% 5</code>, so
+that its <code>code256</code> repeats <code>c(0, 1, 2, NA, 1)</code> for each block (bytes 0 to
+<code>5 * n - 1</code>, for <code>n</code> blocks of five bytes including the first one) and is
+<code>NA</code> for the bytes after. Functions that decode genotypes through <code>code256</code>
+therefore see ordinary dosages, and <code><a href="is_phased.html">is_phased()</a></code>, <code><a href="show_haplotypes.html">show_haplotypes()</a></code> and
+<code><a href="gt_as_vcf.html">gt_as_vcf()</a></code> decode the genotype of each byte (and write the phased
+genotype only). What the blocks mean is up to the package that writes them;
+tidypopgen only carries, unchanged, the attribute <code>"ancestry_labels"</code> of
+the <code>genotypes</code> column. <a href="rbind.gen_tbl.html">rbind()</a> keeps the bytes only if
+both datasets use the same code and the same <code>"ancestry_labels"</code>;
+otherwise it recodes each byte into the genotype it stores (bytes 0 to 4),
+uses <code>code_phased</code>, and drops the annotations with a message.
+<code><a href="gt_set_imputed.html">gt_set_imputed()</a></code> does not work on phased data.</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="gen_tibble.html">gen_tibble()</a></code>, <code><a href="is_phased.html">is_phased()</a></code>, <code><a href="show_haplotypes.html">show_haplotypes()</a></code></p></div>
     </div>

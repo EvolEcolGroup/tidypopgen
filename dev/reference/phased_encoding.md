@@ -51,6 +51,32 @@ data, as it is the only one that decodes byte 4 as 1.
 and second haplotype of an individual (`NA` for missing, and for bytes
 that are not used).
 
+## Extended phased codes
+
+Other packages can annotate the haplotypes of phased genotypes (e.g.
+with their local ancestry) by using bytes above 4. An *extended phased
+code* keeps bytes 0 to 4 of `code_phased`, and adds blocks of five bytes
+with the same meaning: byte `b >= 5` stores the genotype of byte
+`(b - 5) %% 5`, so that its `code256` repeats `c(0, 1, 2, NA, 1)` for
+each block (bytes 0 to `5 * n - 1`, for `n` blocks of five bytes
+including the first one) and is `NA` for the bytes after. Functions that
+decode genotypes through `code256` therefore see ordinary dosages, and
+[`is_phased()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/is_phased.md),
+[`show_haplotypes()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/show_haplotypes.md)
+and
+[`gt_as_vcf()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_as_vcf.md)
+decode the genotype of each byte (and write the phased genotype only).
+What the blocks mean is up to the package that writes them; tidypopgen
+only carries, unchanged, the attribute `"ancestry_labels"` of the
+`genotypes` column.
+[rbind()](https://evolecolgroup.github.io/tidypopgen/dev/reference/rbind.gen_tbl.md)
+keeps the bytes only if both datasets use the same code and the same
+`"ancestry_labels"`; otherwise it recodes each byte into the genotype it
+stores (bytes 0 to 4), uses `code_phased`, and drops the annotations
+with a message.
+[`gt_set_imputed()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_set_imputed.md)
+does not work on phased data.
+
 ## See also
 
 [`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md),

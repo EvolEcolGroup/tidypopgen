@@ -4,7 +4,9 @@ Phased genotypes (see `phased` in
 [`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md))
 are recognised by the `code256` of their file backed matrix, which is
 identical to
-[code_phased](https://evolecolgroup.github.io/tidypopgen/dev/reference/phased_encoding.md).
+[code_phased](https://evolecolgroup.github.io/tidypopgen/dev/reference/phased_encoding.md),
+or is an extended phased code (see
+[phased_encoding](https://evolecolgroup.github.io/tidypopgen/dev/reference/phased_encoding.md)).
 
 ## Usage
 

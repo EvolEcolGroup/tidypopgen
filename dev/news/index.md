@@ -2,6 +2,22 @@
 
 ## tidypopgen (development version)
 
+- extended phased codes, whose bytes above 4 repeat the phased genotypes
+  in blocks of five so that other packages can annotate haplotypes
+  (e.g. with local ancestry), are recognised by
+  [`is_phased()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/is_phased.md),
+  decoded by
+  [`show_haplotypes()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/show_haplotypes.md)
+  and
+  [`gt_as_vcf()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_as_vcf.md),
+  kept with their `"ancestry_labels"` by
+  [`gt_update_backingfile()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_update_backingfile.md)
+  and by [`rbind()`](https://rdrr.io/r/base/cbind.html) (when both
+  datasets match), and refused by
+  [`gt_set_imputed()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_set_imputed.md)
+  (see
+  [`?phased_encoding`](https://evolecolgroup.github.io/tidypopgen/dev/reference/phased_encoding.md))
+
 ## tidypopgen 1.1.0
 
 CRAN release: 2026-11-27

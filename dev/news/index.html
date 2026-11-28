@@ -49,7 +49,8 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="tidypopgen-development-version">tidypopgen (development version)<a class="anchor" aria-label="anchor" href="#tidypopgen-development-version"></a></h2>
-</div>
+<ul><li>extended phased codes, whose bytes above 4 repeat the phased genotypes in blocks of five so that other packages can annotate haplotypes (e.g. with local ancestry), are recognised by <code><a href="../reference/is_phased.html">is_phased()</a></code>, decoded by <code><a href="../reference/show_haplotypes.html">show_haplotypes()</a></code> and <code><a href="../reference/gt_as_vcf.html">gt_as_vcf()</a></code>, kept with their <code>"ancestry_labels"</code> by <code><a href="../reference/gt_update_backingfile.html">gt_update_backingfile()</a></code> and by <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code> (when both datasets match), and refused by <code><a href="../reference/gt_set_imputed.html">gt_set_imputed()</a></code> (see <code><a href="../reference/phased_encoding.html">?phased_encoding</a></code>)</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.1.0" id="tidypopgen-110">tidypopgen 1.1.0<a class="anchor" aria-label="anchor" href="#tidypopgen-110"></a></h2><p class="text-muted">CRAN release: 2026-11-27</p>
 <div class="section level3">
