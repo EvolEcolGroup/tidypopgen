@@ -29,13 +29,13 @@
   Author of countLines() in R.utils, modified for .vcf in
   count_vcf_variants()
 
-- **Jan Wigginton**. Contributor.  
+- **Jan Wigginton**. Contributor, copyright holder.  
   Author of the original Hardy-Weinberg exact test code (SNPHWE), on
   which the PLINK 1.90 code used in loci_hwe() is based
 
 - **Florian Privé**. Contributor, copyright holder.  
   Author of bigsnpr and bigstatsr, code from which is adapted in
-  read_packedancestry(), gt_as_plink(), predict.gt_pca(),
+  read_packedancestry_to_fbm(), gt_as_plink(), predict.gt_pca(),
   autoplot.gt_dapc() and loci_ld_clump()
 
 - **Jérôme Goudet**. Contributor, copyright holder.  

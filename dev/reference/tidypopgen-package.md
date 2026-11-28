@@ -53,12 +53,12 @@ Other contributors:
 
 - Jan Wigginton (Author of the original Hardy-Weinberg exact test code
   (SNPHWE), on which the PLINK 1.90 code used in loci_hwe() is based)
-  \[contributor\]
+  \[contributor, copyright holder\]
 
 - Florian Privé (Author of bigsnpr and bigstatsr, code from which is
-  adapted in read_packedancestry(), gt_as_plink(), predict.gt_pca(),
-  autoplot.gt_dapc() and loci_ld_clump()) \[contributor, copyright
-  holder\]
+  adapted in read_packedancestry_to_fbm(), gt_as_plink(),
+  predict.gt_pca(), autoplot.gt_dapc() and loci_ld_clump())
+  \[contributor, copyright holder\]
 
 - Jérôme Goudet (Author of hierfstat, code from which is adapted in
   pop_global_stats(), pop_het_obs(), pop_het_exp() and

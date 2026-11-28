@@ -66,9 +66,10 @@ gen_tibble(
   - a string giving the path to a vcf file. Only biallelic SNPs will be
     considered.
 
-  - a string giving the path to a *packedancestry* .geno file. The
-    associated .ind and .snp files are expected to be in the same
-    directory and share the same file name prefix.
+  - a string giving the path to a *packedancestry* .geno (or .tgeno)
+    file, in GENO or TGENO layout (see Details). The associated .ind and
+    .snp files are expected to be in the same directory and share the
+    same file name prefix.
 
   - a genotype matrix of dosages (0, 1, 2, NA) giving the dosage of the
     alternate allele.
@@ -132,9 +133,11 @@ gen_tibble(
   the genotypes are parsed in parallel, and a *.vcf.gz* file compressed
   with `bgzip` (as most are) is also decompressed in parallel (other
   gzipped files are decompressed on a single core). For a PLINK *.ped*
-  file, the lines are split and the genotypes coded in parallel, and for
-  a PLINK *.bed* file the genotypes are decoded in parallel. It is
-  ignored for other formats and for `parser = "vcfR"`.
+  file, the lines are split and the genotypes coded in parallel, for a
+  PLINK *.bed* file and a *packedancestry* GENO file the genotypes are
+  decoded in parallel, and for a *packedancestry* TGENO file they are
+  transposed in parallel. It is ignored for other formats and for
+  `parser = "vcfR"`.
 
 - chunk_size:
 
@@ -250,8 +253,15 @@ an object of the class `gen_tbl`.
   [`gt_as_plink()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_as_plink.md)
   writes these columns back to PLINK files.
 
-- *packedancestry* files: When loading *packedancestry* files, missing
-  alleles will be converted from 'X' to NA
+- *packedancestry* files: the genotype file can be in either of the two
+  layouts of EIGENSOFT, GENO (one record per locus) or TGENO (one record
+  per individual, "transposed", as in recent releases of the Allen
+  Ancient DNA Resource, AADR); the layout is detected from the header of
+  the file, whatever its extension (.geno or .tgeno). A TGENO file is
+  read into memory in one go if it is smaller than 2 GB (and otherwise
+  in slabs of loci, using up to 2 GB of memory). When loading
+  *packedancestry* files, missing alleles will be converted from 'X' to
+  NA
 
 - Phased genotypes: with `phased = TRUE`, `gen_tibble()` creates a
   phased `gen_tibble` of diploid individuals, which also knows which

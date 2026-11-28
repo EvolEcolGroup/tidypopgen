@@ -9,7 +9,7 @@ here the format"><meta property="og:image" content="https://evolecolgroup.github
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9015</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.1.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -112,9 +112,10 @@ same directory and have the same file name.</p></li>
 the <code>bigsnpr</code> package (usually created with <code><a href="https://privefl.github.io/bigsnpr/reference/snp_readBed.html" class="external-link">bigsnpr::snp_readBed()</a></code>)</p></li>
 <li><p>a string giving the path to a vcf file. Only biallelic SNPs will be
 considered.</p></li>
-<li><p>a string giving the path to a <em>packedancestry</em> .geno file. The associated
-.ind and .snp files are expected to be in the same directory and share the
-same file name prefix.</p></li>
+<li><p>a string giving the path to a <em>packedancestry</em> .geno (or .tgeno) file,
+in GENO or TGENO layout (see Details). The associated .ind and .snp files
+are expected to be in the same directory and share the same file name
+prefix.</p></li>
 <li><p>a genotype matrix of dosages (0, 1, 2, NA) giving the dosage of the
 alternate allele.</p></li>
 <li><p>with <code>phased = TRUE</code>, a matrix of haplotypes (see Details).</p></li>
@@ -178,8 +179,10 @@ in case your
 file compressed with <code>bgzip</code> (as most are) is also decompressed in
 parallel (other gzipped files are decompressed on a single core). For
 a PLINK <em>.ped</em> file, the lines are split and the genotypes coded in
-parallel, and for a PLINK <em>.bed</em> file the genotypes are decoded in
-parallel. It is ignored for other formats and for <code>parser = "vcfR"</code>.</p></dd>
+parallel, for a PLINK <em>.bed</em> file and a <em>packedancestry</em> GENO file the
+genotypes are decoded in parallel, and for a <em>packedancestry</em> TGENO file
+they are transposed in parallel. It is ignored for other formats and for
+<code>parser = "vcfR"</code>.</p></dd>
 
 
 <dt id="arg-chunk-size">chunk_size<a class="anchor" aria-label="anchor" href="#arg-chunk-size"></a></dt>
@@ -284,7 +287,13 @@ parents and sex, 0 or -9 for a case/control phenotype, and -9 for a
 quantitative one) are NA, and <code>paternal_ID</code>, <code>maternal_ID</code>, <code>sex</code> and
 <code>phenotype</code> are only created if they have some non-missing values.
 <code><a href="gt_as_plink.html">gt_as_plink()</a></code> writes these columns back to PLINK files.</p></li>
-<li><p><em>packedancestry</em> files: When loading <em>packedancestry</em> files,
+<li><p><em>packedancestry</em> files: the genotype file can be in either of the two
+layouts of EIGENSOFT, GENO (one record per locus) or TGENO (one record per
+individual, "transposed", as in recent releases of the Allen Ancient DNA
+Resource, AADR); the layout is detected from the header of the file,
+whatever its extension (.geno or .tgeno). A TGENO file is read into memory
+in one go if it is smaller than 2 GB (and otherwise in slabs of loci,
+using up to 2 GB of memory). When loading <em>packedancestry</em> files,
 missing alleles will be converted from 'X' to NA</p></li>
 <li><p>Phased genotypes: with <code>phased = TRUE</code>, <code>gen_tibble()</code> creates a phased
 <code>gen_tibble</code> of diploid individuals, which also knows which allele of each

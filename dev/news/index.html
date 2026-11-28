@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9015</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.1.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,7 +48,10 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.1.0" id="tidypopgen-110">tidypopgen 1.1.0<a class="anchor" aria-label="anchor" href="#tidypopgen-110"></a></h2>
+<h2 class="pkg-version" data-toc-text="development version" id="tidypopgen-development-version">tidypopgen (development version)<a class="anchor" aria-label="anchor" href="#tidypopgen-development-version"></a></h2>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.1.0" id="tidypopgen-110">tidypopgen 1.1.0<a class="anchor" aria-label="anchor" href="#tidypopgen-110"></a></h2><p class="text-muted">CRAN release: 2026-11-27</p>
 <div class="section level3">
 <h3 id="new-features-and-changes-1-1-0">New features and changes<a class="anchor" aria-label="anchor" href="#new-features-and-changes-1-1-0"></a></h3>
 <ul><li>new <code><a href="../reference/gt_pca.html">gt_pca()</a></code> computes PCAs, by default with missing genotypes handled as <code>plink --pca</code> (PLINK 1.9), without imputation; <code><a href="../reference/gt_pca_partialSVD.html">gt_pca_partialSVD()</a></code> and <code><a href="../reference/gt_pca_randomSVD.html">gt_pca_randomSVD()</a></code> are deprecated</li>
@@ -80,7 +83,9 @@
 <code>qc_report_loci(hwe = FALSE)</code> gives the MAF and missingness of loci in a single pass</li>
 <li>
 <code><a href="../reference/gt_impute_simple.html">gt_impute_simple()</a></code> works after removing loci (but not individuals)</li>
-<li>faster input and output: VCF and <em>.bed</em> files are read in parallel (<code>n_cores</code>), <em>.ped</em> files are read faster, and <em>.gt</em> files are saved twice as fast</li>
+<li>
+<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code> reads <em>packedancestry</em> genotype files in the TGENO layout (one record per individual, as in recent releases of the AADR) as well as GENO; the layout is detected from the header of the file, whatever its extension (<em>.geno</em> or <em>.tgeno</em>)</li>
+<li>faster input and output: VCF, <em>.bed</em> and <em>packedancestry</em> (<em>.geno</em>) files are read in parallel (<code>n_cores</code>), <em>.ped</em> files are read faster, and <em>.gt</em> files are saved twice as fast</li>
 <li>faster <code><a href="../reference/pairwise_king.html">pairwise_king()</a></code> (up to 1.8 times on CPUs with AVX2), <code><a href="../reference/pairwise_ibs.html">pairwise_ibs()</a></code> and <code><a href="../reference/pairwise_allele_sharing.html">pairwise_allele_sharing()</a></code>, and much faster <code><a href="../reference/indiv_inbreeding.html">indiv_inbreeding()</a></code> and <code><a href="../reference/qc_report_indiv.html">qc_report_indiv()</a></code> on grouped data</li>
 <li>faster <code><a href="../reference/select_loci.html">select_loci()</a></code>, and faster <code><a href="../reference/gt_as_vcf.html">gt_as_vcf()</a></code>, <code><a href="../reference/gt_update_backingfile.html">gt_update_backingfile()</a></code> and <code><a href="../reference/gt_order_loci.html">gt_order_loci()</a></code> with many chromosomes; <code><a href="../reference/gt_as_genlight.html">gt_as_genlight()</a></code> uses less memory</li>
 <li>
@@ -104,6 +109,8 @@
 <code><a href="../reference/gt_pcadapt.html">gt_pcadapt()</a></code>: clear error for loci with the same genotype in every individual (<a href="https://github.com/EvolEcolGroup/tidypopgen/issues/179" class="external-link">#179</a>)</li>
 <li>
 <code><a href="../reference/gen_tibble.html">gen_tibble()</a></code>: error on <em>.bed</em> files whose size does not match the <em>.bim</em> and <em>.fam</em> files, and on individual-major <em>.bed</em> files</li>
+<li>
+<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code>: <em>packedancestry</em> files that are truncated, or whose header does not match the <em>.ind</em> and <em>.snp</em> files, give an error before the backing file is created, and EIGENSTRAT (text) <em>.geno</em> files a clear error</li>
 <li>
 <code><a href="../reference/gen_tibble.html">gen_tibble()</a></code> on <em>.ped</em> files: a third allele always flags the locus as multi-allelic</li>
 <li>

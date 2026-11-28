@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9015</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.1.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -132,8 +132,10 @@ the <code>FID</code> column, this is treated as population information
 and is automatically added to the <code>gen_tibble</code> as column
 <code>population</code>. As with a normal tibble, this information can
 be changed, updated, or removed from the <code>gen_tibble</code> if
-needed. <code>tidypopgen</code> can also read data form
-<code>packedancestry</code> files and <code>vcf</code>.</p>
+needed. <code>tidypopgen</code> can also read data from
+<code>packedancestry</code> files (<code>.geno</code> files, in the GENO
+or the TGENO layout of EIGENSOFT, as used by the AADR) and
+<code>vcf</code>.</p>
 <p>Let’s start by creating a <code>gen_tibble</code> from the
 <code>lobster.bed</code> file.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
