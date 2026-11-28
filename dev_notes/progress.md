@@ -4,6 +4,21 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-28 (laptopX1): #250 merged, attribute stress test, version-bump check
+
+- **Done:** stress test of `ancestry_labels` (#245) and `chr_types`
+  (#250) under any order of 14 operations: 469 sequences, 2054
+  operations, no failure (`dev_notes/attribute_stress/stress_attrs.R`).
+  #250 squashed into `dev` (`2fe8fded`) with version 1.1.0.9001 (also
+  covering #245, merged without a bump) and a README note that phased
+  genotypes and sex chromosomes are experimental (Andrea).
+- **Decision (Andrea):** every PR into `dev` that changes the package
+  bumps the version: rule in `~/.claude/CLAUDE.md` and
+  `r-package-development`; CI check in #251.
+- **Gotcha:** the annex dropped out mid-fetch and left an empty object
+  (`2fe8fded`); removed it and refetched, `git fsck` clean.
+- **Notes changed:** `handover.md`, `summary.md`, `attribute_stress/`.
+
 ## 2026-11-28 (laptopX1): 1.1.0 on CRAN, tagged; `dev` 1.1.0.9000; `main` to the release
 
 - **Done:** CRAN accepted 1.1.0 (27 Nov), submitted from `dev` at

@@ -1,8 +1,9 @@
 # tidypopgen: handover
 
 Updated 2026-11-28 (laptopX1: 1.1.0 accepted by CRAN on 27 Nov, tagged
-`v1.1.0`; `dev` is 1.1.0.9000; `main` is the release (#249); #245 merged
-into `dev`; #250 (sex chromosomes) open). Rewritten on
+`v1.1.0`; `main` is the release (#249); #245 and #250 (ancestry tracts,
+sex chromosomes) merged into `dev`, now 1.1.0.9001; #251 (version-bump
+check) open). Rewritten on
 `dev` from the copy of 26-27 Nov on `sex_chromosomes` (itself from the
 23 Nov copy on `split_plan`): merge the living documents by hand when those
 branches reach `dev`. Some documents named below are only on those
@@ -16,10 +17,11 @@ History is in `progress.md`; designs are in the topic documents listed in
 
 | branch | purpose | base | pushed | merged |
 |---|---|---|---|---|
-| `sex_chromosomes` | phase 1 of sex chromosomes and mtDNA (`sex_chromosomes_plan.md`, "As built"): chromosome types, VCF haploid genotypes as 0/2, `indiv_sex_check()`, autosome-only analyses, haploid VCF output and PLINK codes, an article; worktree `/media/andrea/annex/tmp/claude/tidypopgen/wt_sexchr` on the laptop | `dev` at `4374e70d`, `dev` merged in on 28 Nov | yes | PR #250 |
+| `sex_chromosomes` | #250, squashed into `dev` (`2fe8fded`); its worktree `/media/andrea/annex/tmp/claude/tidypopgen/wt_sexchr`: delete both (waiting for Andrea's OK) | `dev` | yes | squashed in #250 |
+| `version_bump_check` | #251: CI workflow `version-bump.yaml`, fails PRs into `dev` that change the built package without a version bump | `dev` at `ad21fc61` | yes | PR #251 |
 | `split_plan` | dev notes only: the plan for the package split (`package_split.md`, `package_split/`) and older living documents; merge into `dev` (no code, `[skip ci]`) | `dev` at `e20145a2` | yes | no |
 | `vignette_filtering` | Andrea's vignette edits, the base of #242: delete once he has switched (about 13 of its lines are not in `dev`: older `big_data` timings, a 0.045 missingness threshold, some wording, probably superseded) | `dev` | yes | squashed in #242 |
-| `phased_ancestry` | #245 (extended phased codes), squashed into `dev` (`a8cb2501`); its worktree `/media/andrea/annex/git/tidypopgen_phased_ancestry`: delete both | `dev` | yes | squashed in #245 |
+| `phased_ancestry` | #245 (extended phased codes), squashed into `dev` (`a8cb2501`); its worktree `/media/andrea/annex/git/tidypopgen_phased_ancestry`: delete both (waiting for Andrea's OK) | `dev` | yes | squashed in #245 |
 | `gt_pca_pseudohaploid` | local only (#244, code identical to `dev`), worktree `/media/andrea/annex/tmp/claude/tidypopgen_pseudo`: delete (waiting for Andrea's OK) | old `dev` | no | squashed in #244 |
 | `ccr-2e473cc7-1prukj` | no commits beyond `dev`: delete (waiting for Andrea's OK) | `dev` | yes | yes |
 | `ploidy_roadmap` | Max Brown's dev notes: roadmap to arbitrary ploidy and the ploidy audit (`dev_notes/ploidy/`); not in `dev`, no PR | `dev` | yes | no |
@@ -27,29 +29,36 @@ History is in `progress.md`; designs are in the topic documents listed in
 
 ## Next tasks
 
-### 1. **P1** [review] Review and merge #250 (`sex_chromosomes`)
+### 1. **P1** [review] Review and merge #251 (version-bump check)
 
-- **Read first:** `dev_notes/sex_chromosomes_plan.md` on the branch
-  (decisions, "As built", numbers); the article
-  `vignettes/articles/sex_chromosomes.Rmd`.
-- **Commits:** `b1fb3203` chromosome types, `9526808e` VCF readers,
-  `69bd0209` `indiv_sex_check()`, `c56ad0bd` autosome-only analyses,
-  `815611fa` writers, `a7a81f4d` article and cheatsheet, `f4de9505` two
-  fixes found by the full suite; notes `47953f40`, `08610bb8` and this
-  wrap-up.
-- **State:** the full test suite passes (laptop, `load_all()`);
-  `indiv_sex_check()` matches PLINK 1.9 b7.11 exactly (fixture made by
-  `data-raw/validate/create_plink_sexcheck_test_data.R`); the VCF parser is
-  as fast as on `dev` (manica01, -O2, +0.5%/+1.2% at 1/8 threads, within
-  noise, identical backing files). Behaviour changes for data with X/Y/MT
-  are accepted (Andrea, 26 Nov). `R CMD check` not run yet.
-- **PR #250** (28 Nov): `dev` (1.1.0 released, #245) merged into the
-  branch; NEWS items moved to the development version section; living
-  notes taken from `dev` plus the branch's progress entries. After the
-  merge, the related test files pass (`load_all()`: chromosome types,
-  sex check, `gen_tibble`, VCF, PLINK, packedancestrymap); CI on the PR.
-- **Done when:** #250 is squash-merged into `dev`; then delete the branch
-  and the worktree `wt_sexchr`.
+- **What:** `.github/workflows/version-bump.yaml` fails a PR into `dev`
+  that changes the built package without a `Version` above `dev`'s tip;
+  `.Rbuildignore`d files need no bump; label `skip-version-bump` skips it.
+  Tested locally: fails the original #245, passes #250, an article-only
+  change and #251 itself (`.github/` only, so no bump needed).
+- **Why:** #245 was merged without a bump (no rule said so). The rule is
+  now in `~/.claude/CLAUDE.md` ("bump the development version with each
+  merged PR") and `r-package-development` (claude_jobs `3040b72`).
+- **Done when:** merged; optionally make it a required check on `dev`
+  (unprotected now).
+
+### Done: #250 (sex chromosomes and mtDNA, phase 1), 28 Nov
+
+- `dev` merged into the branch twice (1.1.0, then #245): conflicts only in
+  NEWS, the living notes and `gt_update_backingfile()`, which keeps both
+  `chr_types` and `ancestry_labels`. Version 1.1.0.9001 (covers #245);
+  README notes that phased genotypes (incl. ancestry tracts) and sex
+  chromosomes are experimental (Andrea). CI green except codecov (patch
+  93.9% vs 95.4% target, project -0.02%). Squashed into `dev` (`2fe8fded`).
+- **Stress test** (`dev_notes/attribute_stress/stress_attrs.R`, run from
+  the package root with `load_all()`): 14 operations (declare types,
+  filter, `[`, arrange, grouped mutate, `select_loci()`,
+  `select_loci_if()`, `gt_order_loci()`, `gt_update_backingfile()`,
+  save/load, rbind with and without declared types, analyses) in all
+  ordered pairs and 300 random sequences of 6: 469 sequences, 2054
+  operations, no failure in `ancestry_labels`, `chr_types`, the extended
+  code, `loci_chromosome_types()`, haplotypes or genotypes; negative
+  controls are caught. Candidate for a testthat test (smaller).
 
 ### 2. **P2** [andrea] A GitHub release for `v1.1.0`
 
