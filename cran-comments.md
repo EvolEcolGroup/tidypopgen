@@ -1,3 +1,14 @@
+## Resubmission
+
+This is a resubmission. In the first submission, one test failed on the
+Debian pre-test. It checks that a gzipped .ped file with a wrong CRC gives
+an error. From zlib 1.3.1.2 (Debian has 1.3.2), `gzread()` returns the data
+decompressed before an error instead of -1, so tidypopgen rejected the file,
+but with the message for a truncated file instead of a corrupted one.
+tidypopgen now checks zlib's error code, and gives the right message with
+both older and newer versions of zlib (tested locally with zlib 1.3 and
+1.3.2).
+
 ## Submission
 
 This is an update to 1.0.0, released on 2026-11-07. I am sorry for the quick
@@ -22,8 +33,11 @@ The update also brings:
 
 * PCA, DAPC, pcadapt and LD clumping and pruning with missing genotypes,
   without imputation, as in PLINK 1.9;
-* faster reading of VCF and PLINK files, and reading several VCF files at
-  once (`gt_merge_vcfs()`, `gt_concat_vcfs()`);
+* PCA of pseudohaploid (ancient DNA) data, as in PLINK;
+* faster reading of VCF, PLINK and packedancestrymap files, reading several
+  VCF files at once (`gt_merge_vcfs()`, `gt_concat_vcfs()`), and reading the
+  TGENO layout of packedancestrymap files (used by the Allen Ancient DNA
+  Resource);
 * faster kinship (KING) and IBS, also within groups;
 * integer chromosome names for datasets with many chromosomes;
 * phased genotypes (experimental);
@@ -31,26 +45,24 @@ The update also brings:
 
 ## Test environments
 
-- local Ubuntu 24.04, R 4.6.2: R CMD check --as-cran
+- local Ubuntu 24.04, R 4.5.2: R CMD check --as-cran
 - Github Actions R-CMD-check (ubuntu-24.04): r-devel, r-release, r-oldrel
 - Github Actions R-CMD-check (windows): r-release
 - Github Actions R-CMD-check (macOS): r-release
 - R-hub (R-devel): linux, macos-arm64, windows, m1-san
 - win-builder: r-devel
 
-<!-- TODO: win-builder result (emailed to the maintainer) -->
-
 ## R CMD check results
 
 0 errors | 0 warnings | 1 note
 
-* Days since last update: 14 (see above).
+* CRAN incoming feasibility: Suggests or Enhances not in mainstream
+  repositories: admixtools is in Additional_repositories, as an r-universe
+  package, and the tests and examples that use it are skipped when it is not
+  installed.
 
 with the following INFO:
 
-* Suggests or Enhances not in mainstream repositories: admixtools is in
-  Additional_repositories, as an r-universe package, and the tests and
-  examples that use it are skipped when it is not installed.
 * Installed package size: this is due to the C++ code compiled with Rcpp.
 
 ## Reverse dependencies

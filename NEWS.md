@@ -1,3 +1,12 @@
+# tidypopgen (development version)
+
+* extended phased codes, whose bytes above 4 repeat the phased genotypes in
+  blocks of five so that other packages can annotate haplotypes (e.g. with
+  local ancestry), are recognised by `is_phased()`, decoded by
+  `show_haplotypes()` and `gt_as_vcf()`, kept with their `"ancestry_labels"`
+  by `gt_update_backingfile()` and by `rbind()` (when both datasets match),
+  and refused by `gt_set_imputed()` (see `?phased_encoding`)
+
 # tidypopgen 1.1.0
 
 ## New features and changes
@@ -37,12 +46,6 @@
 * phased genotypes (experimental): `gen_tibble(phased = TRUE)` reads phased
   VCF files; `is_phased()` and `show_haplotypes()` give the phase,
   `gt_as_vcf()` writes it, and `rbind()` keeps it
-* extended phased codes, whose bytes above 4 repeat the phased genotypes in
-  blocks of five so that other packages can annotate haplotypes (e.g. with
-  local ancestry), are recognised by `is_phased()`, decoded by
-  `show_haplotypes()` and `gt_as_vcf()`, kept with their `"ancestry_labels"`
-  by `gt_update_backingfile()` and by `rbind()` (when both datasets match),
-  and refused by `gt_set_imputed()` (see `?phased_encoding`)
 * new `gt_simulate_bn()` simulates toy datasets (Balding-Nichols model)
 * `qc_report_loci(hwe = FALSE)` gives the MAF and missingness of loci in a
   single pass
