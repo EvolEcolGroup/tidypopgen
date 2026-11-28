@@ -1,75 +1,46 @@
 # tidypopgen: handover
 
-Updated 2026-11-26 (laptopX1: sex chromosomes and mtDNA, phase 1, on the
-branch `sex_chromosomes`, pushed as a backup, waiting for Andrea's review; since 23 Nov
-`dev` also has the TGENO reader, `8284e14d`, 25 Nov; 1.1.0 waits only for
-Andrea's release steps). These living documents were rewritten on
-`sex_chromosomes` from their newest copies on `split_plan` (23 Nov): merge
-them by hand if both branches reach `dev`. For the next session: read this
-and `summary.md` first. History
-is in `progress.md`; designs are in the topic documents listed in
+Updated 2026-11-28 (laptopX1: 1.1.0 accepted by CRAN on 27 Nov, tagged
+`v1.1.0`; `dev` is 1.1.0.9000; `main` brought to the release by #249). Rewritten on
+`dev` from the copy of 26-27 Nov on `sex_chromosomes` (itself from the
+23 Nov copy on `split_plan`): merge the living documents by hand when those
+branches reach `dev`. Some documents named below are only on those
+branches: `sex_chromosomes_plan.md` on `sex_chromosomes`;
+`package_split.md`, `test_times_2026-11.md` and `article_timings/` on
+`split_plan`. For the next session: read this and `summary.md` first.
+History is in `progress.md`; designs are in the topic documents listed in
 `README.md`.
 
 ## Branches
 
 | branch | purpose | base | pushed | merged |
 |---|---|---|---|---|
-| `sex_chromosomes` | phase 1 of sex chromosomes and mtDNA (`sex_chromosomes_plan.md`, "As built"): chromosome types, VCF haploid genotypes as 0/2, `indiv_sex_check()`, autosome-only analyses, haploid VCF output and PLINK codes, an article; worktree `/media/andrea/annex/tmp/claude/tidypopgen/wt_sexchr` | `dev` at `4374e70d` | yes, as a backup (27 Nov; no PR until Andrea's review) | no |
-| `split_plan` | dev notes only: the plan for the package split (`package_split.md`, `package_split/`) and these living documents; merge into `dev` (no code, `[skip ci]`) | `dev` at `e20145a2` | yes | no |
-| `cran_submission` | the commit R-hub checked on 21 Nov (`66e62aa5`); its content is in `dev` (#241): delete after the release | `dev` at `b4f81b26` | yes | squashed in #241 |
-| `vignette_filtering` | Andrea's vignette edits, the base of #242 (Andrea's checkout is on it): delete once he has switched | `dev` | yes | squashed in #242 |
-| `as_fbm`, `skill` | `gt_as_fbm()` (Aug) and tooling to build a Claude skill (Oct); not in `dev`, kept (Andrea, 21 Nov); `skill` has one local commit not pushed (not Claude's) | old `dev` | yes | no |
-
-Deleted on 21 Nov (Andrea): `pca_missing` (#231), `cran_test_time` (#237),
-`remove_armadillo` (#238, merged), `king_avx2` (#239), `vcf_merge_speed`
-(#240), `merge_vcf_speed`, `king_plink_ideas`, `cran-fixes-2026-11-21`
-(#241), `bed_reader` (#234), `big_data_article`,
-`adm_plot_ordering`, `pedigree` and `feature/pop-tajimas-d-polyploid` (all
-superseded by `dev`). `king_simd_packing` (rejected, below the 1.5x bar) is
-no longer in the laptop's repository (never pushed). The Elements HDD now
-mounts as `/media/andrea/Elements` and gave "Permission denied" on 21 Nov.
-
-Deleted on 22 Nov: `indiv_grouping` (#242) and `roxygen_links`
-(`cb7a526e`), local only; the rescue copy of 19 Nov is gone.
-
-Merged and deleted on origin on 23 Nov: `gt_pca_pseudohaploid` (#244). Its
-worktree `/media/andrea/annex/tmp/claude/tidypopgen_pseudo` and the notes
-worktree `/media/andrea/annex/tmp/claude/tidypopgen_notes` (on
-`split_plan`) remain on the laptop (task 6).
+| `sex_chromosomes` | phase 1 of sex chromosomes and mtDNA (`sex_chromosomes_plan.md`, "As built"): chromosome types, VCF haploid genotypes as 0/2, `indiv_sex_check()`, autosome-only analyses, haploid VCF output and PLINK codes, an article; worktree `/media/andrea/annex/tmp/claude/tidypopgen/wt_sexchr` on the laptop | `dev` at `4374e70d` | yes, as a backup (27 Nov; no PR until Andrea's review) | no |
+| `split_plan` | dev notes only: the plan for the package split (`package_split.md`, `package_split/`) and older living documents; merge into `dev` (no code, `[skip ci]`) | `dev` at `e20145a2` | yes | no |
+| `release_1.1.0` | #249: `main` brought to the tree of `v1.1.0` plus the laptop benchmark numbers (two commits, no `[skip ci]`); delete after the merge | `main` at `aee65ae5` | yes | through the merge queue (#249) |
+| `update_benchmark` | Evie's updated laptop numbers of the HGDP benchmark article (`a6f4279c`), cherry-picked to `dev` (`562d1bf5`) and #249: delete once Andrea agrees | `dev` at `4374e70d` | yes | cherry-picked |
+| `vignette_filtering` | Andrea's vignette edits, the base of #242: delete once he has switched | `dev` | yes | squashed in #242 |
+| `as_fbm`, `skill` | `gt_as_fbm()` (Aug) and tooling to build a Claude skill (Oct); not in `dev`, kept (Andrea, 21 Nov) | old `dev` | yes | no |
 
 ## Next tasks
 
-### 1. **P1** [andrea] Release 1.1.0: everything is done but the version
+### 1. **P1** [claude] Check that #249 has landed on `main`
 
-- `dev` at `eaf4d861` has #231 and #237-#242 (missing genotypes without
-  imputation, CRAN test skips, no RcppArmadillo, KING AVX2, faster VCF
-  merge, pre-submission fixes and `cran-comments.md`, grouped `indiv_*`
-  functions made consistent), the roxygen link fix, `CLAUDE.md` moved to
-  `.claude/`, and the re-timed articles (no code after `cb7a526e`).
-- Since 23 Nov, `dev` (`bd2e5082`) also has #244 (`gt_pca()` with
-  pseudohaploids, version 1.0.0.9015), merged after the checks below
-  without re-running them (Andrea: a small change, covered by CI). The
-  version bump to 1.1.0 replaces 1.0.0.9015.
-- Checks re-run on the final `dev` (22 Nov, `8f51a5ca`; the last commit
-  changes comments only; report `dev_notes/cran_checks_2026-11-21.md` on
-  `dev`, section "Re-run on the final `dev`"): local `R CMD check
-  --as-cran` 0/0/4 notes (all expected: version, admixtools, two URLs,
-  local flags); R-hub linux, windows, m1-san, macos-arm64 (run
-  44992007326, on `dev`): Status OK, no notes; win-builder r-devel uploaded
-  (result emailed to Andrea; a retry got FTP 550, i.e. already queued: if
-  no email came, upload again with `devtools::check_win_devel()`);
-  `dartR.base` 1.3.0: same results as with 1.0.0.
-- **Order:** set the version to 1.1.0; merge `dev` into `main` (pkgdown
-  rebuilds the site, so `articles/missing_data.html` and `rad_seq.html`
-  exist); re-run `urlchecker::url_check()`; add the win-builder result and
-  the days since the last update to `cran-comments.md`; submit
-  (`devtools::submit_cran()`); after acceptance tag the release and
-  `usethis::use_dev_version()`. Then delete the branch `cran_submission`.
-- After publication, re-check CRAN's test times (`test_times_2026-11.md`).
-- Precompiled articles: re-timed on a quiet manica01 on 22 Nov
-  (`eaf4d861`; `article_timings_speed_vs_big_data_article.md`, last
-  section). Only the laptop section of the HGDP benchmark still times the
-  old pipeline (see the backlog).
+- **Done (27-28 Nov):** CRAN accepted 1.1.0 (published 27 Nov 21:10 UTC),
+  submitted from `dev` at `e865cf14` (the SHA in `CRAN-SUBMISSION`, which
+  is deleted). Annotated tag `v1.1.0` on `e865cf14` (no GitHub release yet:
+  `gh release create v1.1.0 --verify-tag` with the 1.1.0 NEWS, Andrea).
+  `dev` is 1.1.0.9000 (`cc7ebeec`, NEWS has a development version heading),
+  with the updated laptop benchmark (`562d1bf5`). `cran_submission`,
+  `cran-fixes-2026-11-27` and `fix-tgeno-test-windows` deleted (all their
+  content was in `dev`).
+- **#249** (`release_1.1.0` into `main`, via the merge queue): one commit
+  whose tree is `v1.1.0` (the zlib fix, the resubmission note, the
+  `gt_admixture()` docs, the dev notes, missing from #247) plus the
+  benchmark commit. No `[skip ci]`, so CI and pkgdown run on `main`.
+- **Done when:** #249 is merged, the pkgdown site is rebuilt from `main`,
+  and `release_1.1.0` is deleted. Do not merge `main` back into `dev`:
+  the squash adds nothing `dev` lacks.
 
 ### 2. **P1** [review] Review `sex_chromosomes`, then open a PR
 
@@ -91,8 +62,8 @@ worktree `/media/andrea/annex/tmp/claude/tidypopgen_notes` (on
   the annex drive dropped out; `git fsck` clean). Its head
   commit is `[skip ci]`, so push an empty commit to get CI, then open a PR
   into `dev`. Its NEWS items
-  are in the 1.1.0 section: move them to the next version if 1.1.0 is
-  released first.
+  are in the 1.1.0 section: move them to the development version section
+  (1.1.0 is released).
 - **Done when:** the PR is merged.
 
 ### 3. **P2** [desktop] Re-time on the P-cores
@@ -153,7 +124,7 @@ worktree `/media/andrea/annex/tmp/claude/tidypopgen_notes` (on
   the CRAN checks on the laptop; on manica01, the worktree `wt_grouping`
   (its local branch `grouping` is kept) and the stopped `revdep/`.
 - Branches: `vignette_filtering` (once Andrea has switched his checkout),
-  and `cran_submission` after the release; the local `gt_pca_pseudohaploid`
+  and `update_benchmark` (applied; ask Andrea); the local `gt_pca_pseudohaploid`
   and its worktree `/media/andrea/annex/tmp/claude/tidypopgen_pseudo`, and
   the worktree `/media/andrea/annex/tmp/claude/tidypopgen_notes` (#244,
   23 Nov). The worktree `wt_notes` (on
@@ -167,13 +138,11 @@ worktree `/media/andrea/annex/tmp/claude/tidypopgen_notes` (on
   source archives and the scripts, 94 MB): ask Andrea before deleting. The
   PLINK 1.9 binary downloaded for the fixture was deleted (Andrea's choice:
   download to scratch, delete at the end).
-- After the release: `revdep/` and `revdep.sh` under
+- Now that 1.1.0 is released: `revdep/` and `revdep.sh` under
   `/media/andrea/annex/tmp/claude/tidypopgen/` (the scratch library with
   `dartR.data` and the `dartR.base` checks).
-- On manica01: discard Andrea's uncommitted
-  edits of `a02_qc.Rmd` and `benchmark_hgdp.Rmd.orig` (and the lower-case
-  edits) in `~/git/tidypopgen`, which are in `dev` through #235, before
-  pulling there.
+- Now that 1.1.0 is released: the `R CMD check` output of 27 Nov in
+  `~/project_temp/claude/tidypopgen/check/` on manica01 (192 MB).
 - Ask Andrea before deleting benchmark files (he may keep optimising with
   them). On the laptop's annex, under `/media/andrea/annex/tmp/claude/tidypopgen/`:
   `bench_dapc/` (~3 GB), `bench_grm/` (~3 GB), `bench_ld/` (~0.5 GB),
@@ -286,10 +255,6 @@ The job `vcf_merge_king` ran them on 20 Nov (results in `vcf_merge.md` and
 - VCF merge, further candidates (`vcf_merge.md`): match while reading,
   matching per chromosome in parallel, a decompression thread, libdeflate,
   a 2-bit genotype cache, and copying by blocks of columns at SGDP scale.
-- The laptop section of benchmark_hgdp still times the old pipeline (with
-  imputation): re-run `precompile_benchmark_hgdp_laptop.R` on the laptop
-  (its copy of `hgdp650_id_pop.txt` may have old population labels: use the
-  HG names, as the desktop's file does).
 - The cost of `grm_loci_lsq_cpp()` grows with `n_pca^2` (memory and adds).
 - `loci_ld_clump()` packs a whole chromosome at once; a cache of packed
   blocks would bound the memory for very many individuals.

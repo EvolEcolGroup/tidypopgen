@@ -1,8 +1,7 @@
 # tidypopgen: summary
 
-Updated 2026-11-26 (laptopX1: sex chromosomes and mtDNA, phase 1, on the
-local branch `sex_chromosomes`; 1.1.0 still waits only for the version and
-Andrea's release steps; the branch pushed as a backup on 27 Nov). One section: the package's issue in
+Updated 2026-11-28 (laptopX1: 1.1.0 accepted by CRAN and tagged; earlier,
+manica01: rewritten on `dev` from the copy on `sex_chromosomes`). One section: the package's issue in
 dramanica/claude_jobs, with the single list of its tasks. Its first
 paragraph, status and next steps are copied into the issue
 (`scripts/sync_issue.py`).
@@ -11,7 +10,7 @@ paragraph, status and next steps are copied into the issue
 
 Population genetics with `gen_tibble`s: faster input (VCF reading in `dev`, merging of VCFs prototyped), analyses with missing genotypes without imputation (PCA, DAPC, pcadapt, LD clumping and pruning), fast kinship and inbreeding within groups, and sex chromosomes and mtDNA.
 
-**Status.** `dev` holds everything for 1.1.0 (#231, #237-#242, #244; CRAN checks clean on 22 Nov), so the release waits only for the version bump and Andrea's steps. Sex chromosomes and mtDNA, phase 1 (chromosome types, hemizygous genotypes as 0/2 as in PLINK, `indiv_sex_check()` matching PLINK 1.9 exactly, autosome-only analyses), is on the branch `sex_chromosomes` (pushed, no PR), full test suite passing, waiting for Andrea's review before a PR. Handover: `dev_notes/handover.md` on `sex_chromosomes` (`split_plan` has the 23 Nov copy), `sex_chromosomes_plan.md`, `cran_checks_2026-11-21.md` (on `dev`).
+**Status.** 1.1.0 is on CRAN (27 Nov), tagged `v1.1.0` on the submitted commit (`e865cf14`, `dev`); `dev` is 1.1.0.9000, and #249 brings `main` to the release through the merge queue, with the updated laptop benchmark numbers (also on `dev`). Sex chromosomes and mtDNA, phase 1, is on the branch `sex_chromosomes` (pushed, no PR), waiting for Andrea's review. Handover: `dev_notes/handover.md` on `dev`, `cran_checks_2026-11-27.md`, `sex_chromosomes_plan.md` (on `sex_chromosomes`).
 
 With missing genotypes, imputation pulls individuals with many missing
 genotypes together and makes missingness an axis of the PCA (on HGDP650, PC1
@@ -21,8 +20,7 @@ genotyped individuals and leave out loci with more than half their genotypes
 missing; clumping is 33 times faster than bigsnpr and much closer to the
 complete-data clumps; pruning reproduces PLINK's `--indep-pairwise`. Within
 groups, KING on HGDP650 by population takes 0.081 s on 8 cores (10.3 s with
-`group_map()`), and inbreeding 0.44 s (4.4 s). Version 1.1.0 (with the VCF
-work) is not released yet.
+`group_map()`), and inbreeding 0.44 s (4.4 s). All this is in 1.1.0, on CRAN.
 
 `gt_merge_vcfs()` read each file twice; reading it once and parsing lines in
 parallel removes most of the cost (1.6x on files with one sample, 1.1-1.25x
@@ -51,22 +49,20 @@ but Andrea judged it not worth the complexity (with that many loci
 `names_as_int = TRUE` is needed anyway): it is kept as a patch in the notes.
 
 **Next steps**
-- [ ] **P1** [review] Review the branch `sex_chromosomes` (pushed; `sex_chromosomes_plan.md`, "As built"), then push an empty commit (its head is `[skip ci]`) and open a PR into `dev`: done when merged (move its NEWS items if 1.1.0 is released first).
-- [ ] **P1** [andrea] Release 1.1.0 (CRAN checks re-run on the final `dev`, 22 Nov, all clean): set the version, merge `dev` into `main` (site rebuild fixes two article links), re-run `urlchecker::url_check()`, add the win-builder result (emailed; upload again if none came) to `cran-comments.md`, submit.
+- [ ] **P1** [claude] Check that #249 (`release_1.1.0`: `main` = `v1.1.0` + laptop benchmark) has passed the merge queue: done when `main` and the site are rebuilt and `release_1.1.0` is deleted; optionally a GitHub release for `v1.1.0` (Andrea).
+- [ ] **P1** [review] Review the branch `sex_chromosomes` (pushed; `sex_chromosomes_plan.md`, "As built"), then push an empty commit (its head is `[skip ci]`) and open a PR into `dev`: done when merged (move its NEWS items to the development version section).
 - [ ] **P2** [desktop] Re-time the HGDP650 PCA/DAPC/pcadapt/LD benchmarks on the P-cores (not set up): medians in `gt_pca.md`, `ld_missing.md`.
 - [ ] **P2** [claude] Keep optimising: pcadapt's t-scores, the GRM's count of shared loci, the DAPC regression, the other KING and VCF merge ideas: done when >5% faster with identical outputs.
 - [ ] **P3** [decide] The GRM diagonal of pseudohaploids in `gt_pca(method = "partial")`: coded 0/2 with the diploid scaling, their relationships are unbiased but their self-term is about 2 instead of 1; subtract their expected extra sampling variance from the diagonal (as GCTA does), never rescale them? Test on NORNE against projection (handover, task 5).
 - [ ] **P3** [decide] Sex chromosomes and mtDNA, phase 2: which sex-aware statistics first (frequencies and missingness on X, HWE on X, Fst on X/MT, heterozygous haploid counts)? Recommended: frequencies and missingness on X first, as most others build on them.
 - [ ] **P3** [decide] Look into the package split when ready (`package_split.md`: decisions, phases, open questions; Phase 0 after 1.1.0).
-- [ ] **P3** [cleanup] Delete `vignette_filtering` once Andrea has switched his checkout; after the release, `cran_submission` and `revdep/` on the laptop's annex; ask before deleting the benchmark data and prototypes on the laptop's annex (`bench_*`, `test_timing/`, `proj_proto/`, `ld_src/`) and in `~/claude_work/tidypopgen/` (incl. `pr_timing/`, `articles_2026-11-22/`) on the desktop.
+- [ ] **P3** [cleanup] Delete `vignette_filtering` once Andrea has switched his checkout; `update_benchmark` (applied to `dev` and #249; Andrea's OK); `revdep/` on the laptop's annex and the 27 Nov `R CMD check` output on manica01; ask before deleting the benchmark data and prototypes on the laptop's annex (`bench_*`, `test_timing/`, `proj_proto/`, `ld_src/`) and in `~/claude_work/tidypopgen/` (incl. `pr_timing/`, `articles_2026-11-22/`) on the desktop.
 
 **Done**
-- Sex chromosomes and mtDNA, phase 1, on the local branch `sex_chromosomes` (`b1fb3203`..`f4de9505`); behaviour changes for data with X/Y/MT accepted (Andrea): 26 Nov.
+- 1.1.0 accepted by CRAN (27 Nov); tag `v1.1.0` on `e865cf14`; `dev` at 1.1.0.9000 (`cc7ebeec`); laptop benchmark numbers from `update_benchmark` on `dev` (`562d1bf5`) and in #249; `cran_submission`, `cran-fixes-2026-11-27`, `fix-tgeno-test-windows` deleted: 28 Nov.
+- First submission of 1.1.0 (27 Nov, 19:32): Windows pre-test OK, Debian 1 ERROR (zlib 1.3.2 changed `gzread()`), fixed (`401e2a96`) with a resubmission note (`238487f3`); lint on `dev` fixed (`36643d2f`): 27 Nov.
+- #248 (Windows test fix) and #247 (`dev` into `main`, via the merge queue) merged, `main` merged back into `dev`; site rebuilt, URL check clean; R-hub OK on four platforms; win-builder 1 expected NOTE; `cran-comments.md` final: 27 Nov.
+- #246 merged (`8c2f1a6d`; version 1.1.0, `fbm` in WORDLIST, Jan Wigginton as `cph` (Andrea), `cran-comments.md`); local `R CMD check --as-cran` 0/0/4 expected notes; PR #247 (`dev` into `main`) and #248 (Windows test fix, CI passing) opened; R-hub and win-builder run: 27 Nov.
+- Sex chromosomes and mtDNA, phase 1, on the branch `sex_chromosomes` (`b1fb3203`..`f4de9505`); behaviour changes for data with X/Y/MT accepted (Andrea): 26 Nov.
 - TGENO reader (AADR) on `dev` (`8284e14d`): 25 Nov.
-- #244 merged (`bd2e5082`; `gt_pca()` accepts pseudohaploids, coded as homozygous diploids; version 1.0.0.9015; CodeRabbit's point on imputed genotypes fixed): 23 Nov (Andrea).
-- Timed articles (`benchmark_hgdp`, `big_data`, `rad_seq`, `roh_hgdp`) re-knitted on a quiet manica01 and pushed to `dev` (`eaf4d861`; `big_data` 160.9 -> 51.7 s, as its last knit was on the laptop): 22 Nov.
-- #242 merged (`8f51a5ca`; grouped `indiv_*` functions, `loci_*` edge cases; CodeRabbit's three points fixed): 22 Nov (Andrea).
-- Roxygen link warnings of the `select_loci()` helpers fixed, pushed straight to `dev` (`cb7a526e`): 22 Nov.
-- CRAN checks re-run on the final `dev` (local, R-hub, win-builder, `dartR.base`): 22 Nov.
-- Cleanup: merged branches, worktrees and CRAN scratch on the laptop; `wt_grouping` and the stopped `revdep/` on manica01: 22 Nov.
-- `CLAUDE.md` moved to `.claude/CLAUDE.md` (`ec1c6f2b`, on `dev`) and its pages deleted from `gh-pages` (now 404), so pkgdown no longer publishes it; same move in tidypopgl and tidyniches (`dev`), and the rule added to the skills: 22 Nov (Andrea).
+- #244 merged (`bd2e5082`; `gt_pca()` accepts pseudohaploids, coded as homozygous diploids): 23 Nov (Andrea).

@@ -1,4 +1,4 @@
-# tidypopgen 1.1.0
+# tidypopgen (development version)
 
 ## New features and changes
 
@@ -21,6 +21,16 @@
   chromosome as an autosome with `gt_set_chromosome_types()` to keep it
 * `gt_as_vcf()` writes haploid genotypes for males on X and Y (females on Z
   and W) and for everyone on MT
+
+## Bug fixes
+
+* `gt_as_plink(chromosomes_as_int = TRUE)`: fix the codes of X, Y, XY and MT,
+  which now follow PLINK (23 to 26 in humans; MT was coded before X)
+
+# tidypopgen 1.1.0
+
+## New features and changes
+
 * new `gt_pca()` computes PCAs, by default with missing genotypes handled as
   `plink --pca` (PLINK 1.9), without imputation; `gt_pca_partialSVD()` and
   `gt_pca_randomSVD()` are deprecated
@@ -89,8 +99,6 @@
 
 ## Bug fixes
 
-* `gt_as_plink(chromosomes_as_int = TRUE)`: fix the codes of X, Y, XY and MT,
-  which now follow PLINK (23 to 26 in humans; MT was coded before X)
 * fix occasional "File '...bk' already exists" errors from functions using
   temporary backing files (PCA, LD clumping, KING, IBS and allele sharing)
 * `loci_ld_clump()`, `gt_pcadapt()` and the PCA functions: fix false "You

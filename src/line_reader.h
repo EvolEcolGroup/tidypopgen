@@ -389,15 +389,21 @@ private:
         }
         n_total += n_read;
         // gzread() reads fewer bytes than requested only at the end of the
-        // file; if the file ends in the middle of a gzip stream, it returns
-        // the data decompressed so far (not an error), and gzerror() gives
-        // Z_BUF_ERROR, so a truncated file would be read as a shorter one
+        // file or on an error. If the file ends in the middle of a gzip
+        // stream, it returns the data decompressed so far (not an error),
+        // and gzerror() gives Z_BUF_ERROR, so a truncated file would be read
+        // as a shorter one. From zlib 1.3.1.2, gzread() also returns the
+        // data decompressed before any other error (e.g. a wrong CRC, which
+        // gives Z_DATA_ERROR), rather than -1, so check the error code here
         if ((unsigned int) n_read < n_request) {
           int err;
-          gzerror(gz, &err);
-          if (err != Z_OK) {
+          const char* msg = gzerror(gz, &err);
+          if (err == Z_BUF_ERROR) {
             stop("the gzipped file is truncated (it ends in the middle of "
                    "a gzip stream)");
+          }
+          if (err != Z_OK) {
+            stop(std::string("error reading the gzipped file: ") + msg);
           }
           break;
         }

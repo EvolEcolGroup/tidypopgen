@@ -4,6 +4,73 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-28 (laptopX1): 1.1.0 on CRAN, tagged; `dev` 1.1.0.9000; `main` to the release
+
+- **Done:** CRAN accepted 1.1.0 (27 Nov), submitted from `dev` at
+  `e865cf14` (checked in `CRAN-SUBMISSION`, then deleted). Annotated tag
+  `v1.1.0` there; `dev` bumped to 1.1.0.9000 (`cc7ebeec`). Evie's laptop
+  numbers for the HGDP benchmark article (`update_benchmark`, `a6f4279c`)
+  cherry-picked onto `dev` (`562d1bf5`). #249 brings `main` to the tree of
+  `v1.1.0` plus the benchmark, via the merge queue (Andrea's request).
+  Deleted `cran_submission`, `cran-fixes-2026-11-27`,
+  `fix-tgeno-test-windows` (content all in `dev`).
+- **Next:** #249 merged and the site rebuilt; a GitHub release for
+  `v1.1.0` was not made (blocked by a permission check).
+- **Notes changed:** `handover.md`, `summary.md`.
+
+## 2026-11-27 (laptopX1): CRAN pre-test failure fixed (zlib 1.3.2), CI fixed
+
+- **Done:** lint on `dev` failed on a trailing space from "mention
+  tidygenclust": fixed (`36643d2f`); the tidygenclust note of
+  `gt_admixture()` made its own paragraph of the Description (`b9ab348c`,
+  asked by Andrea). The CRAN pre-test of 1.1.0 (submitted from
+  `d0776110`) failed on Debian: a gzipped `.ped` with a wrong CRC was
+  reported as truncated, because zlib >= 1.3.1.2 `gzread()` returns the
+  data read before an error. Fixed in `src/line_reader.h` (`401e2a96`),
+  checked with zlib 1.3 and 1.3.2 (preloaded from the `plink19` conda
+  env); resubmission note in `cran-comments.md` (`238487f3`). CI on
+  `238487f3`: all green.
+- **Next:** Andrea resubmits 1.1.0 from `dev`.
+- **Notes changed:** `cran_checks_2026-11-27.md`, `handover.md`,
+  `summary.md`.
+
+## 2026-11-27 (manica01): 1.1.0 merged into `main`, ready to submit
+
+- **Done:** #248 squash-merged into `dev` (`fe0be84f`), #247 through
+  `main`'s merge queue (`aee65ae5`), `main` merged back into `dev`
+  (`c1311429`), all with Andrea's go-ahead; site rebuilt, URL check clean;
+  win-builder (the fix branch): 1 NOTE, admixtools (plus transient GitHub
+  504s); `cran-comments.md` final (`530d7af0`). CI on `dev`: all green (R-CMD-check on macOS, Windows and Ubuntu devel, release and oldrel; no-suggests, lint, pkgdown, coverage).
+- **Next:** Andrea submits from `~/git/tidypopgen` on `dev`.
+- **Notes changed:** `cran_checks_2026-11-27.md`, `handover.md`,
+  `summary.md`, `.claude/CLAUDE.md` (the merge queue of `main`).
+
+## 2026-11-27 (manica01): 1.1.0 release PRs, and a Windows test fix
+
+- **Done:** #246 squash-merged (`8c2f1a6d`, Andrea); its CI found the TGENO
+  test (`8284e14d`) failing on Windows (path separators; never checked, as
+  it was pushed with a `[skip ci]` commit): fixed in #248, CI passing.
+  #247 (`dev` into `main`, "v1.1.0") opened. R-hub on
+  `fix-tgeno-test-windows`: Status OK on linux, windows, macos-arm64 and m1-san (R-devel), no notes. win-builder uploaded from `dev`
+  (old ERROR) and from the fix branch (results by email).
+- **Decisions:** merge #248 before #247 (Claude); the `[skip ci]` rule
+  added to `.claude/CLAUDE.md`.
+- **Notes changed:** `cran_checks_2026-11-27.md` ("Release steps"),
+  `handover.md` and `summary.md` (rewritten on `dev` from the
+  `sex_chromosomes` copy), `.claude/CLAUDE.md`.
+
+## 2026-11-27 (manica01): final CRAN checks of 1.1.0
+
+- **Done:** the pre-submission checks re-run on `dev` (`4374e70d`) with the
+  version set to 1.1.0, on the branch `cran-fixes-2026-11-27` (not pushed):
+  version (`127b2b57`), `fbm` in `inst/WORDLIST` (`2e015189`), Jan Wigginton
+  as copyright holder (`75a88d4e`, Andrea).
+- **Results:** `R CMD check --as-cran` 0/0/4 notes, all expected (admixtools,
+  the two URLs that need the site rebuilt from `main`, three local ones);
+  tests 2.5 min with `NOT_CRAN=false`. `cran-comments.md` updated and
+  committed (approved, `a9121e06`).
+- **Notes changed:** `cran_checks_2026-11-27.md` (new), `README.md`.
+
 ## 2026-11-27 (laptopX1): `sex_chromosomes` pushed after the annex dropped out
 
 - **Done:** the annex drive dropped out overnight and came back intact
