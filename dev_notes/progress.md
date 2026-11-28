@@ -4,6 +4,20 @@ Log of major activity, newest first. Earlier work (reviews, speed, sidecar
 files, SFS, CRAN checks) is described in the topic documents listed in
 `README.md`.
 
+## 2026-11-28 (laptopX1): 1.1.0 on CRAN, tagged; `dev` 1.1.0.9000; `main` to the release
+
+- **Done:** CRAN accepted 1.1.0 (27 Nov), submitted from `dev` at
+  `e865cf14` (checked in `CRAN-SUBMISSION`, then deleted). Annotated tag
+  `v1.1.0` there; `dev` bumped to 1.1.0.9000 (`cc7ebeec`). Evie's laptop
+  numbers for the HGDP benchmark article (`update_benchmark`, `a6f4279c`)
+  cherry-picked onto `dev` (`562d1bf5`). #249 brings `main` to the tree of
+  `v1.1.0` plus the benchmark, via the merge queue (Andrea's request).
+  Deleted `cran_submission`, `cran-fixes-2026-11-27`,
+  `fix-tgeno-test-windows` (content all in `dev`).
+- **Next:** #249 merged and the site rebuilt; a GitHub release for
+  `v1.1.0` was not made (blocked by a permission check).
+- **Notes changed:** `handover.md`, `summary.md`.
+
 ## 2026-11-27 (laptopX1): CRAN pre-test failure fixed (zlib 1.3.2), CI fixed
 
 - **Done:** lint on `dev` failed on a trailing space from "mention
