@@ -1,3 +1,14 @@
+## Resubmission
+
+This is a resubmission. In the first submission, one test failed on the
+Debian pre-test. It checks that a gzipped .ped file with a wrong CRC gives
+an error. From zlib 1.3.1.2 (Debian has 1.3.2), `gzread()` returns the data
+decompressed before an error instead of -1, so tidypopgen rejected the file,
+but with the message for a truncated file instead of a corrupted one.
+tidypopgen now checks zlib's error code, and gives the right message with
+both older and newer versions of zlib (tested locally with zlib 1.3 and
+1.3.2).
+
 ## Submission
 
 This is an update to 1.0.0, released on 2026-11-07. I am sorry for the quick
@@ -41,8 +52,6 @@ The update also brings:
 - R-hub (R-devel): linux, macos-arm64, windows, m1-san
 - win-builder: r-devel
 
-<!-- TODO: win-builder result (emailed to the maintainer) -->
-
 ## R CMD check results
 
 0 errors | 0 warnings | 1 note
@@ -51,9 +60,6 @@ The update also brings:
   repositories: admixtools is in Additional_repositories, as an r-universe
   package, and the tests and examples that use it are skipped when it is not
   installed.
-
-<!-- TODO: from the win-builder result of the final commit: add "Days since
-last update" if it is flagged (20 days on 27 Nov), and check the count -->
 
 with the following INFO:
 

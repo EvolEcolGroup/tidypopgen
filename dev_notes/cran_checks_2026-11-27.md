@@ -9,13 +9,17 @@ installed there; the 22 Nov checks ran on R 4.6.2 on the laptop), branch
 
 ## Summary
 
-**Ready once #248 (a Windows test fix, found by CI after the checks below) and #247 are merged, and the remote checks and the URL check are done** (see "Release steps"). One issue
-found and fixed (a word for `inst/WORDLIST`). Nothing in the code or the
-docs blocks the submission. Left: merge the branch into `dev`, merge `dev`
-into `main` so that pkgdown publishes the two articles the README links to,
-re-run the URL check, then R-hub and win-builder on the final commit (with
-Andrea's go-ahead), the last lines of `cran-comments.md`, and the
-submission.
+**Resubmission** (27 Nov, evening): the first submission failed CRAN's
+Debian pre-test on one test, because zlib 1.3.2 changed `gzread()`; fixed
+on `dev` (`401e2a96`; "CRAN pre-test of the first submission" below).
+
+**Ready to submit** (27 Nov, 19:00): `dev` and `main` hold the same package
+(1.1.0, with the Windows test fix of #248), the site is rebuilt, the URL
+check is clean, and `cran-comments.md` is final on `dev` (`530d7af0`).
+Andrea submits with `devtools::submit_cran()` from `~/git/tidypopgen` on
+`dev` (a normal clone; `main` lacks the final `cran-comments.md`). The
+local checks below found one issue (a word for `inst/WORDLIST`); CI then
+found a test failing on Windows (#248, see "Release steps").
 
 | Check | Result |
 |---|---|
@@ -28,6 +32,41 @@ submission.
 | `devtools::check(remote = TRUE, manual = TRUE, env_vars = c(NOT_CRAN = "false"))` | 0 errors, 0 warnings, 4 notes, all expected (below). Install 1.7 min, examples 1.0 min (0.9 with `--run-donttest`), tests 2.5 min, vignettes 0.5 min, 11.6 min in all. INFO installed size 43.4 Mb (`libs` 38.5 Mb, with debug symbols); INFO hexbin not installed on manica01 (its code paths were skipped, as on a CRAN machine without it) |
 | Hidden files | none: the tarball was built from the main clone, not a worktree, so no `.git` NOTE |
 | Reverse dependency `dartR.base` | not re-run: it only calls `gen_tibble()` on VCF files, `show_loci()` and `show_genotypes()`, none changed since its check on 22 Nov (the `gen_tibble()` changes are for packedancestry files only) |
+
+## CRAN pre-test of the first submission (27 Nov, 19:36): 1 ERROR, fixed
+
+Andrea submitted from the laptop checkout on `dev` at `d0776110` (19:32
+UTC). Windows pre-test: OK. Debian pre-test (R-devel r90998, clang 23,
+Debian forky/sid): 1 ERROR, in `test_gen_tibble.R:514`. A gzipped `.ped`
+file with a wrong CRC was rejected, but with "the gzipped file is
+truncated" instead of "error reading the gzipped file"; the rest of the
+suite passed (5276 tests). Log saved while it lasts (7 days):
+`https://win-builder.r-project.org/incoming_pretest/tidypopgen_1.1.0_20261127_203416/`.
+
+- **Cause:** zlib 1.3.1.2 changed `gzread()` to "return all available
+  uncompressed data on error": on a CRC error it now returns the bytes
+  decompressed so far, with `Z_DATA_ERROR` set, instead of -1. Debian sid
+  has zlib 1.3.2; Ubuntu 24.04 (laptop, desktop, GitHub Actions) has 1.3,
+  so CI could not see it. `LineReader::read()` (`src/line_reader.h`)
+  treated any error after a short read as truncation.
+- **Fix (`401e2a96`):** after a short read, `Z_BUF_ERROR` is truncation
+  ("unexpected end of file", in every zlib version); any other error stops
+  with "error reading the gzipped file: " and zlib's message.
+- **Tested:** the failure reproduces and the fix passes with zlib 1.3.2
+  preloaded from the `plink19` conda env
+  (`LD_PRELOAD=/home/andrea/miniconda3/envs/plink19/lib/libz.so.1.3.2
+  Rscript ...`; `extSoftVersion()["zlib"]` shows the version in use), and
+  with the system zlib 1.3: the 12 test files that read gzipped files
+  pass under both. Building zlib 1.3.2 from source was blocked by the
+  permission classifier; the conda copy was enough. CI on `238487f3`:
+  all green (R-CMD-check on Ubuntu devel/release/oldrel, macOS and
+  Windows; no-suggests, lint, pkgdown, coverage), though its runners
+  have zlib 1.3 and cannot see this failure.
+- **`cran-comments.md`:** a "Resubmission" section explains the failure
+  and the fix (`238487f3`).
+- **Also on `dev` since the submission:** a lint fix (trailing space,
+  `36643d2f`) and the tidygenclust note of `gt_admixture()` as its own
+  paragraph of the Description (`b9ab348c`).
 
 ## Release steps (27 Nov, from 17:00)
 
@@ -42,20 +81,36 @@ submission.
   the test joined the folder and the name with `/`. A test bug, but CRAN's
   Windows checks would have failed. Fixed in **#248**
   (`fix-tgeno-test-windows`, normalised paths on both sides): all its CI
-  passes, Windows included. Waits for Andrea's merge.
-- **#247** (`dev` into `main`, "v1.1.0") opened; no CI on it (its head is
-  the `[skip ci]` squash of #246). Merge #248 first. If #247 is
-  squash-merged, its message has `[skip ci]` lines and pkgdown will not
-  run on `main`: the watcher of this session starts it
-  (`gh workflow run pkgdown.yaml --ref main`) if no run appears.
+  passes, Windows included. Merged (below).
+- **#248** squash-merged into `dev` (`fe0be84f`, Andrea's go-ahead); its
+  message has no `[skip ci]`, so CI ran on `dev`: R-CMD-check all green (R-CMD-check on macOS, Windows and Ubuntu devel, release and oldrel; no-suggests, lint, pkgdown, coverage).
+- **#247** (`dev` into `main`, "v1.1.0"): `main` has a merge queue (squash;
+  no required checks), so `gh pr merge` fails ("merge strategy set by the
+  merge queue", and auto-merge is off): enqueued with the GraphQL
+  `enqueuePullRequest` mutation, merged at 18:50 (`aee65ae5`). The queue's
+  squash message lists the commits, `[skip ci]` included, so nothing ran on
+  `main`; pkgdown was started by hand on `main`
+  (`gh workflow run pkgdown.yaml --ref main`), but the pkgdown run of the
+  push to `dev` (release mode, as the version has three components) had
+  already deployed the site at the root.
+- **Back-merge:** `main` merged into `dev` (`c1311429`, no file changes),
+  as after 1.0.0 (`6e26276c2`), so that `main` stays an ancestor of `dev`.
 - **R-hub:** run 46040022538 on `dev` (before #248): windows failed (the
   same test), then cancelled. Run 46042287173 on `fix-tgeno-test-windows`
-  (the package of `dev` after #248): Status OK on linux, windows, macos-arm64 and m1-san (R-devel), no notes.
-- **win-builder r-devel:** uploaded twice, both results emailed to Andrea:
-  at 17:15 from `dev` before #248 (expect the same test ERROR: ignore it),
-  and at about 17:50 from `fix-tgeno-test-windows` (the one for
-  `cran-comments.md`).
-- **URL check:** waits for the site rebuilt from `main` (after #247).
+  (the package of `dev` after #248): Status OK on linux, windows,
+  macos-arm64 and m1-san (R-devel), no notes.
+- **win-builder r-devel** (R-devel 2026-11-17 r90926 ucrt): uploaded twice;
+  the first (17:15, from `dev` before #248) has the Windows test ERROR and
+  does not count. The second
+  (https://win-builder.r-project.org/1WF5QzlQdEA5/, from
+  `fix-tgeno-test-windows`): Status 1 NOTE, CRAN incoming: admixtools in
+  `Additional_repositories`, the two articles (404 before the site
+  rebuild), and 504 Gateway Timeout from five GitHub URLs (transient, on
+  win-builder's side). "Days since last update" (20 days) not flagged; no
+  hidden-file NOTE. Tests 197 s, examples 85 s.
+- **URL check** after the site rebuild (19:00): no URL needs fixing.
+- **`cran-comments.md`:** the TODOs filled from win-builder (`530d7af0`,
+  on `dev`): 0 errors, 0 warnings, 1 note (admixtools).
 
 ## Fixed on `cran-fixes-2026-11-27`
 
@@ -72,18 +127,9 @@ submission.
 
 ## Needs your decision
 
-1. **Merge this branch into `dev`:** push it and open a PR (squash), or
-   push the three commits to `dev` directly (small, no code). The draft of
-   `cran-comments.md` (below) is committed (`a9121e06`).
-2. **Release order** (as on 21 Nov): PR `dev` into `main` ("v1.1.0", as
-   #225 for 1.0.0); pkgdown rebuilds the site; check that both articles
-   exist and re-run `urlchecker::url_check()`.
-3. **Remote checks on the final commit**, each with Andrea's go-ahead:
-   `rhub::rhub_check(branch = "main", platforms = c("linux", "m1-san",
-   "macos-arm64", "windows"))` and `devtools::check_win_devel()` from the
-   main clone (not a worktree). The R-hub and win-builder results of 22 Nov
-   predate #243, #244 and the TGENO reader (584 lines of C++).
-4. **Optional:** install hexbin on manica01, so that local checks cover its
+1. Done on 27 Nov (see "Release steps"): #246, #248 and #247 merged, the
+   site rebuilt, R-hub, win-builder and the URL check run.
+2. **Optional:** install hexbin on manica01, so that local checks cover its
    code paths (CI and R-hub install it).
 
 ## Ignored false positives and accepted notes
@@ -110,22 +156,18 @@ submission.
 - Check results: the one note is CRAN incoming (admixtools); "Days since
   last update" moved to a TODO, to fill in from the win-builder result;
   admixtools moved from INFO to the note.
-- Still to fill in: the win-builder result and the TODOs.
-
-## Commands to re-run once the branch is merged
-
-```r
-urlchecker::url_check()   # after the website is rebuilt from main
-rhub::rhub_check(branch = "main",
-                 platforms = c("linux", "m1-san", "macos-arm64", "windows"))
-devtools::check_win_devel()   # from the main clone, not a worktree
-```
+- The TODOs filled from the win-builder result (`530d7af0`): no "Days
+  since last update" note.
 
 ## What Andrea does by hand
 
-- update `cran-comments.md` with the remote results;
-- submit with `devtools::submit_cran()` (or `devtools::release()`), and
-  confirm the email from CRAN;
-- after acceptance: tag the release (`usethis::use_github_release()`), bump
-  to a development version (`usethis::use_dev_version()`), and delete the
-  branches `cran_submission` and `cran-fixes-2026-11-27`.
+- submit with `devtools::submit_cran()` from `~/git/tidypopgen` on `dev`
+  (its `cran-comments.md` is final), and confirm the email from CRAN;
+  the first submission failed the Debian pre-test (above): resubmit 1.1.0
+  (same version) from `dev` with the zlib fix, after `git pull`;
+- after acceptance: bring `main` up to `dev` (a PR through the merge
+  queue: `main` lacks the zlib fix and the docs commits), then tag the
+  release on `main` (not `aee65ae5` any more;
+  `usethis::use_github_release()`), bump `dev` to a development version
+  (`usethis::use_dev_version()`), and delete the branches `cran_submission`,
+  `cran-fixes-2026-11-27` and `fix-tgeno-test-windows`.
