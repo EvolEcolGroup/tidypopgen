@@ -827,3 +827,226 @@ test_that("is_phased checks its input", {
     matrix(c(0L, 0L, 1L, NA, 1L, 0L, 1L, 1L, NA, 0L), ncol = 2)
   )
 })
+
+################################################################################
+# extended phased codes (see ?phased_encoding)
+################################################################################
+
+# the extended phased code with 1 + k^2 blocks of five bytes (as used by
+# other packages to store the local ancestry of k ancestries)
+extended_code <- function(k) {
+  n_blocks <- 1 + k^2
+  c(rep(c(0, 1, 2, NA, 1), n_blocks), rep(NA, 256 - 5 * n_blocks))
+}
+
+# a phased gen_tibble from haplotypes, whose bytes are moved (at random) to
+# the same genotype in one of the blocks of the extended code for k = 2
+extended_gen_tibble <- function(haps, indiv_meta, loci,
+                                labels = c("anc_a", "anc_b")) {
+  x <- gen_tibble(haps,
+    phased = TRUE, indiv_meta = indiv_meta, loci = loci,
+    backingfile = tempfile("ext_phased_"), quiet = TRUE
+  )
+  fbm <- .gt_get_fbm(x)
+  bytes <- fbm$copy(code = as.numeric(0:255))[, ]
+  # byte b + 5 * block stores the genotype of byte b, for blocks 0 to 4
+  blocks <- sample(0:4, length(bytes), replace = TRUE)
+  fbm[] <- as.raw(bytes + 5 * blocks)
+  fbm$code256 <- extended_code(2)
+  fbm$save()
+  attr(x$genotypes, "fbm_md5sum") <- tools::md5sum(fbm$rds)
+  attr(x$genotypes, "ancestry_labels") <- labels
+  x
+}
+
+# the raw bytes of a gen_tibble
+raw_bytes_of <- function(x) {
+  .gt_get_fbm(x)$copy(code = as.numeric(0:255))[
+    vctrs::vec_data(x$genotypes), show_loci(x)$big_index,
+    drop = FALSE
+  ]
+}
+
+set.seed(456)
+ext_gt <- extended_gen_tibble(rand_haps, rand_indiv, rand_loci)
+
+test_that("extended phased codes are recognised", {
+  expect_identical(phased_code_blocks(code_phased), 1L)
+  expect_identical(phased_code_blocks(extended_code(2)), 5L)
+  expect_identical(phased_code_blocks(extended_code(7)), 50L)
+  expect_identical(phased_code_blocks(bigsnpr::CODE_012), 0L)
+  expect_identical(phased_code_blocks(bigsnpr::CODE_IMPUTE_PRED), 0L)
+  expect_identical(phased_code_blocks(bigsnpr::CODE_DOSAGE), 0L)
+  # a block with a different genotype is not an extended code
+  wrong_code <- extended_code(2)
+  wrong_code[7] <- 2 # byte 6 should be 1 (0|1)
+  expect_identical(phased_code_blocks(wrong_code), 0L)
+  expect_identical(phased_code_blocks(1:256), 0L)
+  expect_true(is_phased(ext_gt))
+  # bytes above 4 are used
+  expect_true(any(raw_bytes_of(ext_gt) >= 5))
+  # decoding through code256 gives the dosages
+  expect_identical(show_genotypes(ext_gt), show_genotypes(phased_gt))
+  expect_identical(show_haplotypes(ext_gt), show_haplotypes(phased_gt))
+  expect_identical(
+    phased_bytes_table(5)[1:25, ],
+    phased_bytes[rep(1:5, 5), ]
+  )
+  expect_true(all(is.na(phased_bytes_table(5)[26:256, ])))
+})
+
+test_that("statistics of extended phased codes are those of phased data", {
+  expect_equal(loci_alt_freq(ext_gt), loci_alt_freq(phased_gt))
+  expect_equal(qc_report_loci(ext_gt), qc_report_loci(phased_gt))
+  expect_equal(pairwise_king(ext_gt), pairwise_king(phased_gt))
+  roh_args <- list(
+    window_snp = 5, min_snp = 5, min_kb = 0, max_kb_per_snp = 1000,
+    n_cores = 1
+  )
+  expect_equal(
+    do.call(windows_indiv_roh, c(list(ext_gt), roh_args)),
+    do.call(windows_indiv_roh, c(list(phased_gt), roh_args))
+  )
+  # PCA needs complete data
+  complete_haps <- random_haplotypes(n_ind, 100, p_missing = 0)
+  phased_complete <- gen_tibble(complete_haps,
+    phased = TRUE,
+    indiv_meta = rand_indiv, loci = random_loci(100),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  ext_complete <- extended_gen_tibble(
+    complete_haps, rand_indiv,
+    random_loci(100)
+  )
+  pca_phased <- gt_pca(phased_complete, k = 3, n_cores = 1)
+  pca_ext <- gt_pca(ext_complete, k = 3, n_cores = 1)
+  expect_equal(abs(pca_ext$u), abs(pca_phased$u), tolerance = 1e-6)
+  expect_equal(pca_ext$d, pca_phased$d, tolerance = 1e-6)
+})
+
+test_that("gt_as_vcf writes the phased genotypes of extended codes", {
+  vcf_ext <- readLines(gt_as_vcf(ext_gt, file = tempfile(fileext = ".vcf")))
+  vcf_phased <- readLines(
+    gt_as_vcf(phased_gt, file = tempfile(fileext = ".vcf"))
+  )
+  # the same body (the header may contain the date)
+  expect_identical(
+    vcf_ext[!startsWith(vcf_ext, "##")],
+    vcf_phased[!startsWith(vcf_phased, "##")]
+  )
+})
+
+test_that("new backing files keep the bytes and labels of extended codes", {
+  x_sub <- ext_gt %>%
+    dplyr::filter(population == "pop2") %>%
+    select_loci(c(10, 3, 200))
+  expect_identical(
+    attr(x_sub$genotypes, "ancestry_labels"),
+    c("anc_a", "anc_b")
+  )
+  x_new <- gt_update_backingfile(x_sub, backingfile = tempfile(), quiet = TRUE)
+  expect_identical(.gt_get_fbm(x_new)$code256, extended_code(2))
+  expect_identical(raw_bytes_of(x_new), raw_bytes_of(x_sub))
+  expect_identical(
+    attr(x_new$genotypes, "ancestry_labels"),
+    c("anc_a", "anc_b")
+  )
+  # saving and loading
+  x_loaded <- gt_load(gt_save(x_new, quiet = TRUE)[1])
+  expect_identical(
+    attr(x_loaded$genotypes, "ancestry_labels"),
+    c("anc_a", "anc_b")
+  )
+  expect_identical(raw_bytes_of(x_loaded), raw_bytes_of(x_sub))
+  # reordering loci
+  x_shuffled <- ext_gt %>% select_loci(sample(count_loci(ext_gt)))
+  x_ordered <- gt_order_loci(x_shuffled,
+    use_current_table = FALSE,
+    quiet = TRUE
+  )
+  expect_identical(raw_bytes_of(x_ordered), raw_bytes_of(ext_gt))
+  expect_identical(
+    attr(x_ordered$genotypes, "ancestry_labels"),
+    c("anc_a", "anc_b")
+  )
+})
+
+test_that("gt_set_imputed refuses phased data", {
+  expect_error(gt_set_imputed(ext_gt, TRUE), "does not work on phased")
+  expect_error(gt_set_imputed(phased_gt, FALSE), "does not work on phased")
+  # the code is unchanged
+  expect_identical(.gt_get_fbm(ext_gt)$code256, extended_code(2))
+})
+
+test_that("rbind keeps extended codes only if codes and labels match", {
+  ext_a <- extended_gen_tibble(rb_haps_a, rb_indiv_a, rb_loci)
+  ext_b <- extended_gen_tibble(rb_haps_b, rb_indiv_b, rb_loci)
+  # the same code and labels: the bytes and labels are kept
+  merged <- rbind(ext_a, ext_b, quiet = TRUE, backingfile = tempfile())
+  expect_identical(.gt_get_fbm(merged)$code256, extended_code(2))
+  expect_identical(
+    attr(merged$genotypes, "ancestry_labels"),
+    c("anc_a", "anc_b")
+  )
+  expect_identical(
+    raw_bytes_of(merged),
+    rbind(raw_bytes_of(ext_a), raw_bytes_of(ext_b))
+  )
+  expect_identical(unname(show_haplotypes(merged)), unname(rb_expected))
+  # different labels: the annotations are dropped
+  ext_b_other <- extended_gen_tibble(rb_haps_b, rb_indiv_b, rb_loci,
+    labels = c("anc_b", "anc_a")
+  )
+  # (the report of rbind is printed, so we capture it)
+  utils::capture.output(expect_message(
+    merged_other <- rbind(ext_a, ext_b_other, backingfile = tempfile()),
+    "the annotations of their haplotypes are dropped"
+  ))
+  expect_identical(.gt_get_fbm(merged_other)$code256, code_phased)
+  expect_null(attr(merged_other$genotypes, "ancestry_labels"))
+  expect_true(all(raw_bytes_of(merged_other) %in% 0:4))
+  expect_identical(unname(show_haplotypes(merged_other)), unname(rb_expected))
+  # an extended and a plain phased code
+  plain_b <- gen_tibble(rb_haps_b,
+    phased = TRUE,
+    indiv_meta = rb_indiv_b, loci = rb_loci,
+    backingfile = tempfile(), quiet = TRUE
+  )
+  merged_plain <- rbind(ext_a, plain_b, quiet = TRUE, backingfile = tempfile())
+  expect_identical(.gt_get_fbm(merged_plain)$code256, code_phased)
+  expect_true(all(raw_bytes_of(merged_plain) %in% 0:4))
+  expect_identical(unname(show_haplotypes(merged_plain)), unname(rb_expected))
+  # an extended phased and an unphased gen_tibble: the phase is discarded
+  unphased_b <- gen_tibble(haps_to_dosages(rb_haps_b),
+    indiv_meta = rb_indiv_b, loci = rb_loci,
+    backingfile = tempfile(), quiet = TRUE
+  )
+  merged_unphased <- rbind(ext_a, unphased_b,
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  expect_false(is_phased(merged_unphased))
+  expect_true(all(raw_bytes_of(merged_unphased) %in% 0:3))
+  expect_identical(
+    show_genotypes(merged_unphased),
+    unname(haps_to_dosages(rb_expected) * 1)
+  )
+})
+
+test_that("rbind_byte_luts recodes the bytes of extended codes", {
+  # kept as they are
+  luts <- rbind_byte_luts(TRUE, keep_phase = TRUE, n_blocks = 5)
+  expect_identical(luts$copy, 0:255)
+  # recoded into bytes 0 to 4
+  luts <- rbind_byte_luts(TRUE,
+    keep_phase = TRUE, n_blocks = 5,
+    keep_extension = FALSE
+  )
+  expect_identical(luts$copy[1:25], rep(0:4, 5))
+  expect_identical(luts$swap, luts$copy)
+  expect_identical(luts$copy[26:256], 25:255)
+  # unphased
+  luts <- rbind_byte_luts(TRUE, keep_phase = FALSE, n_blocks = 5)
+  expect_identical(luts$copy[1:25], rep(c(0L, 1L, 2L, 3L, 1L), 5))
+  expect_identical(luts$swap[1:25], rep(c(2L, 1L, 0L, 3L, 1L), 5))
+})

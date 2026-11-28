@@ -21,6 +21,12 @@
   chromosome as an autosome with `gt_set_chromosome_types()` to keep it
 * `gt_as_vcf()` writes haploid genotypes for males on X and Y (females on Z
   and W) and for everyone on MT
+* extended phased codes, whose bytes above 4 repeat the phased genotypes in
+  blocks of five so that other packages can annotate haplotypes (e.g. with
+  local ancestry), are recognised by `is_phased()`, decoded by
+  `show_haplotypes()` and `gt_as_vcf()`, kept with their `"ancestry_labels"`
+  by `gt_update_backingfile()` and by `rbind()` (when both datasets match),
+  and refused by `gt_set_imputed()` (see `?phased_encoding`)
 
 ## Bug fixes
 

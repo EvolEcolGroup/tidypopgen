@@ -14,8 +14,15 @@ files, SFS, CRAN checks) is described in the topic documents listed in
   `v1.1.0` plus the benchmark, via the merge queue (Andrea's request).
   Deleted `cran_submission`, `cran-fixes-2026-11-27`,
   `fix-tgeno-test-windows` (content all in `dev`).
-- **Next:** #249 merged and the site rebuilt; a GitHub release for
-  `v1.1.0` was not made (blocked by a permission check).
+- **Then:** #249 merged through the queue (`f9619a81`; `codecov/patch`
+  failed on the whole release diff, not required); `release_1.1.0` and
+  `update_benchmark` deleted. #245 (extended phased codes, for ancestry
+  tracts): `dev` merged in (one comment conflict), NEWS to the development
+  version, CI green, squashed into `dev` (`a8cb2501`). `sex_chromosomes`:
+  `dev` merged in, NEWS moved, related tests pass, PR #250 opened.
+  Branch audit: `ccr-2e473cc7-1prukj` and `gt_pca_pseudohaploid` are in
+  `dev` (deletion waits for Andrea); `vignette_filtering` not quite.
+- **Next:** Andrea reviews #250; a GitHub release for `v1.1.0`.
 - **Notes changed:** `handover.md`, `summary.md`.
 
 ## 2026-11-27 (laptopX1): CRAN pre-test failure fixed (zlib 1.3.2), CI fixed

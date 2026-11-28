@@ -66,6 +66,11 @@ gt_update_backingfile <- function(
   original_imputation_code <- attr(.x$genotypes, "imputed")
   # and the declared types of chromosomes (see gt_set_chromosome_types())
   original_chr_types <- attr(.x$genotypes, "chr_types")
+  # the labels of extended phased codes (see ?phased_encoding), whose bytes
+  # are copied unchanged
+  original_ancestry_labels <- attr(.x$genotypes, "ancestry_labels",
+    exact = TRUE
+  )
 
   # initialise a FBM with the dimensions of the data used in the gen_tibble
   new_bk_matrix <- bigstatsr::FBM.code256(
@@ -161,6 +166,10 @@ gt_update_backingfile <- function(
   }
   # keep the declared types of chromosomes
   attr(new_gen_tbl$genotypes, "chr_types") <- original_chr_types
+  # and the ancestry labels
+  if (!is.null(original_ancestry_labels)) {
+    attr(new_gen_tbl$genotypes, "ancestry_labels") <- original_ancestry_labels
+  }
 
   gt_save_light(new_gen_tbl, file_name = file_name, quiet = TRUE)
 

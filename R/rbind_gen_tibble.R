@@ -136,6 +136,16 @@ rbind.gen_tbl <- function(
   ref_phased <- is_phased(ref)
   target_phased <- is_phased(target)
   keep_phase <- ref_phased && target_phased
+  # with extended phased codes (see ?phased_encoding), the annotations stored
+  # in the bytes above 4 are kept only if both datasets use the same code (the
+  # same number of blocks of five bytes) and the same "ancestry_labels";
+  # otherwise each byte is recoded into the genotype it stores (bytes 0 to 4)
+  ref_blocks <- phased_code_blocks(attr(ref$genotypes, "fbm")$code256)
+  target_blocks <- phased_code_blocks(attr(target$genotypes, "fbm")$code256)
+  ref_labels <- attr(ref$genotypes, "ancestry_labels", exact = TRUE)
+  target_labels <- attr(target$genotypes, "ancestry_labels", exact = TRUE)
+  keep_extension <- keep_phase && ref_blocks == target_blocks &&
+    identical(ref_labels, target_labels)
   if (keep_phase && flip_strand) {
     stop(
       "strands can not be flipped when merging phased gen_tibbles: ",
@@ -273,6 +283,18 @@ rbind.gen_tbl <- function(
       merged_code[(phased_genotype_byte[3] + 1)] <- NA
     }
   }
+  # both datasets are phased, but their extended codes (or ancestry labels)
+  # differ: the annotations are dropped, and the merged FBM uses code_phased
+  if (keep_phase && !keep_extension) {
+    if (!quiet) {
+      message(
+        "the two phased gen_tibbles use different extended phased codes ",
+        "or 'ancestry_labels': the annotations of their haplotypes are ",
+        "dropped, and only the phased genotypes are kept"
+      )
+    }
+    merged_code <- code_phased
+  }
   # now we create the merged FBM, with the individuals of ref followed by
   # those of target (it uses the code256 of ref, unless only ref is phased)
   ref_rows <- vctrs::vec_data(ref$genotypes)
@@ -290,8 +312,14 @@ rbind.gen_tbl <- function(
   # alleles are swapped: in ref, loci whose allele_ref is missing in both
   # datasets (only with flip_strand), and in target, loci swapped to match ref
   # (there are none if both datasets are phased)
-  ref_luts <- rbind_byte_luts(ref_phased, keep_phase = keep_phase)
-  target_luts <- rbind_byte_luts(target_phased, keep_phase = keep_phase)
+  ref_luts <- rbind_byte_luts(ref_phased,
+    keep_phase = keep_phase,
+    n_blocks = ref_blocks, keep_extension = keep_extension
+  )
+  target_luts <- rbind_byte_luts(target_phased,
+    keep_phase = keep_phase,
+    n_blocks = target_blocks, keep_extension = keep_extension
+  )
   gt_copy_fbm(
     BM_from = attr(ref$genotypes, "fbm"),
     BM_to = merged_fbm,
@@ -360,6 +388,10 @@ rbind.gen_tbl <- function(
     ploidy = ifelse(any_pseudohaploid, -2L, 2L),
     fbm_ploidy = indivs_ploidy
   )
+  # the ancestry labels of extended phased codes are kept with their bytes
+  if (keep_extension && !is.null(ref_labels)) {
+    attr(merged_tbl$genotypes, "ancestry_labels") <- ref_labels
+  }
 
   # the declared types of chromosomes of both gen_tibbles
   attr(merged_tbl$genotypes, "chr_types") <- merge_chr_types(
@@ -427,8 +459,12 @@ add_missing_cols <- function(x, y) {
 # tables leave the bytes unchanged. Phased data that are not kept phased
 # (when the other dataset is unphased) are unphased (1|0 becomes the unphased
 # heterozygote, byte 1), after swapping the alleles of both haplotypes for
-# swapped loci
-rbind_byte_luts <- function(phased, keep_phase) {
+# swapped loci. For extended phased codes (n_blocks > 1, see ?phased_encoding)
+# that stay phased, the bytes are kept if keep_extension (both datasets use
+# the same code and labels), and otherwise recoded into the genotype they
+# store (bytes 0 to 4)
+rbind_byte_luts <- function(phased, keep_phase, n_blocks = 1L,
+                            keep_extension = TRUE) {
   copy_lut <- 0:255
   swap_lut <- 0:255
   if (!phased) {
@@ -436,22 +472,34 @@ rbind_byte_luts <- function(phased, keep_phase) {
   } else if (!keep_phase) {
     copy_lut <- phased_byte_lut(function(h1, h2) {
       list(pmin(h1, h2), pmax(h1, h2))
-    })
+    }, n_blocks = n_blocks)
     swap_lut <- phased_byte_lut(function(h1, h2) {
       list(pmin(1L - h1, 1L - h2), pmax(1L - h1, 1L - h2))
-    })
+    }, n_blocks = n_blocks)
+  } else if (!keep_extension) {
+    # keep the phased genotype of each byte, dropping the annotation (loci
+    # are never swapped when the phase is kept)
+    copy_lut <- phased_byte_lut(function(h1, h2) {
+      list(h1, h2)
+    }, n_blocks = n_blocks)
+    swap_lut <- copy_lut
   }
   list(copy = copy_lut, swap = swap_lut)
 }
 
 # a lookup table (for bytes 0 to 255) that recodes each phased genotype h1|h2
-# into the genotype f(h1, h2) (a list of the two new haplotypes); bytes that
-# are not phased genotypes (including missing) are left unchanged
-phased_byte_lut <- function(f) {
+# into the genotype f(h1, h2) (a list of the two new haplotypes), stored in
+# bytes 0 to 4; the missing bytes of each block of five bytes of an extended
+# code become the missing byte, and bytes that are not used are left unchanged
+phased_byte_lut <- function(f, n_blocks = 1L) {
   lut <- 0:255
-  is_genotype <- !is.na(phased_bytes[, 1]) & !is.na(phased_bytes[, 2])
-  new_haps <- f(phased_bytes[is_genotype, 1], phased_bytes[is_genotype, 2])
+  bytes_table <- phased_bytes_table(n_blocks)
+  is_genotype <- !is.na(bytes_table[, 1]) & !is.na(bytes_table[, 2])
+  new_haps <- f(bytes_table[is_genotype, 1], bytes_table[is_genotype, 2])
   lut[is_genotype] <-
     phased_genotype_byte[1 + 2 * new_haps[[1]] + new_haps[[2]]]
+  # the missing byte of each block (bytes 3, 8, 13, ...)
+  is_missing <- seq_len(256) <= 5 * n_blocks & !is_genotype
+  lut[is_missing] <- phased_missing_byte
   lut
 }

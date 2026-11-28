@@ -85,6 +85,25 @@ gen_tibble_haplotypes <- function(x, indiv_meta, loci, ploidy, valid_alleles,
 #' second haplotype of an individual (`NA` for missing, and for bytes that are
 #' not used).
 #'
+#' # Extended phased codes
+#'
+#' Other packages can annotate the haplotypes of phased genotypes (e.g. with
+#' their local ancestry) by using bytes above 4. An *extended phased code*
+#' keeps bytes 0 to 4 of `code_phased`, and adds blocks of five bytes with the
+#' same meaning: byte `b >= 5` stores the genotype of byte `(b - 5) %% 5`, so
+#' that its `code256` repeats `c(0, 1, 2, NA, 1)` for each block (bytes 0 to
+#' `5 * n - 1`, for `n` blocks of five bytes including the first one) and is
+#' `NA` for the bytes after. Functions that decode genotypes through `code256`
+#' therefore see ordinary dosages, and [is_phased()], [show_haplotypes()] and
+#' [gt_as_vcf()] decode the genotype of each byte (and write the phased
+#' genotype only). What the blocks mean is up to the package that writes them;
+#' tidypopgen only carries, unchanged, the attribute `"ancestry_labels"` of
+#' the `genotypes` column. [rbind()][rbind.gen_tbl] keeps the bytes only if
+#' both datasets use the same code and the same `"ancestry_labels"`;
+#' otherwise it recodes each byte into the genotype it stores (bytes 0 to 4),
+#' uses `code_phased`, and drops the annotations with a message.
+#' [gt_set_imputed()] does not work on phased data.
+#'
 #' @format `code_phased` is a numeric vector of length 256. `phased_bytes` is
 #'   an integer matrix with 256 rows (bytes 0 to 255) and two columns (`hap1`
 #'   and `hap2`).
@@ -114,6 +133,44 @@ phased_bytes <- local({
   m
 })
 
+# the number of blocks of five bytes of a phased code (1 for code_phased, more
+# for an extended phased code, see ?phased_encoding), or 0 if code256 is not a
+# phased code
+phased_code_blocks <- function(code256) {
+  if (!is.numeric(code256) || length(code256) != 256) {
+    return(0L)
+  }
+  # the last decoded byte is the last byte (1|0) of the last block, so its
+  # (1-based) index is 5 * n_blocks
+  last_byte <- max(c(0L, which(!is.na(code256))))
+  if (last_byte == 0L || last_byte %% 5 != 0) {
+    return(0L)
+  }
+  n_blocks <- last_byte %/% 5L
+  # the code expected for this number of blocks
+  expected <- c(
+    rep(code_phased[1:5], n_blocks),
+    rep(NA_real_, 256 - 5 * n_blocks)
+  )
+  # compare the positions of the NAs, then the decoded values
+  same_na <- identical(is.na(code256), is.na(expected))
+  decoded <- !is.na(expected)
+  if (!same_na || any(code256[decoded] != expected[decoded])) {
+    return(0L)
+  }
+  as.integer(n_blocks)
+}
+
+# the alleles of the two haplotypes for each byte (as phased_bytes) of a
+# phased code with n_blocks blocks of five bytes: byte b of the code stores
+# the genotype of byte b %% 5 (i.e. (b - 5) %% 5 for b >= 5)
+phased_bytes_table <- function(n_blocks = 1L) {
+  table <- phased_bytes
+  used <- seq_len(5 * n_blocks)
+  table[used, ] <- phased_bytes[(used - 1) %% 5 + 1, ]
+  table
+}
+
 # the byte that encodes each phased genotype, indexed by 1 + 2 * hap1 + hap2
 # (i.e. 0|0, 0|1, 1|0, 1|1), and the byte of missing genotypes (the same as
 # in unphased diploid data, max_ploidy + 1)
@@ -123,7 +180,8 @@ phased_missing_byte <- 3L
 #' Test whether a `gen_tibble` contains phased genotypes
 #'
 #' Phased genotypes (see `phased` in [gen_tibble()]) are recognised by the
-#' `code256` of their file backed matrix, which is identical to [code_phased].
+#' `code256` of their file backed matrix, which is identical to [code_phased],
+#' or is an extended phased code (see [phased_encoding]).
 #'
 #' @param .x a [`gen_tibble`], or its `genotypes` column.
 #' @returns `TRUE` if the genotypes are phased, `FALSE` otherwise.
@@ -151,7 +209,8 @@ is_phased <- function(.x) {
   } else if (!inherits(.x, "vctrs_bigSNP")) {
     stop(".x should be a gen_tibble, or its genotypes column", call. = FALSE)
   }
-  identical(.gt_get_fbm(.x)$code256, code_phased)
+  # plain (code_phased) and extended phased codes have at least one block
+  phased_code_blocks(.gt_get_fbm(.x)$code256) > 0
 }
 
 # stop if the genotypes are not phased
@@ -231,14 +290,17 @@ show_haplotypes <- function(.x, indiv_indices = NULL, loci_indices = NULL) {
     cols <- cols[loci_indices]
     loci_names <- loci_names[loci_indices]
   }
+  # the alleles of each byte, also for extended phased codes (whose bytes
+  # above 4 store the genotype of byte (b - 5) %% 5)
+  bytes_table <- phased_bytes_table(phased_code_blocks(fbm$code256))
   # read the raw bytes (a code256 of 0:255 returns the bytes themselves)
   raw_fbm <- fbm$copy(code = as.numeric(0:255))
   bytes <- raw_fbm[rows, cols, drop = FALSE]
   haps <- matrix(NA_integer_, nrow = 2 * length(rows), ncol = length(cols))
   haps[seq(1, by = 2, length.out = length(rows)), ] <-
-    phased_bytes[bytes + 1, 1]
+    bytes_table[bytes + 1, 1]
   haps[seq(2, by = 2, length.out = length(rows)), ] <-
-    phased_bytes[bytes + 1, 2]
+    bytes_table[bytes + 1, 2]
   rownames(haps) <- paste0(
     rep(ids, each = 2),
     rep(c("_1", "_2"), times = length(ids))
